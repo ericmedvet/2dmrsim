@@ -14,20 +14,37 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.engine.simple;
 
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.action.CreateRigidBodyAt;
 import it.units.erallab.mrsim.core.body.Body;
-import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.engine.AbstractEngine;
+import it.units.erallab.mrsim.engine.UnsupportedActionException;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public record Snapshot(
-    double t,
-    Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs,
-    Collection<Body<?>> bodies
-) {
+public class SimpleEngine extends AbstractEngine {
+
+  @Override
+  protected <O> O innerPerform(Action<O> action, Agent agent) throws UnsupportedActionException {
+    if (action instanceof CreateRigidBodyAt a) {
+      // TODO do something
+    }
+    return super.innerPerform(action, agent);
+  }
+
+  @Override
+  protected double innerTick() {
+    return 0;
+  }
+
+  @Override
+  protected Collection<Body<?>> getBodies() {
+    return null;
+  }
 }

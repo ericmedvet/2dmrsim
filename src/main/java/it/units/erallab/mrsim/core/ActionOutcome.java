@@ -21,14 +21,8 @@ import java.util.Optional;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <O> Optional<O> perform(Action<O> action, Agent agent);
-
-  default <O> Optional<O> perform(Action<O> action) {
-    return perform(action, null);
-  }
-
+public record ActionOutcome<O>(
+    Action<O> action,
+    Optional<O> outcome
+) {
 }

@@ -22,5 +22,5 @@ import java.util.List;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public interface Agent {
-  List<Action<?>> act(double t, List<Action<?>> previousActions);
+  List<Action<?>> act(double t, List<ActionOutcome<?>> previousActionOutcomes);
 }

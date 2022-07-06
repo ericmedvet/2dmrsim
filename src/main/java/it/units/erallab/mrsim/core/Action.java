@@ -22,6 +22,4 @@ import java.util.Optional;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public interface Action<O> {
-  Optional<O> outcome();
-  Agent performer();
 }

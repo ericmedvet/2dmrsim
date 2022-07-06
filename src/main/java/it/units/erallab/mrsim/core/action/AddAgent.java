@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.core.action;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.Agent;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <O> Optional<O> perform(Action<O> action, Agent agent);
-
-  default <O> Optional<O> perform(Action<O> action) {
-    return perform(action, null);
-  }
-
+public record AddAgent(Agent agent) implements Action<Void> {
 }

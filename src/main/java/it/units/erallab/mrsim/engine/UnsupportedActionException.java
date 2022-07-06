@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.engine;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.Action;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
+public class UnsupportedActionException extends UnsupportedOperationException {
+  private final Action<?> action;
 
-  Snapshot tick();
-
-  <O> Optional<O> perform(Action<O> action, Agent agent);
-
-  default <O> Optional<O> perform(Action<O> action) {
-    return perform(action, null);
+  public UnsupportedActionException(Action<?> action) {
+    super(String.format("Action %s is not supported", action.getClass().getSimpleName()));
+    this.action = action;
   }
 
+  public Action<?> getAction() {
+    return action;
+  }
 }
