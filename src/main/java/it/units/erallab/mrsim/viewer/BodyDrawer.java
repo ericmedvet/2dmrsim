@@ -24,5 +24,5 @@ import java.awt.*;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface BodyDrawer {
-  boolean draw(double t, Body<?> body, int index, Graphics2D g);
+  boolean draw(double t, Body body, int index, Graphics2D g);
 }

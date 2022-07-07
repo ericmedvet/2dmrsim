@@ -17,20 +17,14 @@
 package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.bodies.UnmovableBody;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.core.geometry.Poly;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public record CreateUnmovableBodyAt(
-    Poly poly,
-    Point translation,
-    double rotation,
-    double scale
-) implements Action<UnmovableBody> {
-  public CreateUnmovableBodyAt(Poly poly, Point translation) {
-    this(poly, translation, 0d, 1d);
-  }
+public record RotateBody(
+    Body body,
+    double angle
+) implements Action<Body> {
 }

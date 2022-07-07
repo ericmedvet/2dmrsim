@@ -17,7 +17,7 @@
 package it.units.erallab.mrsim.engine.simple;
 
 import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.actions.CreateRigidBodyAt;
+import it.units.erallab.mrsim.core.actions.CreateRigidBody;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.core.geometry.Point;
@@ -54,14 +54,10 @@ public class SimpleEngine extends AbstractEngine {
   @Override
   protected void registerActionSolvers() {
     super.registerActionSolvers();
-    registerActionSolver(CreateRigidBodyAt.class, this::createRigidBodyAt);
+    registerActionSolver(CreateRigidBody.class, this::createRigidBody);
   }
 
-  private RigidBody createRigidBodyAt(CreateRigidBodyAt action, Agent agent) throws IllegalActionException {
-    if (action.rotation() != 0 || action.translation().x() != 0 || action.translation()
-        .y() != 0 || action.scale() != 1) {
-      throw new IllegalActionException(action, "Rotation, translation, and scale are not supported");
-    }
+  private RigidBody createRigidBody(CreateRigidBody action, Agent agent) throws IllegalActionException {
     RigidBody rigidBody = new RigidBody() {
       @Override
       public Poly poly() {

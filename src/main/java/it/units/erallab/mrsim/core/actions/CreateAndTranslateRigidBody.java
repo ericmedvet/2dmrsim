@@ -24,14 +24,9 @@ import it.units.erallab.mrsim.core.geometry.Poly;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public record CreateRigidBodyAt(
+public record CreateAndTranslateRigidBody(
     Poly poly,
     double mass,
-    Point translation,
-    double rotation,
-    double scale
+    Point translation
 ) implements Action<RigidBody> {
-  public CreateRigidBodyAt(Poly poly, double mass, Point translation) {
-    this(poly, mass, translation, 0d, 1d);
-  }
 }

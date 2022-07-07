@@ -23,6 +23,6 @@ import java.util.Collection;
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface AttachableBody extends Body<Poly> {
+public interface AttachableBody extends Body {
   Collection<Anchor> anchors();
 }

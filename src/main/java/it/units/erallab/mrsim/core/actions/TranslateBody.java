@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.core.actions;
 
+import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Body;
-
-import java.util.List;
+import it.units.erallab.mrsim.core.geometry.Point;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public interface EmbodiedAgent extends Agent {
-  List<Body> bodyParts();
+public record TranslateBody(
+    Body body,
+    Point translation
+) implements Action<Body> {
 }

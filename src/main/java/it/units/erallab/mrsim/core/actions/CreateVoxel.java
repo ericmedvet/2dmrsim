@@ -18,29 +18,15 @@ package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Voxel;
-import it.units.erallab.mrsim.core.geometry.Point;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public record CreateVoxelAt(
+public record CreateVoxel(
     double sideLength,
     double mass,
     double maxActiveAreaRatio,
     double minActiveRatio,
-    double softness,
-    Point translation,
-    double rotation,
-    double scale
+    double softness
 ) implements Action<Voxel> {
-  public CreateVoxelAt(
-      double sideLength,
-      double mass,
-      double maxActiveAreaRatio,
-      double minActiveRatio,
-      double softness,
-      Point translation
-  ) {
-    this(sideLength, mass, maxActiveAreaRatio, minActiveRatio, softness, translation, 0d, 1d);
-  }
 }

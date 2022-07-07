@@ -39,7 +39,7 @@ public class BodiesDrawer implements Drawer {
   public boolean draw(Snapshot s, Graphics2D g) {
     int c = 0;
     boolean drawn = false;
-    for (Body<?> body : s.bodies()) {
+    for (Body body : s.bodies()) {
       int i = c;
       for (BodyDrawer bodyDrawer : bodyDrawers) {
         if (bodyDrawer.draw(s.t(), body, i, g)) {

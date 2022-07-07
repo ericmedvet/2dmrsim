@@ -17,13 +17,15 @@
 package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.actions.CreateRigidBodyAt;
-import it.units.erallab.mrsim.core.actions.CreateUnmovableBodyAt;
+import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.actions.TranslateBody;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
-import it.units.erallab.mrsim.engine.simple.SimpleEngine;
 import it.units.erallab.mrsim.viewer.Drawers;
 import it.units.erallab.mrsim.viewer.FramesImageBuilder;
 
@@ -41,20 +43,20 @@ public class Main {
     Poly rectangle = Poly.rectangle(2, 1);
     Poly ground = Poly.rectangle(10, 2);
     Engine engine = new Dyn4JEngine();
-    engine.perform(new CreateRigidBodyAt(triangle, 1, new Point(1, 1d)));
-    engine.perform(new CreateUnmovableBodyAt(ground, new Point(0, -2d)));
+    engine.perform(new CreateAndTranslateRigidBody(triangle, 1, new Point(2, 4))).orElseThrow();
+    engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder builder = new FramesImageBuilder(
-        300,
+        400,
         200,
         10,
-        0.25,
-        FramesImageBuilder.Direction.HORIZONTAL,
+        0.33,
+        FramesImageBuilder.Direction.VERTICAL,
         Drawers.basic()
     );
     while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
       if (engine.t() > 2 && snapshot.bodies().size() < 3) {
-        engine.perform(new CreateRigidBodyAt(rectangle, 2, new Point(5, 1d)));
+        engine.perform(new CreateAndTranslateRigidBody(rectangle, 2, new Point(0, 4)));
       }
       System.out.printf(
           "t=%4.1f nBodies=%1d nAgents=%1d%n",

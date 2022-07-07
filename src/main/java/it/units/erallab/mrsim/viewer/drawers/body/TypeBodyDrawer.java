@@ -24,7 +24,7 @@ import java.awt.*;
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public abstract class TypeBodyDrawer<B extends Body<?>> implements BodyDrawer {
+public abstract class TypeBodyDrawer<B extends Body> implements BodyDrawer {
   private final Class<B> bodyClass;
 
   public TypeBodyDrawer(Class<B> bodyClass) {
@@ -33,7 +33,7 @@ public abstract class TypeBodyDrawer<B extends Body<?>> implements BodyDrawer {
 
   @SuppressWarnings("unchecked")
   @Override
-  public boolean draw(double t, Body<?> body, int index, Graphics2D g) {
+  public boolean draw(double t, Body body, int index, Graphics2D g) {
     if (bodyClass.isAssignableFrom(body.getClass())) {
       return innerDraw(t, (B) body, index, g);
     }

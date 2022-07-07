@@ -17,13 +17,13 @@
 package it.units.erallab.mrsim.engine.dyn4j;
 
 import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.actions.CreateRigidBodyAt;
-import it.units.erallab.mrsim.core.actions.CreateUnmovableBodyAt;
+import it.units.erallab.mrsim.core.actions.CreateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
 import java.util.ArrayList;
@@ -66,35 +66,35 @@ public class Dyn4JEngine extends AbstractEngine {
 
   @Override
   protected void registerActionSolvers() {
-    registerActionSolver(CreateRigidBodyAt.class, this::createRigidBodyAt);
-    registerActionSolver(CreateUnmovableBodyAt.class, this::createUnmovableBodyAt);
+    registerActionSolver(CreateRigidBody.class, this::createRigidBody);
+    registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
+    registerActionSolver(TranslateBody.class, this::translate);
     super.registerActionSolvers();
   }
 
-  private RigidBody createRigidBodyAt(CreateRigidBodyAt action, Agent agent) throws IllegalActionException {
-    if (action.scale() != 1) {
-      throw new IllegalActionException(action, "Scale is not supported");
-    }
+  private RigidBody createRigidBody(CreateRigidBody action, Agent agent) {
     RigidBody rigidBody = new RigidBody(action.poly(), action.mass(), RIGID_FRICTION, RIGID_RESTITUTION);
     System.out.println(rigidBody.poly());
-    rigidBody.getBody().rotate(action.rotation());
-    rigidBody.getBody().translate(new Vector2(action.translation().x(), action.translation().y()));
     System.out.println(rigidBody.poly());
     world.addBody(rigidBody.getBody());
     bodies.add(rigidBody);
     return rigidBody;
   }
 
-  private UnmovableBody createUnmovableBodyAt(CreateUnmovableBodyAt action, Agent agent) throws IllegalActionException {
-    if (action.scale() != 1) {
-      throw new IllegalActionException(action, "Scale is not supported");
-    }
+  private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
     UnmovableBody unmovableBody = new UnmovableBody(action.poly(), RIGID_FRICTION, RIGID_RESTITUTION);
-    unmovableBody.getBody().rotate(action.rotation());
-    unmovableBody.getBody().translate(new Vector2(action.translation().x(), action.translation().y()));
     world.addBody(unmovableBody.getBody());
     bodies.add(unmovableBody);
     return unmovableBody;
+  }
+
+  private Body translate(TranslateBody action, Agent agent) throws IllegalActionException {
+    if (action.body() instanceof RigidBody rigidBody) {
+      rigidBody.getBody().translate(action.translation().x(), action.translation().y());
+      return rigidBody;
+    }
+    throw new IllegalActionException(action,
+        String.format("Untranlatable body type: %s", action.body().getClass().getName()));
   }
 
 }
