@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.core.bodies;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.geometry.Poly;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
-
-  default <A extends Action<O>, O> Optional<O> perform(A action) {
-    return perform(action, null);
-  }
-
-  double t();
-
+public interface RigidBody extends Body<Poly> {
 }

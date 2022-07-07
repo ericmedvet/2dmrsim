@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.action;
+package it.units.erallab.mrsim.util;
 
-import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.Agent;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public record AddAgent(Agent agent) implements Action<Void> {
+public interface Accumulator<O,I> extends Consumer<I>, Supplier<O> {
 }

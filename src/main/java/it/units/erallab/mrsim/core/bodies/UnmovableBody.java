@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.core.bodies;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.geometry.Point;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
-
-  default <A extends Action<O>, O> Optional<O> perform(A action) {
-    return perform(action, null);
+public interface UnmovableBody extends RigidBody {
+  @Override
+  default double mass() {
+    return Double.POSITIVE_INFINITY;
   }
 
-  double t();
-
+  @Override
+  default Point centerLinearVelocity() {
+    return new Point(0d, 0d);
+  }
 }

@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.body;
+package it.units.erallab.mrsim.engine;
 
-import it.units.erallab.mrsim.core.geometry.Poly;
+import it.units.erallab.mrsim.core.Action;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface RigidBody extends Body<Poly> {
+public class ActionException extends Exception {
+  private final Action<?> action;
+
+  public ActionException(Action<?> action, String cause) {
+    super(String.format("Cannot perform action %s: %s", action, cause));
+    this.action = action;
+  }
+
+  public Action<?> getAction() {
+    return action;
+  }
+
 }

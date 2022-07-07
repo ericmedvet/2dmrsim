@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.action;
+package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.body.UnmovableBody;
-import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.core.geometry.Poly;
+import it.units.erallab.mrsim.core.Agent;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public record CreateUnmovableBodyAt(
-    Poly poly,
-    Point translation,
-    double rotation,
-    double scale
-) implements Action<UnmovableBody> {
+public record AddAgent(Agent agent) implements Action<Void> {
 }

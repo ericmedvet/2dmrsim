@@ -21,15 +21,8 @@ import it.units.erallab.mrsim.core.Action;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public class UnsupportedActionException extends UnsupportedOperationException {
-  private final Action<?> action;
-
+public class UnsupportedActionException extends ActionException {
   public UnsupportedActionException(Action<?> action) {
-    super(String.format("Action %s is not supported", action.getClass().getSimpleName()));
-    this.action = action;
-  }
-
-  public Action<?> getAction() {
-    return action;
+    super(action, "unsupported");
   }
 }

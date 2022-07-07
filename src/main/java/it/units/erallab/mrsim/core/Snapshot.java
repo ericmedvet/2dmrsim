@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim.core;
 
-import it.units.erallab.mrsim.core.body.Body;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.util.Pair;
 
 import java.util.Collection;
@@ -25,9 +25,10 @@ import java.util.List;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public record Snapshot(
-    double t,
-    Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs,
-    Collection<Body<?>> bodies
-) {
+public interface Snapshot {
+  double t();
+
+  Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs();
+
+  Collection<Body<?>> bodies();
 }

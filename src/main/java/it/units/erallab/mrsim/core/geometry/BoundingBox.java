@@ -45,4 +45,12 @@ public record BoundingBox(Point min, Point max) implements Shape {
         ))
         .orElseThrow(() -> new IllegalArgumentException("There has to be at least one bounding box"));
   }
+
+  public double width() {
+    return max.x() - min.x();
+  }
+
+  public double height() {
+    return max.y() - min.y();
+  }
 }

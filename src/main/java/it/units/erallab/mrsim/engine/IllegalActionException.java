@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.body;
+package it.units.erallab.mrsim.engine;
 
-import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.Action;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface UnmovableBody extends RigidBody {
-  @Override
-  default double mass() {
-    return Double.POSITIVE_INFINITY;
-  }
-
-  @Override
-  default Point centerLinearVelocity() {
-    return new Point(0d, 0d);
+public class IllegalActionException extends ActionException{
+  public IllegalActionException(Action<?> action, String cause) {
+    super(action, cause);
   }
 }

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.action;
+package it.units.erallab.mrsim.engine;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.body.RigidBody;
-import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.core.geometry.Poly;
+import it.units.erallab.mrsim.core.Snapshot;
+import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.util.Pair;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public record CreateRigidBodyAt(
-    Poly poly,
-    double mass,
-    Point translation,
-    double rotation,
-    double scale
-) implements Action<RigidBody> {
+public record EngineSnapshot(
+    double t,
+    Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs,
+    Collection<Body<?>> bodies,
+    double engineT,
+    double wallT,
+    int nOfTicks
+) implements Snapshot {
 }

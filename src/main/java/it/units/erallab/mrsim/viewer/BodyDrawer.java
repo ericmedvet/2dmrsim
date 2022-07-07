@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.viewer;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.bodies.Body;
+
+import java.awt.*;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
-
-  default <A extends Action<O>, O> Optional<O> perform(A action) {
-    return perform(action, null);
-  }
-
-  double t();
-
+public interface BodyDrawer {
+  boolean draw(double t, Body<?> body, int index, Graphics2D g);
 }

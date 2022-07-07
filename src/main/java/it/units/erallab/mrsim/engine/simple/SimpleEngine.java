@@ -16,35 +16,61 @@
 
 package it.units.erallab.mrsim.engine.simple;
 
-import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.action.CreateRigidBodyAt;
-import it.units.erallab.mrsim.core.body.Body;
+import it.units.erallab.mrsim.core.actions.CreateRigidBodyAt;
+import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.core.bodies.RigidBody;
+import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.AbstractEngine;
-import it.units.erallab.mrsim.engine.UnsupportedActionException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public class SimpleEngine extends AbstractEngine {
 
-  @Override
-  protected <O> O innerPerform(Action<O> action, Agent agent) throws UnsupportedActionException {
-    if (action instanceof CreateRigidBodyAt a) {
-      // TODO do something
-    }
-    return super.innerPerform(action, agent);
+  private final static double DELTA_T = 0.1;
+  private final List<Body<?>> bodies;
+
+  public SimpleEngine() {
+    this.bodies = new ArrayList<>();
   }
 
   @Override
   protected double innerTick() {
-    return 0;
+    return t.get() + DELTA_T;
   }
 
   @Override
   protected Collection<Body<?>> getBodies() {
-    return null;
+    return bodies;
+  }
+
+  @Override
+  protected void registerActionSolvers() {
+    super.registerActionSolvers();
+    registerActionSolver(CreateRigidBodyAt.class, ((action, agent) -> {
+      RigidBody rigidBody = new RigidBody() {
+        @Override
+        public Poly shape() {
+          return action.poly();
+        }
+
+        @Override
+        public double mass() {
+          return action.mass();
+        }
+
+        @Override
+        public Point centerLinearVelocity() {
+          return new Point(0, 0);
+        }
+      };
+      bodies.add(rigidBody);
+      return rigidBody;
+    }));
   }
 }

@@ -18,31 +18,54 @@ package it.units.erallab.mrsim.engine;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import it.units.erallab.mrsim.core.*;
-import it.units.erallab.mrsim.core.action.AddAgent;
-import it.units.erallab.mrsim.core.body.Body;
+import it.units.erallab.mrsim.core.actions.AddAgent;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.Period;
+import java.time.temporal.TemporalUnit;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public abstract class AbstractEngine implements Environment {
+public abstract class AbstractEngine implements Engine {
+
+  @FunctionalInterface
+  public interface ActionSolver<A extends Action<O>, O> {
+    O solve(A action, Agent agent) throws ActionException;
+  }
 
   protected final AtomicDouble t;
   protected final List<Pair<Agent, List<ActionOutcome<?>>>> agentPairs;
+  private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
+  private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
+
+  private final AtomicInteger nOfTicks;
+  private final AtomicDouble engineT;
+  private final Instant startingInstant;
+
 
   public AbstractEngine() {
     agentPairs = new ArrayList<>();
+    actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
+    nOfTicks = new AtomicInteger(0);
+    engineT = new AtomicDouble(0d);
+    startingInstant = Instant.now();
+    registerActionSolvers();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public Snapshot tick() {
+    Instant tickStartingInstant = Instant.now();
+    nOfTicks.incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
       List<ActionOutcome<?>> outcomes = new ArrayList<>();
       for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
@@ -54,20 +77,32 @@ public abstract class AbstractEngine implements Environment {
       );
       agentPairs.set(i, pair);
     }
-    return new Snapshot(
-        innerTick(),
+    double newT = innerTick();
+    t.set(newT);
+    engineT.addAndGet(Duration.between(tickStartingInstant, Instant.now()).toMillis() / 1000d);
+    return new EngineSnapshot(
+        t.get(),
         agentPairs,
-        getBodies()
+        getBodies(),
+        engineT.get(),
+        Duration.between(startingInstant, Instant.now()).toMillis() / 1000d,
+        nOfTicks.get()
     );
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <O> Optional<O> perform(Action<O> action, Agent agent) {
+  public <A extends Action<O>, O> Optional<O> perform(A action, Agent agent) {
+    ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
+    if (actionSolver == null) {
+      L.warning(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
+      return Optional.empty();
+    }
     try {
-      O o = innerPerform(action, agent);
-      return o == null ? Optional.empty() : Optional.of(o);
-    } catch (UnsupportedActionException e) {
-      // TODO add logging
+      O outcome = actionSolver.solve(action, agent);
+      return outcome == null ? Optional.empty() : Optional.of(outcome);
+    } catch (ActionException e) {
+      L.warning(String.format("Ignoring illegal action: %s", e));
       return Optional.empty();
     }
   }
@@ -76,12 +111,22 @@ public abstract class AbstractEngine implements Environment {
 
   protected abstract Collection<Body<?>> getBodies();
 
-  protected <O> O innerPerform(Action<O> action, Agent agent) throws UnsupportedActionException {
-    if (action instanceof AddAgent a) {
-      agentPairs.add(new Pair<>(a.agent(), List.of()));
-      return null;
-    }
-    throw new UnsupportedActionException(action);
+  protected final <A extends Action<O>, O> void registerActionSolver(
+      Class<A> actionClass,
+      ActionSolver<A, O> actionSolver
+  ) {
+    actionSolvers.put(actionClass, actionSolver);
   }
 
+  protected void registerActionSolvers() {
+    registerActionSolver(AddAgent.class, (action, agent) -> {
+      agentPairs.add(new Pair<>(action.agent(), List.of()));
+      return null;
+    });
+  }
+
+  @Override
+  public double t() {
+    return t.get();
+  }
 }

@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim.core;
 
-import it.units.erallab.mrsim.core.geometry.Shape;
+import it.units.erallab.mrsim.core.bodies.Body;
 
 import java.util.List;
 
@@ -24,5 +24,5 @@ import java.util.List;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public interface EmbodiedAgent extends Agent {
-  List<Shape> body();
+  List<Body<?>> bodyParts();
 }

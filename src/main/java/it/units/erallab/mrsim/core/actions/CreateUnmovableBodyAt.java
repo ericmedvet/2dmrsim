@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
+package it.units.erallab.mrsim.core.actions;
 
-import java.util.Optional;
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.bodies.UnmovableBody;
+import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.geometry.Poly;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
-
-  Snapshot tick();
-
-  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
-
-  default <A extends Action<O>, O> Optional<O> perform(A action) {
-    return perform(action, null);
+public record CreateUnmovableBodyAt(
+    Poly poly,
+    Point translation,
+    double rotation,
+    double scale
+) implements Action<UnmovableBody> {
+  public CreateUnmovableBodyAt(Poly poly, Point translation) {
+    this(poly, translation, 0d, 1d);
   }
-
-  double t();
-
 }

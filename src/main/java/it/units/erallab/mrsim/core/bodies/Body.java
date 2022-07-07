@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.body;
+package it.units.erallab.mrsim.core.bodies;
 
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Shape;
