@@ -47,7 +47,7 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
   }
 
   @Override
-  public Poly shape() {
+  public Poly poly() {
     Transform t = body.getTransform();
     return new Poly(
         Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())

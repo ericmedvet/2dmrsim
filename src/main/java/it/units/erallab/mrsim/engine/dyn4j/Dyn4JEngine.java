@@ -22,11 +22,7 @@ import it.units.erallab.mrsim.core.actions.CreateUnmovableBodyAt;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
-import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
-import org.dyn4j.geometry.Circle;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
@@ -43,7 +39,7 @@ public class Dyn4JEngine extends AbstractEngine {
   private final static double RIGID_RESTITUTION = 0.5d;
 
   private final Settings settings;
-  private final List<Body<?>> bodies;
+  private final List<Body> bodies;
   private final World<org.dyn4j.dynamics.Body> world;
 
   public Dyn4JEngine(Settings settings) {
@@ -64,7 +60,7 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   @Override
-  protected Collection<Body<?>> getBodies() {
+  protected Collection<Body> getBodies() {
     return bodies;
   }
 
@@ -80,10 +76,10 @@ public class Dyn4JEngine extends AbstractEngine {
       throw new IllegalActionException(action, "Scale is not supported");
     }
     RigidBody rigidBody = new RigidBody(action.poly(), action.mass(), RIGID_FRICTION, RIGID_RESTITUTION);
-    System.out.println(rigidBody.shape());
+    System.out.println(rigidBody.poly());
     rigidBody.getBody().rotate(action.rotation());
     rigidBody.getBody().translate(new Vector2(action.translation().x(), action.translation().y()));
-    System.out.println(rigidBody.shape());
+    System.out.println(rigidBody.poly());
     world.addBody(rigidBody.getBody());
     bodies.add(rigidBody);
     return rigidBody;

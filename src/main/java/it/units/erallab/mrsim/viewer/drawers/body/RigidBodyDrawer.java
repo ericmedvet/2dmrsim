@@ -45,7 +45,7 @@ public class RigidBodyDrawer extends TypeBodyDrawer<RigidBody> {
 
   @Override
   protected boolean innerDraw(double t, RigidBody body, int index, Graphics2D g) {
-    Path2D path = DrawingUtils.toPath(body.shape(),true);
+    Path2D path = DrawingUtils.toPath(body.poly(),true);
     g.setColor(fillColor);
     g.fill(path);
     g.setColor(strokeColor);

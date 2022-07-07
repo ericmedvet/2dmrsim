@@ -68,7 +68,7 @@ public class StaticAllAgentsFramer implements Framer {
     return snapshot.agentPairs().stream()
         .filter(p -> p.first() instanceof EmbodiedAgent)
         .map(a -> ((EmbodiedAgent) a.first()).bodyParts().stream()
-            .map(b -> b.shape().boundingBox())
+            .map(b -> b.poly().boundingBox())
             .reduce(BoundingBox::enclosing)
             .orElse(DEFAULT_BOUNDING_BOX)
         )

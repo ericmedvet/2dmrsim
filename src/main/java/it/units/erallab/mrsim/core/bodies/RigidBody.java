@@ -21,5 +21,5 @@ import it.units.erallab.mrsim.core.geometry.Poly;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface RigidBody extends Body<Poly> {
+public interface RigidBody extends Body {
 }

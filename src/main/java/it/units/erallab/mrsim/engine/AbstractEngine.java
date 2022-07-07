@@ -125,7 +125,7 @@ public abstract class AbstractEngine implements Engine {
 
   protected abstract double innerTick();
 
-  protected abstract Collection<Body<?>> getBodies();
+  protected abstract Collection<Body> getBodies();
 
   protected final <A extends Action<O>, O> void registerActionSolver(
       Class<A> actionClass,

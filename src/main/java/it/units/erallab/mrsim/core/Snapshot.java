@@ -30,5 +30,5 @@ public interface Snapshot {
 
   Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs();
 
-  Collection<Body<?>> bodies();
+  Collection<Body> bodies();
 }

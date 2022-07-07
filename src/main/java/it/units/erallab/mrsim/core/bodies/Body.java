@@ -17,13 +17,13 @@
 package it.units.erallab.mrsim.core.bodies;
 
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.core.geometry.Shape;
+import it.units.erallab.mrsim.core.geometry.Poly;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Body<S extends Shape> {
-  S shape();
+public interface Body {
+  Poly poly();
   double mass();
   Point centerLinearVelocity();
 }

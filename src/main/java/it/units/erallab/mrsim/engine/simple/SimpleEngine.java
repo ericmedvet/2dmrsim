@@ -35,7 +35,7 @@ import java.util.List;
 public class SimpleEngine extends AbstractEngine {
 
   private final static double DELTA_T = 0.1;
-  private final List<Body<?>> bodies;
+  private final List<Body> bodies;
 
   public SimpleEngine() {
     this.bodies = new ArrayList<>();
@@ -47,7 +47,7 @@ public class SimpleEngine extends AbstractEngine {
   }
 
   @Override
-  protected Collection<Body<?>> getBodies() {
+  protected Collection<Body> getBodies() {
     return bodies;
   }
 
@@ -64,7 +64,7 @@ public class SimpleEngine extends AbstractEngine {
     }
     RigidBody rigidBody = new RigidBody() {
       @Override
-      public Poly shape() {
+      public Poly poly() {
         return action.poly();
       }
 
