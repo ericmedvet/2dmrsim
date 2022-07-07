@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim.viewer;
 
+import it.units.erallab.mrsim.viewer.drawers.AgentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.BodiesDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
@@ -49,6 +50,8 @@ public class Drawers {
         Drawer.of(
             new BodiesDrawer(List.of(
                 new RigidBodyDrawer()
+            )),
+            new AgentsDrawer(List.of(
             ))
         )
     );

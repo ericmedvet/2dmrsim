@@ -16,13 +16,15 @@
 
 package it.units.erallab.mrsim.viewer;
 
+import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.Agent;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface AgentDrawer {
-  boolean draw(double t, Agent agent, int index, Graphics2D g);
+  boolean draw(double t, Agent agent, List<ActionOutcome<?>> actionOutcomes, int index, Graphics2D g);
 }
