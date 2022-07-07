@@ -19,7 +19,11 @@ package it.units.erallab.mrsim.engine;
 import com.google.common.util.concurrent.AtomicDouble;
 import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.AddAgent;
+import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateRigidBody;
+import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.util.Pair;
 
 import java.time.Duration;
@@ -85,7 +89,7 @@ public abstract class AbstractEngine implements Engine {
     }
     double newT = innerTick();
     t.set(newT);
-    engineT.addAndGet(Duration.between(tickStartingInstant, Instant.now()).toMillis() / 1000d);
+    engineT.addAndGet(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
     return new EngineSnapshot(
         t.get(),
         agentPairs,
@@ -135,10 +139,25 @@ public abstract class AbstractEngine implements Engine {
   }
 
   protected void registerActionSolvers() {
-    registerActionSolver(AddAgent.class, (action, agent) -> {
-      agentPairs.add(new Pair<>(action.agent(), List.of()));
-      return null;
-    });
+    registerActionSolver(AddAgent.class, this::addAgent);
+    registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
+  }
+
+  protected Void addAgent(AddAgent action, Agent agent) {
+    agentPairs.add(new Pair<>(action.agent(), List.of()));
+    return null;
+  }
+
+  protected RigidBody createAndTranslateRigidBody(
+      CreateAndTranslateRigidBody action,
+      Agent agent
+  ) throws ActionException {
+    RigidBody rigidBody = perform(
+        new CreateRigidBody(action.poly(), action.mass()),
+        agent
+    ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
+    perform(new TranslateBody(rigidBody, action.translation()), agent);
+    return rigidBody;
   }
 
   @Override
