@@ -49,6 +49,9 @@ public abstract class AbstractEngine implements Engine {
   private final AtomicInteger nOfTicks;
   private final AtomicDouble engineT;
   private final Instant startingInstant;
+  private final AtomicInteger nOfActions;
+  private final AtomicInteger nOfUnsupportedActions;
+  private final AtomicInteger nOfIllegalActions;
 
 
   public AbstractEngine() {
@@ -58,6 +61,9 @@ public abstract class AbstractEngine implements Engine {
     nOfTicks = new AtomicInteger(0);
     engineT = new AtomicDouble(0d);
     startingInstant = Instant.now();
+    nOfActions = new AtomicInteger(0);
+    nOfUnsupportedActions = new AtomicInteger(0);
+    nOfIllegalActions = new AtomicInteger(0);
     registerActionSolvers();
   }
 
@@ -86,23 +92,33 @@ public abstract class AbstractEngine implements Engine {
         getBodies(),
         engineT.get(),
         Duration.between(startingInstant, Instant.now()).toMillis() / 1000d,
-        nOfTicks.get()
+        nOfTicks.get(),
+        nOfActions.get(),
+        nOfUnsupportedActions.get(),
+        nOfIllegalActions.get()
     );
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <A extends Action<O>, O> Optional<O> perform(A action, Agent agent) {
+    nOfActions.incrementAndGet();
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
     if (actionSolver == null) {
-      L.warning(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
+      L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
+      nOfUnsupportedActions.incrementAndGet();
       return Optional.empty();
     }
     try {
       O outcome = actionSolver.solve(action, agent);
       return outcome == null ? Optional.empty() : Optional.of(outcome);
     } catch (ActionException e) {
-      L.warning(String.format("Ignoring illegal action: %s", e));
+      L.finer(String.format("Ignoring illegal action: %s", e));
+      nOfIllegalActions.incrementAndGet();
+      return Optional.empty();
+    } catch (RuntimeException e) {
+      L.warning(String.format("Ignoring action throwing exception: %s", e));
+      nOfIllegalActions.incrementAndGet();
       return Optional.empty();
     }
   }

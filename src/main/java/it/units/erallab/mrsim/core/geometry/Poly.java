@@ -16,6 +16,10 @@
 
 package it.units.erallab.mrsim.core.geometry;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
@@ -40,5 +44,33 @@ public record Poly(Point... vertexes) implements Shape {
   @Override
   public Point center() {
     return Point.average(vertexes);
+  }
+
+  public static Poly regular(double l, int n) {
+    return new Poly(IntStream.range(0, n)
+        .mapToObj(i -> new Point(
+                l * Math.cos(Math.PI * 2d * (double) i / (double) n),
+                l * Math.sin(Math.PI * 2d * (double) i / (double) n)
+            )
+        )
+        .toArray(Point[]::new));
+  }
+
+  public static Poly rectangle(double w, double h) {
+    return new Poly(
+        new Point(0, 0),
+        new Point(w, 0),
+        new Point(w, h),
+        new Point(0, h)
+    );
+  }
+
+  public static Poly square(double l) {
+    return rectangle(l, l);
+  }
+
+  @Override
+  public String toString() {
+    return "[" + Arrays.stream(vertexes).map(Point::toString).collect(Collectors.joining("->")) + "]";
   }
 }

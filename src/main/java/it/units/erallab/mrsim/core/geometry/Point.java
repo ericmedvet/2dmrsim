@@ -68,4 +68,9 @@ public record Point(double x, double y) implements Shape {
   public Point center() {
     return this;
   }
+
+  @Override
+  public String toString() {
+    return String.format("(%.1f;%.1f)", x, y);
+  }
 }

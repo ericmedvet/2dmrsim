@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.engine;
+package it.units.erallab.mrsim.engine.dyn4j;
 
-import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.util.Pair;
-
-import java.util.Collection;
-import java.util.List;
+import it.units.erallab.mrsim.core.geometry.Poly;
+import org.dyn4j.geometry.MassType;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public record EngineSnapshot(
-    double t,
-    Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs,
-    Collection<Body<?>> bodies,
-    double engineT,
-    double wallT,
-    int nOfTicks,
-    int nOfAction,
-    int nOfUnsupportedActions,
-    int nOfIllegalActions
-) implements Snapshot {
+public class UnmovableBody extends RigidBody implements it.units.erallab.mrsim.core.bodies.UnmovableBody {
+  public UnmovableBody(
+      Poly convexPoly,
+      double friction,
+      double restitution
+  ) {
+    super(convexPoly, 1d, friction, restitution);
+    getBody().setMassType(MassType.INFINITE);
+  }
 }

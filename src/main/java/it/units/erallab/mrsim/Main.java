@@ -18,9 +18,11 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.CreateRigidBodyAt;
+import it.units.erallab.mrsim.core.actions.CreateUnmovableBodyAt;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
+import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.engine.simple.SimpleEngine;
 import it.units.erallab.mrsim.viewer.Drawers;
 import it.units.erallab.mrsim.viewer.FramesImageBuilder;
@@ -35,15 +37,24 @@ import java.io.IOException;
  */
 public class Main {
   public static void main(String[] args) throws IOException {
-    Poly triangle = new Poly(new Point(1, 1), new Point(2, 2), new Point(3, 1));
-    Poly rectangle = new Poly(new Point(0, 0), new Point(0, 2), new Point(1, 2), new Point(1, 0));
-    Engine engine = new SimpleEngine();
-    engine.perform(new CreateRigidBodyAt(triangle, 1, new Point(0, 0)));
-    FramesImageBuilder builder = new FramesImageBuilder(500,400,5,0.5, FramesImageBuilder.Direction.VERTICAL, Drawers.basic());
-    while (engine.t() < 5) {
+    Poly triangle = Poly.regular(1, 3);
+    Poly rectangle = Poly.rectangle(2, 1);
+    Poly ground = Poly.rectangle(10, 2);
+    Engine engine = new Dyn4JEngine();
+    engine.perform(new CreateRigidBodyAt(triangle, 1, new Point(1, 1d)));
+    engine.perform(new CreateUnmovableBodyAt(ground, new Point(0, -2d)));
+    FramesImageBuilder builder = new FramesImageBuilder(
+        300,
+        200,
+        10,
+        0.25,
+        FramesImageBuilder.Direction.HORIZONTAL,
+        Drawers.basic()
+    );
+    while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
-      if (engine.t()>2 && snapshot.bodies().size()<2) {
-        engine.perform(new CreateRigidBodyAt(rectangle, 1, new Point(0, 0)));
+      if (engine.t() > 2 && snapshot.bodies().size() < 3) {
+        engine.perform(new CreateRigidBodyAt(rectangle, 2, new Point(5, 1d)));
       }
       System.out.printf(
           "t=%4.1f nBodies=%1d nAgents=%1d%n",
@@ -54,6 +65,6 @@ public class Main {
       builder.accept(snapshot);
     }
     BufferedImage image = builder.get();
-    ImageIO.write(image,"png",new File("/home/eric/experiments/simple.png"));
+    ImageIO.write(image, "png", new File("/home/eric/experiments/simple.png"));
   }
 }
