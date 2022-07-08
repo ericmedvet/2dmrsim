@@ -18,50 +18,31 @@ package it.units.erallab.mrsim.viewer.framers;
 
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.geometry.BoundingBox;
-import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.viewer.Framer;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public abstract class StaticFramer implements Framer {
-  public static final BoundingBox DEFAULT_BOUNDING_BOX = new BoundingBox(new Point(0, 0), new Point(10, 5));
-  private final double sizeRelativeMargin;
+public class StaticFramer extends AbstractFramer {
+
+  private BoundingBox initialBoundingBox;
+
+  public StaticFramer(BoundingBox initialBoundingBox) {
+    super(1d);
+    this.initialBoundingBox = initialBoundingBox;
+  }
 
   public StaticFramer(double sizeRelativeMargin) {
-    this.sizeRelativeMargin = sizeRelativeMargin;
+    super(sizeRelativeMargin);
   }
 
   @Override
-  public BoundingBox getFrame(Snapshot snapshot, double ratio) {
-    BoundingBox currentBB = getCurrentBoundingBox(snapshot);
-    //enlarge
-    double cx = currentBB.center().x();
-    double cy = currentBB.center().y();
-    double w = currentBB.width();
-    double h = currentBB.height();
-    BoundingBox enlarged = new BoundingBox(
-        new Point(cx - w / 2d * sizeRelativeMargin, cy - h / 2d * sizeRelativeMargin),
-        new Point(cx + w / 2d * sizeRelativeMargin, cy + h / 2d * sizeRelativeMargin)
-    );
-    //adjust
-    BoundingBox adjusted = enlarged;
-    double fRatio = enlarged.width() / enlarged.height();
-    if (fRatio > ratio) {
-      //enlarge h
-      adjusted = new BoundingBox(
-          new Point(enlarged.min().x(), cy - h / 2d * sizeRelativeMargin * fRatio / ratio),
-          new Point(enlarged.max().x(), cy + h / 2d * sizeRelativeMargin * fRatio / ratio)
-      );
-    } else if (fRatio < ratio) {
-      //enlarge w
-      adjusted = new BoundingBox(
-          new Point(cx - w / 2d * sizeRelativeMargin * ratio / fRatio, enlarged.min().y()),
-          new Point(cx + w / 2d * sizeRelativeMargin * ratio / fRatio, enlarged.max().y())
-      );
+  protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
+    if (initialBoundingBox == null) {
+      initialBoundingBox = snapshot.bodies().stream()
+          .map(b -> b.poly().boundingBox())
+          .reduce(BoundingBox::enclosing)
+          .orElse(DEFAULT_BOUNDING_BOX);
     }
-    return adjusted;
+    return initialBoundingBox;
   }
-
-  protected abstract BoundingBox getCurrentBoundingBox(Snapshot snapshot);
 }

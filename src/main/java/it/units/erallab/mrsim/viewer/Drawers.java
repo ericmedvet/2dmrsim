@@ -23,6 +23,7 @@ import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.SoftBodyDrawer;
 import it.units.erallab.mrsim.viewer.framers.StaticAllAgentsFramer;
 import it.units.erallab.mrsim.viewer.framers.StaticAllBodiesFramer;
+import it.units.erallab.mrsim.viewer.framers.StaticFramer;
 
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class Drawers {
 
   public static Drawer world() {
     return Drawer.transform(
-        new StaticAllBodiesFramer(1.5d),
+        new StaticFramer(1.5d),
         Drawer.of(
             new BodiesDrawer(List.of(
                 new RigidBodyDrawer(),

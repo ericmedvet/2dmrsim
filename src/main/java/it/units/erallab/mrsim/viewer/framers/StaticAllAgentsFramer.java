@@ -23,7 +23,7 @@ import it.units.erallab.mrsim.core.geometry.BoundingBox;
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class StaticAllAgentsFramer extends StaticFramer {
+public class StaticAllAgentsFramer extends AbstractFramer {
 
   public StaticAllAgentsFramer(double sizeRelativeMargin) {
     super(sizeRelativeMargin);
