@@ -54,6 +54,10 @@ public record Point(double x, double y) implements Shape {
         .orElseThrow(() -> new IllegalArgumentException("There has to be at least one point"));
   }
 
+  public double distance(Point p) {
+    return Math.sqrt((x - p.x()) * (x - p.x()) + (y - p.y()) * (y - p.y()));
+  }
+
   @Override
   public BoundingBox boundingBox() {
     return new BoundingBox(this, this);

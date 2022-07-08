@@ -53,8 +53,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
 
   }
 
-  private record VoxelAnchor(Point point, Collection<Anchor> attachedAnchors) implements Anchor {}
-
   protected enum SpringScaffolding {
     SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
   }
@@ -73,7 +71,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
 
   protected final Body[] vertexBodies;
   protected final List<DistanceJoint<Body>> springJoints;
-  protected final List<List<Anchor>> attachedAnchors;
+  protected final List<BodyAnchor> anchors;
   private final Vector2 initialSidesAverageDirection;
 
 
@@ -101,13 +99,8 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     this.springScaffoldings = springScaffoldings;
     vertexBodies = new Body[4];
     springJoints = new ArrayList<>();
-    attachedAnchors = List.of(
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>()
-    );
     assemble();
+    anchors = Arrays.stream(vertexBodies).map(BodyAnchor::new).toList();
     initialSidesAverageDirection = getSidesAverageDirection();
   }
 
@@ -325,27 +318,16 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     return new Point(tV.x, tV.y);
   }
 
-  private Point getVertexCenter(int i) {
-    Transform t = vertexBodies[i].getTransform();
-    Vector2 tV = vertexBodies[i].getFixture(0).getShape().getCenter();
-    t.transform(tV);
-    return new Point(tV.x, tV.y);
-  }
-
   public void translate(Point t) {
     for (Body body : vertexBodies) {
       body.translate(new Vector2(t.x(), t.y()));
     }
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public Collection<Anchor> anchors() {
-    return List.of(
-        new VoxelAnchor(getVertexCenter(0), attachedAnchors.get(0)),
-        new VoxelAnchor(getVertexCenter(1), attachedAnchors.get(1)),
-        new VoxelAnchor(getVertexCenter(2), attachedAnchors.get(2)),
-        new VoxelAnchor(getVertexCenter(3), attachedAnchors.get(3))
-    );
+  public List<Anchor> anchors() {
+    return (List)anchors;
   }
 
   @Override

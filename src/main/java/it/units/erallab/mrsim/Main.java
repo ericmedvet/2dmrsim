@@ -17,9 +17,8 @@
 package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
-import it.units.erallab.mrsim.core.actions.CreateAndTranslateVoxel;
-import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.actions.*;
+import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -27,10 +26,10 @@ import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.viewer.*;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -41,8 +40,21 @@ public class Main {
     Poly ground = Poly.rectangle(10, 2);
     double ballInterval = 2.5d;
     Engine engine = new Dyn4JEngine();
-    engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 4)));
-    engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 5)));
+    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(
+        1,
+        1,
+        Voxel.SOFTNESS,
+        Voxel.AREA_RATIO_RANGE,
+        new Point(5, 4)
+    )).orElseThrow();
+    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(
+        1,
+        1,
+        Voxel.SOFTNESS,
+        Voxel.AREA_RATIO_RANGE,
+        new Point(5, 5)
+    )).orElseThrow();
+    Collection<Anchor> anchors = engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
     engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
@@ -67,6 +79,9 @@ public class Main {
       Snapshot snapshot = engine.tick();
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 2)) {
         engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(4.5, 8)));
+      }
+      if (engine.t() > 10 && engine.t() < 11) {
+        engine.perform(new DetachAllAnchors(v1, v2));
       }
       viewer.accept(snapshot);
     }
