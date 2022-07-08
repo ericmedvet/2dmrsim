@@ -26,4 +26,5 @@ public interface Body {
   Poly poly();
   double mass();
   Point centerLinearVelocity();
+  double angle();
 }

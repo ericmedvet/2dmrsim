@@ -35,8 +35,16 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
 
   private final Body body;
   private final double mass;
+  private final Vector2 initialFirstSideDirection;
 
-  public RigidBody(Poly convexPoly, double mass, double friction, double restitution, double linearDamping, double angularDamping) {
+  public RigidBody(
+      Poly convexPoly,
+      double mass,
+      double friction,
+      double restitution,
+      double linearDamping,
+      double angularDamping
+  ) {
     this.mass = mass;
     Convex convex = new Polygon(
         Arrays.stream(convexPoly.vertexes()).sequential()
@@ -48,6 +56,15 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
     body.setMass(MassType.NORMAL);
     body.setLinearDamping(linearDamping);
     body.setAngularDamping(angularDamping);
+    initialFirstSideDirection = getFirstSideDirection();
+  }
+
+  private Vector2 getFirstSideDirection() {
+    Poly poly = poly();
+    return new Vector2(
+        poly.vertexes()[1].x() - poly.vertexes()[0].x(),
+        poly.vertexes()[1].y() - poly.vertexes()[0].y()
+    );
   }
 
   protected Body getBody() {
@@ -77,5 +94,11 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
   public Point centerLinearVelocity() {
     Vector2 v = body.getLinearVelocity();
     return new Point(v.x, v.y);
+  }
+
+  @Override
+  public double angle() {
+    Vector2 currentFirstSideDirection = getFirstSideDirection();
+    return currentFirstSideDirection.getAngleBetween(initialFirstSideDirection);
   }
 }

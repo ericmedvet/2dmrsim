@@ -71,6 +71,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
 
   protected Body[] vertexBodies;
   protected List<DistanceJoint<Body>> springJoints;
+  private final Vector2 initialSidesAverageDirection;
 
 
   public Voxel(
@@ -96,6 +97,15 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     this.areaRatioActiveRange = areaRatioActiveRange;
     this.springScaffoldings = springScaffoldings;
     assemble();
+    initialSidesAverageDirection = getSidesAverageDirection();
+  }
+
+  private Vector2 getSidesAverageDirection() {
+    Poly poly = poly();
+    return new Vector2(
+        poly.vertexes()[0].x() - poly.vertexes()[1].x() + poly.vertexes()[3].x() - poly.vertexes()[2].x(),
+        poly.vertexes()[0].y() - poly.vertexes()[1].y() + poly.vertexes()[3].y() - poly.vertexes()[2].y()
+    );
   }
 
   protected void assemble() {
@@ -346,5 +356,11 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
   @Override
   public double restArea() {
     return sideLength * sideLength;
+  }
+
+  @Override
+  public double angle() {
+    Vector2 currentSidesAverageDirection = getSidesAverageDirection();
+    return currentSidesAverageDirection.getAngleBetween(initialSidesAverageDirection);
   }
 }

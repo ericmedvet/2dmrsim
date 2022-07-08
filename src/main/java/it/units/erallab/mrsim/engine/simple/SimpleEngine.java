@@ -52,7 +52,7 @@ public class SimpleEngine extends AbstractEngine {
     registerActionSolver(CreateRigidBody.class, this::createRigidBody);
   }
 
-  private RigidBody createRigidBody(CreateRigidBody action, Agent agent) throws IllegalActionException {
+  private RigidBody createRigidBody(CreateRigidBody action, Agent agent) {
     RigidBody rigidBody = new RigidBody() {
       @Override
       public Poly poly() {
@@ -67,6 +67,11 @@ public class SimpleEngine extends AbstractEngine {
       @Override
       public Point centerLinearVelocity() {
         return new Point(0, 0);
+      }
+
+      @Override
+      public double angle() {
+        return 0;
       }
     };
     bodies.add(rigidBody);
