@@ -16,8 +16,13 @@
 
 package it.units.erallab.mrsim.core.bodies;
 
+import it.units.erallab.mrsim.util.DoubleRange;
+
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Voxel extends SoftBody, AttachableBody {
+  double SOFTNESS = 0.75d;
+  DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8,1.2);
+
 }

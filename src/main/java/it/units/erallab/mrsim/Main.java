@@ -18,7 +18,9 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateAndTranslateVoxel;
 import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
@@ -36,17 +38,18 @@ import java.io.IOException;
  */
 public class Main {
   public static void main(String[] args) throws IOException {
-    Poly triangle = Poly.regular(1, 3);
+    Poly ball = Poly.regular(2, 20);
     Poly rectangle = Poly.rectangle(2, 1);
     Poly ground = Poly.rectangle(10, 2);
     Engine engine = new Dyn4JEngine();
-    engine.perform(new CreateAndTranslateRigidBody(triangle, 1, new Point(2, 4))).orElseThrow();
+    engine.perform(new CreateAndTranslateRigidBody(ball, 1, new Point(4.5, 10)));
+    engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 4)));
     engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder builder = new FramesImageBuilder(
         400,
         200,
-        10,
-        0.33,
+        20,
+        0.25,
         FramesImageBuilder.Direction.VERTICAL,
         Drawers.basic()
     );

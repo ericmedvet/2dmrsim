@@ -23,6 +23,7 @@ import it.units.erallab.mrsim.core.actions.CreateVoxel;
 import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
 import org.dyn4j.dynamics.Settings;
@@ -68,6 +69,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(CreateRigidBody.class, this::createRigidBody);
     registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
     registerActionSolver(TranslateBody.class, this::translate);
+    registerActionSolver(CreateVoxel.class, this::createVoxel);
     super.registerActionSolvers();
   }
 
@@ -80,8 +82,6 @@ public class Dyn4JEngine extends AbstractEngine {
         RigidBody.LINEAR_DAMPING,
         RigidBody.ANGULAR_DAMPING
     );
-    System.out.println(rigidBody.poly());
-    System.out.println(rigidBody.poly());
     world.addBody(rigidBody.getBody());
     bodies.add(rigidBody);
     return rigidBody;
@@ -95,13 +95,21 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private Body translate(TranslateBody action, Agent agent) throws IllegalActionException {
+    Point t = new Point(
+        action.translation().x() - action.body().poly().boundingBox().min().x(),
+        action.translation().y() - action.body().poly().boundingBox().min().y()
+    );
     if (action.body() instanceof RigidBody rigidBody) {
-      rigidBody.getBody().translate(action.translation().x(), action.translation().y());
+      rigidBody.getBody().translate(t.x(), t.y());
       return rigidBody;
+    }
+    if (action.body() instanceof it.units.erallab.mrsim.engine.dyn4j.Voxel voxel) {
+      voxel.translate(t);
+      return voxel;
     }
     throw new IllegalActionException(
         action,
-        String.format("Untranlatable body type: %s", action.body().getClass().getName())
+        String.format("Untranslatable body type: %s", action.body().getClass().getName())
     );
   }
 

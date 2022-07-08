@@ -33,15 +33,15 @@ import java.util.*;
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
 public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
+
   protected final static double FRICTION = 1d;
   protected final static double RESTITUTION = 0.5d;
-  protected final static double SOFTNESS = 07.5d;
   protected final static double LINEAR_DAMPING = 0.1d;
   protected final static double ANGULAR_DAMPING = 0.1d;
   protected final static double VERTEX_MASS_SIDE_LENGTH_RATIO = 0.35d;
   protected final static EnumSet<SpringScaffolding> SPRING_SCAFFOLDINGS = EnumSet.allOf(SpringScaffolding.class);
-  public static final DoubleRange SPRING_F_RANGE = new DoubleRange(2d, 10d);
-  public static final double SPRING_D = 0.3d;
+  protected static final DoubleRange SPRING_F_RANGE = new DoubleRange(2d, 10d);
+  protected static final double SPRING_D = 0.3d;
 
   private record SpringRange(double min, double rest, double max) {
 
@@ -112,9 +112,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     vertexBodies[1].addFixture(new Rectangle(massSideLength, massSideLength), density, friction, restitution);
     vertexBodies[2].addFixture(new Rectangle(massSideLength, massSideLength), density, friction, restitution);
     vertexBodies[3].addFixture(new Rectangle(massSideLength, massSideLength), density, friction, restitution);
-    vertexBodies[0].translate(-(sideLength / 2d - massSideLength / 2d), +(sideLength / 2d - massSideLength / 2d));
-    vertexBodies[1].translate(+(sideLength / 2d - massSideLength / 2d), +(sideLength / 2d - massSideLength / 2d));
-    vertexBodies[2].translate(+(sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
+    vertexBodies[0].translate(-(sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
+    vertexBodies[1].translate((sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
+    vertexBodies[2].translate((sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
     vertexBodies[3].translate(-(sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
     for (Body body : vertexBodies) {
       body.setMass(MassType.NORMAL);
@@ -148,26 +148,26 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[0],
           vertexBodies[1],
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d),
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
           vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[1],
           vertexBodies[2],
           vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[2],
           vertexBodies[3],
-          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d),
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[3],
           vertexBodies[0],
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d),
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d)
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d)
       ));
       for (DistanceJoint<Body> joint : localSpringJoints) {
         joint.setUserData(sideParallelActiveRange);
@@ -179,25 +179,25 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[0],
           vertexBodies[1],
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d),
-          vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[1],
           vertexBodies[2],
-          vertexBodies[1].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[2].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[1].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexBodies[2].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[2],
           vertexBodies[3],
           vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d)
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[3],
           vertexBodies[0],
-          vertexBodies[3].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d),
+          vertexBodies[3].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
           vertexBodies[0].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d)
       ));
       for (DistanceJoint<Body> joint : localSpringJoints) {
@@ -210,49 +210,49 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[0],
           vertexBodies[1],
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d),
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
           vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[0],
           vertexBodies[1],
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[1],
           vertexBodies[2],
-          vertexBodies[1].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[1].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[1],
           vertexBodies[2],
           vertexBodies[1].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[2].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[2].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[2],
           vertexBodies[3],
-          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d),
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d)
+          vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[2],
           vertexBodies[3],
           vertexBodies[2].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d)
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[3],
           vertexBodies[0],
-          vertexBodies[3].getWorldCenter().copy().add(-massSideLength / 2d, +massSideLength / 2d),
-          vertexBodies[0].getWorldCenter().copy().add(+massSideLength / 2d, -massSideLength / 2d)
+          vertexBodies[3].getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexBodies[0].getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d)
       ));
       localSpringJoints.add(new DistanceJoint<>(
           vertexBodies[3],
           vertexBodies[0],
-          vertexBodies[3].getWorldCenter().copy().add(+massSideLength / 2d, +massSideLength / 2d),
+          vertexBodies[3].getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
           vertexBodies[0].getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d)
       ));
       for (DistanceJoint<Body> joint : localSpringJoints) {
@@ -303,6 +303,12 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     Vector2 tV = rectangle.getVertices()[j].copy();
     t.transform(tV);
     return new Point(tV.x, tV.y);
+  }
+
+  public void translate(Point t) {
+    for (Body body : vertexBodies) {
+      body.translate(new Vector2(t.x(), t.y()));
+    }
   }
 
   @Override
