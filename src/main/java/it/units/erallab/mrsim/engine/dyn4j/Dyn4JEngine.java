@@ -19,14 +19,17 @@ package it.units.erallab.mrsim.engine.dyn4j;
 import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.actions.CreateRigidBody;
 import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.actions.CreateVoxel;
 import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.world.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,7 +72,14 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private RigidBody createRigidBody(CreateRigidBody action, Agent agent) {
-    RigidBody rigidBody = new RigidBody(action.poly(), action.mass(), RigidBody.FRICTION, RigidBody.RESTITUTION, RigidBody.LINEAR_DAMPING, RigidBody.ANGULAR_DAMPING);
+    RigidBody rigidBody = new RigidBody(
+        action.poly(),
+        action.mass(),
+        RigidBody.FRICTION,
+        RigidBody.RESTITUTION,
+        RigidBody.LINEAR_DAMPING,
+        RigidBody.ANGULAR_DAMPING
+    );
     System.out.println(rigidBody.poly());
     System.out.println(rigidBody.poly());
     world.addBody(rigidBody.getBody());
@@ -93,6 +103,25 @@ public class Dyn4JEngine extends AbstractEngine {
         action,
         String.format("Untranlatable body type: %s", action.body().getClass().getName())
     );
+  }
+
+  private Voxel createVoxel(CreateVoxel action, Agent agent) {
+    it.units.erallab.mrsim.engine.dyn4j.Voxel voxel = new it.units.erallab.mrsim.engine.dyn4j.Voxel(
+        action.sideLength(),
+        action.mass(),
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.FRICTION,
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.RESTITUTION,
+        action.softness(),
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.LINEAR_DAMPING,
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.ANGULAR_DAMPING,
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.VERTEX_MASS_SIDE_LENGTH_RATIO,
+        action.areaRatioActiveRange(),
+        it.units.erallab.mrsim.engine.dyn4j.Voxel.SPRING_SCAFFOLDINGS
+    );
+    Arrays.stream(voxel.getVertexBodies()).sequential().forEach(world::addBody);
+    voxel.getSpringJoints().forEach(world::addJoint);
+    bodies.add(voxel);
+    return voxel;
   }
 
 }

@@ -18,12 +18,10 @@ package it.units.erallab.mrsim.engine;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import it.units.erallab.mrsim.core.*;
-import it.units.erallab.mrsim.core.actions.AddAgent;
-import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
-import it.units.erallab.mrsim.core.actions.CreateRigidBody;
-import it.units.erallab.mrsim.core.actions.TranslateBody;
+import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
+import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Pair;
 
 import java.time.Duration;
@@ -141,6 +139,7 @@ public abstract class AbstractEngine implements Engine {
   protected void registerActionSolvers() {
     registerActionSolver(AddAgent.class, this::addAgent);
     registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
+    registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
   }
 
   protected Void addAgent(AddAgent action, Agent agent) {
@@ -158,6 +157,18 @@ public abstract class AbstractEngine implements Engine {
     ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
     perform(new TranslateBody(rigidBody, action.translation()), agent);
     return rigidBody;
+  }
+
+  protected Voxel createAndTranslateVoxel(
+      CreateAndTranslateVoxel action,
+      Agent agent
+  ) throws ActionException {
+    Voxel voxel = perform(
+        new CreateVoxel(action.sideLength(), action.mass(), action.softness(), action.areaRatioActiveRange()),
+        agent
+    ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
+    perform(new TranslateBody(voxel, action.translation()), agent);
+    return voxel;
   }
 
   @Override

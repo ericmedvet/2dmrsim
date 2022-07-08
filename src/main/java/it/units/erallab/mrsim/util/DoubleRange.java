@@ -50,4 +50,8 @@ public record DoubleRange(double min, double max) implements Serializable {
     return (clip(value) - min) / (max - min);
   }
 
+  public double denormalize(double value) {
+    return clip(value * extent() + min());
+  }
+
 }

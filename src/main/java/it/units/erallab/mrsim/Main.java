@@ -18,10 +18,7 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
-import it.units.erallab.mrsim.core.actions.CreateRigidBody;
 import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
-import it.units.erallab.mrsim.core.actions.TranslateBody;
-import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
