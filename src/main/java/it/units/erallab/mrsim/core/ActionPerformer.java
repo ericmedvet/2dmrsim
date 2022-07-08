@@ -16,15 +16,17 @@
 
 package it.units.erallab.mrsim.core;
 
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.engine.ActionException;
-
-import java.util.List;
+import java.util.Optional;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public interface EmbodiedAgent extends Agent {
-  List<Body> bodyParts();
-  void assemble(ActionPerformer actionPerformer) throws ActionException;
+@FunctionalInterface
+public interface ActionPerformer {
+  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
+
+  default <A extends Action<O>, O> Optional<O> perform(A action) {
+    return perform(action, null);
+  }
+
 }

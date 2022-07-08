@@ -16,10 +16,7 @@
 
 package it.units.erallab.mrsim.engine;
 
-import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.Snapshot;
+import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
@@ -39,7 +36,7 @@ import java.util.logging.Logger;
 public abstract class AbstractEngine implements Engine {
 
   @FunctionalInterface
-  public interface ActionSolver<A extends Action<O>, O> {
+  protected interface ActionSolver<A extends Action<O>, O> {
     O solve(A action, Agent agent) throws ActionException;
   }
 
@@ -144,8 +141,13 @@ public abstract class AbstractEngine implements Engine {
     registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
   }
 
-  protected Void addAgent(AddAgent action, Agent agent) {
-    agentPairs.add(new Pair<>(action.agent(), List.of()));
+  protected Void addAgent(AddAgent action, Agent agent) throws ActionException {
+    if (agent instanceof EmbodiedAgent embodiedAgent) {
+      embodiedAgent.assemble(this);
+      agentPairs.add(new Pair<>(action.agent(), List.of()));
+    } else {
+      agentPairs.add(new Pair<>(action.agent(), List.of()));
+    }
     return null;
   }
 

@@ -21,15 +21,9 @@ import java.util.Optional;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface Environment {
+public interface Environment extends ActionPerformer {
 
   Snapshot tick();
-
-  <A extends Action<O>, O> Optional<O> perform(A action, Agent agent);
-
-  default <A extends Action<O>, O> Optional<O> perform(A action) {
-    return perform(action, null);
-  }
 
   double t();
 
