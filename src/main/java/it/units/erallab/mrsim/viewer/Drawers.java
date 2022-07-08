@@ -21,6 +21,7 @@ import it.units.erallab.mrsim.viewer.drawers.BodiesDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.SoftBodyDrawer;
+import it.units.erallab.mrsim.viewer.drawers.body.UnmovableBodyDrawer;
 import it.units.erallab.mrsim.viewer.framers.StaticFramer;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class Drawers {
         new StaticFramer(1.5d),
         Drawer.of(
             new BodiesDrawer(List.of(
+                new UnmovableBodyDrawer(),
                 new RigidBodyDrawer(),
                 new SoftBodyDrawer()
             )),
