@@ -16,28 +16,21 @@
 
 package it.units.erallab.mrsim.viewer.framers;
 
-import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.geometry.BoundingBox;
 
 /**
- * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public class StaticAllAgentsFramer extends StaticFramer {
-
-  public StaticAllAgentsFramer(double sizeRelativeMargin) {
+public class StaticAllBodiesFramer extends StaticFramer {
+  public StaticAllBodiesFramer(double sizeRelativeMargin) {
     super(sizeRelativeMargin);
   }
 
   @Override
   protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
-    return snapshot.agentPairs().stream()
-        .filter(p -> p.first() instanceof EmbodiedAgent)
-        .map(a -> ((EmbodiedAgent) a.first()).bodyParts().stream()
-            .map(b -> b.poly().boundingBox())
-            .reduce(BoundingBox::enclosing)
-            .orElse(DEFAULT_BOUNDING_BOX)
-        )
+    return snapshot.bodies().stream()
+        .map(b -> b.poly().boundingBox())
         .reduce(BoundingBox::enclosing)
         .orElse(DEFAULT_BOUNDING_BOX);
   }
