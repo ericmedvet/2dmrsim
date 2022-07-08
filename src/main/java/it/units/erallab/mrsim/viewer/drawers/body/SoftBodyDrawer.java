@@ -18,9 +18,12 @@ package it.units.erallab.mrsim.viewer.drawers.body;
 
 import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.core.bodies.SoftBody;
+import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.viewer.DrawingUtils;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 
 /**
@@ -65,17 +68,23 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
 
   @Override
   protected boolean innerDraw(double t, SoftBody body, int index, Graphics2D g) {
-    Path2D path = DrawingUtils.toPath(body.poly(), true);
-    g.setColor(DrawingUtils.linear(contractedColor,
+    Poly poly = body.poly();
+    Path2D path = DrawingUtils.toPath(poly, true);
+    g.setColor(DrawingUtils.linear(
+        contractedColor,
         restColor,
         expandedColor,
         (float) minAreaRatio,
         1,
         (float) maxAreaRatio,
-        (float) body.areaRatio()));
+        (float) body.areaRatio()
+    ));
     g.fill(path);
     g.setColor(strokeColor);
     g.draw(path);
+    Point center = poly.center();
+    Point firstSideMeanPoint = Point.average(poly.vertexes()[0], poly.vertexes()[1]);
+    g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
     return true;
   }
 }
