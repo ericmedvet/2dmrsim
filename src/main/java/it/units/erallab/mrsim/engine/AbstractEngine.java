@@ -16,19 +16,19 @@
 
 package it.units.erallab.mrsim.engine;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import it.units.erallab.mrsim.core.*;
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionOutcome;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalTime;
-import java.time.Period;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -89,7 +89,7 @@ public abstract class AbstractEngine implements Engine {
     }
     double newT = innerTick();
     t.set(newT);
-    engineT.addAndGet(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
+    engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
     return new EngineSnapshot(
         t.get(),
         agentPairs,
