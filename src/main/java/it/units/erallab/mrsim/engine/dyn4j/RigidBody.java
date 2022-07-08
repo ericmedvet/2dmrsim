@@ -27,10 +27,16 @@ import java.util.Arrays;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
+
+  protected final static double FRICTION = 1d;
+  protected final static double RESTITUTION = 0.5d;
+  protected final static double LINEAR_DAMPING = 0.1d;
+  protected final static double ANGULAR_DAMPING = 0.1d;
+
   private final Body body;
   private final double mass;
 
-  public RigidBody(Poly convexPoly, double mass, double friction, double restitution) {
+  public RigidBody(Poly convexPoly, double mass, double friction, double restitution, double linearDamping, double angularDamping) {
     this.mass = mass;
     Convex convex = new Polygon(
         Arrays.stream(convexPoly.vertexes()).sequential()
@@ -40,6 +46,8 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
     body = new Body();
     body.addFixture(convex, mass / convexPoly.area(), friction, restitution);
     body.setMass(MassType.NORMAL);
+    body.setLinearDamping(linearDamping);
+    body.setAngularDamping(angularDamping);
   }
 
   protected Body getBody() {

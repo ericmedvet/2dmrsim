@@ -23,12 +23,16 @@ import org.dyn4j.geometry.MassType;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class UnmovableBody extends RigidBody implements it.units.erallab.mrsim.core.bodies.UnmovableBody {
+
+  protected final static double FRICTION = 1d;
+  protected final static double RESTITUTION = 0.5d;
+
   public UnmovableBody(
       Poly convexPoly,
       double friction,
       double restitution
   ) {
-    super(convexPoly, 1d, friction, restitution);
+    super(convexPoly, 1d, friction, restitution, 0d, 0d);
     getBody().setMassType(MassType.INFINITE);
   }
 }

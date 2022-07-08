@@ -34,10 +34,6 @@ import java.util.List;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class Dyn4JEngine extends AbstractEngine {
-
-  private final static double RIGID_FRICTION = 1d;
-  private final static double RIGID_RESTITUTION = 0.5d;
-
   private final Settings settings;
   private final List<Body> bodies;
   private final World<org.dyn4j.dynamics.Body> world;
@@ -73,7 +69,7 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private RigidBody createRigidBody(CreateRigidBody action, Agent agent) {
-    RigidBody rigidBody = new RigidBody(action.poly(), action.mass(), RIGID_FRICTION, RIGID_RESTITUTION);
+    RigidBody rigidBody = new RigidBody(action.poly(), action.mass(), RigidBody.FRICTION, RigidBody.RESTITUTION, RigidBody.LINEAR_DAMPING, RigidBody.ANGULAR_DAMPING);
     System.out.println(rigidBody.poly());
     System.out.println(rigidBody.poly());
     world.addBody(rigidBody.getBody());
@@ -82,7 +78,7 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
-    UnmovableBody unmovableBody = new UnmovableBody(action.poly(), RIGID_FRICTION, RIGID_RESTITUTION);
+    UnmovableBody unmovableBody = new UnmovableBody(action.poly(), UnmovableBody.FRICTION, UnmovableBody.RESTITUTION);
     world.addBody(unmovableBody.getBody());
     bodies.add(unmovableBody);
     return unmovableBody;
@@ -93,8 +89,10 @@ public class Dyn4JEngine extends AbstractEngine {
       rigidBody.getBody().translate(action.translation().x(), action.translation().y());
       return rigidBody;
     }
-    throw new IllegalActionException(action,
-        String.format("Untranlatable body type: %s", action.body().getClass().getName()));
+    throw new IllegalActionException(
+        action,
+        String.format("Untranlatable body type: %s", action.body().getClass().getName())
+    );
   }
 
 }
