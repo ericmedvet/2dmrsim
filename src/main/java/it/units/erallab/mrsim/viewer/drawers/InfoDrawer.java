@@ -75,7 +75,7 @@ public class InfoDrawer implements Drawer {
       sb.append(string);
       sb.append("\n");
     }
-    sb.append(String.format("t=%4.1f%n", s.t()));
+    sb.append(String.format("t=%4.1fs%n", s.t()));
     if (!engineInfos.isEmpty()) {
       if (s instanceof EngineSnapshot es) {
         sb.append(engineInfos.stream().map(ei -> ei.apply(es)).collect(Collectors.joining("; ")));
