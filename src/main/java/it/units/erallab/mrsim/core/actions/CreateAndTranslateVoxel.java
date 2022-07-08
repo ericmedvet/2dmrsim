@@ -31,4 +31,11 @@ public record CreateAndTranslateVoxel(
     DoubleRange areaRatioActiveRange,
     Point translation
 ) implements Action<Voxel> {
+  public CreateAndTranslateVoxel(
+      double sideLength,
+      double mass,
+      Point translation
+  ) {
+    this(sideLength, mass, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, translation);
+  }
 }

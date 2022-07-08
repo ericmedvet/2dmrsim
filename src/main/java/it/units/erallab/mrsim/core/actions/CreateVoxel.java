@@ -29,4 +29,7 @@ public record CreateVoxel(
     double softness,
     DoubleRange areaRatioActiveRange
 ) implements Action<Voxel> {
+  public CreateVoxel(double sideLength, double mass) {
+    this(sideLength, mass, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE);
+  }
 }

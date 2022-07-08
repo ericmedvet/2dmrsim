@@ -40,21 +40,11 @@ public class Main {
     Poly ground = Poly.rectangle(10, 2);
     double ballInterval = 2.5d;
     Engine engine = new Dyn4JEngine();
-    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(
-        1,
-        1,
-        Voxel.SOFTNESS,
-        Voxel.AREA_RATIO_RANGE,
-        new Point(5, 4)
-    )).orElseThrow();
-    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(
-        1,
-        1,
-        Voxel.SOFTNESS,
-        Voxel.AREA_RATIO_RANGE,
-        new Point(5, 5)
-    )).orElseThrow();
-    Collection<Anchor> anchors = engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
+    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(5, 4))).orElseThrow();
+    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(5, 5))).orElseThrow();
+    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(6, 5))).orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
     engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
@@ -68,24 +58,25 @@ public class Main {
         600,
         400,
         0,
-        10,
+        20,
         24,
         VideoUtils.EncoderFacility.FFMPEG_SMALL,
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    //RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
-      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 2)) {
-        engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(4.5, 8)));
+      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 4)) {
+        engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(5.5, 8)));
       }
       if (engine.t() > 10 && engine.t() < 11) {
         engine.perform(new DetachAllAnchors(v1, v2));
       }
-      viewer.accept(snapshot);
+      //viewer.accept(snapshot);
+      videoBuilder.accept(snapshot);
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
-    //videoBuilder.get();
+    videoBuilder.get();
   }
 }
