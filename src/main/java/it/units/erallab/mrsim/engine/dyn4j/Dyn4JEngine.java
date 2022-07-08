@@ -29,22 +29,18 @@ import it.units.erallab.mrsim.engine.IllegalActionException;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.world.World;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class Dyn4JEngine extends AbstractEngine {
   private final Settings settings;
-  private final List<Body> bodies;
   private final World<org.dyn4j.dynamics.Body> world;
 
   public Dyn4JEngine(Settings settings) {
     this.settings = settings;
-    bodies = new ArrayList<>();
     world = new World<>();
     world.setSettings(settings);
   }

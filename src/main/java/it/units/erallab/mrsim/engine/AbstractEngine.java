@@ -44,6 +44,7 @@ public abstract class AbstractEngine implements Engine {
   }
 
   protected final AtomicDouble t;
+  protected final List<Body> bodies;
   protected final List<Pair<Agent, List<ActionOutcome<?>>>> agentPairs;
   private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
   private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
@@ -57,6 +58,7 @@ public abstract class AbstractEngine implements Engine {
 
 
   public AbstractEngine() {
+    bodies = new ArrayList<>();
     agentPairs = new ArrayList<>();
     actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
