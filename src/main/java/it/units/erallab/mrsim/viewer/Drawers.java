@@ -21,8 +21,6 @@ import it.units.erallab.mrsim.viewer.drawers.BodiesDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.SoftBodyDrawer;
-import it.units.erallab.mrsim.viewer.framers.StaticAllAgentsFramer;
-import it.units.erallab.mrsim.viewer.framers.StaticAllBodiesFramer;
 import it.units.erallab.mrsim.viewer.framers.StaticFramer;
 
 import java.util.List;
