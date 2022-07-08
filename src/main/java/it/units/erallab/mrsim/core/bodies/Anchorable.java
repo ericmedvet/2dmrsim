@@ -16,13 +16,11 @@
 
 package it.units.erallab.mrsim.core.bodies;
 
-import it.units.erallab.mrsim.core.geometry.Poly;
-
 import java.util.Collection;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface AttachableBody extends Body {
+public interface Anchorable {
   Collection<Anchor> anchors();
 }

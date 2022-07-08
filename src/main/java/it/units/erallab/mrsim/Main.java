@@ -42,6 +42,7 @@ public class Main {
     double ballInterval = 2.5d;
     Engine engine = new Dyn4JEngine();
     engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 4)));
+    engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 5)));
     engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,

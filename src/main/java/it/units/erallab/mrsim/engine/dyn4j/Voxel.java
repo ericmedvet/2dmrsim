@@ -53,6 +53,8 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
 
   }
 
+  private record VoxelAnchor(Point point, Collection<Anchor> attachedAnchors) implements Anchor {}
+
   protected enum SpringScaffolding {
     SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
   }
@@ -69,8 +71,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
   private final DoubleRange areaRatioActiveRange;
   private final EnumSet<SpringScaffolding> springScaffoldings;
 
-  protected Body[] vertexBodies;
-  protected List<DistanceJoint<Body>> springJoints;
+  protected final Body[] vertexBodies;
+  protected final List<DistanceJoint<Body>> springJoints;
+  protected final List<List<Anchor>> attachedAnchors;
   private final Vector2 initialSidesAverageDirection;
 
 
@@ -96,6 +99,14 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     this.vertexMassSideLengthRatio = vertexMassSideLengthRatio;
     this.areaRatioActiveRange = areaRatioActiveRange;
     this.springScaffoldings = springScaffoldings;
+    vertexBodies = new Body[4];
+    springJoints = new ArrayList<>();
+    attachedAnchors = List.of(
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>()
+    );
     assemble();
     initialSidesAverageDirection = getSidesAverageDirection();
   }
@@ -113,7 +124,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     double massSideLength = sideLength * vertexMassSideLengthRatio;
     double density = (mass / 4) / (massSideLength * massSideLength);
     //build bodies
-    vertexBodies = new Body[4];
     vertexBodies[0] = new Body(); //NW
     vertexBodies[1] = new Body(); //NE
     vertexBodies[2] = new Body(); //SE
@@ -296,7 +306,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
       joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
       joint.setDampingRatio(SPRING_D);
     }
-    springJoints = Collections.unmodifiableList(allSpringJoints);
+    springJoints.addAll(allSpringJoints);
   }
 
   protected Body[] getVertexBodies() {
@@ -315,6 +325,13 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     return new Point(tV.x, tV.y);
   }
 
+  private Point getVertexCenter(int i) {
+    Transform t = vertexBodies[i].getTransform();
+    Vector2 tV = vertexBodies[i].getFixture(0).getShape().getCenter();
+    t.transform(tV);
+    return new Point(tV.x, tV.y);
+  }
+
   public void translate(Point t) {
     for (Body body : vertexBodies) {
       body.translate(new Vector2(t.x(), t.y()));
@@ -323,8 +340,12 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
 
   @Override
   public Collection<Anchor> anchors() {
-    //TODO fill
-    return null;
+    return List.of(
+        new VoxelAnchor(getVertexCenter(0), attachedAnchors.get(0)),
+        new VoxelAnchor(getVertexCenter(1), attachedAnchors.get(1)),
+        new VoxelAnchor(getVertexCenter(2), attachedAnchors.get(2)),
+        new VoxelAnchor(getVertexCenter(3), attachedAnchors.get(3))
+    );
   }
 
   @Override
