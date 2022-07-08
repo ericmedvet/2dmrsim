@@ -27,6 +27,7 @@ import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.viewer.Drawers;
 import it.units.erallab.mrsim.viewer.FramesImageBuilder;
+import it.units.erallab.mrsim.viewer.RealtimeViewer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -53,18 +54,14 @@ public class Main {
         FramesImageBuilder.Direction.VERTICAL,
         Drawers.basic()
     );
-    while (engine.t() < 10) {
+    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       if (engine.t() > 2 && snapshot.bodies().size() < 3) {
         engine.perform(new CreateAndTranslateRigidBody(rectangle, 2, new Point(0, 4)));
       }
-      System.out.printf(
-          "t=%4.1f nBodies=%1d nAgents=%1d%n",
-          snapshot.t(),
-          snapshot.bodies().size(),
-          snapshot.agentPairs().size()
-      );
-      builder.accept(snapshot);
+      //builder.accept(snapshot);
+      viewer.accept(snapshot);
     }
     BufferedImage image = builder.get();
     ImageIO.write(image, "png", new File("/home/eric/experiments/simple.png"));

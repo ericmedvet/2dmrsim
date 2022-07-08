@@ -38,7 +38,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
   private final Drawer drawer;
   private final BufferedImage image;
   private int frameCount;
-  private double latestDrawnT;
+  private double lastDrawnT;
 
   public FramesImageBuilder(int frameW, int frameH, int nOfFrames, double deltaT, Direction direction, Drawer drawer) {
     this.nOfFrames = nOfFrames;
@@ -46,7 +46,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
     this.direction = direction;
     this.drawer = drawer;
     frameCount = 0;
-    latestDrawnT = 0d;
+    lastDrawnT = 0d;
     //prepare image
     int overallW = frameW;
     int overallH = frameH;
@@ -65,10 +65,10 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
 
   @Override
   public void accept(Snapshot snapshot) {
-    if (snapshot.t() < latestDrawnT + deltaT || frameCount > nOfFrames) {
+    if (snapshot.t() < lastDrawnT + deltaT || frameCount > nOfFrames) {
       return;
     }
-    latestDrawnT = snapshot.t();
+    lastDrawnT = snapshot.t();
     frameCount = frameCount + 1;
     //frame
     BoundingBox imageFrame;

@@ -60,7 +60,7 @@ public class InfoDrawer implements Drawer {
   }
 
   public InfoDrawer(String string) {
-    this(string, EnumSet.of(EngineInfo.ENGINE_T, EngineInfo.WALL_T));
+    this(string, EnumSet.allOf(EngineInfo.class));
   }
 
   public InfoDrawer() {
