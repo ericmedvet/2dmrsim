@@ -46,11 +46,11 @@ public record Poly(Point... vertexes) implements Shape {
     return Point.average(vertexes);
   }
 
-  public static Poly regular(double l, int n) {
+  public static Poly regular(double radius, int n) {
     return new Poly(IntStream.range(0, n)
         .mapToObj(i -> new Point(
-                l * Math.cos(Math.PI * 2d * (double) i / (double) n),
-                l * Math.sin(Math.PI * 2d * (double) i / (double) n)
+                radius * Math.cos(Math.PI * 2d * (double) i / (double) n),
+                radius * Math.sin(Math.PI * 2d * (double) i / (double) n)
             )
         )
         .toArray(Point[]::new));

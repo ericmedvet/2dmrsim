@@ -39,11 +39,10 @@ import java.io.IOException;
  */
 public class Main {
   public static void main(String[] args) throws IOException {
-    Poly ball = Poly.regular(2, 20);
-    Poly rectangle = Poly.rectangle(2, 1);
+    Poly ball = Poly.regular(1, 20);
     Poly ground = Poly.rectangle(10, 2);
+    double ballInterval = 2.5d;
     Engine engine = new Dyn4JEngine();
-    engine.perform(new CreateAndTranslateRigidBody(ball, 1, new Point(4.5, 10)));
     engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 4)));
     engine.perform(new CreateUnmovableBody(ground));
     FramesImageBuilder builder = new FramesImageBuilder(
@@ -57,8 +56,8 @@ public class Main {
     RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
-      if (engine.t() > 2 && snapshot.bodies().size() < 3) {
-        engine.perform(new CreateAndTranslateRigidBody(rectangle, 2, new Point(0, 4)));
+      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 2)) {
+        engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(4.5, 8)));
       }
       //builder.accept(snapshot);
       viewer.accept(snapshot);
