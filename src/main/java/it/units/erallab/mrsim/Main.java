@@ -25,9 +25,7 @@ import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
-import it.units.erallab.mrsim.viewer.Drawers;
-import it.units.erallab.mrsim.viewer.FramesImageBuilder;
-import it.units.erallab.mrsim.viewer.RealtimeViewer;
+import it.units.erallab.mrsim.viewer.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -45,12 +43,22 @@ public class Main {
     Engine engine = new Dyn4JEngine();
     engine.perform(new CreateAndTranslateVoxel(1, 1, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, new Point(5, 4)));
     engine.perform(new CreateUnmovableBody(ground));
-    FramesImageBuilder builder = new FramesImageBuilder(
+    FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
         20,
         0.25,
         FramesImageBuilder.Direction.VERTICAL,
+        Drawers.basic()
+    );
+    VideoBuilder videoBuilder = new VideoBuilder(
+        600,
+        400,
+        0,
+        10,
+        24,
+        VideoUtils.EncoderFacility.FFMPEG_SMALL,
+        new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
     RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
@@ -59,10 +67,9 @@ public class Main {
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 2)) {
         engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(4.5, 8)));
       }
-      //builder.accept(snapshot);
       viewer.accept(snapshot);
     }
-    BufferedImage image = builder.get();
-    ImageIO.write(image, "png", new File("/home/eric/experiments/simple.png"));
+    //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
+    //videoBuilder.get();
   }
 }
