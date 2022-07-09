@@ -24,7 +24,7 @@ import java.util.Collection;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public interface MultipartBody { // TODO make Voxel implement this, or maybe all bodies; change removeBody to use this
+public interface MultipartBody {
   Collection<Body> getBodies();
   Collection<Joint<Body>> getJoints();
 }

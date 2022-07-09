@@ -116,11 +116,11 @@ public class Dyn4JEngine extends AbstractEngine {
         action.mass(),
         it.units.erallab.mrsim.engine.dyn4j.Voxel.FRICTION,
         it.units.erallab.mrsim.engine.dyn4j.Voxel.RESTITUTION,
-        action.softness(),
+        action.material().softness(),
         it.units.erallab.mrsim.engine.dyn4j.Voxel.LINEAR_DAMPING,
         it.units.erallab.mrsim.engine.dyn4j.Voxel.ANGULAR_DAMPING,
         it.units.erallab.mrsim.engine.dyn4j.Voxel.VERTEX_MASS_SIDE_LENGTH_RATIO,
-        action.areaRatioActiveRange(),
+        action.material().areaRatioRange(),
         it.units.erallab.mrsim.engine.dyn4j.Voxel.SPRING_SCAFFOLDINGS
     );
     voxel.getBodies().forEach(world::addBody);

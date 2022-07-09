@@ -176,7 +176,7 @@ public abstract class AbstractEngine implements Engine {
       Agent agent
   ) throws ActionException {
     Voxel voxel = perform(
-        new CreateVoxel(action.sideLength(), action.mass(), action.softness(), action.areaRatioActiveRange()),
+        new CreateVoxel(action.sideLength(), action.mass(), action.material()),
         agent
     ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
     perform(new TranslateBody(voxel, action.translation()), agent);

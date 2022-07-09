@@ -18,7 +18,6 @@ package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Voxel;
-import it.units.erallab.mrsim.util.DoubleRange;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -26,10 +25,9 @@ import it.units.erallab.mrsim.util.DoubleRange;
 public record CreateVoxel(
     double sideLength,
     double mass,
-    double softness,
-    DoubleRange areaRatioActiveRange
+    Voxel.Material material
 ) implements Action<Voxel> {
   public CreateVoxel(double sideLength, double mass) {
-    this(sideLength, mass, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE);
+    this(sideLength, mass, new Voxel.Material());
   }
 }

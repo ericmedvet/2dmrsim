@@ -27,8 +27,7 @@ import it.units.erallab.mrsim.util.DoubleRange;
 public record CreateAndTranslateVoxel(
     double sideLength,
     double mass,
-    double softness,
-    DoubleRange areaRatioActiveRange,
+    Voxel.Material material,
     Point translation
 ) implements Action<Voxel> {
   public CreateAndTranslateVoxel(
@@ -36,6 +35,6 @@ public record CreateAndTranslateVoxel(
       double mass,
       Point translation
   ) {
-    this(sideLength, mass, Voxel.SOFTNESS, Voxel.AREA_RATIO_RANGE, translation);
+    this(sideLength, mass, new Voxel.Material(), translation);
   }
 }

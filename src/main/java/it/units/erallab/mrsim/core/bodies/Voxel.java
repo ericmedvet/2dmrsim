@@ -22,11 +22,21 @@ import it.units.erallab.mrsim.util.DoubleRange;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Voxel extends SoftBody, Anchorable {
+  record Material(double softness, DoubleRange areaRatioRange) {
+    static double SOFTNESS = 0.75d;
+    static DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8, 1.2);
+
+    public Material(double softness, double areaRatioRangeDelta) {
+      this(softness, new DoubleRange(1 - Math.abs(areaRatioRangeDelta), 1 + Math.abs(areaRatioRangeDelta)));
+    }
+
+    public Material() {
+      this(SOFTNESS, AREA_RATIO_RANGE);
+    }
+  }
+
   enum Side {N, E, W, S}
 
   enum Vertex {NW, NE, SE, SW}
-
-  double SOFTNESS = 0.75d;
-  DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8, 1.2);
 
 }
