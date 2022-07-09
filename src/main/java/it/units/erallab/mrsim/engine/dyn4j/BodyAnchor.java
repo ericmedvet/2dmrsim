@@ -17,6 +17,7 @@
 package it.units.erallab.mrsim.engine.dyn4j;
 
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
@@ -29,10 +30,12 @@ import java.util.*;
  */
 public class BodyAnchor implements Anchor {
   private final Body body;
+  private final Anchorable anchorable;
   private final Map<BodyAnchor, Joint<Body>> jointMap;
 
-  public BodyAnchor(Body body) {
+  public BodyAnchor(Body body, Anchorable anchorable) {
     this.body = body;
+    this.anchorable = anchorable;
     jointMap = new HashMap<>();
   }
 
@@ -40,6 +43,11 @@ public class BodyAnchor implements Anchor {
   public Point point() {
     Vector2 center = body.getWorldCenter();
     return new Point(center.x, center.y);
+  }
+
+  @Override
+  public Anchorable anchorable() {
+    return anchorable;
   }
 
   @Override

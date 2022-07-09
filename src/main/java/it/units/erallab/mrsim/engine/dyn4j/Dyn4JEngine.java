@@ -19,6 +19,7 @@ package it.units.erallab.mrsim.engine.dyn4j;
 import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
@@ -67,7 +68,8 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(TranslateBody.class, this::translate);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
-    registerActionSolver(DetachAnchor.class, this::detachAnchor);
+    registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
+    registerActionSolver(RemoveBody.class, this::removeBody);
     super.registerActionSolvers();
   }
 
@@ -156,7 +158,7 @@ public class Dyn4JEngine extends AbstractEngine {
     return null;
   }
 
-  private Collection<Anchor> detachAnchor(DetachAnchor action, Agent agent) {
+  private Collection<Anchor> detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
     Collection<Anchor> removedAnchors = new ArrayList<>();
     if (action.anchor() instanceof BodyAnchor src) {
       for (Anchor dstAnchor : action.anchorable().anchors()) {
@@ -172,6 +174,28 @@ public class Dyn4JEngine extends AbstractEngine {
       }
     }
     return removedAnchors;
+  }
+
+  private Body removeBody(RemoveBody action, Agent agent) throws IllegalActionException {
+    //detach
+    if (action.body() instanceof Anchorable anchorable) {
+      perform(new DetachAllAnchors(anchorable), agent);
+    }
+    //remove
+    if (action.body() instanceof RigidBody rigidBody) {
+      world.removeBody(rigidBody.getBody());
+      bodies.remove(rigidBody);
+      return rigidBody;
+    }
+    if (action.body() instanceof it.units.erallab.mrsim.engine.dyn4j.Voxel voxel) {
+      Arrays.stream(voxel.getVertexBodies()).sequential().forEach(world::removeBody);
+      voxel.getSpringJoints().forEach(world::removeJoint);
+      bodies.remove(voxel);
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Unsupported body type %s", action.body().getClass().getSimpleName())
+    );
   }
 
 }

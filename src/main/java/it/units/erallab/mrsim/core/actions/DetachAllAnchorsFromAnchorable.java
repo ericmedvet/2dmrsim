@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.bodies;
+package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
 
 import java.util.Collection;
 
 /**
- * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public interface Anchor {
-  Point point();
-  Anchorable anchorable();
-
-  Collection<Anchor> attachedAnchors();
+public record DetachAllAnchorsFromAnchorable(
+    Anchorable sourceAnchorable, Anchorable targetAnchorable
+) implements Action<Collection<Anchor>> {
 }

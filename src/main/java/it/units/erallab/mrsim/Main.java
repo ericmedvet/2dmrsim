@@ -18,7 +18,7 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
-import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -28,8 +28,7 @@ import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -64,19 +63,24 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    //RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    Consumer<Snapshot> consumer = viewer;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 4)) {
         engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(5.5, 8)));
       }
       if (engine.t() > 10 && engine.t() < 11) {
-        engine.perform(new DetachAllAnchors(v1, v2));
+        engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));
       }
-      //viewer.accept(snapshot);
-      videoBuilder.accept(snapshot);
+      for (Body body : snapshot.bodies()) {
+        if (body.poly().center().y() < -3) {
+          engine.perform(new RemoveBody(body));
+        }
+      }
+      consumer.accept(snapshot);
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
-    videoBuilder.get();
+    //videoBuilder.get();
   }
 }

@@ -23,9 +23,7 @@ import it.units.erallab.mrsim.core.bodies.Anchorable;
 import java.util.Collection;
 
 /**
- * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record DetachAllAnchors(
-    Anchorable sourceAnchorable, Anchorable targetAnchorable
-) implements Action<Collection<Anchor>> {
+public record DetachAllAnchors(Anchorable anchorable) implements Action<Collection<Anchor>> {
 }

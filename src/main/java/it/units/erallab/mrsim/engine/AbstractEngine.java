@@ -18,10 +18,7 @@ package it.units.erallab.mrsim.engine;
 
 import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.*;
-import it.units.erallab.mrsim.core.bodies.Anchor;
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.core.bodies.RigidBody;
-import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.core.bodies.*;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
@@ -31,6 +28,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -91,8 +89,8 @@ public abstract class AbstractEngine implements Engine {
     engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
     return new EngineSnapshot(
         t.get(),
-        agentPairs,
-        getBodies(),
+        List.copyOf(agentPairs),
+        List.copyOf(getBodies()),
         engineT.get(),
         Duration.between(startingInstant, Instant.now()).toMillis() / 1000d,
         nOfTicks.get(),
@@ -147,6 +145,7 @@ public abstract class AbstractEngine implements Engine {
     registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
     registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
     registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
+    registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
     registerActionSolver(DetachAllAnchors.class, this::detachAllAnchors);
   }
 
@@ -197,10 +196,24 @@ public abstract class AbstractEngine implements Engine {
         .toList();
   }
 
-  protected Collection<Anchor> detachAllAnchors(DetachAllAnchors action, Agent agent) {
+  protected Collection<Anchor> detachAllAnchorsFromAnchorable(
+      DetachAllAnchorsFromAnchorable action,
+      Agent agent
+  ) {
     return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).orElseThrow())
+        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).orElseThrow())
         .flatMap(Collection::stream)
         .toList();
+  }
+
+  protected Collection<Anchor> detachAllAnchors(DetachAllAnchors action, Agent agent) {
+    Set<Anchorable> anchorables = action.anchorable().anchors().stream()
+        .map(a -> a.attachedAnchors().stream().map(Anchor::anchorable).collect(Collectors.toSet()))
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+    return anchorables.stream()
+        .map(target -> perform(new DetachAllAnchorsFromAnchorable(action.anchorable(), target), agent).orElseThrow())
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
   }
 }

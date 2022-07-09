@@ -100,7 +100,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     vertexBodies = new Body[4];
     springJoints = new ArrayList<>();
     assemble();
-    anchors = Arrays.stream(vertexBodies).map(BodyAnchor::new).toList();
+    anchors = Arrays.stream(vertexBodies).map(v -> new BodyAnchor(v,this)).toList();
     initialSidesAverageDirection = getSidesAverageDirection();
   }
 
