@@ -67,6 +67,7 @@ public class Main {
     Consumer<Snapshot> consumer = viewer;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
+      consumer.accept(snapshot);
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 4)) {
         engine.perform(new CreateAndTranslateRigidBody(
             ball,
@@ -75,7 +76,7 @@ public class Main {
                 .stream()
                 .mapToDouble(b -> b.poly().boundingBox().max().y())
                 .max()
-                .orElse(10)+2d)
+                .orElse(10) + 2d)
         ));
       }
       if (engine.t() > 10 && engine.t() < 11) {
@@ -86,7 +87,13 @@ public class Main {
           engine.perform(new RemoveBody(body));
         }
       }
-      consumer.accept(snapshot);
+      if (snapshot.bodies().contains(v1)) {
+        engine.perform(new ActuateVoxel(v1, Math.sin(2d * Math.PI * engine.t())));
+      }
+      if (snapshot.bodies().contains(v2)) {
+        double v = Math.sin(2d * Math.PI * engine.t());
+        engine.perform(new ActuateVoxel(v2, v, 0, 0, -1));
+      }
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
     //videoBuilder.get();

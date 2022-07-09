@@ -329,6 +329,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     //apply on sides
     for (Map.Entry<Side, Double> sideEntry : sideValues.entrySet()) {
       double v = sideEntry.getValue();
+      if (Math.abs(v) > 1d) {
+        v = Math.signum(v);
+      }
       for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
         Voxel.SpringRange range = (SpringRange) joint.getUserData();
         if (v >= 0) { // shrink
@@ -340,6 +343,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     }
     //apply on central
     double v = sideValues.values().stream().mapToDouble(Double::doubleValue).average().orElse(0d);
+    if (Math.abs(v) > 1d) {
+      v = Math.signum(v);
+    }
     for (DistanceJoint<Body> joint : centralJoints) {
       Voxel.SpringRange range = (SpringRange) joint.getUserData();
       if (v >= 0) { // shrink
@@ -348,14 +354,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
       }
     }
-  }
-
-  protected void actuate(double value) {
-    EnumMap<Side, Double> sideValues = new EnumMap<>(Side.class);
-    for (Side side : Side.values()) {
-      sideValues.put(side, value);
-    }
-    actuate(sideValues);
   }
 
   @Override

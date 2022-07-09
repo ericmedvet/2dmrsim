@@ -70,6 +70,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
     registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
     registerActionSolver(RemoveBody.class, this::removeBody);
+    registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
     super.registerActionSolvers();
   }
 
@@ -100,7 +101,7 @@ public class Dyn4JEngine extends AbstractEngine {
         action.translation().y() - action.body().poly().boundingBox().min().y()
     );
     if (action.body() instanceof MultipartBody multipartBody) {
-      multipartBody.getBodies().forEach(b -> b.translate(t.x(),t.y()));
+      multipartBody.getBodies().forEach(b -> b.translate(t.x(), t.y()));
       return action.body();
     }
     throw new IllegalActionException(
@@ -187,6 +188,17 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format("Unsupported body type %s", action.body().getClass().getSimpleName())
+    );
+  }
+
+  private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
+    if (action.voxel() instanceof it.units.erallab.mrsim.engine.dyn4j.Voxel voxel) {
+      voxel.actuate(action.values());
+      return voxel;
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Unsupported voxel type %s", action.voxel().getClass().getSimpleName())
     );
   }
 
