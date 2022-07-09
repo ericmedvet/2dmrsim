@@ -268,6 +268,16 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
     return Arrays.stream(ts).map(o -> (T) o).toList();
   }
 
+  public Collection<Key> keys() {
+    Collection<Key> keys = new ArrayList<>(w * h);
+    for (int x = 0; x < w; x++) {
+      for (int y = 0; y < h; y++) {
+        keys.add(new Key(x, y));
+      }
+    }
+    return Collections.unmodifiableCollection(keys);
+  }
+
   public Collection<Entry<T>> entries() {
     Collection<Entry<T>> entries = new ArrayList<>(w * h);
     for (int x = 0; x < w; x++) {

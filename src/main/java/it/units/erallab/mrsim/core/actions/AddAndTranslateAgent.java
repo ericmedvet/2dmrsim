@@ -17,10 +17,11 @@
 package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.EmbodiedAgent;
+import it.units.erallab.mrsim.core.geometry.Point;
 
 /**
- * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record AddAgent(Agent agent) implements Action<Agent> {
+public record AddAndTranslateAgent(EmbodiedAgent agent, Point translation) implements Action<EmbodiedAgent> {
 }

@@ -21,6 +21,7 @@ import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.bodies.SoftBody;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
+import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.viewer.DrawingUtils;
 
 import java.awt.*;
@@ -38,8 +39,7 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
   private final static Color EXPANDED_COLOR = new Color(145, 191, 219);
   private final static Color BORDER_COLOR = Color.BLACK;
   private final static Color ANCHOR_COLOR = Color.GRAY;
-  private final static double MIN_AREA_RATIO = 0.6;
-  private final static double MAX_AREA_RATIO = 1.4;
+  private final static DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.75,1.25);
   private final static double ANCHOR_DOT_RADIUS = .05;
 
   private final Color contractedColor;
@@ -47,8 +47,7 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
   private final Color expandedColor;
   private final Color borderColor;
   private final Color anchorColor;
-  private final double minAreaRatio;
-  private final double maxAreaRatio;
+  private final DoubleRange areaRatioRange;
 
   public SoftBodyDrawer(
       Color contractedColor,
@@ -56,8 +55,7 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
       Color expandedColor,
       Color borderColor,
       Color anchorColor,
-      double minAreaRatio,
-      double maxAreaRatio
+      DoubleRange areaRatioRange
   ) {
     super(SoftBody.class);
     this.contractedColor = contractedColor;
@@ -65,12 +63,11 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
     this.expandedColor = expandedColor;
     this.borderColor = borderColor;
     this.anchorColor = anchorColor;
-    this.minAreaRatio = minAreaRatio;
-    this.maxAreaRatio = maxAreaRatio;
+    this.areaRatioRange = areaRatioRange;
   }
 
   public SoftBodyDrawer() {
-    this(CONTRACTED_COLOR, REST_COLOR, EXPANDED_COLOR, BORDER_COLOR, ANCHOR_COLOR, MIN_AREA_RATIO, MAX_AREA_RATIO);
+    this(CONTRACTED_COLOR, REST_COLOR, EXPANDED_COLOR, BORDER_COLOR, ANCHOR_COLOR, AREA_RATIO_RANGE);
   }
 
   @Override
@@ -81,9 +78,9 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
         contractedColor,
         restColor,
         expandedColor,
-        (float) minAreaRatio,
+        (float) areaRatioRange.min(),
         1,
-        (float) maxAreaRatio,
+        (float) areaRatioRange.max(),
         (float) body.areaRatio()
     ));
     g.fill(path);

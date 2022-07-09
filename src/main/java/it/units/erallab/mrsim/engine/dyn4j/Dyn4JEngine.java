@@ -65,7 +65,7 @@ public class Dyn4JEngine extends AbstractEngine {
   protected void registerActionSolvers() {
     registerActionSolver(CreateRigidBody.class, this::createRigidBody);
     registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
-    registerActionSolver(TranslateBody.class, this::translate);
+    registerActionSolver(TranslateBody.class, this::translateBody);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
     registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
@@ -95,10 +95,10 @@ public class Dyn4JEngine extends AbstractEngine {
     return unmovableBody;
   }
 
-  private Body translate(TranslateBody action, Agent agent) throws IllegalActionException {
+  private Body translateBody(TranslateBody action, Agent agent) throws IllegalActionException {
     Point t = new Point(
-        action.translation().x() - action.body().poly().boundingBox().min().x(),
-        action.translation().y() - action.body().poly().boundingBox().min().y()
+        action.translation().x(),
+        action.translation().y()
     );
     if (action.body() instanceof MultipartBody multipartBody) {
       multipartBody.getBodies().forEach(b -> b.translate(t.x(), t.y()));

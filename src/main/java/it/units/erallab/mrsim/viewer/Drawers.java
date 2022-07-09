@@ -49,7 +49,7 @@ public class Drawers {
 
   public static Drawer world() {
     return Drawer.transform(
-        new StaticFramer(2.25d),
+        new StaticFramer(1.5d),
         Drawer.of(
             new BodiesDrawer(List.of(
                 new UnmovableBodyDrawer(),

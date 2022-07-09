@@ -147,16 +147,18 @@ public abstract class AbstractEngine implements Engine {
     registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
     registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
     registerActionSolver(DetachAllAnchors.class, this::detachAllAnchors);
+    registerActionSolver(TranslateAgent.class, this::translateAgent);
+    registerActionSolver(AddAndTranslateAgent.class, this::addAndTranslateAgent);
   }
 
-  protected Void addAgent(AddAgent action, Agent agent) throws ActionException {
-    if (agent instanceof EmbodiedAgent embodiedAgent) {
+  protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
+    if (action.agent() instanceof EmbodiedAgent embodiedAgent) {
       embodiedAgent.assemble(this);
       agentPairs.add(new Pair<>(action.agent(), List.of()));
     } else {
       agentPairs.add(new Pair<>(action.agent(), List.of()));
     }
-    return null;
+    return action.agent();
   }
 
   protected RigidBody createAndTranslateRigidBody(
@@ -215,5 +217,19 @@ public abstract class AbstractEngine implements Engine {
         .map(target -> perform(new DetachAllAnchorsFromAnchorable(action.anchorable(), target), agent).orElseThrow())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
+  }
+
+  protected EmbodiedAgent addAndTranslateAgent(AddAndTranslateAgent action, Agent agent) throws ActionException {
+    EmbodiedAgent embodiedAgent = (EmbodiedAgent) perform(
+        new AddAgent(action.agent()), agent)
+        .orElseThrow(() -> new ActionException(action, "Undoable addition")
+        );
+    perform(new TranslateAgent(embodiedAgent, action.translation()), agent);
+    return embodiedAgent;
+  }
+
+  protected EmbodiedAgent translateAgent(TranslateAgent action, Agent agent) {
+    action.agent().bodyParts().forEach(b -> perform(new TranslateBody(b, action.translation()), agent));
+    return action.agent();
   }
 }

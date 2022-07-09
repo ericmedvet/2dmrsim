@@ -20,8 +20,13 @@ import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.ActionPerformer;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
+import it.units.erallab.mrsim.core.actions.AttachClosestAnchors;
+import it.units.erallab.mrsim.core.actions.CreateAndTranslateVoxel;
+import it.units.erallab.mrsim.core.actions.CreateVoxel;
+import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.ActionException;
 import it.units.erallab.mrsim.util.Grid;
 
@@ -34,19 +39,22 @@ import java.util.Objects;
 public class GridVSR implements EmbodiedAgent {
 
   private final static double VOXEL_SIDE_LENGTH = 1d;
+  private final static double VOXEL_MASS = 1d;
 
   private final Grid<Voxel.Material> materialGrid;
   private final double voxelSideLength;
-  private final Grid<Voxel> bodyGrid;
+  private final double voxelMass;
+  private final Grid<Voxel> voxelGrid;
 
-  public GridVSR(Grid<Voxel.Material> materialGrid, double voxelSideLength) {
+  public GridVSR(Grid<Voxel.Material> materialGrid, double voxelSideLength, double voxelMass) {
     this.materialGrid = materialGrid;
     this.voxelSideLength = voxelSideLength;
-    bodyGrid = Grid.create(materialGrid.getW(), materialGrid.getH());
+    this.voxelMass = voxelMass;
+    voxelGrid = Grid.create(materialGrid.getW(), materialGrid.getH());
   }
 
   public GridVSR(Grid<Voxel.Material> materialGrid) {
-    this(materialGrid, VOXEL_SIDE_LENGTH);
+    this(materialGrid, VOXEL_SIDE_LENGTH, VOXEL_MASS);
   }
 
   @Override
@@ -57,11 +65,33 @@ public class GridVSR implements EmbodiedAgent {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public List<Body> bodyParts() {
-    return (List)bodyGrid.values().stream().filter(Objects::nonNull).toList();
+    return (List) voxelGrid.values().stream().filter(Objects::nonNull).toList();
   }
 
   @Override
-  public void assemble(ActionPerformer actionPerformer) throws ActionException {
-
+  public void assemble(ActionPerformer actionPerformer) {
+    //create and translate
+    materialGrid.entries().stream()
+        .filter(e -> e.value() != null)
+        .forEach(e -> voxelGrid.set(e.key(), actionPerformer.perform(new CreateAndTranslateVoxel(
+            voxelSideLength,
+            voxelMass,
+            e.value(),
+            new Point(e.key().x() * voxelSideLength, e.key().y() * voxelSideLength)
+        ), this).orElseThrow()));
+    //attach
+    for (Grid.Key key : voxelGrid.keys()) {
+      Voxel srcVoxel = voxelGrid.get(key);
+      if (srcVoxel != null) {
+        Voxel onEast = voxelGrid.get(key.x() + 1, key.y());
+        Voxel onSouth = voxelGrid.get(key.x(), key.y() + 1);
+        if (onEast != null) {
+          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onEast), this);
+        }
+        if (onSouth != null) {
+          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onSouth), this);
+        }
+      }
+    }
   }
 }

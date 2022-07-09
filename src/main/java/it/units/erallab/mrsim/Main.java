@@ -16,9 +16,12 @@
 
 package it.units.erallab.mrsim;
 
+import it.units.erallab.mrsim.agents.GridVSR;
+import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -36,15 +39,16 @@ import java.util.function.Consumer;
 public class Main {
   public static void main(String[] args) throws IOException {
     Poly ball = Poly.regular(1, 20);
-    Poly ground = Poly.rectangle(10, 2);
-    double ballInterval = 2.5d;
+    double ballInterval = 5d;
     Engine engine = new Dyn4JEngine();
-    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(5, 4))).orElseThrow();
-    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(5, 5))).orElseThrow();
-    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(6, 5))).orElseThrow();
+    GridVSR vsr = new GridVSR(ShapeUtils.buildShape("biped-7x4").map(b -> b ? new Voxel.Material() : null));
+    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).orElseThrow();
+    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).orElseThrow();
+    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).orElseThrow();
+    engine.perform(new AddAndTranslateAgent(vsr, new Point(2d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
-    engine.perform(new CreateUnmovableBody(ground));
+    engine.perform(new CreateUnmovableBody(Poly.rectangle(20, 4)));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
@@ -68,7 +72,7 @@ public class Main {
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
-      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 4)) {
+      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().stream().filter(b -> b instanceof RigidBody).count() - 1)) {
         engine.perform(new CreateAndTranslateRigidBody(
             ball,
             2,
