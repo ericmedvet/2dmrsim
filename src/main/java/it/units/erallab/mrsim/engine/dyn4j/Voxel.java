@@ -59,10 +59,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
   }
 
-  protected enum Side {N, E, W, S}
-
-  protected enum Vertex {NW, NE, SE, SW}
-
   private final double sideLength;
   private final double mass;
   private final double friction;
@@ -327,6 +323,39 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setDampingRatio(SPRING_D);
       }
     });
+  }
+
+  protected void actuate(EnumMap<Side, Double> sideValues) {
+    //apply on sides
+    for (Map.Entry<Side, Double> sideEntry : sideValues.entrySet()) {
+      double v = sideEntry.getValue();
+      for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
+        Voxel.SpringRange range = (SpringRange) joint.getUserData();
+        if (v >= 0) { // shrink
+          joint.setRestDistance(range.rest - (range.rest - range.min) * v);
+        } else if (v < 0) { // expand
+          joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
+        }
+      }
+    }
+    //apply on central
+    double v = sideValues.values().stream().mapToDouble(Double::doubleValue).average().orElse(0d);
+    for (DistanceJoint<Body> joint : centralJoints) {
+      Voxel.SpringRange range = (SpringRange) joint.getUserData();
+      if (v >= 0) { // shrink
+        joint.setRestDistance(range.rest - (range.rest - range.min) * v);
+      } else if (v < 0) { // expand
+        joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
+      }
+    }
+  }
+
+  protected void actuate(double value) {
+    EnumMap<Side, Double> sideValues = new EnumMap<>(Side.class);
+    for (Side side : Side.values()) {
+      sideValues.put(side, value);
+    }
+    actuate(sideValues);
   }
 
   @Override

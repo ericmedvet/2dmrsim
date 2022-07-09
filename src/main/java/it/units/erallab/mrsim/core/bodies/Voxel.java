@@ -22,7 +22,11 @@ import it.units.erallab.mrsim.util.DoubleRange;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Voxel extends SoftBody, Anchorable {
+  enum Side {N, E, W, S}
+
+  enum Vertex {NW, NE, SE, SW}
+
   double SOFTNESS = 0.75d;
-  DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8,1.2);
+  DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8, 1.2);
 
 }
