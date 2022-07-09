@@ -33,6 +33,6 @@ public class UnmovableBody extends RigidBody implements it.units.erallab.mrsim.c
       double restitution
   ) {
     super(convexPoly, 1d, friction, restitution, 0d, 0d);
-    getBody().setMassType(MassType.INFINITE);
+    getBodies().forEach(b -> b.setMassType(MassType.INFINITE));
   }
 }

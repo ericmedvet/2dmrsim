@@ -22,6 +22,7 @@ import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Transform;
@@ -32,7 +33,7 @@ import java.util.*;
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
+public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, MultipartBody {
 
   protected final static double FRICTION = 1d;
   protected final static double RESTITUTION = 0.5d;
@@ -302,12 +303,15 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     springJoints.addAll(allSpringJoints);
   }
 
-  protected Body[] getVertexBodies() {
-    return vertexBodies;
+  @Override
+  public Collection<Body> getBodies() {
+    return List.of(vertexBodies);
   }
 
-  protected List<DistanceJoint<Body>> getSpringJoints() {
-    return springJoints;
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @Override
+  public Collection<Joint<Body>> getJoints() {
+    return (List)springJoints;
   }
 
   private Point getIndexedVertex(int i, int j) {
@@ -316,12 +320,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel {
     Vector2 tV = rectangle.getVertices()[j].copy();
     t.transform(tV);
     return new Point(tV.x, tV.y);
-  }
-
-  public void translate(Point t) {
-    for (Body body : vertexBodies) {
-      body.translate(new Vector2(t.x(), t.y()));
-    }
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

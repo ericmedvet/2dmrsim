@@ -19,14 +19,17 @@ package it.units.erallab.mrsim.engine.dyn4j;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.*;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
+public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, MultipartBody {
 
   protected final static double FRICTION = 1d;
   protected final static double RESTITUTION = 0.5d;
@@ -67,8 +70,14 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody {
     );
   }
 
-  protected Body getBody() {
-    return body;
+  @Override
+  public Collection<Body> getBodies() {
+    return List.of(body);
+  }
+
+  @Override
+  public Collection<Joint<Body>> getJoints() {
+    return List.of();
   }
 
   @Override

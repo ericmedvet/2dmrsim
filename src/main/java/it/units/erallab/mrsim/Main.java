@@ -68,7 +68,15 @@ public class Main {
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().size() - 4)) {
-        engine.perform(new CreateAndTranslateRigidBody(ball, 2, new Point(5.5, 8)));
+        engine.perform(new CreateAndTranslateRigidBody(
+            ball,
+            2,
+            new Point(5.5, snapshot.bodies()
+                .stream()
+                .mapToDouble(b -> b.poly().boundingBox().max().y())
+                .max()
+                .orElse(10)+2d)
+        ));
       }
       if (engine.t() > 10 && engine.t() < 11) {
         engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));

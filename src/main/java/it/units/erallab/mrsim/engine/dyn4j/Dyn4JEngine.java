@@ -82,14 +82,14 @@ public class Dyn4JEngine extends AbstractEngine {
         RigidBody.LINEAR_DAMPING,
         RigidBody.ANGULAR_DAMPING
     );
-    world.addBody(rigidBody.getBody());
+    rigidBody.getBodies().forEach(world::addBody);
     bodies.add(rigidBody);
     return rigidBody;
   }
 
   private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
     UnmovableBody unmovableBody = new UnmovableBody(action.poly(), UnmovableBody.FRICTION, UnmovableBody.RESTITUTION);
-    world.addBody(unmovableBody.getBody());
+    unmovableBody.getBodies().forEach(world::addBody);
     bodies.add(unmovableBody);
     return unmovableBody;
   }
@@ -99,13 +99,9 @@ public class Dyn4JEngine extends AbstractEngine {
         action.translation().x() - action.body().poly().boundingBox().min().x(),
         action.translation().y() - action.body().poly().boundingBox().min().y()
     );
-    if (action.body() instanceof RigidBody rigidBody) {
-      rigidBody.getBody().translate(t.x(), t.y());
-      return rigidBody;
-    }
-    if (action.body() instanceof it.units.erallab.mrsim.engine.dyn4j.Voxel voxel) {
-      voxel.translate(t);
-      return voxel;
+    if (action.body() instanceof MultipartBody multipartBody) {
+      multipartBody.getBodies().forEach(b -> b.translate(t.x(),t.y()));
+      return action.body();
     }
     throw new IllegalActionException(
         action,
@@ -126,8 +122,8 @@ public class Dyn4JEngine extends AbstractEngine {
         action.areaRatioActiveRange(),
         it.units.erallab.mrsim.engine.dyn4j.Voxel.SPRING_SCAFFOLDINGS
     );
-    Arrays.stream(voxel.getVertexBodies()).sequential().forEach(world::addBody);
-    voxel.getSpringJoints().forEach(world::addJoint);
+    voxel.getBodies().forEach(world::addBody);
+    voxel.getJoints().forEach(world::addJoint);
     bodies.add(voxel);
     return voxel;
   }
@@ -182,15 +178,11 @@ public class Dyn4JEngine extends AbstractEngine {
       perform(new DetachAllAnchors(anchorable), agent);
     }
     //remove
-    if (action.body() instanceof RigidBody rigidBody) {
-      world.removeBody(rigidBody.getBody());
-      bodies.remove(rigidBody);
-      return rigidBody;
-    }
-    if (action.body() instanceof it.units.erallab.mrsim.engine.dyn4j.Voxel voxel) {
-      Arrays.stream(voxel.getVertexBodies()).sequential().forEach(world::removeBody);
-      voxel.getSpringJoints().forEach(world::removeJoint);
-      bodies.remove(voxel);
+    if (action.body() instanceof MultipartBody multipartBody) {
+      multipartBody.getJoints().forEach(world::removeJoint);
+      multipartBody.getBodies().forEach(world::removeBody);
+      bodies.remove(action.body());
+      return action.body();
     }
     throw new IllegalActionException(
         action,
