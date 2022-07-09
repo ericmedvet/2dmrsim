@@ -93,8 +93,8 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
 
   public static <K> Grid<K> create(int w, int h, BiFunction<Integer, Integer, K> fillerFunction) {
     Grid<K> grid = new Grid<>(w, h);
-    for (int x = 0; x < grid.getW(); x++) {
-      for (int y = 0; y < grid.getH(); y++) {
+    for (int x = 0; x < grid.w(); x++) {
+      for (int y = 0; y < grid.h(); y++) {
         grid.set(x, y, fillerFunction.apply(x, y));
       }
     }
@@ -106,16 +106,16 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
   }
 
   public static <K> Grid<K> create(Grid<?> other) {
-    return create(other.getW(), other.getH());
+    return create(other.w(), other.h());
   }
 
   public static <K> String toString(Grid<K> grid, String format) {
     StringBuilder sb = new StringBuilder();
-    for (int y = 0; y < grid.getH(); y++) {
-      for (int x = 0; x < grid.getW(); x++) {
+    for (int y = 0; y < grid.h(); y++) {
+      for (int x = 0; x < grid.w(); x++) {
         sb.append(String.format(format, grid.get(x, y)));
       }
-      if (y < grid.getH() - 1) {
+      if (y < grid.h() - 1) {
         sb.append(String.format("%n"));
       }
     }
@@ -140,11 +140,11 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
 
   public static <K> String toString(Grid<K> grid, Function<Entry<K>, Character> function, String separator) {
     StringBuilder sb = new StringBuilder();
-    for (int y = 0; y < grid.getH(); y++) {
-      for (int x = 0; x < grid.getW(); x++) {
+    for (int y = 0; y < grid.h(); y++) {
+      for (int x = 0; x < grid.w(); x++) {
         sb.append(function.apply(new Entry<>(new Key(x, y), grid.get(x, y))));
       }
-      if (y < grid.getH() - 1) {
+      if (y < grid.h() - 1) {
         sb.append(separator);
       }
     }
@@ -182,11 +182,11 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
     return get(key.x, key.y);
   }
 
-  public int getH() {
+  public int h() {
     return h;
   }
 
-  public int getW() {
+  public int w() {
     return w;
   }
 
@@ -264,28 +264,28 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<T> values() {
+  public List<T> values() {
     return Arrays.stream(ts).map(o -> (T) o).toList();
   }
 
-  public Collection<Key> keys() {
-    Collection<Key> keys = new ArrayList<>(w * h);
+  public List<Key> keys() {
+    List<Key> keys = new ArrayList<>(w * h);
     for (int x = 0; x < w; x++) {
       for (int y = 0; y < h; y++) {
         keys.add(new Key(x, y));
       }
     }
-    return Collections.unmodifiableCollection(keys);
+    return Collections.unmodifiableList(keys);
   }
 
-  public Collection<Entry<T>> entries() {
-    Collection<Entry<T>> entries = new ArrayList<>(w * h);
+  public List<Entry<T>> entries() {
+    List<Entry<T>> entries = new ArrayList<>(w * h);
     for (int x = 0; x < w; x++) {
       for (int y = 0; y < h; y++) {
         entries.add(new Entry<>(new Key(x, y), get(x, y)));
       }
     }
-    return Collections.unmodifiableCollection(entries);
+    return Collections.unmodifiableList(entries);
   }
 
   public <R> Grid<R> map(Function<T, R> f) {

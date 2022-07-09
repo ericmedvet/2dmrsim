@@ -43,7 +43,7 @@ public class AgentsDrawer implements Drawer {
   public boolean draw(Snapshot s, Graphics2D g) {
     int c = 0;
     boolean drawn = false;
-    for (Pair<Agent, List<ActionOutcome<?>>> pair : s.agentPairs()) {
+    for (Pair<Agent, List<ActionOutcome<?, ?>>> pair : s.agentPairs()) {
       int i = c;
       for (AgentDrawer agentDrawer : agentDrawers) {
         if (agentDrawer.draw(s.t(), pair.first(), pair.second(), i, g)) {

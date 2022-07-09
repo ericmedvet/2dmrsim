@@ -16,7 +16,8 @@
 
 package it.units.erallab.mrsim;
 
-import it.units.erallab.mrsim.agents.GridVSR;
+import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
+import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
@@ -27,10 +28,12 @@ import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
+import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -41,14 +44,19 @@ public class Main {
     Poly ball = Poly.regular(1, 20);
     double ballInterval = 5d;
     Engine engine = new Dyn4JEngine();
-    GridVSR vsr = new GridVSR(ShapeUtils.buildShape("biped-7x4").map(b -> b ? new Voxel.Material() : null));
+    Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
+    AbstractGridVSR vsr = new NumGridVSR(
+        shape.map(b -> b ? new Voxel.Material() : null),
+        shape.map(b -> List.of()),
+        (t, iG) -> Grid.create(shape.w(), shape.h(), (x, y) -> Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w()))
+    );
     Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).orElseThrow();
     Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).orElseThrow();
     Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).orElseThrow();
-    engine.perform(new AddAndTranslateAgent(vsr, new Point(2d, 4d)));
+    engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
-    engine.perform(new CreateUnmovableBody(Poly.rectangle(20, 4)));
+    engine.perform(new CreateUnmovableBody(Poly.rectangle(25, 4)));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
@@ -67,12 +75,15 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
-    Consumer<Snapshot> consumer = viewer;
+    //RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    Consumer<Snapshot> consumer = videoBuilder;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
-      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies().stream().filter(b -> b instanceof RigidBody).count() - 1)) {
+      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies()
+          .stream()
+          .filter(b -> b instanceof RigidBody)
+          .count() - 1)) {
         engine.perform(new CreateAndTranslateRigidBody(
             ball,
             2,
@@ -100,6 +111,6 @@ public class Main {
       }
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
-    //videoBuilder.get();
+    videoBuilder.get();
   }
 }

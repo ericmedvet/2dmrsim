@@ -21,8 +21,8 @@ import java.util.Optional;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public record ActionOutcome<O>(
-    Action<O> action,
+public record ActionOutcome<A extends Action<O>, O>(
+    A action,
     Optional<O> outcome
 ) {
 }

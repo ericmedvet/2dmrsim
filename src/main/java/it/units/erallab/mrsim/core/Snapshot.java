@@ -28,7 +28,7 @@ import java.util.List;
 public interface Snapshot {
   double t();
 
-  Collection<Pair<Agent, List<ActionOutcome<?>>>> agentPairs();
+  Collection<Pair<Agent, List<ActionOutcome<?,?>>>> agentPairs();
 
   Collection<Body> bodies();
 }

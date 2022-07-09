@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.agents;
+package it.units.erallab.mrsim.agents.gridvsr;
 
-import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.ActionPerformer;
-import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.actions.AttachClosestAnchors;
 import it.units.erallab.mrsim.core.actions.CreateAndTranslateVoxel;
-import it.units.erallab.mrsim.core.actions.CreateVoxel;
-import it.units.erallab.mrsim.core.actions.TranslateBody;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.engine.ActionException;
 import it.units.erallab.mrsim.util.Grid;
 
 import java.util.List;
@@ -36,30 +30,25 @@ import java.util.Objects;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public class GridVSR implements EmbodiedAgent {
+public abstract class AbstractGridVSR implements it.units.erallab.mrsim.core.EmbodiedAgent {
 
-  private final static double VOXEL_SIDE_LENGTH = 1d;
-  private final static double VOXEL_MASS = 1d;
+  protected final static double VOXEL_SIDE_LENGTH = 1d;
+  protected final static double VOXEL_MASS = 1d;
 
   private final Grid<Voxel.Material> materialGrid;
   private final double voxelSideLength;
   private final double voxelMass;
-  private final Grid<Voxel> voxelGrid;
+  protected final Grid<Voxel> voxelGrid;
 
-  public GridVSR(Grid<Voxel.Material> materialGrid, double voxelSideLength, double voxelMass) {
+  public AbstractGridVSR(Grid<Voxel.Material> materialGrid, double voxelSideLength, double voxelMass) {
     this.materialGrid = materialGrid;
     this.voxelSideLength = voxelSideLength;
     this.voxelMass = voxelMass;
-    voxelGrid = Grid.create(materialGrid.getW(), materialGrid.getH());
+    voxelGrid = Grid.create(materialGrid.w(), materialGrid.h());
   }
 
-  public GridVSR(Grid<Voxel.Material> materialGrid) {
+  public AbstractGridVSR(Grid<Voxel.Material> materialGrid) {
     this(materialGrid, VOXEL_SIDE_LENGTH, VOXEL_MASS);
-  }
-
-  @Override
-  public List<Action<?>> act(double t, List<ActionOutcome<?>> previousActionOutcomes) {
-    return List.of();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

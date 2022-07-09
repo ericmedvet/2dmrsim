@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.viewer;
+package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.Agent;
-
-import java.awt.Graphics2D;
-import java.util.List;
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.bodies.Body;
 
 /**
- * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public interface AgentDrawer {
-  boolean draw(double t, Agent agent, List<ActionOutcome<?, ?>> actionOutcomes, int index, Graphics2D g);
+public interface Sense<B extends Body> extends Action<Double> {
+  B body();
 }
