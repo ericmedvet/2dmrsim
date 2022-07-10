@@ -29,6 +29,7 @@ import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.util.Grid;
+import it.units.erallab.mrsim.util.PolyUtils;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -56,7 +57,7 @@ public class Main {
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
-    engine.perform(new CreateUnmovableBody(Poly.rectangle(25, 4)));
+    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("flat")));
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
@@ -75,8 +76,8 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    //RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
-    Consumer<Snapshot> consumer = videoBuilder;
+    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    Consumer<Snapshot> consumer = viewer;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
@@ -111,6 +112,6 @@ public class Main {
       }
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
-    videoBuilder.get();
+    //videoBuilder.get();
   }
 }
