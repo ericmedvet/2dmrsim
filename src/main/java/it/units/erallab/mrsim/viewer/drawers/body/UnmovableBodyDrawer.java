@@ -30,7 +30,7 @@ public class UnmovableBodyDrawer extends TypeBodyDrawer<UnmovableBody> {
 
   private final static Color TEXTURE_COLOR = Color.GRAY;
   private final static Color STROKE_COLOR = Color.BLACK;
-  private final static int TEXTURE_SIZE = 1;
+  private final static int TEXTURE_SIZE = 2;
 
   private final Color strokeColor;
   private final TexturePaint texturePaint;

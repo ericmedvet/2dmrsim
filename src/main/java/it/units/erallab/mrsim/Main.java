@@ -57,7 +57,8 @@ public class Main {
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
-    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("flat")));
+    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("hilly-0.25-2-0",100,4,1,5)));
+
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
@@ -99,7 +100,7 @@ public class Main {
         engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));
       }
       for (Body body : snapshot.bodies()) {
-        if (body.poly().center().y() < -3) {
+        if (body.poly().center().y() < -10) {
           engine.perform(new RemoveBody(body));
         }
       }

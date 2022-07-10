@@ -18,12 +18,14 @@ package it.units.erallab.mrsim.util;
 
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.decompose.SweepLine;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/10 for 2dmrsim
@@ -74,15 +76,9 @@ public class PolyUtils {
       RandomGenerator random = new Random(Integer.parseInt(params.get("seed")));
       while (ps.get(ps.size() - 1).x() < terrainW + borderW) {
         Point last = ps.get(ps.size() - 1);
-        ps.add(new Point(
-            last.x() + Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w),
-            last.y()
-        ));
+        ps.add(new Point(last.x() + Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w), last.y()));
         last = ps.get(ps.size() - 1);
-        ps.add(new Point(
-            last.x(),
-            last.y() + random.nextGaussian() * h
-        ));
+        ps.add(new Point(last.x(), last.y() + random.nextGaussian() * h));
       }
     } else if ((params = StringUtils.params(downhill, name)) != null) {
       double angle = Double.parseDouble(params.get("angle"));
@@ -102,7 +98,45 @@ public class PolyUtils {
     ps.add(new Point(maxX + borderW, borderH));
     ps.add(new Point(maxX + borderW, minY - terrainH));
     ps.add(new Point(0, minY - terrainH));
+    //rotate
+    int mid = ps.size() / 2;
+    ps.addAll(ps.subList(0, mid));
+    ps = ps.subList(mid, ps.size() - 1);
     return new Poly(ps.toArray(Point[]::new));
   }
+
+  public static Set<Poly> decompose(Poly poly) {
+    List<Convex> convexes = new SweepLine().decompose(
+        Arrays.stream(poly.vertexes()).map(p -> new Vector2(p.x(), p.y())).toArray(Vector2[]::new)
+    );
+    return convexes.stream()
+        .map(c -> new Poly(
+            Arrays.stream(((Polygon) c).getVertices()).map(v -> new Point(v.x, v.y)).toArray(Point[]::new)
+        ))
+        .collect(Collectors.toSet());
+  }
+
+  private static double angle(Point a, Point b, Point c) {
+    double angle = c.diff(b).direction() - a.diff(b).direction();
+    return angle > 0 ? angle : (angle + 2d * Math.PI);
+  }
+
+  public static Poly makeCounterClockwise(Poly poly) {
+    Point c = poly.center();
+    double sum = 0d;
+    for (int i = 1; i < poly.vertexes().length; i++) {
+      sum = sum + angle(poly.vertexes()[i], c, poly.vertexes()[i - 1]);
+    }
+    sum = sum + angle(poly.vertexes()[0], c, poly.vertexes()[poly.vertexes().length - 1]);
+    if (sum >= 0) {
+      return poly;
+    }
+    Point[] vertexes = new Point[poly.vertexes().length];
+    for (int i = 0; i < vertexes.length; i++) {
+      vertexes[i] = poly.vertexes()[vertexes.length - 1 - i];
+    }
+    return new Poly(vertexes);
+  }
+
 
 }

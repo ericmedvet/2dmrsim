@@ -55,7 +55,19 @@ public record Point(double x, double y) implements Shape {
   }
 
   public double distance(Point p) {
-    return Math.sqrt((x - p.x()) * (x - p.x()) + (y - p.y()) * (y - p.y()));
+    return diff(p).magnitude();
+  }
+
+  public Point diff(Point p) {
+    return new Point(x - p.x(), y - p.y());
+  }
+
+  public double direction() {
+    return Math.atan2(y, x);
+  }
+
+  public double magnitude() {
+    return Math.sqrt(x * x + y * y);
   }
 
   @Override

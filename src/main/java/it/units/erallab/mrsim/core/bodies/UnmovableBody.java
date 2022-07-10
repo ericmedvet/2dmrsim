@@ -31,4 +31,9 @@ public interface UnmovableBody extends RigidBody {
   default Point centerLinearVelocity() {
     return new Point(0d, 0d);
   }
+
+  @Override
+  default double angle() {
+    return 0;
+  }
 }

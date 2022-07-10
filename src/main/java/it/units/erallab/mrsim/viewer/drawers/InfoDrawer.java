@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
  */
 public class InfoDrawer implements Drawer {
   public enum EngineInfo implements Function<EngineSnapshot, String> {
-    ENGINE_T(s -> String.format("eT=%5.2fms", s.engineT() * 1000d)),
-    WALL_T(s -> String.format("wT=%5.3fs", s.wallT())),
+    ENGINE_T(s -> String.format("eT=%5.1fms", s.engineT() * 1000d)),
+    WALL_T(s -> String.format("wT=%5.1fs", s.wallT())),
     ENGINE_TPS(s -> String.format("eTPS=%5.1f", s.nOfTicks() / s.engineT())),
     WALL_TPS(s -> String.format("wTPS=%5.1f", s.nOfTicks() / s.wallT())),
     N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())),
