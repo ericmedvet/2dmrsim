@@ -38,15 +38,12 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
   private final static Color REST_COLOR = new Color(255, 255, 191);
   private final static Color EXPANDED_COLOR = new Color(145, 191, 219);
   private final static Color BORDER_COLOR = Color.BLACK;
-  private final static Color ANCHOR_COLOR = Color.GRAY;
-  private final static DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.75,1.25);
-  private final static double ANCHOR_DOT_RADIUS = .05;
+  private final static DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.75, 1.25);
 
   private final Color contractedColor;
   private final Color restColor;
   private final Color expandedColor;
   private final Color borderColor;
-  private final Color anchorColor;
   private final DoubleRange areaRatioRange;
 
   public SoftBodyDrawer(
@@ -54,7 +51,6 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
       Color restColor,
       Color expandedColor,
       Color borderColor,
-      Color anchorColor,
       DoubleRange areaRatioRange
   ) {
     super(SoftBody.class);
@@ -62,12 +58,11 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
     this.restColor = restColor;
     this.expandedColor = expandedColor;
     this.borderColor = borderColor;
-    this.anchorColor = anchorColor;
     this.areaRatioRange = areaRatioRange;
   }
 
   public SoftBodyDrawer() {
-    this(CONTRACTED_COLOR, REST_COLOR, EXPANDED_COLOR, BORDER_COLOR, ANCHOR_COLOR, AREA_RATIO_RANGE);
+    this(CONTRACTED_COLOR, REST_COLOR, EXPANDED_COLOR, BORDER_COLOR, AREA_RATIO_RANGE);
   }
 
   @Override
@@ -90,25 +85,6 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
     Point center = poly.center();
     Point firstSideMeanPoint = Point.average(poly.vertexes()[0], poly.vertexes()[1]);
     g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
-    //anchors
-    if (body instanceof Anchorable anchorable && anchorColor != null) {
-      g.setColor(anchorColor);
-      for (Anchor anchor : anchorable.anchors()) {
-        g.fill(new Ellipse2D.Double(
-            anchor.point().x() - ANCHOR_DOT_RADIUS,
-            anchor.point().y() - ANCHOR_DOT_RADIUS,
-            ANCHOR_DOT_RADIUS * 2d,
-            ANCHOR_DOT_RADIUS * 2d
-        ));
-        for (Anchor dstAnchor : anchor.attachedAnchors()) {
-          Point midPoint = Point.average(anchor.point(), dstAnchor.point());
-          g.draw(new Line2D.Double(
-              anchor.point().x(), anchor.point().y(),
-              midPoint.x(), midPoint.y()
-          ));
-        }
-      }
-    }
     return true;
   }
 }

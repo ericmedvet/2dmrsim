@@ -27,4 +27,13 @@ import java.util.List;
  */
 public interface AgentDrawer {
   boolean draw(double t, Agent agent, List<ActionOutcome<?, ?>> actionOutcomes, int index, Graphics2D g);
+
+  default AgentDrawer andThen(AgentDrawer otherDrawer) {
+    AgentDrawer thisDrawer = this;
+    return (t, agent, actionOutcomes, index, g) -> {
+      boolean firstDrawn = thisDrawer.draw(t, agent, actionOutcomes, index, g);
+      boolean otherDrawn = otherDrawer.draw(t, agent, actionOutcomes, index, g);
+      return firstDrawn || otherDrawn;
+    };
+  }
 }

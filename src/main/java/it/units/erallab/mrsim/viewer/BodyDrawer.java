@@ -25,4 +25,13 @@ import java.awt.*;
  */
 public interface BodyDrawer {
   boolean draw(double t, Body body, int index, Graphics2D g);
+
+  default BodyDrawer andThen(BodyDrawer otherDrawer) {
+    BodyDrawer thisDrawer = this;
+    return (t, body, index, g) -> {
+      boolean firstDrawn = thisDrawer.draw(t, body, index, g);
+      boolean otherDrawn = otherDrawer.draw(t, body, index, g);
+      return firstDrawn || otherDrawn;
+    };
+  }
 }
