@@ -42,7 +42,7 @@ public abstract class AbstractEngine implements Engine {
 
   protected final AtomicDouble t;
   protected final List<Body> bodies;
-  protected final List<Pair<Agent, List<ActionOutcome<?,?>>>> agentPairs;
+  protected final List<Pair<Agent, List<ActionOutcome<?, ?>>>> agentPairs;
   private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
   private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
 
@@ -74,11 +74,15 @@ public abstract class AbstractEngine implements Engine {
     Instant tickStartingInstant = Instant.now();
     nOfTicks.incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
-      List<ActionOutcome<?,?>> outcomes = new ArrayList<>();
+      List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
       for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
-        outcomes.add(new ActionOutcome<>(action, (Optional) perform(action, agentPairs.get(i).first())));
+        outcomes.add(new ActionOutcome<>(
+            agentPairs.get(i).first(),
+            action,
+            (Optional) perform(action, agentPairs.get(i).first())
+        ));
       }
-      Pair<Agent, List<ActionOutcome<?,?>>> pair = new Pair<>(
+      Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(
           agentPairs.get(i).first(),
           outcomes
       );
