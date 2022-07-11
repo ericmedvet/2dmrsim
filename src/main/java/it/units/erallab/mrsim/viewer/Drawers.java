@@ -16,16 +16,14 @@
 
 package it.units.erallab.mrsim.viewer;
 
-import it.units.erallab.mrsim.viewer.drawers.AgentsDrawer;
-import it.units.erallab.mrsim.viewer.drawers.BodiesDrawer;
+import it.units.erallab.mrsim.core.Snapshot;
+import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.AnchorableBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.SoftBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.body.UnmovableBodyDrawer;
 import it.units.erallab.mrsim.viewer.framers.AllAgentsFramer;
-import it.units.erallab.mrsim.viewer.framers.AllBodiesFramer;
-import it.units.erallab.mrsim.viewer.framers.StaticFramer;
 
 import java.util.List;
 
@@ -53,13 +51,15 @@ public class Drawers {
     return Drawer.transform(
         new AllAgentsFramer(2.5d),
         Drawer.of(
-            new BodiesDrawer(List.of(
-                new UnmovableBodyDrawer(),
-                new RigidBodyDrawer(),
-                new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
-            )),
-            new AgentsDrawer(List.of(
-            ))
+            new ComponentsDrawer(
+                List.of(
+                    new UnmovableBodyDrawer(),
+                    new RigidBodyDrawer(),
+                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
+                ),
+                Snapshot::bodies
+            )
+            //add agent and action drawers
         )
     );
   }

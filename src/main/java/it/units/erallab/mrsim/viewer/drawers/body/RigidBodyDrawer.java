@@ -25,11 +25,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class RigidBodyDrawer extends TypeBodyDrawer<RigidBody> {
+public class RigidBodyDrawer extends AbstractComponentDrawer<RigidBody> {
 
   private final static Color FILL_COLOR = Color.GRAY;
   private final static Color STROKE_COLOR = Color.BLACK;
@@ -48,7 +49,7 @@ public class RigidBodyDrawer extends TypeBodyDrawer<RigidBody> {
   }
 
   @Override
-  protected boolean innerDraw(double t, RigidBody body, int index, Graphics2D g) {
+  protected boolean innerDraw(double t, RigidBody body, Graphics2D g) {
     Poly poly = body.poly();
     Path2D path = DrawingUtils.toPath(poly,true);
     g.setColor(fillColor);

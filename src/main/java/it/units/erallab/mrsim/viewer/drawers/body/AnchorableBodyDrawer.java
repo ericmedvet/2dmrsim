@@ -18,18 +18,17 @@ package it.units.erallab.mrsim.viewer.drawers.body;
 
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
-import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.viewer.BodyDrawer;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/10 for 2dmrsim
  */
-public class AnchorableBodyDrawer implements BodyDrawer {
+public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
 
   private final static Color ANCHOR_COLOR = Color.GRAY;
   private final static double ANCHOR_DOT_RADIUS = .05;
@@ -37,6 +36,7 @@ public class AnchorableBodyDrawer implements BodyDrawer {
   private final Color anchorColor;
 
   public AnchorableBodyDrawer(Color anchorColor) {
+    super(Anchorable.class);
     this.anchorColor = anchorColor;
   }
 
@@ -45,25 +45,24 @@ public class AnchorableBodyDrawer implements BodyDrawer {
   }
 
   @Override
-  public boolean draw(double t, Body body, int index, Graphics2D g) {
-    if (body instanceof Anchorable anchorable && anchorColor != null) {
-      g.setColor(anchorColor);
-      for (Anchor anchor : anchorable.anchors()) {
-        g.fill(new Ellipse2D.Double(
-            anchor.point().x() - ANCHOR_DOT_RADIUS,
-            anchor.point().y() - ANCHOR_DOT_RADIUS,
-            ANCHOR_DOT_RADIUS * 2d,
-            ANCHOR_DOT_RADIUS * 2d
+  protected boolean innerDraw(double t, Anchorable anchorable, Graphics2D g) {
+    g.setColor(anchorColor);
+    for (Anchor anchor : anchorable.anchors()) {
+      g.fill(new Ellipse2D.Double(
+          anchor.point().x() - ANCHOR_DOT_RADIUS,
+          anchor.point().y() - ANCHOR_DOT_RADIUS,
+          ANCHOR_DOT_RADIUS * 2d,
+          ANCHOR_DOT_RADIUS * 2d
+      ));
+      for (Anchor dstAnchor : anchor.attachedAnchors()) {
+        it.units.erallab.mrsim.core.geometry.Point midPoint = Point.average(anchor.point(), dstAnchor.point());
+        g.draw(new Line2D.Double(
+            anchor.point().x(), anchor.point().y(),
+            midPoint.x(), midPoint.y()
         ));
-        for (Anchor dstAnchor : anchor.attachedAnchors()) {
-          it.units.erallab.mrsim.core.geometry.Point midPoint = Point.average(anchor.point(), dstAnchor.point());
-          g.draw(new Line2D.Double(
-              anchor.point().x(), anchor.point().y(),
-              midPoint.x(), midPoint.y()
-          ));
-        }
       }
     }
-    return false;
+    return !anchorable.anchors().isEmpty();
   }
+
 }

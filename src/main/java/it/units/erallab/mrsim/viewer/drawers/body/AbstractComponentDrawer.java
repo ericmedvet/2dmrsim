@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.viewer;
+package it.units.erallab.mrsim.viewer.drawers.body;
 
-import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.viewer.ComponentDrawer;
 
-import java.awt.Graphics2D;
-import java.util.List;
+import java.awt.*;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public interface AgentDrawer {
-  boolean draw(double t, Agent agent, List<ActionOutcome<?, ?>> actionOutcomes, int index, Graphics2D g);
+public abstract class AbstractComponentDrawer<K> implements ComponentDrawer {
+  private final Class<K> bodyClass;
 
-  default AgentDrawer andThen(AgentDrawer otherDrawer) {
-    AgentDrawer thisDrawer = this;
-    return (t, agent, actionOutcomes, index, g) -> {
-      boolean firstDrawn = thisDrawer.draw(t, agent, actionOutcomes, index, g);
-      boolean otherDrawn = otherDrawer.draw(t, agent, actionOutcomes, index, g);
-      return firstDrawn || otherDrawn;
-    };
+  public AbstractComponentDrawer(Class<K> bodyClass) {
+    this.bodyClass = bodyClass;
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean draw(double t, Object o, Graphics2D g) {
+    if (bodyClass.isAssignableFrom(o.getClass())) {
+      return innerDraw(t, (K) o, g);
+    }
+    return false;
+  }
+
+  protected abstract boolean innerDraw(double t, K k, Graphics2D g);
 }

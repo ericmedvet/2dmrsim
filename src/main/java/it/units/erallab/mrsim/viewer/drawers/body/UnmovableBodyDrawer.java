@@ -22,11 +22,12 @@ import it.units.erallab.mrsim.viewer.DrawingUtils;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class UnmovableBodyDrawer extends TypeBodyDrawer<UnmovableBody> {
+public class UnmovableBodyDrawer extends AbstractComponentDrawer<UnmovableBody> {
 
   private final static Color TEXTURE_COLOR = Color.GRAY;
   private final static Color STROKE_COLOR = Color.BLACK;
@@ -58,7 +59,7 @@ public class UnmovableBodyDrawer extends TypeBodyDrawer<UnmovableBody> {
   }
 
   @Override
-  protected boolean innerDraw(double t, UnmovableBody body, int index, Graphics2D g) {
+  protected boolean innerDraw(double t, UnmovableBody body, Graphics2D g) {
     Path2D path = DrawingUtils.toPath(body.poly(), true);
     g.setPaint(texturePaint);
     g.fill(path);

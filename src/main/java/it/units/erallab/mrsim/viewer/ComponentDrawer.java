@@ -16,22 +16,23 @@
 
 package it.units.erallab.mrsim.viewer;
 
-import it.units.erallab.mrsim.core.bodies.Body;
-
 import java.awt.*;
+import java.util.List;
 
 /**
- * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public interface BodyDrawer {
-  boolean draw(double t, Body body, int index, Graphics2D g);
+public interface ComponentDrawer {
 
-  default BodyDrawer andThen(BodyDrawer otherDrawer) {
-    BodyDrawer thisDrawer = this;
-    return (t, body, index, g) -> {
-      boolean firstDrawn = thisDrawer.draw(t, body, index, g);
-      boolean otherDrawn = otherDrawer.draw(t, body, index, g);
+  boolean draw(double t, Object o, Graphics2D g);
+
+  default ComponentDrawer andThen(ComponentDrawer otherDrawer) {
+    ComponentDrawer thisDrawer = this;
+    return (t, o, g) -> {
+      boolean firstDrawn = thisDrawer.draw(t, o, g);
+      boolean otherDrawn = otherDrawer.draw(t, o, g);
       return firstDrawn || otherDrawn;
     };
   }
+
 }

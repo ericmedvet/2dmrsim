@@ -16,8 +16,6 @@
 
 package it.units.erallab.mrsim.viewer.drawers.body;
 
-import it.units.erallab.mrsim.core.bodies.Anchor;
-import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.bodies.SoftBody;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -25,14 +23,14 @@ import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.viewer.DrawingUtils;
 
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
+public class SoftBodyDrawer extends AbstractComponentDrawer<SoftBody> {
 
   private final static Color CONTRACTED_COLOR = new Color(252, 141, 89);
   private final static Color REST_COLOR = new Color(255, 255, 191);
@@ -66,7 +64,7 @@ public class SoftBodyDrawer extends TypeBodyDrawer<SoftBody> {
   }
 
   @Override
-  protected boolean innerDraw(double t, SoftBody body, int index, Graphics2D g) {
+  protected boolean innerDraw(double t, SoftBody body, Graphics2D g) {
     Poly poly = body.poly();
     Path2D path = DrawingUtils.toPath(poly, true);
     g.setColor(DrawingUtils.linear(

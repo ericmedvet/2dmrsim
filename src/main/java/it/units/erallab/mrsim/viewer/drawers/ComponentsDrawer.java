@@ -16,42 +16,42 @@
 
 package it.units.erallab.mrsim.viewer.drawers;
 
-import it.units.erallab.mrsim.core.Action;
-import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.util.Pair;
-import it.units.erallab.mrsim.viewer.AgentDrawer;
-import it.units.erallab.mrsim.viewer.BodyDrawer;
+import it.units.erallab.mrsim.viewer.ComponentDrawer;
 import it.units.erallab.mrsim.viewer.Drawer;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
-public class AgentsDrawer implements Drawer {
-  private final List<AgentDrawer> agentDrawers;
+public class ComponentsDrawer implements Drawer {
+  private final List<ComponentDrawer> componentDrawers;
+  private final Function<Snapshot, Collection<?>> extractor;
 
-  public AgentsDrawer(List<AgentDrawer> agentDrawers) {
-    this.agentDrawers = agentDrawers;
+  public ComponentsDrawer(List<ComponentDrawer> componentDrawers, Function<Snapshot, Collection<?>> extractor) {
+    this.componentDrawers = componentDrawers;
+    this.extractor = extractor;
   }
 
   @Override
   public boolean draw(Snapshot s, Graphics2D g) {
-    int c = 0;
     boolean drawn = false;
-    for (Pair<Agent, List<ActionOutcome<?, ?>>> pair : s.agentPairs()) {
-      int i = c;
-      for (AgentDrawer agentDrawer : agentDrawers) {
-        if (agentDrawer.draw(s.t(), pair.first(), pair.second(), i, g)) {
+    Collection<?> components = extractor.apply(s);
+    for (Object component : components) {
+      for (ComponentDrawer componentDrawer : componentDrawers) {
+        if (componentDrawer.draw(
+            s.t(),
+            component,
+            g
+        )) {
           drawn = true;
           break;
         }
       }
-      c = c + 1;
     }
     return drawn;
   }
