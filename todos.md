@@ -1,6 +1,5 @@
 # Todos
 
-- attach actions should return anchor pairs, not just target anchors
 - anchor should be of (at least) two types: hard and soft
 - drawer with memory (upon snapshot at t, return a consumer of (delta_t, graphics2D))
 - sensors
