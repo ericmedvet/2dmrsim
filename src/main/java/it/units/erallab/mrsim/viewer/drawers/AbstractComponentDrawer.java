@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.viewer.drawers.body;
+package it.units.erallab.mrsim.viewer.drawers;
 
 import it.units.erallab.mrsim.viewer.ComponentDrawer;
 

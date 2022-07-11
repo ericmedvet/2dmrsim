@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.viewer.drawers.body;
+package it.units.erallab.mrsim.viewer.drawers.bodies;
 
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.viewer.drawers.AbstractComponentDrawer;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/10 for 2dmrsim

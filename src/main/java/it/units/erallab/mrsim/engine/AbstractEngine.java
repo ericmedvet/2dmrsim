@@ -189,7 +189,7 @@ public abstract class AbstractEngine implements Engine {
     return voxel;
   }
 
-  protected Collection<Anchor> attachClosestAnchors(AttachClosestAnchors action, Agent agent) {
+  protected Collection<Anchor.Link> attachClosestAnchors(AttachClosestAnchors action, Agent agent) {
     Point targetCenter = Point.average(action.targetAnchorable()
         .anchors()
         .stream()
@@ -202,7 +202,7 @@ public abstract class AbstractEngine implements Engine {
         .toList();
   }
 
-  protected Collection<Anchor> detachAllAnchorsFromAnchorable(
+  protected Collection<Anchor.Link> detachAllAnchorsFromAnchorable(
       DetachAllAnchorsFromAnchorable action,
       Agent agent
   ) {
@@ -212,7 +212,7 @@ public abstract class AbstractEngine implements Engine {
         .toList();
   }
 
-  protected Collection<Anchor> detachAllAnchors(DetachAllAnchors action, Agent agent) {
+  protected Collection<Anchor.Link> detachAllAnchors(DetachAllAnchors action, Agent agent) {
     Set<Anchorable> anchorables = action.anchorable().anchors().stream()
         .map(a -> a.attachedAnchors().stream().map(Anchor::anchorable).collect(Collectors.toSet()))
         .flatMap(Collection::stream)

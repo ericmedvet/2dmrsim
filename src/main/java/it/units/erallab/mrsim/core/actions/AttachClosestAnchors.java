@@ -29,5 +29,5 @@ public record AttachClosestAnchors(
     int nOfAnchors,
     Anchorable sourceAnchorable,
     Anchorable targetAnchorable
-) implements Action<Collection<Anchor>> {
+) implements Action<Collection<Anchor.Link>> {
 }

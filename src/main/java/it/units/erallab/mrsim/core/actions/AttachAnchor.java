@@ -28,5 +28,5 @@ import java.util.Collection;
 public record AttachAnchor(
     Anchor anchor,
     Anchorable anchorable
-) implements Action<Anchor> {
+) implements Action<Anchor.Link> {
 }

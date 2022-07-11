@@ -129,7 +129,7 @@ public class Dyn4JEngine extends AbstractEngine {
     return voxel;
   }
 
-  private Anchor attachAnchor(AttachAnchor action, Agent agent) {
+  private Anchor.Link attachAnchor(AttachAnchor action, Agent agent) {
     if (action.anchor() instanceof BodyAnchor src) {
       BodyAnchor dst = action.anchorable().anchors().stream()
           .filter(a -> a instanceof BodyAnchor)
@@ -150,13 +150,13 @@ public class Dyn4JEngine extends AbstractEngine {
         src.getJointMap().put(dst, joint);
         dst.getJointMap().put(src, joint);
       }
-      return dst;
+      return new Anchor.Link(src, dst);
     }
     return null;
   }
 
-  private Collection<Anchor> detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
-    Collection<Anchor> removedAnchors = new ArrayList<>();
+  private Collection<Anchor.Link> detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
+    Collection<Anchor.Link> removedAnchors = new ArrayList<>();
     if (action.anchor() instanceof BodyAnchor src) {
       for (Anchor dstAnchor : action.anchorable().anchors()) {
         if (dstAnchor instanceof BodyAnchor dstBodyAnchor) {
@@ -165,7 +165,7 @@ public class Dyn4JEngine extends AbstractEngine {
             world.removeJoint(joint);
             src.getJointMap().remove(dstBodyAnchor);
             dstBodyAnchor.getJointMap().remove(src);
-            removedAnchors.add(dstBodyAnchor);
+            removedAnchors.add(new Anchor.Link(src, dstBodyAnchor));
           }
         }
       }

@@ -19,10 +19,10 @@ package it.units.erallab.mrsim.viewer;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
-import it.units.erallab.mrsim.viewer.drawers.body.AnchorableBodyDrawer;
-import it.units.erallab.mrsim.viewer.drawers.body.RigidBodyDrawer;
-import it.units.erallab.mrsim.viewer.drawers.body.SoftBodyDrawer;
-import it.units.erallab.mrsim.viewer.drawers.body.UnmovableBodyDrawer;
+import it.units.erallab.mrsim.viewer.drawers.bodies.AnchorableBodyDrawer;
+import it.units.erallab.mrsim.viewer.drawers.bodies.RigidBodyDrawer;
+import it.units.erallab.mrsim.viewer.drawers.bodies.SoftBodyDrawer;
+import it.units.erallab.mrsim.viewer.drawers.bodies.UnmovableBodyDrawer;
 import it.units.erallab.mrsim.viewer.framers.AllAgentsFramer;
 
 import java.util.List;

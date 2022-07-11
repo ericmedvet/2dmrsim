@@ -24,7 +24,11 @@ import java.util.Collection;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Anchor {
+
+  record Link(Anchor source, Anchor destination) {}
+
   Point point();
+
   Anchorable anchorable();
 
   Collection<Anchor> attachedAnchors();
