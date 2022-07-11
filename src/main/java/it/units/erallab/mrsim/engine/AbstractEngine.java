@@ -52,6 +52,7 @@ public abstract class AbstractEngine implements Engine {
   private final AtomicInteger nOfActions;
   private final AtomicInteger nOfUnsupportedActions;
   private final AtomicInteger nOfIllegalActions;
+  private final List<ActionOutcome<?, ?>> lastTickPerformedActions;
 
 
   public AbstractEngine() {
@@ -65,22 +66,19 @@ public abstract class AbstractEngine implements Engine {
     nOfActions = new AtomicInteger(0);
     nOfUnsupportedActions = new AtomicInteger(0);
     nOfIllegalActions = new AtomicInteger(0);
+    lastTickPerformedActions = new ArrayList<>();
     registerActionSolvers();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public Snapshot tick() {
+    lastTickPerformedActions.clear();
     Instant tickStartingInstant = Instant.now();
     nOfTicks.incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
       List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
       for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
-        outcomes.add(new ActionOutcome<>(
-            agentPairs.get(i).first(),
-            action,
-            (Optional) perform(action, agentPairs.get(i).first())
-        ));
+        outcomes.add(perform(action, agentPairs.get(i).first()));
       }
       Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(
           agentPairs.get(i).first(),
@@ -93,8 +91,9 @@ public abstract class AbstractEngine implements Engine {
     engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
     return new EngineSnapshot(
         t.get(),
-        List.copyOf(agentPairs),
         List.copyOf(getBodies()),
+        agentPairs.stream().map(Pair::first).toList(),
+        List.copyOf(lastTickPerformedActions),
         engineT.get(),
         Duration.between(startingInstant, Instant.now()).toMillis() / 1000d,
         nOfTicks.get(),
@@ -106,25 +105,25 @@ public abstract class AbstractEngine implements Engine {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <A extends Action<O>, O> Optional<O> perform(A action, Agent agent) {
+  public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
     nOfActions.incrementAndGet();
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
     if (actionSolver == null) {
       L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
       nOfUnsupportedActions.incrementAndGet();
-      return Optional.empty();
+      return new ActionOutcome<>(agent, action, Optional.empty());
     }
     try {
       O outcome = actionSolver.solve(action, agent);
-      return outcome == null ? Optional.empty() : Optional.of(outcome);
+      return new ActionOutcome<>(agent, action, outcome == null ? Optional.empty() : Optional.of(outcome));
     } catch (ActionException e) {
       L.finer(String.format("Ignoring illegal action: %s", e));
       nOfIllegalActions.incrementAndGet();
-      return Optional.empty();
+      return new ActionOutcome<>(agent, action, Optional.empty());
     } catch (RuntimeException e) {
       L.warning(String.format("Ignoring action throwing exception: %s", e));
       nOfIllegalActions.incrementAndGet();
-      return Optional.empty();
+      return new ActionOutcome<>(agent, action, Optional.empty());
     }
   }
 
@@ -172,7 +171,7 @@ public abstract class AbstractEngine implements Engine {
     RigidBody rigidBody = perform(
         new CreateRigidBody(action.poly(), action.mass()),
         agent
-    ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
+    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
     perform(new TranslateBody(rigidBody, action.translation()), agent);
     return rigidBody;
   }
@@ -184,7 +183,7 @@ public abstract class AbstractEngine implements Engine {
     Voxel voxel = perform(
         new CreateVoxel(action.sideLength(), action.mass(), action.material()),
         agent
-    ).orElseThrow(() -> new ActionException(action, "Undoable creation"));
+    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
     perform(new TranslateBody(voxel, action.translation()), agent);
     return voxel;
   }
@@ -198,7 +197,7 @@ public abstract class AbstractEngine implements Engine {
     return action.sourceAnchorable().anchors().stream()
         .sorted(Comparator.comparingDouble(a -> a.point().distance(targetCenter)))
         .limit(action.nOfAnchors())
-        .map(a -> perform(new AttachAnchor(a, action.targetAnchorable()), agent).orElseThrow())
+        .map(a -> perform(new AttachAnchor(a, action.targetAnchorable()), agent).outcome().orElseThrow())
         .toList();
   }
 
@@ -207,7 +206,7 @@ public abstract class AbstractEngine implements Engine {
       Agent agent
   ) {
     return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).orElseThrow())
+        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).outcome().orElseThrow())
         .flatMap(Collection::stream)
         .toList();
   }
@@ -218,7 +217,8 @@ public abstract class AbstractEngine implements Engine {
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
     return anchorables.stream()
-        .map(target -> perform(new DetachAllAnchorsFromAnchorable(action.anchorable(), target), agent).orElseThrow())
+        .map(target -> perform(new DetachAllAnchorsFromAnchorable(action.anchorable(), target), agent).outcome()
+            .orElseThrow())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
   }
@@ -226,7 +226,7 @@ public abstract class AbstractEngine implements Engine {
   protected EmbodiedAgent addAndTranslateAgent(AddAndTranslateAgent action, Agent agent) throws ActionException {
     EmbodiedAgent embodiedAgent = (EmbodiedAgent) perform(
         new AddAgent(action.agent()), agent)
-        .orElseThrow(() -> new ActionException(action, "Undoable addition")
+        .outcome().orElseThrow(() -> new ActionException(action, "Undoable addition")
         );
     perform(new TranslateAgent(embodiedAgent, action.translation()), agent);
     return embodiedAgent;

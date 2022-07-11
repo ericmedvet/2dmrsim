@@ -31,9 +31,9 @@ public class AllAgentsFramer extends AbstractFramer {
 
   @Override
   protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
-    return snapshot.agentPairs().stream()
-        .filter(p -> p.first() instanceof EmbodiedAgent)
-        .map(a -> ((EmbodiedAgent) a.first()).bodyParts().stream()
+    return snapshot.agents().stream()
+        .filter(a -> a instanceof EmbodiedAgent)
+        .map(a -> ((EmbodiedAgent) a).bodyParts().stream()
             .map(b -> b.poly().boundingBox())
             .reduce(BoundingBox::enclosing)
             .orElse(DEFAULT_BOUNDING_BOX)

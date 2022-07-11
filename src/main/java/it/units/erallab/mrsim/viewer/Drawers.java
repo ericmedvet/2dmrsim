@@ -19,6 +19,7 @@ package it.units.erallab.mrsim.viewer;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
+import it.units.erallab.mrsim.viewer.drawers.actions.AttachAnchor;
 import it.units.erallab.mrsim.viewer.drawers.bodies.AnchorableBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.SoftBodyDrawer;
@@ -56,10 +57,13 @@ public class Drawers {
                     new UnmovableBodyDrawer(),
                     new RigidBodyDrawer(),
                     new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
-                ),
-                Snapshot::bodies
+                ), Snapshot::bodies
+            ),
+            new ComponentsDrawer(
+                List.of(
+                    new AttachAnchor()
+                ), Snapshot::actionOutcomes
             )
-            //add agent and action drawers
         )
     );
   }

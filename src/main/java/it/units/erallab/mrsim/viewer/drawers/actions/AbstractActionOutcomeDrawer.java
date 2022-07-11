@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core;
-
-import java.util.Optional;
+package it.units.erallab.mrsim.viewer.drawers.actions;
 
 /**
- * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-@FunctionalInterface
-public interface ActionPerformer {
-  <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent);
 
-  default <A extends Action<O>, O> ActionOutcome<A, O> perform(A action) {
-    return perform(action, null);
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionOutcome;
+import it.units.erallab.mrsim.viewer.drawers.AbstractLastingComponentDrawer;
+
+import java.awt.*;
+import java.util.function.BiPredicate;
+
+public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O>  extends AbstractLastingComponentDrawer<ActionOutcome<A,O>> {
+  public AbstractActionOutcomeDrawer(Class<ActionOutcome<A,O>> bodyClass) {
+    super(bodyClass);
   }
 
 }

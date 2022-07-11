@@ -67,7 +67,7 @@ public abstract class AbstractGridVSR implements it.units.erallab.mrsim.core.Emb
             voxelMass,
             e.value(),
             new Point(e.key().x() * voxelSideLength, e.key().y() * voxelSideLength)
-        ), this).orElseThrow()));
+        ), this).outcome().orElseThrow()));
     //attach
     for (Grid.Key key : voxelGrid.keys()) {
       Voxel srcVoxel = voxelGrid.get(key);

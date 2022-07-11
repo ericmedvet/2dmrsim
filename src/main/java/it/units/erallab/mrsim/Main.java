@@ -51,13 +51,13 @@ public class Main {
         shape.map(b -> List.of()),
         (t, iG) -> Grid.create(shape.w(), shape.h(), (x, y) -> Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w()))
     );
-    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).orElseThrow();
-    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).orElseThrow();
-    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).orElseThrow();
+    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).outcome().orElseThrow();
+    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).outcome().orElseThrow();
+    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).outcome().orElseThrow();
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
-    engine.perform(new AttachClosestAnchors(2, v1, v2)).orElseThrow();
-    engine.perform(new AttachClosestAnchors(2, v2, v3)).orElseThrow();
-    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("hilly-0.25-2-0",100,4,1,5)));
+    engine.perform(new AttachClosestAnchors(2, v1, v2)).outcome().orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v2, v3)).outcome().orElseThrow();
+    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("hilly-0.25-2-0", 100, 4, 1, 5)));
 
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
