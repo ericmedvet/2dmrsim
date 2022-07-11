@@ -27,9 +27,24 @@ import it.units.erallab.mrsim.viewer.drawers.AbstractLastingComponentDrawer;
 import java.awt.*;
 import java.util.function.BiPredicate;
 
-public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O>  extends AbstractLastingComponentDrawer<ActionOutcome<A,O>> {
-  public AbstractActionOutcomeDrawer(Class<ActionOutcome<A,O>> bodyClass) {
-    super(bodyClass);
+public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O> extends AbstractLastingComponentDrawer {
+
+  private final Class<A> actionClass;
+
+  public AbstractActionOutcomeDrawer(Class<A> actionClass) {
+    this.actionClass = actionClass;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  protected BiPredicate<Double, Graphics2D> buildTask(double t, Object o) {
+    if (o instanceof ActionOutcome<?, ?> actionOutcome) {
+      if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
+        return innerBuildTask(t, (ActionOutcome<A, O>) actionOutcome);
+      }
+    }
+    return null;
+  }
+
+  protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(double t, ActionOutcome<A, O> o);
 }

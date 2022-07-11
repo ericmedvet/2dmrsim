@@ -77,7 +77,7 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    RealtimeViewer viewer = new RealtimeViewer(Drawers.basic());
+    RealtimeViewer viewer = new RealtimeViewer(30, Drawers.basic());
     Consumer<Snapshot> consumer = viewer;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
@@ -96,7 +96,7 @@ public class Main {
                 .orElse(10) + 2d)
         ));
       }
-      if (engine.t() > 10 && engine.t() < 11) {
+      if (engine.t() > 4 && engine.t() < 5) {
         engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));
       }
       for (Body body : snapshot.bodies()) {

@@ -17,6 +17,7 @@
 package it.units.erallab.mrsim.viewer.drawers;
 
 import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.viewer.ComponentDrawer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -26,19 +27,20 @@ import java.util.function.BiPredicate;
 /**
  * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public abstract class AbstractLastingComponentDrawer<K> extends AbstractComponentDrawer<K> {
+public abstract class AbstractLastingComponentDrawer implements ComponentDrawer {
 
   private final List<Pair<BiPredicate<Double, Graphics2D>, Double>> tasks;
 
-  public AbstractLastingComponentDrawer(
-      Class<K> bodyClass
-  ) {
-    super(bodyClass);
+  public AbstractLastingComponentDrawer() {
     this.tasks = new ArrayList<>();
   }
 
   @Override
-  protected boolean innerDraw(double t, K k, Graphics2D g) {
+  public boolean draw(double t, Object o, Graphics2D g) {
+    BiPredicate<Double, Graphics2D> newTask = buildTask(t, o);
+    if (newTask != null) {
+      tasks.add(new Pair<>(newTask, t));
+    }
     List<Pair<BiPredicate<Double, Graphics2D>, Double>> toRemoveTasks = new ArrayList<>();
     for (Pair<BiPredicate<Double, Graphics2D>, Double> task : tasks) {
       if (task.first().test(t - task.second(), g)) {
@@ -47,8 +49,8 @@ public abstract class AbstractLastingComponentDrawer<K> extends AbstractComponen
     }
     boolean drawn = !tasks.isEmpty();
     tasks.removeAll(toRemoveTasks);
-    return tasks.isEmpty();
+    return drawn;
   }
 
-  protected abstract BiPredicate<Double, Graphics2D> buildTask(double t, K k);
+  protected abstract BiPredicate<Double, Graphics2D> buildTask(double t, Object o);
 }

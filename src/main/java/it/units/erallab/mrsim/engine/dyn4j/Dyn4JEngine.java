@@ -68,7 +68,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(TranslateBody.class, this::translateBody);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
-    registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
+    registerActionSolver(DetachAnchor.class, this::detachAnchor);
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
     super.registerActionSolvers();
@@ -155,7 +155,7 @@ public class Dyn4JEngine extends AbstractEngine {
     return null;
   }
 
-  private Collection<Anchor.Link> detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
+  private Collection<Anchor.Link> detachAnchor(DetachAnchor action, Agent agent) {
     Collection<Anchor.Link> removedAnchors = new ArrayList<>();
     if (action.anchor() instanceof BodyAnchor src) {
       for (Anchor dstAnchor : action.anchorable().anchors()) {

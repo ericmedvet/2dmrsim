@@ -37,7 +37,8 @@ public class InfoDrawer implements Drawer {
     ENGINE_TPS(s -> String.format("eTPS=%5.1f", s.nOfTicks() / s.engineT())),
     WALL_TPS(s -> String.format("wTPS=%5.1f", s.nOfTicks() / s.wallT())),
     N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())),
-    N_OF_AGENTS(s -> String.format("#agents=%d", s.agents().size()));
+    N_OF_AGENTS(s -> String.format("#agents=%d", s.agents().size())),
+    N_OF_ACTIONS(s -> String.format("#actions=%d", s.actionOutcomes().size()));
     private final Function<EngineSnapshot, String> function;
 
     EngineInfo(Function<EngineSnapshot, String> function) {

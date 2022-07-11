@@ -72,7 +72,6 @@ public abstract class AbstractEngine implements Engine {
 
   @Override
   public Snapshot tick() {
-    lastTickPerformedActions.clear();
     Instant tickStartingInstant = Instant.now();
     nOfTicks.incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
@@ -80,16 +79,13 @@ public abstract class AbstractEngine implements Engine {
       for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
         outcomes.add(perform(action, agentPairs.get(i).first()));
       }
-      Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(
-          agentPairs.get(i).first(),
-          outcomes
-      );
+      Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(agentPairs.get(i).first(), outcomes);
       agentPairs.set(i, pair);
     }
     double newT = innerTick();
     t.set(newT);
     engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
-    return new EngineSnapshot(
+    EngineSnapshot snapshot =  new EngineSnapshot(
         t.get(),
         List.copyOf(getBodies()),
         agentPairs.stream().map(Pair::first).toList(),
@@ -101,6 +97,8 @@ public abstract class AbstractEngine implements Engine {
         nOfUnsupportedActions.get(),
         nOfIllegalActions.get()
     );
+    lastTickPerformedActions.clear();
+    return snapshot;
   }
 
   @SuppressWarnings("unchecked")
@@ -108,23 +106,27 @@ public abstract class AbstractEngine implements Engine {
   public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
     nOfActions.incrementAndGet();
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
+    ActionOutcome<A, O> outcome;
     if (actionSolver == null) {
       L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
       nOfUnsupportedActions.incrementAndGet();
-      return new ActionOutcome<>(agent, action, Optional.empty());
+      outcome = new ActionOutcome<>(agent, action, Optional.empty());
+    } else {
+      try {
+        O o = actionSolver.solve(action, agent);
+        outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
+      } catch (ActionException e) {
+        L.finer(String.format("Ignoring illegal action: %s", e));
+        nOfIllegalActions.incrementAndGet();
+        outcome = new ActionOutcome<>(agent, action, Optional.empty());
+      } catch (RuntimeException e) {
+        L.warning(String.format("Ignoring action throwing exception: %s", e));
+        nOfIllegalActions.incrementAndGet();
+        outcome = new ActionOutcome<>(agent, action, Optional.empty());
+      }
     }
-    try {
-      O outcome = actionSolver.solve(action, agent);
-      return new ActionOutcome<>(agent, action, outcome == null ? Optional.empty() : Optional.of(outcome));
-    } catch (ActionException e) {
-      L.finer(String.format("Ignoring illegal action: %s", e));
-      nOfIllegalActions.incrementAndGet();
-      return new ActionOutcome<>(agent, action, Optional.empty());
-    } catch (RuntimeException e) {
-      L.warning(String.format("Ignoring action throwing exception: %s", e));
-      nOfIllegalActions.incrementAndGet();
-      return new ActionOutcome<>(agent, action, Optional.empty());
-    }
+    lastTickPerformedActions.add(outcome);
+    return outcome;
   }
 
   protected abstract double innerTick();
@@ -206,7 +208,7 @@ public abstract class AbstractEngine implements Engine {
       Agent agent
   ) {
     return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).outcome().orElseThrow())
+        .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).outcome().orElseThrow())
         .flatMap(Collection::stream)
         .toList();
   }
