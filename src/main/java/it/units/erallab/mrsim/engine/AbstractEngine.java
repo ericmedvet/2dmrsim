@@ -86,7 +86,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     double newT = innerTick();
     t.set(newT);
     engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
-    EngineSnapshot snapshot =  new EngineSnapshot(
+    EngineSnapshot snapshot = new EngineSnapshot(
         t.get(),
         List.copyOf(getBodies()),
         agentPairs.stream().map(Pair::first).toList(),
@@ -158,6 +158,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
   protected void registerActionSolvers() {
     registerActionSolver(AddAgent.class, this::addAgent);
     registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
+    registerActionSolver(CreateAndTranslateUnmovableBody.class, this::createAndTranslateUnmovableBody);
     registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
     registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
     registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
@@ -186,6 +187,18 @@ public abstract class AbstractEngine implements Engine, Profiled {
     ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
     perform(new TranslateBody(rigidBody, action.translation()), agent);
     return rigidBody;
+  }
+
+  protected UnmovableBody createAndTranslateUnmovableBody(
+      CreateAndTranslateUnmovableBody action,
+      Agent agent
+  ) throws ActionException {
+    UnmovableBody unmovableBody = perform(
+        new CreateUnmovableBody(action.poly()),
+        agent
+    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
+    perform(new TranslateBody(unmovableBody, action.translation()), agent);
+    return unmovableBody;
   }
 
   protected Voxel createAndTranslateVoxel(

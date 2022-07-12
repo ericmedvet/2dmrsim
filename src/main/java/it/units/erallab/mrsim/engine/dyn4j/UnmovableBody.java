@@ -16,8 +16,10 @@
 
 package it.units.erallab.mrsim.engine.dyn4j;
 
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.util.PolyUtils;
+import org.dyn4j.dynamics.AbstractPhysicsBody;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Convex;
@@ -28,6 +30,7 @@ import org.dyn4j.geometry.Vector2;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -40,13 +43,16 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
   private final Poly poly;
   private final List<Body> bodies;
 
+  private final Point initialCenter;
+
   public UnmovableBody(
       Poly poly,
       double friction,
       double restitution
   ) {
     this.poly = poly;
-    bodies = PolyUtils.decompose(poly).stream()
+    Set<Poly> parts = (poly.vertexes().length > 3) ? PolyUtils.decompose(poly) : Set.of(poly);
+    bodies = parts.stream()
         .map(c -> {
           Convex convex = new Polygon(
               Arrays.stream(c.vertexes()).sequential()
@@ -59,11 +65,23 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
           return body;
         })
         .toList();
+    initialCenter = center(bodies);
+  }
+
+  private static Point center(List<Body> bodies) {
+    return Point.average(bodies.stream()
+        .map(AbstractPhysicsBody::getWorldCenter)
+        .map(v -> new Point(v.x, v.y))
+        .toArray(Point[]::new));
   }
 
   @Override
   public Poly poly() {
-    return poly;
+    // assuming it can only be translated, we just check diff wrt initial center
+    Point t = center(bodies).diff(initialCenter);
+    return new Poly(Arrays.stream(poly.vertexes())
+        .map(p -> p.sum(t))
+        .toArray(Point[]::new));
   }
 
   @Override

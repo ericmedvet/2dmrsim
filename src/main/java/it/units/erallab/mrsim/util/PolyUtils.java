@@ -16,12 +16,15 @@
 
 package it.units.erallab.mrsim.util;
 
+import it.units.erallab.mrsim.core.geometry.Path;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.SweepLine;
+import org.dyn4j.geometry.decompose.Triangulator;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
@@ -51,67 +54,67 @@ public class PolyUtils {
     String downhill = "downhill-(?<angle>[0-9]+(\\.[0-9]+)?)";
     String uphill = "uphill-(?<angle>[0-9]+(\\.[0-9]+)?)";
     Map<String, String> params;
-    List<Point> ps = new ArrayList<>();
-    ps.add(new Point(0, 0));
-    ps.add(new Point(0, borderH));
-    ps.add(new Point(borderW, borderH));
-    ps.add(new Point(borderW, 0));
+    Path path = new Path(new Point(0, 0));
+    path = path
+        .moveTo(0, borderH)
+        .moveTo(borderW, 0)
+        .moveTo(0, -borderH);
     //noinspection UnusedAssignment
     if ((params = StringUtils.params(flat, name)) != null) {
-      ps.add(new Point(terrainW + borderW, 0));
+      path = path.moveTo(new Point(terrainW, 0));
     } else if ((params = StringUtils.params(hilly, name)) != null) {
       double h = Double.parseDouble(params.get("h"));
       double w = Double.parseDouble(params.get("w"));
       RandomGenerator random = new Random(Integer.parseInt(params.get("seed")));
-      while (ps.get(ps.size() - 1).x() < terrainW + borderW) {
-        Point last = ps.get(ps.size() - 1);
-        ps.add(new Point(
-            last.x() + Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w),
-            last.y() + random.nextGaussian() * h
-        ));
+      double dW = 0d;
+      while (dW < terrainW) {
+        double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
+        double sH = random.nextGaussian() * h;
+        dW = dW + sW;
+        path = path.moveTo(sW, sH);
       }
     } else if ((params = StringUtils.params(steppy, name)) != null) {
       double h = Double.parseDouble(params.get("h"));
       double w = Double.parseDouble(params.get("w"));
       RandomGenerator random = new Random(Integer.parseInt(params.get("seed")));
-      while (ps.get(ps.size() - 1).x() < terrainW + borderW) {
-        Point last = ps.get(ps.size() - 1);
-        ps.add(new Point(last.x() + Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w), last.y()));
-        last = ps.get(ps.size() - 1);
-        ps.add(new Point(last.x(), last.y() + random.nextGaussian() * h));
+      double dW = 0d;
+      while (dW < terrainW) {
+        double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
+        double sH = random.nextGaussian() * h;
+        dW = dW + sW;
+        path = path
+            .moveTo(sW, 0)
+            .moveTo(0, sH);
       }
     } else if ((params = StringUtils.params(downhill, name)) != null) {
       double angle = Double.parseDouble(params.get("angle"));
-      double dY = terrainW * Math.sin(angle / 180 * Math.PI);
-      ps.add(new Point(terrainW + borderW, -dY));
+      path = path.moveTo(terrainW, -terrainW * Math.sin(angle / 180 * Math.PI));
     } else if ((params = StringUtils.params(uphill, name)) != null) {
       double angle = Double.parseDouble(params.get("angle"));
-      double dY = (TERRAIN_WIDTH - 2 * TERRAIN_BORDER_WIDTH) * Math.sin(angle / 180 * Math.PI);
-      ps.add(new Point(terrainW + borderW, dY));
+      path = path.moveTo(terrainW, terrainW * Math.sin(angle / 180 * Math.PI));
     } else {
       throw new IllegalArgumentException(String.format("Unknown terrain name: %s", name));
     }
-    double maxX = ps.stream().mapToDouble(Point::x).max().orElse(borderW);
-    double minY = ps.stream().mapToDouble(Point::y).min().orElse(borderW);
-    ps.add(new Point(maxX, 0));
-    ps.add(new Point(maxX, borderH));
-    ps.add(new Point(maxX + borderW, borderH));
-    ps.add(new Point(maxX + borderW, minY - terrainH));
-    ps.add(new Point(0, minY - terrainH));
-    //rotate
-    int mid = ps.size() / 2;
-    ps.addAll(ps.subList(0, mid));
-    ps = ps.subList(mid, ps.size() - 1);
-    return new Poly(ps.toArray(Point[]::new));
+    path = path
+        .moveTo(0, borderH)
+        .moveTo(borderW, 0)
+        .moveTo(0, -borderH);
+    double maxX = Arrays.stream(path.points()).mapToDouble(Point::x).max().orElse(borderW);
+    double minY = Arrays.stream(path.points()).mapToDouble(Point::y).min().orElse(borderW);
+    path = path
+        .add(maxX, minY - terrainH)
+        .moveTo(-maxX, 0);
+    return path.toPoly();
   }
 
   public static Set<Poly> decompose(Poly poly) {
-    List<Convex> convexes = new SweepLine().decompose(
+    Triangulator triangulator = new SweepLine();
+    List<Triangle> triangles = triangulator.triangulate(
         Arrays.stream(poly.vertexes()).map(p -> new Vector2(p.x(), p.y())).toArray(Vector2[]::new)
     );
-    return convexes.stream()
+    return triangles.stream()
         .map(c -> new Poly(
-            Arrays.stream(((Polygon) c).getVertices()).map(v -> new Point(v.x, v.y)).toArray(Point[]::new)
+            Arrays.stream(c.getVertices()).map(v -> new Point(v.x, v.y)).toArray(Point[]::new)
         ))
         .collect(Collectors.toSet());
   }

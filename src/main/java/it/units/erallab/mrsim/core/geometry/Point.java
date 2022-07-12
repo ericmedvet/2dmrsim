@@ -62,6 +62,10 @@ public record Point(double x, double y) implements Shape {
     return new Point(x - p.x(), y - p.y());
   }
 
+  public Point sum(Point p) {
+    return new Point(x + p.x(), y + p.y());
+  }
+
   public double direction() {
     return Math.atan2(y, x);
   }

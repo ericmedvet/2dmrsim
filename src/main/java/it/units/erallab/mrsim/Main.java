@@ -23,6 +23,7 @@ import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
+import it.units.erallab.mrsim.core.bodies.UnmovableBody;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -36,7 +37,9 @@ import it.units.erallab.mrsim.viewer.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
+import java.util.random.RandomGenerator;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -45,6 +48,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     Poly ball = Poly.regular(1, 20);
     double ballInterval = 5d;
+    double lastBallT = 0d;
     Engine engine = new Dyn4JEngine();
     Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
     AbstractGridVSR vsr = new NumGridVSR(
@@ -58,11 +62,15 @@ public class Main {
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).outcome().orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).outcome().orElseThrow();
-    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain(
+    Poly terrain = PolyUtils.createTerrain(
         //"hilly-0.25-2-0",
-        "downhill-30",
-        100, 4, 1, 5
-    )));
+        "downhill-10",
+        //"uphill-30",
+        //"steppy-0.25-2-0",
+        //"flat",
+        100, 1, 1, 3
+    );
+    engine.perform(new CreateUnmovableBody(terrain));
     Drawer drawer = Drawers.basic().profiled();
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
@@ -82,30 +90,29 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
+    RandomGenerator rg = new Random();
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Consumer<Snapshot> consumer = viewer;
-    while (engine.t() < 15) {
+    while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
-      if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies()
-          .stream()
-          .filter(b -> b instanceof RigidBody)
-          .count() - 1)) {
+      if (engine.t() > lastBallT + ballInterval) {
+        lastBallT = engine.t();
         engine.perform(new CreateAndTranslateRigidBody(
             ball,
             2,
-            new Point(5.5, snapshot.bodies()
+            new Point(rg.nextDouble() * 10 + 2, snapshot.bodies()
                 .stream()
                 .mapToDouble(b -> b.poly().boundingBox().max().y())
                 .max()
-                .orElse(10) + 2d)
+                .orElse(0) + Math.max(1d, 1d + rg.nextGaussian() * 1.1d))
         ));
       }
       if (engine.t() > 4 && engine.t() < 5) {
         engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));
       }
       for (Body body : snapshot.bodies()) {
-        if (body.poly().center().y() < -10) {
+        if (!(body instanceof UnmovableBody) && (body.poly().center().y() < -12)) {
           engine.perform(new RemoveBody(body));
         }
       }
