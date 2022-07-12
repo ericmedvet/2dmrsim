@@ -100,10 +100,12 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
     registerActionSolver(TranslateBody.class, this::translateBody);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
-    registerActionSolver(AttachAnchor.class, this::attachAnchor);
-    registerActionSolver(DetachAnchor.class, this::detachAnchor);
+    registerActionSolver(CreateLink.class, this::createLink);
+    registerActionSolver(RemoveLink.class, this::removeLink);
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
+    registerActionSolver(AttachAnchor.class, this::attachAnchor); // TODO move to abstract engine
+    registerActionSolver(DetachAnchor.class, this::detachAnchor); // TODO move to abstract engine
     super.registerActionSolvers();
   }
 
@@ -166,6 +168,71 @@ public class Dyn4JEngine extends AbstractEngine {
     return voxel;
   }
 
+  private Anchor.Link createLink(CreateLink action, Agent agent) throws IllegalActionException {
+    if (action.source().links().stream().anyMatch(l -> l.destination()
+        .anchorable()
+        .equals(action.destination().anchorable()))) {
+      //this anchor is already attached to dst anchorable: ignore
+      return null;
+    }
+    if (action.source() instanceof BodyAnchor src) {
+      if (action.destination() instanceof BodyAnchor dst) {
+        Joint<org.dyn4j.dynamics.Body> joint;
+        if (Anchor.Link.Type.RIGID.equals(action.type())) {
+          joint = new WeldJoint<>(
+              src.getBody(),
+              dst.getBody(),
+              new Vector2(
+                  src.point().x(),
+                  src.point().y()
+              )
+          );
+        } else if (Anchor.Link.Type.SOFT.equals(action.type())) {
+          DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
+              src.getBody(),
+              dst.getBody(),
+              new Vector2(src.point().x(), src.point().y()),
+              new Vector2(dst.point().x(), dst.point().y())
+          );
+          springJoint.setRestDistance(src.point().distance(dst.point()) * configuration.softLinkRestDistanceRatio);
+          springJoint.setCollisionAllowed(true);
+          springJoint.setFrequency(configuration.softLinkSpringF);
+          springJoint.setDampingRatio(configuration.softLinkSpringD);
+          joint = springJoint;
+        } else {
+          throw new IllegalActionException(action, String.format("Unsupported link type: %s", action.type()));
+        }
+        world.addJoint(joint);
+        Anchor.Link link = new Anchor.Link(src, dst, action.type());
+        src.getJointMap().put(link, joint);
+        dst.getJointMap().put(link.reversed(), joint);
+        return new Anchor.Link(src, dst, action.type());
+      }
+    }
+    throw new IllegalActionException(
+        action,
+        String.format(
+            "Unsupported anchor types: src=%s, dst=%s ",
+            action.source().getClass().getSimpleName(),
+            action.destination().getClass().getSimpleName()
+        )
+    );
+  }
+
+  private Anchor.Link removeLink(RemoveLink action, Agent agent) {
+    if (action.link().source() instanceof BodyAnchor srcAnchor) {
+      if (action.link().destination() instanceof BodyAnchor dstAnchor) {
+        //remove joint from world
+        world.removeJoint(srcAnchor.getJointMap().get(action.link()));
+        //remove link from maps
+        srcAnchor.getJointMap().remove(action.link());
+        dstAnchor.getJointMap().remove(action.link().reversed());
+        return action.link();
+      }
+    }
+    return null;
+  }
+
   private Anchor.Link attachAnchor(AttachAnchor action, Agent agent) throws IllegalActionException {
     if (action.anchor().links().stream().anyMatch(l -> l.destination().anchorable().equals(action.anchorable()))) {
       //this anchor is already attached to dst anchorable: ignore
@@ -216,7 +283,6 @@ public class Dyn4JEngine extends AbstractEngine {
   private Collection<Anchor.Link> detachAnchor(DetachAnchor action, Agent agent) {
     Collection<Anchor.Link> removedLinks = new ArrayList<>();
     if (action.anchor() instanceof BodyAnchor srcAnchor) {
-
       for (Anchor.Link link : srcAnchor.links()) {
         if (link.destination() instanceof BodyAnchor dstAnchor) {
           if (dstAnchor.anchorable() == action.anchorable()) {
