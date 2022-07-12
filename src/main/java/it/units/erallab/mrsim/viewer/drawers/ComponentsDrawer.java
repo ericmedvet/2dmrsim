@@ -38,18 +38,20 @@ public class ComponentsDrawer implements Drawer {
   }
 
   @Override
-  public boolean draw(Snapshot s, Graphics2D g) {
+  public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     boolean drawn = false;
-    Collection<?> components = extractor.apply(s);
-    for (Object component : components) {
-      for (ComponentDrawer componentDrawer : componentDrawers) {
-        if (componentDrawer.draw(
-            s.t(),
-            component,
-            g
-        )) {
-          drawn = true;
-          break;
+    for (Snapshot snapshot : snapshots) {
+      Collection<?> components = extractor.apply(snapshot);
+      for (Object component : components) {
+        for (ComponentDrawer componentDrawer : componentDrawers) {
+          if (componentDrawer.draw(
+              snapshot.t(),
+              component,
+              g
+          )) {
+            drawn = true;
+            break;
+          }
         }
       }
     }

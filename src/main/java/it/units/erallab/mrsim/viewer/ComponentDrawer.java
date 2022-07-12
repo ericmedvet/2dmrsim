@@ -24,13 +24,13 @@ import java.util.List;
  */
 public interface ComponentDrawer {
 
-  boolean draw(double t, Object o, Graphics2D g);
+  boolean draw(double t, Object component, Graphics2D g);
 
   default ComponentDrawer andThen(ComponentDrawer otherDrawer) {
     ComponentDrawer thisDrawer = this;
-    return (t, o, g) -> {
-      boolean firstDrawn = thisDrawer.draw(t, o, g);
-      boolean otherDrawn = otherDrawer.draw(t, o, g);
+    return (t, component, g) -> {
+      boolean firstDrawn = thisDrawer.draw(t, component, g);
+      boolean otherDrawn = otherDrawer.draw(t, component, g);
       return firstDrawn || otherDrawn;
     };
   }

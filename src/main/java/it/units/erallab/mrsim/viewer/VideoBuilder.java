@@ -52,6 +52,7 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
   private final Drawer drawer;
   private final List<BufferedImage> images;
   private double lastDrawnT;
+  private final List<Snapshot> snapshots;
 
   public VideoBuilder(
       int w,
@@ -72,23 +73,28 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
     this.file = file;
     this.drawer = drawer;
     images = new ArrayList<>((int) Math.ceil((endTime - startTime) * frameRate));
+    snapshots = new ArrayList<>();
   }
 
   @Override
   public void accept(Snapshot snapshot) {
-    if (snapshot.t() < lastDrawnT + (1d / frameRate) || snapshot.t() < startTime || snapshot.t() > endTime) {
+    if (snapshot.t() < startTime || snapshot.t() > endTime) {
       return;
     }
-    lastDrawnT = snapshot.t();
-    //create image
-    BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
-    //draw
-    Graphics2D g = image.createGraphics();
-    g.setClip(0, 0, image.getWidth(), image.getHeight());
-    drawer.draw(snapshot, g);
-    g.dispose();
-    //add
-    images.add(image);
+    snapshots.add(snapshot);
+    if (snapshot.t() >= lastDrawnT + (1d / frameRate)) {
+      lastDrawnT = snapshot.t();
+      //create image
+      BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+      //draw
+      Graphics2D g = image.createGraphics();
+      g.setClip(0, 0, image.getWidth(), image.getHeight());
+      drawer.draw(snapshots, g);
+      g.dispose();
+      //add
+      images.add(image);
+      snapshots.clear();
+    }
   }
 
   @Override

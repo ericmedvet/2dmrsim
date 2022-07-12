@@ -23,6 +23,8 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -41,6 +43,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
   private double lastDrawnT;
   private double lastDrawingMillis;
   private Instant startingInstant;
+  private final List<Snapshot> snapshots;
 
   public RealtimeViewer(double frameRate, Drawer drawer) {
     super("Realtime simulation viewer");
@@ -61,6 +64,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     canvas.setIgnoreRepaint(true);
     canvas.createBufferStrategy(2);
     lastDrawnT = Double.NEGATIVE_INFINITY;
+    snapshots = new ArrayList<>();
   }
 
   public RealtimeViewer(Drawer drawer) throws HeadlessException {
@@ -73,37 +77,38 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     if (startingInstant == null) {
       startingInstant = Instant.now();
     }
-    if (snapshot.t() - lastDrawnT < 1d / frameRate) {
-      return;
-    }
-    //wait
-    while (true) {
-      double currentWallTime = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
-      if (snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
-        try {
-          Thread.sleep(WAIT_MILLIS);
-        } catch (InterruptedException e) {
-          //ignore
+    snapshots.add(snapshot);
+    if (snapshot.t() - lastDrawnT >= 1d / frameRate) {
+      //wait
+      while (true) {
+        double currentWallTime = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
+        if (snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
+          try {
+            Thread.sleep(WAIT_MILLIS);
+          } catch (InterruptedException e) {
+            //ignore
+          }
+        } else {
+          break;
         }
-      } else {
-        break;
       }
+      Instant drawingTimeStart = Instant.now();
+      //get graphics
+      Graphics2D g = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
+      g.setClip(0, 0, canvas.getWidth(), canvas.getHeight());
+      //draw
+      drawer.draw(snapshots, g);
+      //dispose and encode
+      g.dispose();
+      BufferStrategy strategy = canvas.getBufferStrategy();
+      if (!strategy.contentsLost()) {
+        strategy.show();
+      }
+      Toolkit.getDefaultToolkit().sync();
+      lastDrawingMillis = Duration.between(drawingTimeStart, Instant.now()).toMillis();
+      //update time
+      lastDrawnT = snapshot.t();
+      snapshots.clear();
     }
-    Instant drawingTimeStart = Instant.now();
-    //get graphics
-    Graphics2D g = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
-    g.setClip(0, 0, canvas.getWidth(), canvas.getHeight());
-    //draw
-    drawer.draw(snapshot, g);
-    //dispose and encode
-    g.dispose();
-    BufferStrategy strategy = canvas.getBufferStrategy();
-    if (!strategy.contentsLost()) {
-      strategy.show();
-    }
-    Toolkit.getDefaultToolkit().sync();
-    lastDrawingMillis = Duration.between(drawingTimeStart, Instant.now()).toMillis();
-    //update time
-    lastDrawnT = snapshot.t();
   }
 }

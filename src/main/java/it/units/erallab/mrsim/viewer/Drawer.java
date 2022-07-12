@@ -32,7 +32,7 @@ import java.util.List;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Drawer {
-  boolean draw(Snapshot s, Graphics2D g);
+  boolean draw(List<Snapshot> snapshots, Graphics2D g);
 
   static Drawer clear() {
     return clear(Color.WHITE);
@@ -47,7 +47,7 @@ public interface Drawer {
   }
 
   static Drawer clip(BoundingBox boundingBox, Drawer drawer) {
-    return (s, g) -> {
+    return (snapshots, g) -> {
       Shape shape = g.getClip();
       double clipX = shape.getBounds2D().getX();
       double clipY = shape.getBounds2D().getY();
@@ -60,7 +60,7 @@ public interface Drawer {
           clipH * boundingBox.height()
       ));
       //draw
-      boolean drawn = drawer.draw(s, g);
+      boolean drawn = drawer.draw(snapshots, g);
       //restore clip and transform
       g.setClip(shape);
       return drawn;
@@ -72,10 +72,10 @@ public interface Drawer {
   }
 
   static Drawer of(List<Drawer> drawers) {
-    return (s, g) -> {
+    return (snapshots, g) -> {
       boolean drawn = false;
       for (Drawer drawer : drawers) {
-        drawn = drawer.draw(s, g) || drawn;
+        drawn = drawer.draw(snapshots, g) || drawn;
       }
       return drawn;
     };
@@ -90,7 +90,7 @@ public interface Drawer {
   }
 
   static Drawer text(String string, DrawingUtils.Alignment alignment, Color color) {
-    return (s, g) -> {
+    return (snapshots, g) -> {
       g.setColor(color);
       g.drawString(string, switch (alignment) {
         case LEFT -> g.getClipBounds().x + 1;
@@ -102,7 +102,7 @@ public interface Drawer {
   }
 
   static Drawer transform(Framer framer, Drawer drawer) {
-    return (s, g) -> {
+    return (snapshots, g) -> {
       BoundingBox graphicsFrame = new BoundingBox(
           new Point(
               g.getClip().getBounds2D().getX(),
@@ -113,7 +113,10 @@ public interface Drawer {
               g.getClip().getBounds2D().getMaxY()
           )
       );
-      BoundingBox worldFrame = framer.getFrame(s, graphicsFrame.width() / graphicsFrame.height());
+      BoundingBox worldFrame = framer.getFrame(
+          snapshots.get(snapshots.size() - 1),
+          graphicsFrame.width() / graphicsFrame.height()
+      );
       //save original transform and stroke
       AffineTransform oAt = g.getTransform();
       Stroke oStroke = g.getStroke();
@@ -129,12 +132,17 @@ public interface Drawer {
       g.setTransform(at);
       g.setStroke(DrawingUtils.getScaleIndependentStroke(1, (float) ratio));
       //draw
-      boolean drawn = drawer.draw(s, g);
+      boolean drawn = drawer.draw(snapshots, g);
       //restore transform
       g.setTransform(oAt);
       g.setStroke(oStroke);
       return drawn;
     };
+  }
+
+  default Drawer onLastSnapshot() {
+    Drawer thisDrawer = this;
+    return (snapshots, g) -> thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
   }
 
 }

@@ -21,8 +21,10 @@ import it.units.erallab.mrsim.core.geometry.BoundingBox;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.Accumulator;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -40,6 +42,8 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
   private int frameCount;
   private double lastDrawnT;
 
+  private final List<Snapshot> snapshots;
+
   public FramesImageBuilder(int frameW, int frameH, int nOfFrames, double deltaT, Direction direction, Drawer drawer) {
     this.nOfFrames = nOfFrames;
     this.deltaT = deltaT;
@@ -56,6 +60,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       overallH = frameH * nOfFrames;
     }
     image = new BufferedImage(overallW, overallH, BufferedImage.TYPE_3BYTE_BGR);
+    snapshots = new ArrayList<>();
   }
 
   @Override
@@ -65,28 +70,32 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
 
   @Override
   public void accept(Snapshot snapshot) {
-    if (snapshot.t() < lastDrawnT + deltaT || frameCount > nOfFrames) {
+    if (frameCount > nOfFrames) {
       return;
     }
-    lastDrawnT = snapshot.t();
-    frameCount = frameCount + 1;
-    //frame
-    BoundingBox imageFrame;
-    if (direction.equals(Direction.HORIZONTAL)) {
-      imageFrame = new BoundingBox(
-          new Point((double) frameCount / (double) nOfFrames, 0),
-          new Point((double) (frameCount + 1) / (double) nOfFrames, 1d)
-      );
-    } else {
-      imageFrame = new BoundingBox(
-          new Point(0d, (double) frameCount / (double) nOfFrames),
-          new Point(1d, (double) (frameCount + 1) / (double) nOfFrames)
-      );
+    snapshots.add(snapshot);
+    if (snapshot.t() >= lastDrawnT + deltaT) {
+      lastDrawnT = snapshot.t();
+      frameCount = frameCount + 1;
+      //frame
+      BoundingBox imageFrame;
+      if (direction.equals(Direction.HORIZONTAL)) {
+        imageFrame = new BoundingBox(
+            new Point((double) frameCount / (double) nOfFrames, 0),
+            new Point((double) (frameCount + 1) / (double) nOfFrames, 1d)
+        );
+      } else {
+        imageFrame = new BoundingBox(
+            new Point(0d, (double) frameCount / (double) nOfFrames),
+            new Point(1d, (double) (frameCount + 1) / (double) nOfFrames)
+        );
+      }
+      //draw
+      Graphics2D g = image.createGraphics();
+      g.setClip(0, 0, image.getWidth(), image.getHeight());
+      Drawer.clip(imageFrame, drawer).draw(snapshots, g);
+      g.dispose();
+      snapshots.clear();
     }
-    //draw
-    Graphics2D g = image.createGraphics();
-    g.setClip(0, 0, image.getWidth(), image.getHeight());
-    Drawer.clip(imageFrame, drawer).draw(snapshot, g);
-    g.dispose();
   }
 }

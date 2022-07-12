@@ -21,8 +21,9 @@ import it.units.erallab.mrsim.engine.EngineSnapshot;
 import it.units.erallab.mrsim.viewer.Drawer;
 import it.units.erallab.mrsim.viewer.DrawingUtils;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,16 +70,17 @@ public class InfoDrawer implements Drawer {
   }
 
   @Override
-  public boolean draw(Snapshot s, Graphics2D g) {
+  public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
+    Snapshot snapshot = snapshots.get(snapshots.size()-1);
     //prepare string
     StringBuilder sb = new StringBuilder();
     if (!string.isEmpty()) {
       sb.append(string);
       sb.append("\n");
     }
-    sb.append(String.format("t=%4.1fs%n", s.t()));
+    sb.append(String.format("t=%4.1fs%n", snapshot.t()));
     if (!engineInfos.isEmpty()) {
-      if (s instanceof EngineSnapshot es) {
+      if (snapshot instanceof EngineSnapshot es) {
         sb.append(engineInfos.stream().map(ei -> ei.apply(es)).collect(Collectors.joining("; ")));
         sb.append("\n");
       }
