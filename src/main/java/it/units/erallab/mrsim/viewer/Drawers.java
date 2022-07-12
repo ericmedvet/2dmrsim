@@ -51,7 +51,7 @@ public class Drawers {
 
   public static Drawer world() {
     return Drawer.transform(
-        new AllAgentsFramer(2.5d),
+        new AllAgentsFramer(2.5d).averaged(2d),
         Drawer.of(
             new ComponentsDrawer(
                 List.of(

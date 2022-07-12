@@ -58,7 +58,11 @@ public class Main {
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
     engine.perform(new AttachClosestAnchors(2, v1, v2)).outcome().orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).outcome().orElseThrow();
-    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("hilly-0.25-2-0", 100, 4, 1, 5)));
+    engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain(
+        //"hilly-0.25-2-0",
+        "downhill-30",
+        100, 4, 1, 5
+    )));
     Drawer drawer = Drawers.basic().profiled();
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
