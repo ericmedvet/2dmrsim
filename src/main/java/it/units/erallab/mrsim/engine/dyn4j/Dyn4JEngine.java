@@ -161,7 +161,7 @@ public class Dyn4JEngine extends AbstractEngine {
               new Vector2(src.point().x(), src.point().y()),
               new Vector2(dst.point().x(), dst.point().y())
           );
-          springJoint.setRestDistance(src.point().distance(dst.point()));
+          springJoint.setRestDistance(src.point().distance(dst.point())*BodyAnchor.SOFT_LINK_REST_DISTANCE_RATIO);
           springJoint.setCollisionAllowed(true);
           springJoint.setFrequency(BodyAnchor.SOFT_LINK_SPRING_F);
           springJoint.setDampingRatio(BodyAnchor.SOFT_LINK_SPRING_D);

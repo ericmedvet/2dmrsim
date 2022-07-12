@@ -34,6 +34,7 @@ public class BodyAnchor implements Anchor {
 
   protected static double SOFT_LINK_SPRING_F = 8;
   protected static final double SOFT_LINK_SPRING_D = 0.3d;
+  protected static final double SOFT_LINK_REST_DISTANCE_RATIO = 0.5d;
 
   private final Body body;
   private final Anchorable anchorable;
