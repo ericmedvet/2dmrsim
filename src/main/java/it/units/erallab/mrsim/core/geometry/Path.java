@@ -48,6 +48,22 @@ public record Path(Point[] points) {
     return moveTo(new Point(x, y));
   }
 
+  public Path add(Path other) {
+    Path path = this;
+    for (Point p : other.points) {
+      path = path.add(p);
+    }
+    return path;
+  }
+
+  public Path moveTo(Path other) {
+    Path path = this;
+    for (Point p : other.points) {
+      path = path.add(p.sum(points[points.length - 1]));
+    }
+    return path;
+  }
+
   public Poly toPoly() {
     return new Poly(points);
   }

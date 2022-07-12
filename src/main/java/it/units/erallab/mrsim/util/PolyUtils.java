@@ -27,6 +27,7 @@ import org.dyn4j.geometry.decompose.SweepLine;
 import org.dyn4j.geometry.decompose.Triangulator;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
@@ -48,54 +49,52 @@ public class PolyUtils {
   }
 
   public static Poly createTerrain(String name, double terrainW, double terrainH, double borderW, double borderH) {
-    String flat = "flat";
-    String hilly = "hilly-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)";
-    String steppy = "steppy-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)";
-    String downhill = "downhill-(?<angle>[0-9]+(\\.[0-9]+)?)";
-    String uphill = "uphill-(?<angle>[0-9]+(\\.[0-9]+)?)";
-    Map<String, String> params;
-    Path path = new Path(new Point(0, 0));
-    path = path
+    Function<String, Optional<Path>> provider = StringUtils.formattedProvider(Map.ofEntries(
+        Map.entry("flat", p -> new Path(new Point(terrainW, 0))),
+        Map.entry("hilly-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)", p -> {
+          double h = p.d().get("h");
+          double w = p.d().get("w");
+          RandomGenerator random = new Random(p.i().get("seed"));
+          Path path = new Path(new Point(w, 0));
+          double dW = 0d;
+          while (dW < terrainW) {
+            double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
+            double sH = random.nextGaussian() * h;
+            dW = dW + sW;
+            path = path.moveTo(sW, sH);
+          }
+          return path;
+        }),
+        Map.entry("steppy-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)", p -> {
+          double h = p.d().get("h");
+          double w = p.d().get("w");
+          RandomGenerator random = new Random(p.i().get("seed"));
+          Path path = new Path(new Point(w, 0));
+          double dW = 0d;
+          while (dW < terrainW) {
+            double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
+            double sH = random.nextGaussian() * h;
+            dW = dW + sW;
+            path = path
+                .moveTo(sW, 0)
+                .moveTo(0, sH);
+          }
+          return path;
+        }),
+        Map.entry("downhill-(?<angle>[0-9]+(\\.[0-9]+)?)", p -> {
+          double angle = p.d().get("angle");
+          return new Path(new Point(terrainW, -terrainW * Math.sin(angle / 180 * Math.PI)));
+        }),
+        Map.entry("uphill-(?<angle>[0-9]+(\\.[0-9]+)?)", p -> {
+          double angle = p.d().get("angle");
+          return new Path(new Point(terrainW, terrainW * Math.sin(angle / 180 * Math.PI)));
+        })
+    ));
+    Path path = new Path(new Point(0, 0))
         .moveTo(0, borderH)
         .moveTo(borderW, 0)
-        .moveTo(0, -borderH);
-    //noinspection UnusedAssignment
-    if ((params = StringUtils.params(flat, name)) != null) {
-      path = path.moveTo(new Point(terrainW, 0));
-    } else if ((params = StringUtils.params(hilly, name)) != null) {
-      double h = Double.parseDouble(params.get("h"));
-      double w = Double.parseDouble(params.get("w"));
-      RandomGenerator random = new Random(Integer.parseInt(params.get("seed")));
-      double dW = 0d;
-      while (dW < terrainW) {
-        double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-        double sH = random.nextGaussian() * h;
-        dW = dW + sW;
-        path = path.moveTo(sW, sH);
-      }
-    } else if ((params = StringUtils.params(steppy, name)) != null) {
-      double h = Double.parseDouble(params.get("h"));
-      double w = Double.parseDouble(params.get("w"));
-      RandomGenerator random = new Random(Integer.parseInt(params.get("seed")));
-      double dW = 0d;
-      while (dW < terrainW) {
-        double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-        double sH = random.nextGaussian() * h;
-        dW = dW + sW;
-        path = path
-            .moveTo(sW, 0)
-            .moveTo(0, sH);
-      }
-    } else if ((params = StringUtils.params(downhill, name)) != null) {
-      double angle = Double.parseDouble(params.get("angle"));
-      path = path.moveTo(terrainW, -terrainW * Math.sin(angle / 180 * Math.PI));
-    } else if ((params = StringUtils.params(uphill, name)) != null) {
-      double angle = Double.parseDouble(params.get("angle"));
-      path = path.moveTo(terrainW, terrainW * Math.sin(angle / 180 * Math.PI));
-    } else {
-      throw new IllegalArgumentException(String.format("Unknown terrain name: %s", name));
-    }
-    path = path
+        .moveTo(0, -borderH)
+        .moveTo(provider.apply(name).orElseThrow())
         .moveTo(0, borderH)
         .moveTo(borderW, 0)
         .moveTo(0, -borderH);

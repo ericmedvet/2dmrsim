@@ -16,10 +16,8 @@
 
 package it.units.erallab.mrsim.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,6 +59,53 @@ public class StringUtils {
         string,
         pattern
     ));
+  }
+
+  public record TypedParams(
+      Map<String, Integer> i,
+      Map<String, Double> d,
+      Map<String, Number> n,
+      Map<String, Boolean> b,
+      Map<String, String> s
+  ) {
+    public TypedParams() {
+      this(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+    }
+  }
+
+  public static <T> Function<String, Optional<T>> formattedProvider(Map<String, Function<TypedParams, T>> providers) {
+    return string -> {
+      for (Map.Entry<String, Function<TypedParams, T>> providerEntry : providers.entrySet()) {
+        //check match
+        Map<String, String> params = params(providerEntry.getKey(), string);
+        if (params == null) {
+          continue;
+        }
+        //prepare typed params
+        TypedParams typedParams = new TypedParams();
+        typedParams.s.putAll(params);
+        for (Map.Entry<String, String> paramEntry : params.entrySet()) {
+          try {
+            int i = Integer.parseInt(paramEntry.getValue());
+            typedParams.i.put(paramEntry.getKey(), i);
+            typedParams.n.put(paramEntry.getKey(), i);
+          } catch (NumberFormatException ignored) {
+          }
+          try {
+            double d = Double.parseDouble(paramEntry.getValue());
+            typedParams.d.put(paramEntry.getKey(), d);
+            typedParams.n.put(paramEntry.getKey(), d);
+          } catch (NumberFormatException ignored) {
+          }
+          boolean b = Boolean.parseBoolean(paramEntry.getValue());
+          typedParams.b.put(paramEntry.getKey(), b);
+        }
+        //invoke function
+        T result = providerEntry.getValue().apply(typedParams);
+        return result == null ? Optional.empty() : Optional.of(result);
+      }
+      return Optional.empty();
+    };
   }
 
 }
