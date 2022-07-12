@@ -82,7 +82,7 @@ public class Main {
         400,
         0,
         20,
-        24,
+        60,
         VideoUtils.EncoderFacility.FFMPEG_SMALL,
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()

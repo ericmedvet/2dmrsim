@@ -18,10 +18,12 @@ package it.units.erallab.mrsim.viewer.drawers.actions;
 
 import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.DoubleRange;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.util.function.BiPredicate;
 
 /**
@@ -30,10 +32,10 @@ import java.util.function.BiPredicate;
 public class AttachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.AttachAnchor,
     Anchor.Link> {
 
-  private final static double DURATION = 0.5;
+  private final static double DURATION = 0.75;
   private final static Color COLOR = Color.GREEN;
 
-  private final static DoubleRange RADIUS = new DoubleRange(0, 0.2);
+  private final static DoubleRange RADIUS = new DoubleRange(0, 0.15);
 
   private final double duration;
   private final Color color;
@@ -57,11 +59,15 @@ public class AttachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.m
     return (dT, g) -> {
       g.setColor(color);
       if (o.outcome().isPresent()) {
-        double r = RADIUS.denormalize(dT / duration);
+        double r = RADIUS.max() - RADIUS.denormalize(dT / duration);
         Anchor src = o.outcome().get().source();
         Anchor dst = o.outcome().get().destination();
         g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
         g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
+        double a = src.point().diff(dst.point()).direction();
+        it.units.erallab.mrsim.core.geometry.Point lSrc = src.point().diff(new it.units.erallab.mrsim.core.geometry.Point(a).scale(r));
+        it.units.erallab.mrsim.core.geometry.Point lDst = dst.point().sum(new Point(a).scale(r));
+        g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
       }
       return dT > duration;
     };

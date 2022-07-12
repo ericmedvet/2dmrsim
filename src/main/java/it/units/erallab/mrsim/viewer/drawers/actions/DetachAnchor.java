@@ -18,10 +18,13 @@ package it.units.erallab.mrsim.viewer.drawers.actions;
 
 import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.DoubleRange;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.util.Collection;
 import java.util.function.BiPredicate;
 
@@ -31,10 +34,10 @@ import java.util.function.BiPredicate;
 public class DetachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.DetachAnchor,
     Collection<Anchor.Link>> {
 
-  private final static double DURATION = 0.5;
+  private final static double DURATION = 0.75;
   private final static Color COLOR = Color.RED;
 
-  private final static DoubleRange RADIUS = new DoubleRange(0, 0.2);
+  private final static DoubleRange RADIUS = new DoubleRange(0, 0.15);
 
   private final double duration;
   private final Color color;
@@ -61,12 +64,16 @@ public class DetachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.m
     return (dT, g) -> {
       g.setColor(color);
       if (o.outcome().isPresent() && !o.outcome().get().isEmpty()) {
-        double r = RADIUS.max() - RADIUS.denormalize(dT / duration);
+        double r = RADIUS.denormalize(dT / duration);
         Anchor src = o.action().anchor();
         g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
         for (Anchor.Link link : o.outcome().get()) {
           Anchor dst = link.destination();
           g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
+          double a = src.point().diff(dst.point()).direction();
+          Point lSrc = src.point().diff(new Point(a).scale(r));
+          Point lDst = dst.point().sum(new Point(a).scale(r));
+          g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
         }
       }
       return dT > duration;
