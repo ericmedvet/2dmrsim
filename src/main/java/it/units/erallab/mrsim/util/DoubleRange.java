@@ -24,6 +24,8 @@ import java.util.Arrays;
  */
 public record DoubleRange(double min, double max) implements Serializable {
 
+  public static DoubleRange UNIT = new DoubleRange(0, 1);
+
   public DoubleRange {
     if (max < min) {
       throw new IllegalArgumentException(String.format(

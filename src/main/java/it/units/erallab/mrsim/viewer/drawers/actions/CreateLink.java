@@ -32,23 +32,20 @@ import java.util.function.BiPredicate;
 public class CreateLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.CreateLink,
     Anchor.Link> {
 
-  private final static double DURATION = 0.75;
   private final static Color COLOR = Color.GREEN;
 
   private final static DoubleRange RADIUS = new DoubleRange(0, 0.15);
 
-  private final double duration;
   private final Color color;
 
 
-  public CreateLink(double duration, Color color) {
-    super(it.units.erallab.mrsim.core.actions.CreateLink.class);
-    this.duration = duration;
+  public CreateLink(Color color, double duration) {
+    super(it.units.erallab.mrsim.core.actions.CreateLink.class, duration);
     this.color = color;
   }
 
   public CreateLink() {
-    this(DURATION, COLOR);
+    this(COLOR, DURATION);
   }
 
   @Override

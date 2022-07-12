@@ -44,14 +44,18 @@ import java.util.random.RandomGenerator;
 public class Main {
   public static void main(String[] args) throws IOException {
     Poly ball = Poly.regular(1, 20);
-    double ballInterval = 5d;
+    double ballInterval = 15d;
     double lastBallT = 0d;
     Engine engine = new Dyn4JEngine();
     Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
     AbstractGridVSR vsr = new NumGridVSR(
         shape.map(b -> b ? new Voxel.Material() : null),
         shape.map(b -> List.of()),
-        (t, iG) -> Grid.create(shape.w(), shape.h(), (x, y) -> Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w()))
+        (t, iG) -> Grid.create(
+            shape.w(),
+            shape.h(),
+            (x, y) -> 0.1 * Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w())
+        )
     );
     Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).outcome().orElseThrow();
     Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).outcome().orElseThrow();
@@ -60,8 +64,8 @@ public class Main {
     engine.perform(new AttachClosestAnchors(2, v1, v2, Anchor.Link.Type.RIGID)).outcome().orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3, Anchor.Link.Type.SOFT)).outcome().orElseThrow();
     Poly terrain = PolyUtils.createTerrain(
-        "hilly-0.25-1-0",
-        //"downhill-10",
+        //"hilly-0.25-1-0",
+        "downhill-5",
         //"uphill-30",
         //"steppy-0.25-2-0",
         //"flat",
@@ -105,16 +109,16 @@ public class Main {
                 .orElse(0) + Math.max(1d, 1d + rg.nextGaussian() * 1.1d))
         ));
       }
-      if (engine.t() > 4 && engine.t() < 5) {
+      if (engine.t() > 3 && engine.t() < 4) {
         engine.perform(new DetachAnchors(v1, v2));
+      }
+      if (engine.t() > 5 && engine.t() < 20) {
+        engine.perform(new AttractAndLinkAnchor(v1.anchors().get(2), v3.anchors().get(1), 1, Anchor.Link.Type.SOFT));
       }
       for (Body body : snapshot.bodies()) {
         if (!(body instanceof UnmovableBody) && (body.poly().center().y() < -12)) {
           engine.perform(new RemoveBody(body));
         }
-      }
-      if (snapshot.bodies().contains(v1)) {
-        engine.perform(new ActuateVoxel(v1, Math.sin(2d * Math.PI * engine.t())));
       }
       if (snapshot.bodies().contains(v2)) {
         double v = Math.sin(2d * Math.PI * engine.t());

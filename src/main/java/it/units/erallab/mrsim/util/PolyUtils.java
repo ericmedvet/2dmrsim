@@ -154,5 +154,26 @@ public class PolyUtils {
     return p.moveTo(dL.sum(dP.scale(0.5)));
   }
 
+  public static double distance(Point p, Point p1, Point p2) {
+    p2 = p2.diff(p1);
+    p = p.diff(p1);
+    double a = p.angle(p2);
+    double l = p.magnitude();
+    if (a < Math.PI / 2d && a > -Math.PI / 2d) {
+      if (Math.cos(a) * l < p2.magnitude()) {
+        return Math.sin(a) * l;
+      }
+      return p2.sum(p1).distance(p);
+    }
+    return l;
+  }
+
+  public static double distance(Point p, Poly poly) {
+    double minD = distance(p, poly.vertexes()[poly.vertexes().length - 1], poly.vertexes()[0]);
+    for (int i = 0; i < poly.vertexes().length - 1; i++) {
+      minD = Math.min(minD, distance(p, poly.vertexes()[i], poly.vertexes()[i + 1]));
+    }
+    return minD;
+  }
 
 }

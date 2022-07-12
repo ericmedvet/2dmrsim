@@ -34,26 +34,20 @@ import java.util.function.BiPredicate;
 public class RemoveLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.RemoveLink,
     Anchor.Link> {
 
-  private final static double DURATION = 0.75;
   private final static Color COLOR = Color.RED;
 
   private final static DoubleRange RADIUS = new DoubleRange(0, 0.15);
 
-  private final double duration;
   private final Color color;
 
 
-  public RemoveLink(
-      double duration,
-      Color color
-  ) {
-    super(it.units.erallab.mrsim.core.actions.RemoveLink.class);
-    this.duration = duration;
+  public RemoveLink(Color color, double duration) {
+    super(it.units.erallab.mrsim.core.actions.RemoveLink.class, duration);
     this.color = color;
   }
 
   public RemoveLink() {
-    this(DURATION, COLOR);
+    this(COLOR, DURATION);
   }
 
   @Override

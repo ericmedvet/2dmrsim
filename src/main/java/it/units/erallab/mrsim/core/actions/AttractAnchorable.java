@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.bodies;
+package it.units.erallab.mrsim.core.actions;
+
+import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.util.Pair;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
- * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/12 for 2dmrsim
  */
-public interface Anchorable extends Body {
-  List<Anchor> anchors();
+public record AttractAnchorable(
+    Collection<Anchor> anchors, Anchorable anchorable, double magnitude
+) implements Action<Collection<Pair<Anchor, Anchor>>> {
 }

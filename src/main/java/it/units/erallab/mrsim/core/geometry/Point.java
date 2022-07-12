@@ -74,6 +74,10 @@ public record Point(double x, double y) implements Shape {
     return new Point(r * x, r * y);
   }
 
+  public double angle(Point p) {
+    return Math.acos((x * p.x() + y * p.y()) / magnitude() / p.magnitude());
+  }
+
   public double direction() {
     return Math.atan2(y, x);
   }

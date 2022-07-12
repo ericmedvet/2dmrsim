@@ -16,10 +16,6 @@
 
 package it.units.erallab.mrsim.viewer.drawers.actions;
 
-/**
- * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
- */
-
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.viewer.drawers.AbstractLastingComponentDrawer;
@@ -27,12 +23,19 @@ import it.units.erallab.mrsim.viewer.drawers.AbstractLastingComponentDrawer;
 import java.awt.*;
 import java.util.function.BiPredicate;
 
+/**
+ * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
+ */
 public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O> extends AbstractLastingComponentDrawer {
 
-  private final Class<A> actionClass;
+  protected final static double DURATION = 0.75;
 
-  public AbstractActionOutcomeDrawer(Class<A> actionClass) {
+  private final Class<A> actionClass;
+  protected final double duration;
+
+  public AbstractActionOutcomeDrawer(Class<A> actionClass, double duration) {
     this.actionClass = actionClass;
+    this.duration = duration;
   }
 
   @SuppressWarnings("unchecked")

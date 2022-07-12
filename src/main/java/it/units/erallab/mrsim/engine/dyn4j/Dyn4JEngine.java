@@ -25,6 +25,7 @@ import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
+import it.units.erallab.mrsim.util.DoubleRange;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -32,9 +33,7 @@ import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.EnumSet;
 
 /**
@@ -47,7 +46,8 @@ public class Dyn4JEngine extends AbstractEngine {
       1, 0.5, 0.1, 0.1,
       1, 0.5,
       1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(it.units.erallab.mrsim.engine.dyn4j.Voxel.SpringScaffolding.class),
-      8d, 0.3d, 0.5d
+      8d, 0.3d, 0.5d,
+      10
   );
 
   public record Configuration(
@@ -66,8 +66,8 @@ public class Dyn4JEngine extends AbstractEngine {
       EnumSet<it.units.erallab.mrsim.engine.dyn4j.Voxel.SpringScaffolding> voxelSpringScaffoldings,
       double softLinkSpringF,
       double softLinkSpringD,
-      double softLinkRestDistanceRatio
-
+      double softLinkRestDistanceRatio,
+      double attractionMaxMagnitude
   ) {}
 
   private final Configuration configuration;
@@ -104,6 +104,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(RemoveLink.class, this::removeLink);
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
+    registerActionSolver(AttractAnchor.class, this::attractAnchor);
     super.registerActionSolvers();
   }
 
@@ -217,7 +218,7 @@ public class Dyn4JEngine extends AbstractEngine {
     );
   }
 
-  private Anchor.Link removeLink(RemoveLink action, Agent agent) {
+  private Anchor.Link removeLink(RemoveLink action, Agent agent) throws IllegalActionException {
     if (action.link().source() instanceof BodyAnchor srcAnchor) {
       if (action.link().destination() instanceof BodyAnchor dstAnchor) {
         //remove joint from world
@@ -228,7 +229,14 @@ public class Dyn4JEngine extends AbstractEngine {
         return action.link();
       }
     }
-    return null;
+    throw new IllegalActionException(
+        action,
+        String.format(
+            "Unsupported anchor types: src=%s, dst=%s ",
+            action.link().source().getClass().getSimpleName(),
+            action.link().destination().getClass().getSimpleName()
+        )
+    );
   }
 
   private Body removeBody(RemoveBody action, Agent agent) throws IllegalActionException {
@@ -257,6 +265,33 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format("Unsupported voxel type %s", action.voxel().getClass().getSimpleName())
+    );
+  }
+
+  private Double attractAnchor(AttractAnchor action, Agent agent) throws IllegalActionException {
+    if (action.source().anchorable() == action.destination().anchorable()) {
+      throw new IllegalActionException(action, "Cannot attract an anchor of the same body");
+    }
+    if (action.source().point().distance(action.destination().point()) < super.configuration().attractionRange()) {
+      if (action.source() instanceof BodyAnchor src) {
+        if (action.destination() instanceof BodyAnchor dst) {
+          double f = new DoubleRange(0, configuration.attractionMaxMagnitude).denormalize(action.magnitude());
+          Vector2 force = new Vector2(dst.point().diff(src.point()).direction());
+          src.getBody().applyForce(force.copy().multiply(f));
+          dst.getBody().applyForce(force.copy().multiply(-f));
+          return DoubleRange.UNIT.clip(f);
+        }
+      }
+    } else {
+      return null;
+    }
+    throw new IllegalActionException(
+        action,
+        String.format(
+            "Unsupported anchor types: src=%s, dst=%s ",
+            action.source().getClass().getSimpleName(),
+            action.destination().getClass().getSimpleName()
+        )
     );
   }
 

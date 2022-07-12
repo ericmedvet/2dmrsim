@@ -20,9 +20,9 @@ import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.*;
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.engine.dyn4j.BodyAnchor;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.util.PolyUtils;
 import it.units.erallab.mrsim.util.Profiled;
 
 import java.time.Duration;
@@ -37,10 +37,22 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractEngine implements Engine, Profiled {
 
+  private final static Configuration DEFAULT_CONFIGURATION = new Configuration(
+      2,
+      1
+  );
+
+  public record Configuration(
+      double attractionRange,
+      double attractLinkRangeRatio
+  ) {}
+
   @FunctionalInterface
   protected interface ActionSolver<A extends Action<O>, O> {
     O solve(A action, Agent agent) throws ActionException;
   }
+
+  private final Configuration configuration;
 
   protected final AtomicDouble t;
   protected final List<Body> bodies;
@@ -57,7 +69,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private final List<ActionOutcome<?, ?>> lastTickPerformedActions;
 
 
-  public AbstractEngine() {
+  public AbstractEngine(Configuration configuration) {
+    this.configuration = configuration;
     bodies = new ArrayList<>();
     agentPairs = new ArrayList<>();
     actionSolvers = new LinkedHashMap<>();
@@ -70,6 +83,14 @@ public abstract class AbstractEngine implements Engine, Profiled {
     nOfIllegalActions = new AtomicInteger(0);
     lastTickPerformedActions = new ArrayList<>();
     registerActionSolvers();
+  }
+
+  public AbstractEngine() {
+    this(DEFAULT_CONFIGURATION);
+  }
+
+  protected Configuration configuration() {
+    return configuration;
   }
 
   @Override
@@ -168,6 +189,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(AddAndTranslateAgent.class, this::addAndTranslateAgent);
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
     registerActionSolver(DetachAnchor.class, this::detachAnchor);
+    registerActionSolver(AttractAnchorable.class, this::attractAnchorable);
+    registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -264,7 +287,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
       Agent agent
   ) {
     return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).outcome().orElseThrow())
+        .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).outcome())
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .toList();
   }
 
@@ -293,5 +318,47 @@ public abstract class AbstractEngine implements Engine, Profiled {
     action.agent().bodyParts().forEach(b -> perform(new TranslateBody(b, action.translation()), agent));
     return action.agent();
   }
+
+  protected Collection<Pair<Anchor, Anchor>> attractAnchorable(AttractAnchorable action, Agent agent) {
+    //discard already attached
+    Collection<Anchor> srcAnchors = action.anchors().stream()
+        .filter(a -> a.links().stream()
+            .map(l -> l.destination().anchorable())
+            .filter(dst -> dst == action.anchorable()).toList().isEmpty())
+        .toList();
+    //match anchor pairs
+    Collection<Anchor> dstAnchors = new HashSet<>(action.anchorable().anchors());
+    Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
+    srcAnchors.forEach(src -> {
+      Optional<Anchor> closest = dstAnchors.stream()
+          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())));
+      if (closest.isPresent()) {
+        pairs.add(new Pair<>(src, closest.get()));
+        dstAnchors.remove(closest.get());
+      }
+    });
+    //attract
+    pairs.forEach(p -> perform(new AttractAnchor(p.first(), p.second(), action.magnitude())));
+    return pairs;
+  }
+
+  protected Pair<Double, Anchor.Link> attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
+    double srcD = PolyUtils.distance(action.source().point(), action.source().anchorable().poly());
+    double dstD = PolyUtils.distance(action.destination().point(), action.destination().anchorable().poly());
+    double d = (srcD + dstD) * configuration.attractLinkRangeRatio;
+    if (action.source().point().distance(action.destination().point()) < d) {
+      return new Pair<>(
+          null,
+          perform(new CreateLink(action.source(), action.destination(), action.type()), agent).outcome().orElse(null)
+      );
+    } else {
+      return new Pair<>(
+          perform(new AttractAnchor(action.source(), action.destination(), action.magnitude()), agent).outcome()
+              .orElse(null),
+          null
+      );
+    }
+  }
+
 
 }
