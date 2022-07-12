@@ -59,7 +59,7 @@ public class Drawers {
                     new RigidBodyDrawer(),
                     new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
                 ), Snapshot::bodies
-            ),
+            ).onLastSnapshot(),
             new ComponentsDrawer(
                 List.of(
                     new AttachAnchor(),

@@ -19,6 +19,8 @@ package it.units.erallab.mrsim.viewer;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.geometry.BoundingBox;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.util.AtomicDouble;
+import it.units.erallab.mrsim.util.Profiled;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -26,12 +28,18 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Drawer {
+
+  interface ProfiledDrawer extends Drawer, Profiled {}
+
   boolean draw(List<Snapshot> snapshots, Graphics2D g);
 
   static Drawer clear() {
@@ -143,6 +151,27 @@ public interface Drawer {
   default Drawer onLastSnapshot() {
     Drawer thisDrawer = this;
     return (snapshots, g) -> thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
+  }
+
+  default ProfiledDrawer profiled() {
+    Drawer thisDrawer = this;
+    AtomicDouble drawingT = new AtomicDouble(0d);
+    return new ProfiledDrawer() {
+      @Override
+      public Map<String, Double> values() {
+        return Map.ofEntries(
+            Map.entry("drawingT", drawingT.get())
+        );
+      }
+
+      @Override
+      public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
+        Instant startingT = Instant.now();
+        boolean drawn = thisDrawer.draw(snapshots, g);
+        drawingT.add(Duration.between(startingT, Instant.now()).toNanos() / 1000000000d);
+        return drawn;
+      }
+    };
   }
 
 }

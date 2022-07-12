@@ -30,6 +30,7 @@ import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.PolyUtils;
+import it.units.erallab.mrsim.util.Profiled;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -58,7 +59,7 @@ public class Main {
     engine.perform(new AttachClosestAnchors(2, v1, v2)).outcome().orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3)).outcome().orElseThrow();
     engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("hilly-0.25-2-0", 100, 4, 1, 5)));
-
+    Drawer drawer = Drawers.basic().profiled();
     FramesImageBuilder imageBuilder = new FramesImageBuilder(
         400,
         200,
@@ -77,9 +78,9 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
-    RealtimeViewer viewer = new RealtimeViewer(30, Drawers.basic());
+    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Consumer<Snapshot> consumer = viewer;
-    while (engine.t() < 100) {
+    while (engine.t() < 15) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (Math.floor(engine.t() / ballInterval) > (snapshot.bodies()
@@ -114,5 +115,8 @@ public class Main {
     }
     //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
     //videoBuilder.get();
+    if (drawer instanceof Profiled profiled) {
+      System.out.println(profiled.values());
+    }
   }
 }

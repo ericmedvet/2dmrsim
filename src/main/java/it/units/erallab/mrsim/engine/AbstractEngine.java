@@ -22,6 +22,7 @@ import it.units.erallab.mrsim.core.bodies.*;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.util.Profiled;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public abstract class AbstractEngine implements Engine {
+public abstract class AbstractEngine implements Engine, Profiled {
 
   @FunctionalInterface
   protected interface ActionSolver<A extends Action<O>, O> {
@@ -99,6 +100,15 @@ public abstract class AbstractEngine implements Engine {
     );
     lastTickPerformedActions.clear();
     return snapshot;
+  }
+
+  @Override
+  public Map<String, Double> values() {
+    return Map.ofEntries(
+        Map.entry("engineT", engineT.get()),
+        Map.entry("t", t.get()),
+        Map.entry("wallT", Duration.between(startingInstant, Instant.now()).toMillis() / 1000d)
+    );
   }
 
   @SuppressWarnings("unchecked")
@@ -238,4 +248,5 @@ public abstract class AbstractEngine implements Engine {
     action.agent().bodyParts().forEach(b -> perform(new TranslateBody(b, action.translation()), agent));
     return action.agent();
   }
+
 }
