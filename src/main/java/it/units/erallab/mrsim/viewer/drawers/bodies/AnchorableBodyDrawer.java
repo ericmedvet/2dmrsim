@@ -19,10 +19,11 @@ package it.units.erallab.mrsim.viewer.drawers.bodies;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.util.PolyUtils;
+import it.units.erallab.mrsim.viewer.DrawingUtils;
 import it.units.erallab.mrsim.viewer.drawers.AbstractComponentDrawer;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 
@@ -33,6 +34,8 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
 
   private final static Color ANCHOR_COLOR = Color.GRAY;
   private final static double ANCHOR_DOT_RADIUS = .05;
+  private final static int SOFT_LINK_POINTS = 3;
+  private final static double SOFT_LINK_WIDTH = .1;
 
   private final Color anchorColor;
 
@@ -57,10 +60,17 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
       ));
       for (Anchor.Link link : anchor.links()) {
         Point midPoint = Point.average(anchor.point(), link.destination().point());
-        g.draw(new Line2D.Double(
-            anchor.point().x(), anchor.point().y(),
-            midPoint.x(), midPoint.y()
-        ));
+        switch (link.type()) {
+          case RIGID -> g.draw(new Line2D.Double(
+              anchor.point().x(), anchor.point().y(),
+              midPoint.x(), midPoint.y()
+          ));
+          case SOFT -> {
+            g.draw(DrawingUtils.toPath(
+                PolyUtils.zigZag(anchor.point(), midPoint, SOFT_LINK_POINTS, SOFT_LINK_WIDTH).points()
+            ));
+          }
+        }
       }
     }
     return !anchorable.anchors().isEmpty();

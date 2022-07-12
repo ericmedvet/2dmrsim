@@ -36,6 +36,10 @@ public record Point(double x, double y) implements Shape {
     );
   }
 
+  public Point(double direction) {
+    this(Math.cos(direction), Math.sin(direction));
+  }
+
   public static Point min(Point... points) {
     return Arrays.stream(points).sequential()
         .reduce((p1, p2) -> new Point(
@@ -66,6 +70,10 @@ public record Point(double x, double y) implements Shape {
     return new Point(x + p.x(), y + p.y());
   }
 
+  public Point scale(double r) {
+    return new Point(r * x, r * y);
+  }
+
   public double direction() {
     return Math.atan2(y, x);
   }
@@ -73,6 +81,7 @@ public record Point(double x, double y) implements Shape {
   public double magnitude() {
     return Math.sqrt(x * x + y * y);
   }
+
 
   @Override
   public BoundingBox boundingBox() {

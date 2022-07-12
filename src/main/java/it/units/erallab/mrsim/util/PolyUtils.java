@@ -141,5 +141,19 @@ public class PolyUtils {
     return new Poly(vertexes);
   }
 
+  public static Path zigZag(Point src, Point dst, int n, double w) {
+    Point dL = dst.diff(src).scale(0.5d / (double) n);
+    double a = dL.direction() + Math.PI / 2d;
+    Point dP = new Point(Math.cos(a) * w, Math.sin(a) * w);
+    Path p = new Path(src)
+        .moveTo(dL.diff(dP.scale(0.5)));
+    for (int i = 0; i < n - 1; i++) {
+      p = p
+          .moveTo(dL.sum(dP))
+          .moveTo(dL.diff(dP));
+    }
+    return p.moveTo(dL.sum(dP.scale(0.5)));
+  }
+
 
 }

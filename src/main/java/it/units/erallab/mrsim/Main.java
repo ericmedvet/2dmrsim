@@ -60,8 +60,8 @@ public class Main {
     engine.perform(new AttachClosestAnchors(2, v1, v2, Anchor.Link.Type.RIGID)).outcome().orElseThrow();
     engine.perform(new AttachClosestAnchors(2, v2, v3, Anchor.Link.Type.SOFT)).outcome().orElseThrow();
     Poly terrain = PolyUtils.createTerrain(
-        //"hilly-0.25-2-0",
-        "downhill-10",
+        "hilly-0.25-2-0",
+        //"downhill-10",
         //"uphill-30",
         //"steppy-0.25-2-0",
         //"flat",
