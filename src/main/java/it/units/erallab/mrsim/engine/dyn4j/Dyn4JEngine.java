@@ -104,8 +104,6 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(RemoveLink.class, this::removeLink);
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
-    registerActionSolver(AttachAnchor.class, this::attachAnchor); // TODO move to abstract engine
-    registerActionSolver(DetachAnchor.class, this::detachAnchor); // TODO move to abstract engine
     super.registerActionSolvers();
   }
 
@@ -231,72 +229,6 @@ public class Dyn4JEngine extends AbstractEngine {
       }
     }
     return null;
-  }
-
-  private Anchor.Link attachAnchor(AttachAnchor action, Agent agent) throws IllegalActionException {
-    if (action.anchor().links().stream().anyMatch(l -> l.destination().anchorable().equals(action.anchorable()))) {
-      //this anchor is already attached to dst anchorable: ignore
-      return null;
-    }
-    if (action.anchor() instanceof BodyAnchor src) {
-      BodyAnchor dst = action.anchorable().anchors().stream()
-          .filter(a -> a instanceof BodyAnchor)
-          .map(a -> (BodyAnchor) a)
-          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
-          .orElse(null);
-      if (dst != null) {
-        Joint<org.dyn4j.dynamics.Body> joint;
-        if (Anchor.Link.Type.RIGID.equals(action.type())) {
-          joint = new WeldJoint<>(
-              src.getBody(),
-              dst.getBody(),
-              new Vector2(
-                  src.point().x(),
-                  src.point().y()
-              )
-          );
-        } else if (Anchor.Link.Type.SOFT.equals(action.type())) {
-          DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
-              src.getBody(),
-              dst.getBody(),
-              new Vector2(src.point().x(), src.point().y()),
-              new Vector2(dst.point().x(), dst.point().y())
-          );
-          springJoint.setRestDistance(src.point().distance(dst.point()) * configuration.softLinkRestDistanceRatio);
-          springJoint.setCollisionAllowed(true);
-          springJoint.setFrequency(configuration.softLinkSpringF);
-          springJoint.setDampingRatio(configuration.softLinkSpringD);
-          joint = springJoint;
-        } else {
-          throw new IllegalActionException(action, String.format("Unsupported link type: %s", action.type()));
-        }
-        world.addJoint(joint);
-        Anchor.Link link = new Anchor.Link(src, dst, action.type());
-        src.getJointMap().put(link, joint);
-        dst.getJointMap().put(link.reversed(), joint);
-      }
-      return new Anchor.Link(src, dst, action.type());
-    }
-    return null;
-  }
-
-  private Collection<Anchor.Link> detachAnchor(DetachAnchor action, Agent agent) {
-    Collection<Anchor.Link> removedLinks = new ArrayList<>();
-    if (action.anchor() instanceof BodyAnchor srcAnchor) {
-      for (Anchor.Link link : srcAnchor.links()) {
-        if (link.destination() instanceof BodyAnchor dstAnchor) {
-          if (dstAnchor.anchorable() == action.anchorable()) {
-            removedLinks.add(link);
-            //remove joint from world
-            world.removeJoint(srcAnchor.getJointMap().get(link));
-            //remove link from maps
-            srcAnchor.getJointMap().remove(link);
-            dstAnchor.getJointMap().remove(link.reversed());
-          }
-        }
-      }
-    }
-    return removedLinks;
   }
 
   private Body removeBody(RemoveBody action, Agent agent) throws IllegalActionException {

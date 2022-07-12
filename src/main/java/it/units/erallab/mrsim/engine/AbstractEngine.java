@@ -20,6 +20,7 @@ import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.*;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.engine.dyn4j.BodyAnchor;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
 import it.units.erallab.mrsim.util.Profiled;
@@ -161,10 +162,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(CreateAndTranslateUnmovableBody.class, this::createAndTranslateUnmovableBody);
     registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
     registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
-    registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
+    registerActionSolver(DetachAnchors.class, this::detachAnchors);
     registerActionSolver(DetachAllAnchors.class, this::detachAllAnchors);
     registerActionSolver(TranslateAgent.class, this::translateAgent);
     registerActionSolver(AddAndTranslateAgent.class, this::addAndTranslateAgent);
+    registerActionSolver(AttachAnchor.class, this::attachAnchor);
+    registerActionSolver(DetachAnchor.class, this::detachAnchor);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -213,6 +216,36 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return voxel;
   }
 
+  private Anchor.Link attachAnchor(AttachAnchor action, Agent agent) {
+    // find already attached anchors
+    Collection<Anchor> attachedAnchors = action.anchor().links().stream()
+        .map(Anchor.Link::destination)
+        .filter(a -> a.anchorable() == action.anchorable())
+        .collect(Collectors.toSet());
+    //find closest anchor on destination
+    Anchor destination = action.anchorable().anchors().stream()
+        .filter(a -> !attachedAnchors.contains(a))
+        .min(Comparator.comparingDouble(a -> a.point().distance(action.anchor().point())))
+        .orElse(null);
+    //create link
+    if (destination != null) {
+      return perform(new CreateLink(action.anchor(), destination, action.type()), agent).outcome().orElse(null);
+    }
+    return null;
+  }
+
+  private Anchor.Link detachAnchor(DetachAnchor action, Agent agent) {
+    //find anchor
+    Optional<Anchor.Link> optionalLink = action.anchor()
+        .links()
+        .stream()
+        .filter(l -> l.destination().anchorable() == action.anchorable())
+        .findFirst();
+    return optionalLink
+        .flatMap(l -> perform(new RemoveLink(optionalLink.get()), agent).outcome())
+        .orElse(null);
+  }
+
   protected Collection<Anchor.Link> attachClosestAnchors(AttachClosestAnchors action, Agent agent) {
     Point targetCenter = Point.average(action.targetAnchorable()
         .anchors()
@@ -226,13 +259,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .toList();
   }
 
-  protected Collection<Anchor.Link> detachAllAnchorsFromAnchorable(
-      DetachAllAnchorsFromAnchorable action,
+  protected Collection<Anchor.Link> detachAnchors(
+      DetachAnchors action,
       Agent agent
   ) {
     return action.sourceAnchorable().anchors().stream()
         .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).outcome().orElseThrow())
-        .flatMap(Collection::stream)
         .toList();
   }
 
@@ -242,7 +274,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
     return anchorables.stream()
-        .map(target -> perform(new DetachAllAnchorsFromAnchorable(action.anchorable(), target), agent).outcome()
+        .map(target -> perform(new DetachAnchors(action.anchorable(), target), agent).outcome()
             .orElseThrow())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());

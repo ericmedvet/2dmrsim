@@ -106,7 +106,7 @@ public class Main {
         ));
       }
       if (engine.t() > 4 && engine.t() < 5) {
-        engine.perform(new DetachAllAnchorsFromAnchorable(v1, v2));
+        engine.perform(new DetachAnchors(v1, v2));
       }
       for (Body body : snapshot.bodies()) {
         if (!(body instanceof UnmovableBody) && (body.poly().center().y() < -12)) {

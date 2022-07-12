@@ -19,8 +19,8 @@ package it.units.erallab.mrsim.viewer;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
-import it.units.erallab.mrsim.viewer.drawers.actions.AttachAnchor;
-import it.units.erallab.mrsim.viewer.drawers.actions.DetachAnchor;
+import it.units.erallab.mrsim.viewer.drawers.actions.CreateLink;
+import it.units.erallab.mrsim.viewer.drawers.actions.RemoveLink;
 import it.units.erallab.mrsim.viewer.drawers.bodies.AnchorableBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.SoftBodyDrawer;
@@ -62,8 +62,8 @@ public class Drawers {
             ).onLastSnapshot(),
             new ComponentsDrawer(
                 List.of(
-                    new AttachAnchor(),
-                    new DetachAnchor()
+                    new CreateLink(),
+                    new RemoveLink()
                 ), Snapshot::actionOutcomes
             )
         )

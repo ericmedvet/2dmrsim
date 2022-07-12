@@ -31,8 +31,8 @@ import java.util.function.BiPredicate;
 /**
  * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public class DetachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.DetachAnchor,
-    Collection<Anchor.Link>> {
+public class RemoveLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.RemoveLink,
+    Anchor.Link> {
 
   private final static double DURATION = 0.75;
   private final static Color COLOR = Color.RED;
@@ -43,38 +43,37 @@ public class DetachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.m
   private final Color color;
 
 
-  public DetachAnchor(
+  public RemoveLink(
       double duration,
       Color color
   ) {
-    super(it.units.erallab.mrsim.core.actions.DetachAnchor.class);
+    super(it.units.erallab.mrsim.core.actions.RemoveLink.class);
     this.duration = duration;
     this.color = color;
   }
 
-  public DetachAnchor() {
+  public RemoveLink() {
     this(DURATION, COLOR);
   }
 
   @Override
   protected BiPredicate<Double, Graphics2D> innerBuildTask(
       double t,
-      ActionOutcome<it.units.erallab.mrsim.core.actions.DetachAnchor, Collection<Anchor.Link>> o
+      ActionOutcome<it.units.erallab.mrsim.core.actions.RemoveLink, Anchor.Link> o
   ) {
     return (dT, g) -> {
       g.setColor(color);
-      if (o.outcome().isPresent() && !o.outcome().get().isEmpty()) {
+      if (o.outcome().isPresent()) {
         double r = RADIUS.denormalize(dT / duration);
-        Anchor src = o.action().anchor();
+        Anchor.Link link = o.outcome().get();
+        Anchor src = link.source();
         g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
-        for (Anchor.Link link : o.outcome().get()) {
-          Anchor dst = link.destination();
-          g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
-          double a = src.point().diff(dst.point()).direction();
-          Point lSrc = src.point().diff(new Point(a).scale(r));
-          Point lDst = dst.point().sum(new Point(a).scale(r));
-          g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
-        }
+        Anchor dst = link.destination();
+        g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
+        double a = src.point().diff(dst.point()).direction();
+        Point lSrc = src.point().diff(new Point(a).scale(r));
+        Point lDst = dst.point().sum(new Point(a).scale(r));
+        g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
       }
       return dT > duration;
     };

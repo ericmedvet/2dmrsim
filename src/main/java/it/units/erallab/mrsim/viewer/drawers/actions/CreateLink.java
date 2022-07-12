@@ -29,7 +29,7 @@ import java.util.function.BiPredicate;
 /**
  * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public class AttachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.AttachAnchor,
+public class CreateLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.CreateLink,
     Anchor.Link> {
 
   private final static double DURATION = 0.75;
@@ -41,20 +41,20 @@ public class AttachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.m
   private final Color color;
 
 
-  public AttachAnchor(double duration, Color color) {
-    super(it.units.erallab.mrsim.core.actions.AttachAnchor.class);
+  public CreateLink(double duration, Color color) {
+    super(it.units.erallab.mrsim.core.actions.CreateLink.class);
     this.duration = duration;
     this.color = color;
   }
 
-  public AttachAnchor() {
+  public CreateLink() {
     this(DURATION, COLOR);
   }
 
   @Override
   protected BiPredicate<Double, Graphics2D> innerBuildTask(
       double t,
-      ActionOutcome<it.units.erallab.mrsim.core.actions.AttachAnchor, Anchor.Link> o
+      ActionOutcome<it.units.erallab.mrsim.core.actions.CreateLink, Anchor.Link> o
   ) {
     return (dT, g) -> {
       g.setColor(color);
@@ -65,7 +65,8 @@ public class AttachAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.m
         g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
         g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
         double a = src.point().diff(dst.point()).direction();
-        it.units.erallab.mrsim.core.geometry.Point lSrc = src.point().diff(new it.units.erallab.mrsim.core.geometry.Point(a).scale(r));
+        it.units.erallab.mrsim.core.geometry.Point lSrc = src.point()
+            .diff(new it.units.erallab.mrsim.core.geometry.Point(a).scale(r));
         it.units.erallab.mrsim.core.geometry.Point lDst = dst.point().sum(new Point(a).scale(r));
         g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
       }

@@ -28,5 +28,5 @@ import java.util.Collection;
 public record DetachAnchor(
     Anchor anchor,
     Anchorable anchorable
-) implements Action<Collection<Anchor.Link>> {
+) implements Action<Anchor.Link> {
 }
