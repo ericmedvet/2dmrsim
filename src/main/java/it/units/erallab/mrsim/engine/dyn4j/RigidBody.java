@@ -31,11 +31,6 @@ import java.util.List;
  */
 public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, MultipartBody {
 
-  protected final static double FRICTION = 1d;
-  protected final static double RESTITUTION = 0.5d;
-  protected final static double LINEAR_DAMPING = 0.1d;
-  protected final static double ANGULAR_DAMPING = 0.1d;
-
   private final Body body;
   private final double mass;
   private final Vector2 initialFirstSideDirection;

@@ -37,9 +37,6 @@ import java.util.Set;
  */
 public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.UnmovableBody, MultipartBody {
 
-  protected final static double FRICTION = 1d;
-  protected final static double RESTITUTION = 0.5d;
-
   private final Poly poly;
   private final List<Body> bodies;
 

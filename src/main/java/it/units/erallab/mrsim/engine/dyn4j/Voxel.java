@@ -36,12 +36,6 @@ import java.util.stream.Stream;
  */
 public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, MultipartBody {
 
-  protected final static double FRICTION = 1d;
-  protected final static double RESTITUTION = 0.5d;
-  protected final static double LINEAR_DAMPING = 0.1d;
-  protected final static double ANGULAR_DAMPING = 0.1d;
-  protected final static double VERTEX_MASS_SIDE_LENGTH_RATIO = 0.35d;
-  protected final static EnumSet<SpringScaffolding> SPRING_SCAFFOLDINGS = EnumSet.allOf(SpringScaffolding.class);
   protected static final DoubleRange SPRING_F_RANGE = new DoubleRange(2d, 10d);
   protected static final double SPRING_D = 0.3d;
 

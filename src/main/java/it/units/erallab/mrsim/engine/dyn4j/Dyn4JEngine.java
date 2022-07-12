@@ -35,28 +35,58 @@ import org.dyn4j.world.World;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumSet;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class Dyn4JEngine extends AbstractEngine {
-  private final Settings settings;
+
+  private final static Configuration DEFAULT_CONFIGURATION = new Configuration(
+      new Settings(),
+      1, 0.5, 0.1, 0.1,
+      1, 0.5,
+      1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(it.units.erallab.mrsim.engine.dyn4j.Voxel.SpringScaffolding.class),
+      8d, 0.3d, 0.5d
+  );
+
+  public record Configuration(
+      Settings innerSettings,
+      double rigidBodyFriction,
+      double rigidBodyRestitution,
+      double rigidBodyLinearDamping,
+      double rigidBodyAngularDamping,
+      double unmovableBodyFriction,
+      double unmovableBodyRestitution,
+      double voxelFriction,
+      double voxelRestitution,
+      double voxelLinearDamping,
+      double voxelAngularDamping,
+      double voxelVertexMassSideLengthRatio,
+      EnumSet<it.units.erallab.mrsim.engine.dyn4j.Voxel.SpringScaffolding> voxelSpringScaffoldings,
+      double softLinkSpringF,
+      double softLinkSpringD,
+      double softLinkRestDistanceRatio
+
+  ) {}
+
+  private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
 
-  public Dyn4JEngine(Settings settings) {
-    this.settings = settings;
+  public Dyn4JEngine(Configuration configuration) {
+    this.configuration = configuration;
     world = new World<>();
-    world.setSettings(settings);
+    world.setSettings(configuration.innerSettings());
   }
 
   public Dyn4JEngine() {
-    this(new Settings());
+    this(DEFAULT_CONFIGURATION);
   }
 
   @Override
   protected double innerTick() {
     world.step(1);
-    return t() + settings.getStepFrequency();
+    return t() + configuration.innerSettings().getStepFrequency();
   }
 
   @Override
@@ -81,10 +111,10 @@ public class Dyn4JEngine extends AbstractEngine {
     RigidBody rigidBody = new RigidBody(
         action.poly(),
         action.mass(),
-        RigidBody.FRICTION,
-        RigidBody.RESTITUTION,
-        RigidBody.LINEAR_DAMPING,
-        RigidBody.ANGULAR_DAMPING
+        configuration.rigidBodyFriction,
+        configuration.rigidBodyRestitution,
+        configuration.rigidBodyLinearDamping,
+        configuration.rigidBodyAngularDamping
     );
     rigidBody.getBodies().forEach(world::addBody);
     bodies.add(rigidBody);
@@ -92,7 +122,11 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
-    UnmovableBody unmovableBody = new UnmovableBody(action.poly(), UnmovableBody.FRICTION, UnmovableBody.RESTITUTION);
+    UnmovableBody unmovableBody = new UnmovableBody(
+        action.poly(),
+        configuration.unmovableBodyFriction,
+        configuration.unmovableBodyRestitution
+    );
     unmovableBody.getBodies().forEach(world::addBody);
     bodies.add(unmovableBody);
     return unmovableBody;
@@ -117,14 +151,14 @@ public class Dyn4JEngine extends AbstractEngine {
     it.units.erallab.mrsim.engine.dyn4j.Voxel voxel = new it.units.erallab.mrsim.engine.dyn4j.Voxel(
         action.sideLength(),
         action.mass(),
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.FRICTION,
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.RESTITUTION,
+        configuration.voxelFriction,
+        configuration.voxelRestitution,
         action.material().softness(),
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.LINEAR_DAMPING,
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.ANGULAR_DAMPING,
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.VERTEX_MASS_SIDE_LENGTH_RATIO,
+        configuration.voxelLinearDamping,
+        configuration.voxelAngularDamping,
+        configuration.voxelVertexMassSideLengthRatio,
         action.material().areaRatioRange(),
-        it.units.erallab.mrsim.engine.dyn4j.Voxel.SPRING_SCAFFOLDINGS
+        configuration.voxelSpringScaffoldings
     );
     voxel.getBodies().forEach(world::addBody);
     voxel.getJoints().forEach(world::addJoint);
@@ -161,10 +195,10 @@ public class Dyn4JEngine extends AbstractEngine {
               new Vector2(src.point().x(), src.point().y()),
               new Vector2(dst.point().x(), dst.point().y())
           );
-          springJoint.setRestDistance(src.point().distance(dst.point())*BodyAnchor.SOFT_LINK_REST_DISTANCE_RATIO);
+          springJoint.setRestDistance(src.point().distance(dst.point()) * configuration.softLinkRestDistanceRatio);
           springJoint.setCollisionAllowed(true);
-          springJoint.setFrequency(BodyAnchor.SOFT_LINK_SPRING_F);
-          springJoint.setDampingRatio(BodyAnchor.SOFT_LINK_SPRING_D);
+          springJoint.setFrequency(configuration.softLinkSpringF);
+          springJoint.setDampingRatio(configuration.softLinkSpringD);
           joint = springJoint;
         } else {
           throw new IllegalActionException(action, String.format("Unsupported link type: %s", action.type()));
