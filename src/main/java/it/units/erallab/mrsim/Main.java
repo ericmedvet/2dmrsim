@@ -21,10 +21,7 @@ import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.core.bodies.RigidBody;
-import it.units.erallab.mrsim.core.bodies.UnmovableBody;
-import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.core.bodies.*;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
@@ -60,8 +57,8 @@ public class Main {
     Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).outcome().orElseThrow();
     Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).outcome().orElseThrow();
     engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
-    engine.perform(new AttachClosestAnchors(2, v1, v2)).outcome().orElseThrow();
-    engine.perform(new AttachClosestAnchors(2, v2, v3)).outcome().orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v1, v2, Anchor.Link.Type.RIGID)).outcome().orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v2, v3, Anchor.Link.Type.SOFT)).outcome().orElseThrow();
     Poly terrain = PolyUtils.createTerrain(
         //"hilly-0.25-2-0",
         "downhill-10",

@@ -21,7 +21,8 @@ import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.viewer.drawers.AbstractComponentDrawer;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 
@@ -54,8 +55,8 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
           ANCHOR_DOT_RADIUS * 2d,
           ANCHOR_DOT_RADIUS * 2d
       ));
-      for (Anchor dstAnchor : anchor.attachedAnchors()) {
-        it.units.erallab.mrsim.core.geometry.Point midPoint = Point.average(anchor.point(), dstAnchor.point());
+      for (Anchor.Link link : anchor.links()) {
+        Point midPoint = Point.average(anchor.point(), link.destination().point());
         g.draw(new Line2D.Double(
             anchor.point().x(), anchor.point().y(),
             midPoint.x(), midPoint.y()

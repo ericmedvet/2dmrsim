@@ -25,11 +25,18 @@ import java.util.Collection;
  */
 public interface Anchor {
 
-  record Link(Anchor source, Anchor destination) {}
+  record Link(Anchor source, Anchor destination, Type type) {
+    public enum Type {RIGID, SOFT}
+
+    public Link reversed() {
+      return new Link(destination, source, type);
+    }
+  }
+
 
   Point point();
 
   Anchorable anchorable();
 
-  Collection<Anchor> attachedAnchors();
+  Collection<Anchor.Link> links();
 }

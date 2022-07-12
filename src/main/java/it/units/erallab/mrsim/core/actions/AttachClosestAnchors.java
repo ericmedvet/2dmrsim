@@ -28,6 +28,7 @@ import java.util.Collection;
 public record AttachClosestAnchors(
     int nOfAnchors,
     Anchorable sourceAnchorable,
-    Anchorable targetAnchorable
+    Anchorable targetAnchorable,
+    Anchor.Link.Type type
 ) implements Action<Collection<Anchor.Link>> {
 }

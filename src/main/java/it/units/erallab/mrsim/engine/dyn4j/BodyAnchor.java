@@ -19,19 +19,25 @@ package it.units.erallab.mrsim.engine.dyn4j;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.util.Pair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
 public class BodyAnchor implements Anchor {
+
+  protected static double SOFT_LINK_SPRING_F = 8;
+  protected static final double SOFT_LINK_SPRING_D = 0.3d;
+
   private final Body body;
   private final Anchorable anchorable;
-  private final Map<BodyAnchor, Joint<Body>> jointMap;
+  private final Map<Link, Joint<Body>> jointMap;
 
   public BodyAnchor(Body body, Anchorable anchorable) {
     this.body = body;
@@ -50,18 +56,17 @@ public class BodyAnchor implements Anchor {
     return anchorable;
   }
 
+
   @Override
-  public Collection<Anchor> attachedAnchors() {
-    Collection<Anchor> anchors = new ArrayList<>(jointMap.size());
-    anchors.addAll(jointMap.keySet());
-    return anchors;
+  public Collection<Link> links() {
+    return jointMap.keySet();
   }
 
   protected Body getBody() {
     return body;
   }
 
-  protected Map<BodyAnchor, Joint<Body>> getJointMap() {
+  protected Map<Link, Joint<Body>> getJointMap() {
     return jointMap;
   }
 

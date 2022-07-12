@@ -222,7 +222,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return action.sourceAnchorable().anchors().stream()
         .sorted(Comparator.comparingDouble(a -> a.point().distance(targetCenter)))
         .limit(action.nOfAnchors())
-        .map(a -> perform(new AttachAnchor(a, action.targetAnchorable()), agent).outcome().orElseThrow())
+        .map(a -> perform(new AttachAnchor(a, action.targetAnchorable(), action.type()), agent).outcome().orElseThrow())
         .toList();
   }
 
@@ -238,7 +238,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
 
   protected Collection<Anchor.Link> detachAllAnchors(DetachAllAnchors action, Agent agent) {
     Set<Anchorable> anchorables = action.anchorable().anchors().stream()
-        .map(a -> a.attachedAnchors().stream().map(Anchor::anchorable).collect(Collectors.toSet()))
+        .map(a -> a.links().stream().map(l -> l.destination().anchorable()).collect(Collectors.toSet()))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
     return anchorables.stream()

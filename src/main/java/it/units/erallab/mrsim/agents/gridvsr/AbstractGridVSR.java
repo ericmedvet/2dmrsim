@@ -17,8 +17,10 @@
 package it.units.erallab.mrsim.agents.gridvsr;
 
 import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.actions.AttachClosestAnchors;
 import it.units.erallab.mrsim.core.actions.CreateAndTranslateVoxel;
+import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
@@ -30,10 +32,11 @@ import java.util.Objects;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public abstract class AbstractGridVSR implements it.units.erallab.mrsim.core.EmbodiedAgent {
+public abstract class AbstractGridVSR implements EmbodiedAgent {
 
   protected final static double VOXEL_SIDE_LENGTH = 1d;
   protected final static double VOXEL_MASS = 1d;
+  protected final static Anchor.Link.Type LINK_TYPE = Anchor.Link.Type.RIGID;
 
   private final Grid<Voxel.Material> materialGrid;
   private final double voxelSideLength;
@@ -75,10 +78,10 @@ public abstract class AbstractGridVSR implements it.units.erallab.mrsim.core.Emb
         Voxel onEast = voxelGrid.get(key.x() + 1, key.y());
         Voxel onSouth = voxelGrid.get(key.x(), key.y() + 1);
         if (onEast != null) {
-          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onEast), this);
+          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onEast, LINK_TYPE), this);
         }
         if (onSouth != null) {
-          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onSouth), this);
+          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onSouth, LINK_TYPE), this);
         }
       }
     }
