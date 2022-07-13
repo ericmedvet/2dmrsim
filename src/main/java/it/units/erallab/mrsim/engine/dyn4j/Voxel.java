@@ -23,10 +23,7 @@ import it.units.erallab.mrsim.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Rectangle;
-import org.dyn4j.geometry.Transform;
-import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,6 +63,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   private final EnumSet<SpringScaffolding> springScaffoldings;
 
   protected final Map<Vertex, Body> vertexes;
+  protected final List<Body> otherBodies;
   protected final Map<Side, List<DistanceJoint<Body>>> sideJoints;
   protected final List<DistanceJoint<Body>> centralJoints;
   protected final Map<Vertex, BodyAnchor> anchors;
@@ -96,6 +94,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     this.springScaffoldings = springScaffoldings;
     vertexes = new EnumMap<>(Vertex.class);
     sideJoints = new EnumMap<>(Side.class);
+    otherBodies = new ArrayList<>();
     Arrays.stream(Side.values()).forEach(s -> sideJoints.put(s, new ArrayList<>()));
     centralJoints = new ArrayList<>();
     assemble();
@@ -312,6 +311,32 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setUserData(centralCrossActiveRange);
       }
     }
+    if (true) {
+      Body centralMass = new Body();
+      double radius = activeSideRange.min() / 2d;
+      centralMass.addFixture(
+          new Rectangle(radius, radius),
+          mass / Math.PI / radius / radius,
+          friction,
+          restitution
+      );
+      centralMass.setMass(MassType.NORMAL);
+      centralMass.setLinearDamping(linearDamping);
+      centralMass.setAngularDamping(angularDamping);
+      centralMass.translate(sideLength / 2d - radius / 2d, sideLength / 2d - radius / 2d);
+      otherBodies.add(centralMass);
+      for (Body vertex : vertexes.values()) {
+        DistanceJoint<Body> joint = new DistanceJoint<>(
+            centralMass, vertex, centralMass.getWorldCenter(), vertex.getWorldCenter()
+        );
+        joint.setUserData(new SpringRange(
+            centralCrossActiveRange.min / 2d,
+            centralCrossActiveRange.rest / 2d,
+            centralCrossActiveRange.max / 2
+        ));
+        centralJoints.add(joint);
+      }
+    }
     //setup spring joints
     getJoints().forEach(j -> {
       if (j instanceof DistanceJoint<Body> joint) {
@@ -356,7 +381,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   @Override
   public Collection<Body> getBodies() {
-    return vertexes.values();
+    return Stream.of(vertexes.values(), otherBodies)
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
