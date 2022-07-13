@@ -375,14 +375,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
     //match anchor pairs
     Collection<Anchor> dstAnchors = new HashSet<>(action.anchorable().anchors());
     Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
-    srcAnchors.forEach(src -> {
-      Optional<Anchor> closest = dstAnchors.stream()
-          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())));
-      if (closest.isPresent()) {
-        pairs.add(new Pair<>(src, closest.get()));
-        dstAnchors.remove(closest.get());
-      }
-    });
+    srcAnchors.forEach(src -> dstAnchors.stream()
+        .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
+        .ifPresent(dstAnchor -> {
+          pairs.add(new Pair<>(src, dstAnchor));
+          dstAnchors.remove(dstAnchor);
+        }));
     //attract and link
     Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new HashMap<>();
     for (Pair<Anchor, Anchor> pair : pairs) {

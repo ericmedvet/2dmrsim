@@ -51,31 +51,34 @@ public class Main {
     Drawer drawer = Drawers.basic().profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
         600,
-        300,
+        400,
         0,
-        20,
+        50,
         30,
-        VideoUtils.EncoderFacility.FFMPEG_SMALL,
+        VideoUtils.EncoderFacility.FFMPEG_LARGE,
         new File("/home/eric/experiments/balls.mp4"),
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
+    Engine engine = new Dyn4JEngine();
     //do thing
-    //vsr(terrain, viewer);
-    iVsrs(terrain, viewer);
+    //vsr(engine, terrain, viewer);
+    iVsrs(engine, terrain, viewer);
     //do final stuff
     videoBuilder.get();
     if (drawer instanceof Profiled profiled) {
       System.out.println(profiled.values());
     }
+    if (engine instanceof Profiled profiled) {
+      System.out.println(profiled.values());
+    }
   }
 
-  private static void vsr(Poly terrain, Consumer<Snapshot> consumer) {
+  private static void vsr(Engine engine, Poly terrain, Consumer<Snapshot> consumer) {
     Poly ball = Poly.regular(1, 20);
     double ballInterval = 5d;
     double lastBallT = 0d;
-    Engine engine = new Dyn4JEngine();
     Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
     AbstractGridVSR vsr = new NumGridVSR(
         shape.map(b -> b ? new Voxel.Material() : null),
@@ -107,11 +110,10 @@ public class Main {
     }
   }
 
-  private static void iVsrs(Poly terrain, Consumer<Snapshot> consumer) {
+  private static void iVsrs(Engine engine, Poly terrain, Consumer<Snapshot> consumer) {
     double interval = 5d;
     double lastT = Double.NEGATIVE_INFINITY;
     double sideInterval = 2d;
-    Engine engine = new Dyn4JEngine();
     engine.perform(new CreateUnmovableBody(terrain));
     RandomGenerator rg = new Random();
     Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
@@ -127,7 +129,7 @@ public class Main {
         },
         0, 8
     );
-    while (engine.t() < 100) {
+    while (engine.t() < 30) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (engine.t() > lastT + interval) {
