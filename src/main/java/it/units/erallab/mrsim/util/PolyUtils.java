@@ -40,7 +40,6 @@ public class PolyUtils {
   public final static double TERRAIN_BORDER_HEIGHT = 100d;
   public static final int TERRAIN_WIDTH = 2000;
   public static final double TERRAIN_BORDER_WIDTH = 10d;
-  public static final double TERRAIN_START_LENGTH = 10d;
 
   private PolyUtils() {
   }

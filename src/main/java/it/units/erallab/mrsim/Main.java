@@ -43,35 +43,6 @@ import java.util.random.RandomGenerator;
  */
 public class Main {
   public static void main(String[] args) throws IOException {
-    Poly ball = Poly.regular(1, 20);
-    double ballInterval = 15d;
-    double lastBallT = 0d;
-    Engine engine = new Dyn4JEngine();
-    Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
-    AbstractGridVSR vsr = new NumGridVSR(
-        shape.map(b -> b ? new Voxel.Material() : null),
-        shape.map(b -> List.of()),
-        (t, iG) -> Grid.create(
-            shape.w(),
-            shape.h(),
-            (x, y) -> 0.1 * Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w())
-        )
-    );
-    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 14))).outcome().orElseThrow();
-    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8, 15))).outcome().orElseThrow();
-    Voxel v3 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(9, 15))).outcome().orElseThrow();
-    engine.perform(new AddAndTranslateAgent(vsr, new Point(3d, 4d)));
-    engine.perform(new AttachClosestAnchors(2, v1, v2, Anchor.Link.Type.RIGID)).outcome().orElseThrow();
-    engine.perform(new AttachClosestAnchors(2, v2, v3, Anchor.Link.Type.SOFT)).outcome().orElseThrow();
-    Poly terrain = PolyUtils.createTerrain(
-        //"hilly-0.25-1-0",
-        "downhill-5",
-        //"uphill-30",
-        //"steppy-0.25-2-0",
-        //"flat",
-        100, 1, 1, 3
-    );
-    engine.perform(new CreateUnmovableBody(terrain));
     Drawer drawer = Drawers.basic().profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
         600,
@@ -81,11 +52,37 @@ public class Main {
         30,
         VideoUtils.EncoderFacility.FFMPEG_SMALL,
         new File("/home/eric/experiments/balls.mp4"),
-        Drawers.basic()
+        drawer
     );
-    RandomGenerator rg = new Random();
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Consumer<Snapshot> consumer = videoBuilder;
+    Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
+    //do thing
+    vsr(terrain, viewer);
+    //do final stuff
+    videoBuilder.get();
+    if (drawer instanceof Profiled profiled) {
+      System.out.println(profiled.values());
+    }
+  }
+
+  private static void vsr(Poly terrain, Consumer<Snapshot> consumer) {
+    Poly ball = Poly.regular(1, 20);
+    double ballInterval = 5d;
+    double lastBallT = 0d;
+    Engine engine = new Dyn4JEngine();
+    Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
+    AbstractGridVSR vsr = new NumGridVSR(
+        shape.map(b -> b ? new Voxel.Material() : null),
+        shape.map(b -> List.of()),
+        (t, iG) -> Grid.create(
+            shape.w(),
+            shape.h(),
+            (x, y) -> 1.5 * Math.sin(-2d * Math.PI * t + Math.PI * x / shape.w())
+        )
+    );
+    engine.perform(new CreateUnmovableBody(terrain));
+    engine.perform(new AddAndTranslateAgent(vsr, new Point(50, 5)));
+    RandomGenerator rg = new Random();
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
@@ -101,28 +98,6 @@ public class Main {
                 .orElse(0) + Math.max(1d, 1d + rg.nextGaussian() * 1.1d))
         ));
       }
-      if (engine.t() > 3 && engine.t() < 4) {
-        engine.perform(new DetachAnchors(v1, v2));
-      }
-      if (engine.t() > 5 && engine.t() < 20) {
-        engine.perform(new AttractAndLinkClosestAnchorable(
-            List.of(v1.anchors().get(0), v1.anchors().get(3)),
-            1, Anchor.Link.Type.SOFT
-        ));
-      }
-      for (Body body : snapshot.bodies()) {
-        if (!(body instanceof UnmovableBody) && (body.poly().center().y() < -12)) {
-          engine.perform(new RemoveBody(body));
-        }
-      }
-      if (snapshot.bodies().contains(v2)) {
-        double v = Math.sin(2d * Math.PI * engine.t());
-        engine.perform(new ActuateVoxel(v2, v, 0, 0, -1));
-      }
-    }
-    videoBuilder.get();
-    if (drawer instanceof Profiled profiled) {
-      System.out.println(profiled.values());
     }
   }
 }

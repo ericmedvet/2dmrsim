@@ -99,6 +99,10 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
 
   @Override
   public File get() {
+    if (snapshots.isEmpty()) {
+      L.warning("No snapshot to save: abort");
+      return null;
+    }
     L.fine(String.format("Saving video on %s", file));
     try {
       Instant encodingStartInstant = Instant.now();

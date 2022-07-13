@@ -82,7 +82,7 @@ public class NumGridVSR extends AbstractGridVSR {
         }
       }
     }
-    //compute acutation
+    //compute actuation
     timedFunction.apply(t,inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();

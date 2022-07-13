@@ -29,6 +29,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -67,7 +68,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   protected final Map<Vertex, Body> vertexes;
   protected final Map<Side, List<DistanceJoint<Body>>> sideJoints;
   protected final List<DistanceJoint<Body>> centralJoints;
-  protected final List<BodyAnchor> anchors;
+  protected final Map<Vertex, BodyAnchor> anchors;
   private final Vector2 initialSidesAverageDirection;
 
 
@@ -98,7 +99,10 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     Arrays.stream(Side.values()).forEach(s -> sideJoints.put(s, new ArrayList<>()));
     centralJoints = new ArrayList<>();
     assemble();
-    anchors = vertexes.values().stream().map(v -> new BodyAnchor(v, this)).toList();
+    anchors = vertexes.entrySet().stream().collect(Collectors.toMap(
+        Map.Entry::getKey,
+        e -> new BodyAnchor(e.getValue(), this)
+    ));
     initialSidesAverageDirection = getSidesAverageDirection();
   }
 
@@ -379,7 +383,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public List<Anchor> anchors() {
-    return (List) anchors;
+    return (List) anchors.values().stream().toList();
   }
 
   @Override
@@ -417,5 +421,20 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   public double angle() {
     Vector2 currentSidesAverageDirection = getSidesAverageDirection();
     return currentSidesAverageDirection.getAngleBetween(initialSidesAverageDirection);
+  }
+
+  @Override
+  public Anchor anchorOn(Vertex vertex) {
+    return anchors.get(vertex);
+  }
+
+  @Override
+  public Collection<Anchor> anchorsOn(Side side) {
+    return switch (side) {
+      case N -> List.of(anchors.get(Vertex.NW), anchors.get(Vertex.NE));
+      case E -> List.of(anchors.get(Vertex.NE), anchors.get(Vertex.SE));
+      case S -> List.of(anchors.get(Vertex.SE), anchors.get(Vertex.SW));
+      case W -> List.of(anchors.get(Vertex.SW), anchors.get(Vertex.NW));
+    };
   }
 }

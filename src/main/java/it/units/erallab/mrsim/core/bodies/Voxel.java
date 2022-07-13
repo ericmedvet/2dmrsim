@@ -18,6 +18,8 @@ package it.units.erallab.mrsim.core.bodies;
 
 import it.units.erallab.mrsim.util.DoubleRange;
 
+import java.util.Collection;
+
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
@@ -38,5 +40,8 @@ public interface Voxel extends SoftBody, Anchorable {
   enum Side {N, E, W, S}
 
   enum Vertex {NW, NE, SE, SW}
+
+  Anchor anchorOn(Vertex vertex);
+  Collection<Anchor> anchorsOn(Side side);
 
 }
