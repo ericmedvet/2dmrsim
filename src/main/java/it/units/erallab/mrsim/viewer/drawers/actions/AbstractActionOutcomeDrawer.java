@@ -28,7 +28,7 @@ import java.util.function.BiPredicate;
  */
 public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O> extends AbstractLastingComponentDrawer {
 
-  protected final static double DURATION = 0.75;
+  protected final static double DURATION = 0.5;
 
   private final Class<A> actionClass;
   protected final double duration;

@@ -17,7 +17,7 @@
 package it.units.erallab.mrsim.viewer;
 
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.engine.dyn4j.VoxelDrawer;
+import it.units.erallab.mrsim.engine.dyn4j.drawers.VoxelDrawer;
 import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.actions.AttractAnchor;
@@ -59,7 +59,7 @@ public class Drawers {
                 List.of(
                     new UnmovableBodyDrawer(),
                     new RigidBodyDrawer(),
-                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()).andThen(new VoxelDrawer())
+                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
                 ), Snapshot::bodies
             ).onLastSnapshot(),
             new ComponentsDrawer(

@@ -20,12 +20,15 @@ import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.util.DoubleRange;
+import org.dyn4j.collision.Filter;
+import org.dyn4j.collision.TypeFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.*;
 
 import java.util.*;
+import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +39,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   protected static final DoubleRange SPRING_F_RANGE = new DoubleRange(2d, 10d);
   protected static final double SPRING_D = 0.3d;
+  private static final double CENTRAL_MASS_RATIO = 0.5d;
+  private static final DoubleFunction<Convex> MASS_SHAPE_PROVIDER = l -> new Circle(l / 2d);
+
 
   private record SpringRange(double min, double rest, double max) {
 
@@ -49,6 +55,16 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   protected enum SpringScaffolding {
     SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
+  }
+
+  private record OwnerFilter(Object owner) implements Filter {
+    @Override
+    public boolean isAllowed(Filter filter) {
+      if (filter instanceof OwnerFilter ownerFilter) {
+        return owner != ownerFilter.owner;
+      }
+      return true;
+    }
   }
 
   private final double sideLength;
@@ -116,14 +132,14 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   protected void assemble() {
     //compute densities
     double massSideLength = sideLength * vertexMassSideLengthRatio;
-    double density = (mass / 4) / (massSideLength * massSideLength);
+    double density = (mass * (1d - CENTRAL_MASS_RATIO) / 4d) / (massSideLength * massSideLength);
     //build bodies
     vertexes.put(Vertex.NW, new Body()); // 0
     vertexes.put(Vertex.NE, new Body()); // 1
     vertexes.put(Vertex.SE, new Body()); // 2
     vertexes.put(Vertex.SW, new Body()); // 3
     vertexes.values().forEach(v -> v.addFixture(
-        new Rectangle(massSideLength, massSideLength),
+        MASS_SHAPE_PROVIDER.apply(massSideLength),
         density,
         friction,
         restitution
@@ -311,19 +327,18 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setUserData(centralCrossActiveRange);
       }
     }
-    if (true) {
+    if (CENTRAL_MASS_RATIO > 0) {
       Body centralMass = new Body();
-      double radius = activeSideRange.min() / 2d;
       centralMass.addFixture(
-          new Rectangle(radius, radius),
-          mass / Math.PI / radius / radius,
+          new Circle(activeSideRange.min() / 2d),
+          mass * CENTRAL_MASS_RATIO,
           friction,
           restitution
       );
       centralMass.setMass(MassType.NORMAL);
       centralMass.setLinearDamping(linearDamping);
       centralMass.setAngularDamping(angularDamping);
-      centralMass.translate(sideLength / 2d - radius / 2d, sideLength / 2d - radius / 2d);
+      centralMass.translate(sideLength / 2d, sideLength / 2d);
       otherBodies.add(centralMass);
       for (Body vertex : vertexes.values()) {
         DistanceJoint<Body> joint = new DistanceJoint<>(
@@ -334,9 +349,12 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
             centralCrossActiveRange.rest / 2d,
             centralCrossActiveRange.max / 2
         ));
+        joint.setCollisionAllowed(false);
         centralJoints.add(joint);
       }
     }
+    //set collision filter
+    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this))));
     //setup spring joints
     getJoints().forEach(j -> {
       if (j instanceof DistanceJoint<Body> joint) {
@@ -407,6 +425,14 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     return new Point(tV.x, tV.y);
   }
 
+  private Point toPoint(Vector2 v) {
+    return new Point(v.x, v.y);
+  }
+
+  private Point enlongForm(Point src, Point dst, double d) {
+    return dst.sum(new Point(dst.diff(src).direction()).scale(d));
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public List<Anchor> anchors() {
@@ -415,12 +441,18 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   @Override
   public Poly poly() {
-    return new Poly(
+    /*return new Poly(
         getIndexedVertex(Vertex.NW, 3),
         getIndexedVertex(Vertex.NE, 2),
         getIndexedVertex(Vertex.SE, 1),
         getIndexedVertex(Vertex.SW, 0)
-    );
+    );*/
+    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
+    Point c = Point.average(centers.toArray(Point[]::new));
+    double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
+    return new Poly(centers.stream()
+        .map(vc -> enlongForm(c, vc, d))
+        .toArray(Point[]::new));
   }
 
   @Override

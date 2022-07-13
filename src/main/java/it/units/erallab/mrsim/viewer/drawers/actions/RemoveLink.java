@@ -56,8 +56,8 @@ public class RemoveLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrs
       ActionOutcome<it.units.erallab.mrsim.core.actions.RemoveLink, Anchor.Link> o
   ) {
     return (dT, g) -> {
-      g.setColor(color);
       if (o.outcome().isPresent()) {
+        g.setColor(color);
         double r = RADIUS.denormalize(dT / duration);
         Anchor.Link link = o.outcome().get();
         Anchor src = link.source();
@@ -68,8 +68,9 @@ public class RemoveLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrs
         Point lSrc = src.point().diff(new Point(a).scale(r));
         Point lDst = dst.point().sum(new Point(a).scale(r));
         g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
+        return dT > duration;
       }
-      return dT > duration;
+      return true;
     };
   }
 }

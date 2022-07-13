@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.engine.dyn4j;
+package it.units.erallab.mrsim.engine.dyn4j.drawers;
 
+import it.units.erallab.mrsim.engine.dyn4j.Voxel;
+import it.units.erallab.mrsim.viewer.DrawingUtils;
 import it.units.erallab.mrsim.viewer.drawers.AbstractComponentDrawer;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.Body;
@@ -29,7 +31,6 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.util.Arrays;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
@@ -37,11 +38,13 @@ import java.util.Arrays;
 public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
   private final static Color COLOR = Color.BLACK;
 
-  private final Color color;
+  private final Color drawColor;
+  private final Color fillColor;
 
   public VoxelDrawer(Color color) {
     super(Voxel.class);
-    this.color = color;
+    this.drawColor = color;
+    this.fillColor = DrawingUtils.alphaed(color, 0.1f);
   }
 
   public VoxelDrawer() {
@@ -50,7 +53,6 @@ public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
 
   @Override
   protected boolean innerDraw(double t, Voxel voxel, Graphics2D g) {
-    g.setColor(color);
     for (Body body : voxel.getBodies()) {
       Transform trans = body.getTransform();
       for (Fixture fixture : body.getFixtures()) {
@@ -71,10 +73,15 @@ public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
           double r = circle.getRadius();
           Vector2 c = circle.getCenter().copy();
           trans.transform(c);
-          g.draw(new Ellipse2D.Double(c.x - r / 2d, c.y - r / 2d, c.x + r / 2d, c.y + r / 2d));
+          Shape s = new Ellipse2D.Double(c.x - r, c.y - r, 2d * r, 2d * r);
+          g.setColor(fillColor);
+          g.fill(s);
+          g.setColor(drawColor);
+          g.draw(s);
         }
       }
     }
+    g.setColor(drawColor);
     for (Joint<Body> joint : voxel.getJoints()) {
       g.draw(new Line2D.Double(joint.getAnchor1().x, joint.getAnchor1().y, joint.getAnchor2().x, joint.getAnchor2().y));
     }

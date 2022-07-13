@@ -54,8 +54,8 @@ public class CreateLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrs
       ActionOutcome<it.units.erallab.mrsim.core.actions.CreateLink, Anchor.Link> o
   ) {
     return (dT, g) -> {
-      g.setColor(color);
       if (o.outcome().isPresent()) {
+        g.setColor(color);
         double r = RADIUS.max() - RADIUS.denormalize(dT / duration);
         Anchor src = o.outcome().get().source();
         Anchor dst = o.outcome().get().destination();
@@ -66,8 +66,10 @@ public class CreateLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrs
             .diff(new it.units.erallab.mrsim.core.geometry.Point(a).scale(r));
         it.units.erallab.mrsim.core.geometry.Point lDst = dst.point().sum(new Point(a).scale(r));
         g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
+        return dT > duration;
+      } else {
+        return true;
       }
-      return dT > duration;
     };
   }
 

@@ -129,7 +129,7 @@ public class Main {
         },
         0, 8
     );
-    while (engine.t() < 30) {
+    while (engine.t() < 60) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (engine.t() > lastT + interval) {
