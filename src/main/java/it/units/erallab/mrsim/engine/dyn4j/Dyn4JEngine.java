@@ -26,6 +26,7 @@ import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
 import it.units.erallab.mrsim.util.DoubleRange;
+import it.units.erallab.mrsim.util.PolyUtils;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -187,13 +188,15 @@ public class Dyn4JEngine extends AbstractEngine {
               )
           );
         } else if (Anchor.Link.Type.SOFT.equals(action.type())) {
+          double d = PolyUtils.minAnchorDistance(action.source(),
+              action.destination()) * configuration.softLinkRestDistanceRatio;
           DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
               src.getBody(),
               dst.getBody(),
               new Vector2(src.point().x(), src.point().y()),
               new Vector2(dst.point().x(), dst.point().y())
           );
-          springJoint.setRestDistance(src.point().distance(dst.point()) * configuration.softLinkRestDistanceRatio);
+          springJoint.setRestDistance(d);
           springJoint.setCollisionAllowed(true);
           springJoint.setFrequency(configuration.softLinkSpringF);
           springJoint.setDampingRatio(configuration.softLinkSpringD);

@@ -24,6 +24,7 @@ import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
 import it.units.erallab.mrsim.util.PolyUtils;
 import it.units.erallab.mrsim.util.Profiled;
+import org.w3c.dom.Attr;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -39,12 +40,14 @@ public abstract class AbstractEngine implements Engine, Profiled {
 
   private final static Configuration DEFAULT_CONFIGURATION = new Configuration(
       2,
-      1
+      1.5,
+      5
   );
 
   public record Configuration(
       double attractionRange,
-      double attractLinkRangeRatio
+      double attractLinkRangeRatio,
+      double bodyFindRange
   ) {}
 
   @FunctionalInterface
@@ -191,6 +194,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(DetachAnchor.class, this::detachAnchor);
     registerActionSolver(AttractAnchorable.class, this::attractAnchorable);
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
+    registerActionSolver(AttractAndLinkAnchorable.class, this::attractAndLinkAnchorable);
+    registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -342,22 +347,85 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return pairs;
   }
 
-  protected Pair<Double, Anchor.Link> attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
-    double srcD = PolyUtils.distance(action.source().point(), action.source().anchorable().poly());
-    double dstD = PolyUtils.distance(action.destination().point(), action.destination().anchorable().poly());
-    double d = (srcD + dstD) * configuration.attractLinkRangeRatio;
+  protected AttractAndLinkAnchor.Outcome attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
+    double d = PolyUtils.minAnchorDistance(action.source(), action.destination()) * configuration.attractLinkRangeRatio;
     if (action.source().point().distance(action.destination().point()) < d) {
-      return new Pair<>(
-          null,
-          perform(new CreateLink(action.source(), action.destination(), action.type()), agent).outcome().orElse(null)
+      return new AttractAndLinkAnchor.Outcome(
+          Optional.empty(),
+          perform(new CreateLink(action.source(), action.destination(), action.type()), agent).outcome()
       );
     } else {
-      return new Pair<>(
-          perform(new AttractAnchor(action.source(), action.destination(), action.magnitude()), agent).outcome()
-              .orElse(null),
-          null
+      return new AttractAndLinkAnchor.Outcome(
+          perform(new AttractAnchor(action.source(), action.destination(), action.magnitude()), agent).outcome(),
+          Optional.empty()
       );
     }
+  }
+
+  protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkAnchorable(
+      AttractAndLinkAnchorable action,
+      Agent agent
+  ) {
+    //discard already attached
+    Collection<Anchor> srcAnchors = action.anchors().stream()
+        .filter(a -> a.links().stream()
+            .map(l -> l.destination().anchorable())
+            .filter(dst -> dst == action.anchorable()).toList().isEmpty())
+        .toList();
+    //match anchor pairs
+    Collection<Anchor> dstAnchors = new HashSet<>(action.anchorable().anchors());
+    Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
+    srcAnchors.forEach(src -> {
+      Optional<Anchor> closest = dstAnchors.stream()
+          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())));
+      if (closest.isPresent()) {
+        pairs.add(new Pair<>(src, closest.get()));
+        dstAnchors.remove(closest.get());
+      }
+    });
+    //attract and link
+    Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new HashMap<>();
+    for (Pair<Anchor, Anchor> pair : pairs) {
+      perform(new AttractAndLinkAnchor(
+          pair.first(),
+          pair.second(),
+          action.magnitude(),
+          action.type()
+      ), agent)
+          .outcome()
+          .ifPresent(outcome -> map.put(pair, outcome));
+    }
+    return map;
+  }
+
+  protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkClosestAnchorable(
+      AttractAndLinkClosestAnchorable action,
+      Agent agent
+  ) throws IllegalActionException {
+    //find owner
+    Anchorable src = action.anchors()
+        .stream()
+        .findAny()
+        .map(Anchor::anchorable)
+        .orElseThrow(() -> new IllegalActionException(action, "Empty source anchorable"));
+    //find closest
+    Optional<Pair<Anchorable, Double>> closest = bodies.stream()
+        .filter(b -> b != src && b instanceof Anchorable)
+        .map(b -> new Pair<>(
+            (Anchorable) b,
+            action.anchors().stream().mapToDouble(a -> PolyUtils.distance(a.point(), b.poly())).sum()
+        ))
+        .min(Comparator.comparingDouble(Pair::second));
+    //attract and link
+    if (closest.isPresent() && closest.get().second() < configuration.bodyFindRange) {
+      return perform(new AttractAndLinkAnchorable(
+          action.anchors(),
+          closest.get().first(),
+          action.magnitude(),
+          action.type()
+      ), agent).outcome().orElse(Map.of());
+    }
+    return Map.of();
   }
 
 

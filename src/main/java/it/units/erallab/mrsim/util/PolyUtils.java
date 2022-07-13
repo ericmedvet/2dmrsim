@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim.util;
 
+import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.geometry.Path;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -174,6 +175,12 @@ public class PolyUtils {
       minD = Math.min(minD, distance(p, poly.vertexes()[i], poly.vertexes()[i + 1]));
     }
     return minD;
+  }
+
+  public static double minAnchorDistance(Anchor anchor1, Anchor anchor2) {
+    double d1 = PolyUtils.distance(anchor1.point(), anchor1.anchorable().poly());
+    double d2 = PolyUtils.distance(anchor2.point(), anchor2.anchorable().poly());
+    return d1 + d2;
   }
 
 }

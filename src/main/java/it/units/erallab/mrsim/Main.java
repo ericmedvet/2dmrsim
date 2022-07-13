@@ -73,27 +73,19 @@ public class Main {
     );
     engine.perform(new CreateUnmovableBody(terrain));
     Drawer drawer = Drawers.basic().profiled();
-    FramesImageBuilder imageBuilder = new FramesImageBuilder(
-        400,
-        200,
-        20,
-        0.25,
-        FramesImageBuilder.Direction.VERTICAL,
-        Drawers.basic()
-    );
     VideoBuilder videoBuilder = new VideoBuilder(
         600,
-        400,
+        300,
         0,
         20,
-        60,
+        30,
         VideoUtils.EncoderFacility.FFMPEG_SMALL,
         new File("/home/eric/experiments/balls.mp4"),
         Drawers.basic()
     );
     RandomGenerator rg = new Random();
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Consumer<Snapshot> consumer = viewer;
+    Consumer<Snapshot> consumer = videoBuilder;
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
@@ -113,7 +105,10 @@ public class Main {
         engine.perform(new DetachAnchors(v1, v2));
       }
       if (engine.t() > 5 && engine.t() < 20) {
-        engine.perform(new AttractAndLinkAnchor(v1.anchors().get(2), v3.anchors().get(1), 1, Anchor.Link.Type.SOFT));
+        engine.perform(new AttractAndLinkClosestAnchorable(
+            List.of(v1.anchors().get(0), v1.anchors().get(3)),
+            1, Anchor.Link.Type.SOFT
+        ));
       }
       for (Body body : snapshot.bodies()) {
         if (!(body instanceof UnmovableBody) && (body.poly().center().y() < -12)) {
@@ -125,8 +120,7 @@ public class Main {
         engine.perform(new ActuateVoxel(v2, v, 0, 0, -1));
       }
     }
-    //ImageIO.write(imageBuilder.get(), "png", new File("/home/eric/experiments/simple.png"));
-    //videoBuilder.get();
+    videoBuilder.get();
     if (drawer instanceof Profiled profiled) {
       System.out.println(profiled.values());
     }

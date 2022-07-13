@@ -18,14 +18,16 @@ package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.util.Pair;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author "Eric Medvet" on 2022/07/12 for 2dmrsim
  */
-public record AttractAndLinkAnchor(Anchor source, Anchor destination, double magnitude, Anchor.Link.Type type) implements Action<AttractAndLinkAnchor.Outcome> {
-
-  public record Outcome(Optional<Double> magnitude, Optional<Anchor.Link> link) {}
+public record AttractAndLinkAnchorable(
+    Collection<Anchor> anchors, Anchorable anchorable, double magnitude, Anchor.Link.Type type
+) implements Action<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {
 }
