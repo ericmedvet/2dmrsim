@@ -18,37 +18,82 @@ package it.units.erallab.mrsim.agents.independentvoxel;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.ActionOutcome;
+import it.units.erallab.mrsim.core.actions.*;
+import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.TimedRealFunction;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
  */
 public class NumIndependentVoxel extends AbstractIndependentVoxel {
 
+  private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
+
+  private final List<Function<Voxel, Sense<? super Voxel>>> sensors;
   private final TimedRealFunction function;
+
+  private final double[] inputs;
 
   public NumIndependentVoxel(
       Voxel.Material material,
       double voxelSideLength,
       double voxelMass,
+      List<Function<Voxel, Sense<? super Voxel>>> sensors,
       TimedRealFunction function
   ) {
     super(material, voxelSideLength, voxelMass);
+    this.sensors = sensors;
     this.function = function;
+    inputs = new double[sensors.size()];
+    if (function.nOfInputs() != inputs.length) {
+      throw new IllegalArgumentException(String.format(
+          "Invalid function input size: %d found vs. %d expected",
+          function.nOfInputs(),
+          inputs.length
+      ));
+    }
+    if (function.nOfOutputs() != 8) {
+      throw new IllegalArgumentException(String.format(
+          "Invalid function output size: %d found vs. 8 expected",
+          function.nOfInputs()
+      ));
+    }
   }
 
-  public NumIndependentVoxel(TimedRealFunction function) {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, function);
+  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction function) {
+    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors, function);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
+    double[] readInputs = previousActionOutcomes.stream()
+        .filter(ao -> ao.action() instanceof Sense)
+        .mapToDouble(ao -> ((ActionOutcome<Sense<? super Voxel>, Double>) ao).outcome().orElse(0d))
+        .toArray();
+    System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
+    double[] outputs = function.apply(t, inputs);
+    //generate next sense actions
+    List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions
-    return null;
+    actions.add(new ActuateVoxel(voxel, outputs[0], outputs[1], outputs[2], outputs[3]));
+    for (int i = 0; i < Voxel.Side.values().length; i++) {
+      Voxel.Side side = Voxel.Side.values()[i];
+      double m = outputs[i + 4];
+      if (m > ATTACH_ACTION_THRESHOLD) {
+        actions.add(new AttractAndLinkClosestAnchorable(voxel.anchorsOn(side), 1, Anchor.Link.Type.SOFT));
+      } else if (m < -ATTACH_ACTION_THRESHOLD) {
+        actions.add(new DetachAnchors(voxel.anchorsOn(side)));
+      }
+    }
+    return actions;
   }
 }

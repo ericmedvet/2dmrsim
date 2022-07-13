@@ -245,7 +245,7 @@ public class Dyn4JEngine extends AbstractEngine {
   private Body removeBody(RemoveBody action, Agent agent) throws IllegalActionException {
     //detach
     if (action.body() instanceof Anchorable anchorable) {
-      perform(new DetachAllAnchors(anchorable), agent);
+      perform(new DetachAllAnchorsFromAnchorable(anchorable), agent);
     }
     //remove
     if (action.body() instanceof MultipartBody multipartBody) {

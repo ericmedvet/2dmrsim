@@ -50,10 +50,6 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
     voxelGrid = Grid.create(materialGrid.w(), materialGrid.h());
   }
 
-  public AbstractGridVSR(Grid<Voxel.Material> materialGrid) {
-    this(materialGrid, VOXEL_SIDE_LENGTH, VOXEL_MASS);
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public List<Body> bodyParts() {

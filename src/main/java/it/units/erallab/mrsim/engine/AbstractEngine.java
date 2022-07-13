@@ -24,7 +24,6 @@ import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
 import it.units.erallab.mrsim.util.PolyUtils;
 import it.units.erallab.mrsim.util.Profiled;
-import org.w3c.dom.Attr;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -151,11 +150,11 @@ public abstract class AbstractEngine implements Engine, Profiled {
         O o = actionSolver.solve(action, agent);
         outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
       } catch (ActionException e) {
-        L.finer(String.format("Ignoring illegal action: %s", e));
+        L.finer(String.format("Ignoring illegal action %s due to %s", action.getClass().getSimpleName(), e));
         nOfIllegalActions.incrementAndGet();
         outcome = new ActionOutcome<>(agent, action, Optional.empty());
       } catch (RuntimeException e) {
-        L.warning(String.format("Ignoring action throwing exception: %s", e));
+        L.warning(String.format("Ignoring action %s throwing exception: %s", action.getClass().getSimpleName(), e));
         nOfIllegalActions.incrementAndGet();
         outcome = new ActionOutcome<>(agent, action, Optional.empty());
       }
@@ -185,13 +184,14 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
     registerActionSolver(CreateAndTranslateUnmovableBody.class, this::createAndTranslateUnmovableBody);
     registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
-    registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
-    registerActionSolver(DetachAnchors.class, this::detachAnchors);
-    registerActionSolver(DetachAllAnchors.class, this::detachAllAnchors);
     registerActionSolver(TranslateAgent.class, this::translateAgent);
     registerActionSolver(AddAndTranslateAgent.class, this::addAndTranslateAgent);
+    registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
     registerActionSolver(AttachAnchor.class, this::attachAnchor);
-    registerActionSolver(DetachAnchor.class, this::detachAnchor);
+    registerActionSolver(DetachAnchors.class, this::detachAnchors);
+    registerActionSolver(DetachAnchorsFromAnchorable.class, this::detachAnchorsFromAnchorable);
+    registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
+    registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
     registerActionSolver(AttractAnchorable.class, this::attractAnchorable);
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
     registerActionSolver(AttractAndLinkAnchorable.class, this::attractAndLinkAnchorable);
@@ -262,7 +262,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return null;
   }
 
-  private Anchor.Link detachAnchor(DetachAnchor action, Agent agent) {
+  private Anchor.Link detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
     //find anchor
     Optional<Anchor.Link> optionalLink = action.anchor()
         .links()
@@ -287,24 +287,24 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .toList();
   }
 
-  protected Collection<Anchor.Link> detachAnchors(
-      DetachAnchors action,
+  protected Collection<Anchor.Link> detachAnchorsFromAnchorable(
+      DetachAnchorsFromAnchorable action,
       Agent agent
   ) {
     return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchor(a, action.targetAnchorable()), agent).outcome())
+        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).outcome())
         .filter(Optional::isPresent)
         .map(Optional::get)
         .toList();
   }
 
-  protected Collection<Anchor.Link> detachAllAnchors(DetachAllAnchors action, Agent agent) {
+  protected Collection<Anchor.Link> detachAllAnchorsFromAnchorable(DetachAllAnchorsFromAnchorable action, Agent agent) {
     Set<Anchorable> anchorables = action.anchorable().anchors().stream()
         .map(a -> a.links().stream().map(l -> l.destination().anchorable()).collect(Collectors.toSet()))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
     return anchorables.stream()
-        .map(target -> perform(new DetachAnchors(action.anchorable(), target), agent).outcome()
+        .map(target -> perform(new DetachAnchorsFromAnchorable(action.anchorable(), target), agent).outcome()
             .orElseThrow())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
@@ -428,5 +428,16 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return Map.of();
   }
 
+  protected Collection<Anchor.Link> detachAnchors(DetachAnchors action, Agent agent) {
+    Collection<Anchor.Link> toRemoveLinks = action.anchors().stream()
+        .map(Anchor::links)
+        .flatMap(Collection::stream)
+        .toList();
+    return toRemoveLinks.stream()
+        .map(l -> perform(new RemoveLink(l), agent).outcome())
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
+  }
 
 }

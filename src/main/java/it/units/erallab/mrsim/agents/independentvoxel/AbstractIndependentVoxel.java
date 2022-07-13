@@ -48,10 +48,6 @@ public abstract class AbstractIndependentVoxel implements EmbodiedAgent {
     this.voxelMass = voxelMass;
   }
 
-  public AbstractIndependentVoxel() {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS);
-  }
-
   @Override
   public List<Body> bodyParts() {
     return List.of(voxel);

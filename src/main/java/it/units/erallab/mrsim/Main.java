@@ -19,6 +19,8 @@ package it.units.erallab.mrsim;
 import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
+import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
+import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.*;
@@ -29,20 +31,23 @@ import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.PolyUtils;
 import it.units.erallab.mrsim.util.Profiled;
+import it.units.erallab.mrsim.util.TimedRealFunction;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.random.RandomGenerator;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public class Main {
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     Drawer drawer = Drawers.basic().profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
         600,
@@ -57,7 +62,8 @@ public class Main {
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
     //do thing
-    vsr(terrain, viewer);
+    //vsr(terrain, viewer);
+    iVsrs(terrain, viewer);
     //do final stuff
     videoBuilder.get();
     if (drawer instanceof Profiled profiled) {
@@ -100,4 +106,36 @@ public class Main {
       }
     }
   }
+
+  private static void iVsrs(Poly terrain, Consumer<Snapshot> consumer) {
+    double interval = 5d;
+    double lastT = Double.NEGATIVE_INFINITY;
+    double sideInterval = 2d;
+    Engine engine = new Dyn4JEngine();
+    engine.perform(new CreateUnmovableBody(terrain));
+    RandomGenerator rg = new Random();
+    Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
+        (oT, in) -> {
+          double t = oT + index;
+          int sideIndex = (int) Math.round(t / sideInterval) % 4;
+          double[] out = new double[8];
+          for (int i = 0; i < 4; i++) {
+            out[i] = (sideIndex == i) ? Math.sin(2d * Math.PI * t) : 0d;
+            out[i + 4] = (sideIndex == i) ? ((Math.round(t / sideInterval / 4d) % 2 == 1) ? 1d : -1d) : 0d;
+          }
+          return out;
+        },
+        0, 8
+    );
+    while (engine.t() < 100) {
+      Snapshot snapshot = engine.tick();
+      consumer.accept(snapshot);
+      if (engine.t() > lastT + interval) {
+        lastT = engine.t();
+        EmbodiedAgent agent = new NumIndependentVoxel(List.of(), functionProvider.apply(snapshot.agents().size()));
+        engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 5, 5)));
+      }
+    }
+  }
+
 }

@@ -20,12 +20,10 @@ import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
 
-import java.util.Collection;
-
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public record DetachAnchor(
+public record DetachAnchorFromAnchorable(
     Anchor anchor,
     Anchorable anchorable
 ) implements Action<Anchor.Link> {

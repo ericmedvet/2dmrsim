@@ -25,5 +25,5 @@ import java.util.Collection;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record DetachAllAnchors(Anchorable anchorable) implements Action<Collection<Anchor.Link>> {
+public record DetachAllAnchorsFromAnchorable(Anchorable anchorable) implements Action<Collection<Anchor.Link>> {
 }

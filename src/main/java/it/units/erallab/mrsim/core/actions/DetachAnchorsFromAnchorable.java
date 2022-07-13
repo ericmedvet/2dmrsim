@@ -18,11 +18,14 @@ package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
 
 import java.util.Collection;
 
 /**
- * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public record DetachAnchors(Collection<Anchor> anchors) implements Action<Collection<Anchor.Link>> {
+public record DetachAnchorsFromAnchorable(
+    Anchorable sourceAnchorable, Anchorable targetAnchorable
+) implements Action<Collection<Anchor.Link>> {
 }
