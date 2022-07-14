@@ -18,10 +18,12 @@ package it.units.erallab.mrsim.core.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.util.DoubleRange;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
 public interface Sense<B extends Body> extends Action<Double> {
   B body();
+  DoubleRange range();
 }

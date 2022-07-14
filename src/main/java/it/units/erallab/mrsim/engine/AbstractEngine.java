@@ -196,6 +196,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
     registerActionSolver(AttractAndLinkAnchorable.class, this::attractAndLinkAnchorable);
     registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
+    registerActionSolver(SenseDirectedVelocity.class, this::senseDirectedVelocity);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -436,6 +437,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .filter(Optional::isPresent)
         .map(Optional::get)
         .toList();
+  }
+
+  protected double senseDirectedVelocity(SenseDirectedVelocity action, Agent agent) {
+    Point v = action.body().centerLinearVelocity();
+    double a = v.direction() - action.direction();
+    return v.magnitude() * Math.cos(a);
   }
 
 }

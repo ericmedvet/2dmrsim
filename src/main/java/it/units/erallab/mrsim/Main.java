@@ -63,8 +63,8 @@ public class Main {
     Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
     Engine engine = new Dyn4JEngine();
     //do thing
-    //vsr(engine, terrain, viewer);
-    iVsrs(engine, terrain, viewer);
+    vsr(engine, terrain, viewer);
+    //iVsrs(engine, terrain, viewer);
     //do final stuff
     videoBuilder.get();
     if (drawer instanceof Profiled profiled) {
@@ -79,10 +79,14 @@ public class Main {
     Poly ball = Poly.regular(1, 20);
     double ballInterval = 5d;
     double lastBallT = 0d;
-    Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x4");
+    Grid<Boolean> shape = ShapeUtils.buildShape("biped-4x3");
     AbstractGridVSR vsr = new NumGridVSR(
         shape.map(b -> b ? new Voxel.Material() : null),
-        shape.map(b -> List.of()),
+        Grid.create(
+            shape.w(),
+            shape.h(),
+            (x, y) -> (x == 0 && y == 0) ? List.of(v -> new SenseDirectedVelocity(0, v)) : List.of()
+        ),
         (t, iG) -> Grid.create(
             shape.w(),
             shape.h(),
