@@ -53,15 +53,15 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   }
 
-  protected enum SpringScaffolding {
-    SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
-  }
+  protected enum SpringScaffolding {SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS}
 
-  private record OwnerFilter(Object owner) implements Filter {
+  private enum BodyType {VERTEX, CENTRAL}
+
+  private record OwnerFilter(Object owner, BodyType bodyType) implements Filter {
     @Override
-    public boolean isAllowed(Filter filter) {
-      if (filter instanceof OwnerFilter ownerFilter) {
-        return owner != ownerFilter.owner;
+    public boolean isAllowed(Filter otherFilter) {
+      if (otherFilter instanceof OwnerFilter otherOwnerFilter) {
+        return owner != otherOwnerFilter.owner || bodyType.equals(otherOwnerFilter.bodyType);
       }
       return true;
     }
@@ -327,6 +327,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setUserData(centralCrossActiveRange);
       }
     }
+    //set collision filter
+    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this, BodyType.VERTEX))));
+    //add central mass
     if (CENTRAL_MASS_RATIO > 0) {
       Body centralMass = new Body();
       centralMass.addFixture(
@@ -339,6 +342,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
       centralMass.setLinearDamping(linearDamping);
       centralMass.setAngularDamping(angularDamping);
       centralMass.translate(sideLength / 2d, sideLength / 2d);
+      centralMass.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this, BodyType.CENTRAL)));
       otherBodies.add(centralMass);
       for (Body vertex : vertexes.values()) {
         DistanceJoint<Body> joint = new DistanceJoint<>(
@@ -353,8 +357,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         centralJoints.add(joint);
       }
     }
-    //set collision filter
-    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this))));
     //setup spring joints
     getJoints().forEach(j -> {
       if (j instanceof DistanceJoint<Body> joint) {
