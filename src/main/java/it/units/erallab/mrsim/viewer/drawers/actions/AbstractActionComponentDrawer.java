@@ -18,36 +18,30 @@ package it.units.erallab.mrsim.viewer.drawers.actions;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.viewer.drawers.AbstractLastingComponentDrawer;
+import it.units.erallab.mrsim.viewer.ComponentDrawer;
 
 import java.awt.*;
-import java.util.function.BiPredicate;
 
 /**
- * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/15 for 2dmrsim
  */
-public abstract class AbstractActionOutcomeDrawer<A extends Action<O>, O> extends AbstractLastingComponentDrawer {
-
-  protected final static double DURATION = 0.5;
-
+public abstract class AbstractActionComponentDrawer<A extends Action<O>, O> implements ComponentDrawer {
   private final Class<A> actionClass;
-  protected final double duration;
 
-  public AbstractActionOutcomeDrawer(Class<A> actionClass, double duration) {
+  public AbstractActionComponentDrawer(Class<A> actionClass) {
     this.actionClass = actionClass;
-    this.duration = duration;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  protected BiPredicate<Double, Graphics2D> buildTask(double t, Object o) {
-    if (o instanceof ActionOutcome<?, ?> actionOutcome) {
+  public boolean draw(double t, Object component, Graphics2D g) {
+    if (component instanceof ActionOutcome<?, ?> actionOutcome) {
       if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
-        return innerBuildTask(t, (ActionOutcome<A, O>) actionOutcome);
+        return innerDraw(t, (ActionOutcome<A, O>) actionOutcome, g);
       }
     }
-    return null;
+    return false;
   }
 
-  protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(double t, ActionOutcome<A, O> o);
+  protected abstract boolean innerDraw(double t, ActionOutcome<A, O> actionOutcome, Graphics2D g);
 }

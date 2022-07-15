@@ -29,7 +29,7 @@ import java.util.function.BiPredicate;
 /**
  * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public class CreateLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.CreateLink,
+public class CreateLink extends AbstractLastingActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.CreateLink,
     Anchor.Link> {
 
   private final static Color COLOR = Color.GREEN;

@@ -21,17 +21,15 @@ import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.DoubleRange;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.Collection;
 import java.util.function.BiPredicate;
 
 /**
  * @author "Eric Medvet" on 2022/07/11 for 2dmrsim
  */
-public class RemoveLink extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.RemoveLink,
+public class RemoveLink extends AbstractLastingActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.RemoveLink,
     Anchor.Link> {
 
   private final static Color COLOR = Color.RED;

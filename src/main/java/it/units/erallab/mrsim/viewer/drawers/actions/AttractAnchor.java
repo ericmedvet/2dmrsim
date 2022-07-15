@@ -23,12 +23,11 @@ import it.units.erallab.mrsim.viewer.DrawingUtils;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.util.function.BiPredicate;
 
 /**
  * @author "Eric Medvet" on 2022/07/12 for 2dmrsim
  */
-public class AttractAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.mrsim.core.actions.AttractAnchor,
+public class AttractAnchor extends AbstractActionComponentDrawer<it.units.erallab.mrsim.core.actions.AttractAnchor,
     Double> {
 
   private final static Color COLOR = DrawingUtils.alphaed(Color.GREEN, 0.25f);
@@ -40,7 +39,7 @@ public class AttractAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.
   private final Color color;
 
   public AttractAnchor(Color color) {
-    super(it.units.erallab.mrsim.core.actions.AttractAnchor.class, 0);
+    super(it.units.erallab.mrsim.core.actions.AttractAnchor.class);
     this.color = color;
   }
 
@@ -49,38 +48,38 @@ public class AttractAnchor extends AbstractActionOutcomeDrawer<it.units.erallab.
   }
 
   @Override
-  protected BiPredicate<Double, Graphics2D> innerBuildTask(
+  protected boolean innerDraw(
       double t,
-      ActionOutcome<it.units.erallab.mrsim.core.actions.AttractAnchor, Double> o
+      ActionOutcome<it.units.erallab.mrsim.core.actions.AttractAnchor, Double> o,
+      Graphics2D g
   ) {
-    return (dT, g) -> {
-      if (o.outcome().isEmpty()) {
-        return true;
-      }
-      double magnitude = o.outcome().get();
-      if (magnitude == 0) {
-        return true;
-      }
-      double a = o.action().destination().point().diff(o.action().source().point()).direction();
-      double sX = o.action().source().point().x();
-      double sY = o.action().source().point().y();
-      double dX = o.action().destination().point().x();
-      double dY = o.action().destination().point().y();
-      double l = RADIUS.denormalize(magnitude);
-      Path2D triangle = new Path2D.Double();
-      triangle.moveTo(sX, sY);
-      triangle.lineTo(sX + Math.cos(a - ANGLE / 2d) * l, sY + Math.sin(a - ANGLE / 2d) * l);
-      triangle.lineTo(sX + Math.cos(a + ANGLE / 2d) * l, sY + Math.sin(a + ANGLE / 2d) * l);
-      triangle.closePath();
-      g.setColor(color);
-      g.fill(triangle);
-      g.draw(new Line2D.Double(
-          dX,
-          dY,
-          dX - Math.cos(a) * l * ATTRACTED_LENGTH_RATIO,
-          dY - Math.sin(a) * l * ATTRACTED_LENGTH_RATIO
-      ));
+    if (o.outcome().isEmpty()) {
       return true;
-    };
+    }
+    double magnitude = o.outcome().get();
+    if (magnitude == 0) {
+      return true;
+    }
+    double a = o.action().destination().point().diff(o.action().source().point()).direction();
+    double sX = o.action().source().point().x();
+    double sY = o.action().source().point().y();
+    double dX = o.action().destination().point().x();
+    double dY = o.action().destination().point().y();
+    double l = RADIUS.denormalize(magnitude);
+    Path2D triangle = new Path2D.Double();
+    triangle.moveTo(sX, sY);
+    triangle.lineTo(sX + Math.cos(a - ANGLE / 2d) * l, sY + Math.sin(a - ANGLE / 2d) * l);
+    triangle.lineTo(sX + Math.cos(a + ANGLE / 2d) * l, sY + Math.sin(a + ANGLE / 2d) * l);
+    triangle.closePath();
+    g.setColor(color);
+    g.fill(triangle);
+    g.draw(new Line2D.Double(
+        dX,
+        dY,
+        dX - Math.cos(a) * l * ATTRACTED_LENGTH_RATIO,
+        dY - Math.sin(a) * l * ATTRACTED_LENGTH_RATIO
+    ));
+    return true;
   }
+
 }
