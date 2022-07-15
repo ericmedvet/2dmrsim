@@ -22,10 +22,7 @@ import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.actions.AddAndTranslateAgent;
-import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
-import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
-import it.units.erallab.mrsim.core.actions.SenseDirectedVelocity;
+import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -79,7 +76,11 @@ public class Main {
         Grid.create(
             shape.w(),
             shape.h(),
-            (x, y) -> (x == 0 && y == 0) ? List.of(v -> new SenseDirectedVelocity(0, v)) : List.of()
+            (x, y) -> (x == 0 && y == 0) ? List.of(
+                v -> new SenseRotatedVelocity(0, v),
+                v -> new SenseRotatedVelocity(Math.PI / 2d, v),
+                SenseAreaRatio::new
+            ) : List.of()
         ),
         (t, iG) -> Grid.create(
             shape.w(),
@@ -114,6 +115,16 @@ public class Main {
     double sideInterval = 2d;
     engine.perform(new CreateUnmovableBody(terrain));
     RandomGenerator rg = new Random();
+    List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of(
+        v -> new SenseRotatedVelocity(0, v),
+        v -> new SenseRotatedVelocity(Math.PI / 2d, v),
+        SenseAreaRatio::new,
+        SenseAngle::new,
+        v -> new SenseSideCompression(Voxel.Side.N, v),
+        v -> new SenseSideCompression(Voxel.Side.E, v),
+        v -> new SenseSideCompression(Voxel.Side.S, v),
+        v -> new SenseSideCompression(Voxel.Side.W, v)
+    );
     Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
         (oT, in) -> {
           double t = oT + index;
@@ -125,14 +136,14 @@ public class Main {
           }
           return out;
         },
-        0, 8
+        sensors.size(), 8
     );
     while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (engine.t() > lastT + interval) {
         lastT = engine.t();
-        EmbodiedAgent agent = new NumIndependentVoxel(List.of(), functionProvider.apply(snapshot.agents().size()));
+        EmbodiedAgent agent = new NumIndependentVoxel(sensors, functionProvider.apply(snapshot.agents().size()));
         engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 5, 5)));
       }
     }

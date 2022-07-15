@@ -18,15 +18,19 @@ package it.units.erallab.mrsim.agents.independentvoxel;
 
 import it.units.erallab.mrsim.core.Action;
 import it.units.erallab.mrsim.core.ActionOutcome;
-import it.units.erallab.mrsim.core.actions.*;
+import it.units.erallab.mrsim.core.actions.ActuateVoxel;
+import it.units.erallab.mrsim.core.actions.AttractAndLinkClosestAnchorable;
+import it.units.erallab.mrsim.core.actions.DetachAnchors;
+import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Voxel;
-import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.TimedRealFunction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
@@ -76,11 +80,20 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
     //read inputs from last request
     double[] readInputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
-        .mapToDouble(ao -> ((ActionOutcome<Sense<? super Voxel>, Double>) ao).outcome().orElse(0d))
+        .mapToDouble(ao -> {
+          ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
+          return so.action().range().normalize(so.outcome().orElse(0d));
+        })
         .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
     double[] outputs = function.apply(t, inputs);
+    System.out.printf(
+        "%10.10s -> %s%n",
+        hashCode(),
+        Arrays.stream(inputs).mapToObj(d -> String.format("%5.2f", d)).collect(
+            Collectors.joining(" "))
+    ); // TODO remove
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions

@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim.core.bodies;
 
+import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.DoubleRange;
 
 import java.util.Collection;
@@ -37,11 +38,25 @@ public interface Voxel extends SoftBody, Anchorable {
     }
   }
 
-  enum Side {N, E, W, S}
+  enum Side {
+    N(Vertex.NE, Vertex.NW), E(Vertex.NE, Vertex.SE), W(Vertex.NW, Vertex.SW), S(Vertex.SE, Vertex.SW);
+    private final Vertex[] vertexes;
+
+    Side(Vertex... vertexes) {
+      this.vertexes = vertexes;
+    }
+
+    public Vertex[] vertexes() {
+      return vertexes;
+    }
+  }
 
   enum Vertex {NW, NE, SE, SW}
 
   Anchor anchorOn(Vertex vertex);
+
   Collection<Anchor> anchorsOn(Side side);
+
+  Point vertex(Vertex vertex);
 
 }

@@ -19,21 +19,22 @@ package it.units.erallab.mrsim.core.actions;
 import it.units.erallab.mrsim.core.ActionPerformer;
 import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.SelfDescribedAction;
-import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.core.bodies.Voxel.Side;
 import it.units.erallab.mrsim.engine.ActionException;
 import it.units.erallab.mrsim.util.DoubleRange;
 
-public record SenseDirectedVelocity(double direction, Body body) implements Sense<Body>, SelfDescribedAction<Double> {
+public record SenseSideCompression(Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
+  private final static DoubleRange RANGE = new DoubleRange(0.5, 1.5);
+
   @Override
   public DoubleRange range() {
-    return DoubleRange.UNBOUNDED;
+    return RANGE;
   }
 
   @Override
   public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
-    Point v = body.centerLinearVelocity();
-    double a = v.direction() - direction;
-    return v.magnitude() * Math.cos(a);
+    double avgL = Math.sqrt(body.areaRatio() * body.restArea());
+    return RANGE.clip(body.vertex(side.vertexes()[0]).distance(body.vertex(side.vertexes()[1])) / avgL);
   }
 }

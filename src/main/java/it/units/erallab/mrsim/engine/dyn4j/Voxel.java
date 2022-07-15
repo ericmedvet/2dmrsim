@@ -21,7 +21,6 @@ import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.util.DoubleRange;
 import org.dyn4j.collision.Filter;
-import org.dyn4j.collision.TypeFilter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -443,18 +442,20 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   @Override
   public Poly poly() {
-    /*return new Poly(
-        getIndexedVertex(Vertex.NW, 3),
-        getIndexedVertex(Vertex.NE, 2),
-        getIndexedVertex(Vertex.SE, 1),
-        getIndexedVertex(Vertex.SW, 0)
-    );*/
     List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
     Point c = Point.average(centers.toArray(Point[]::new));
     double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
     return new Poly(centers.stream()
         .map(vc -> enlongForm(c, vc, d))
         .toArray(Point[]::new));
+  }
+
+  @Override
+  public Point vertex(Vertex vertex) {
+    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
+    Point c = Point.average(centers.toArray(Point[]::new));
+    double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
+    return enlongForm(c, toPoint(vertexes.get(vertex).getWorldCenter()), d);
   }
 
   @Override

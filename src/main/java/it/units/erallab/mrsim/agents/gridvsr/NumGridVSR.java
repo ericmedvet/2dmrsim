@@ -59,7 +59,7 @@ public class NumGridVSR extends AbstractGridVSR {
       Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
       BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
   ) {
-    this(materialGrid, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, sensorsGrid,timedFunction);
+    this(materialGrid, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, sensorsGrid, timedFunction);
   }
 
   @SuppressWarnings("unchecked")
@@ -75,7 +75,7 @@ public class NumGridVSR extends AbstractGridVSR {
             ActionOutcome<?, ?> outcome = previousActionOutcomes.get(c);
             if (outcome.action() instanceof Sense<?>) {
               ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
-              inputs[i] = o.outcome().orElse(0d);
+              inputs[i] = o.action().range().normalize(o.outcome().orElse(0d));
               c = c + 1;
             }
           }
@@ -83,7 +83,7 @@ public class NumGridVSR extends AbstractGridVSR {
       }
     }
     //compute actuation
-    timedFunction.apply(t,inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
+    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     actions.addAll(voxelGrid.entries().stream()

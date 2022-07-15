@@ -16,15 +16,27 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.Body;
+import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.engine.ActionException;
 import it.units.erallab.mrsim.util.DoubleRange;
 
-/**
- * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
- */
-public interface Sense<B extends Body> extends Action<Double> {
-  B body();
-  DoubleRange range();
+public record SenseRotatedVelocity(double direction, Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 
+  private final static DoubleRange RANGE = new DoubleRange(-10, 10);
+
+  @Override
+  public DoubleRange range() {
+    return RANGE;
+  }
+
+  @Override
+  public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
+    Point v = body.centerLinearVelocity();
+    double a = v.direction() - direction - body.angle();
+    return v.magnitude() * Math.cos(a);
+  }
 }
