@@ -17,8 +17,8 @@
 package it.units.erallab.mrsim.viewer;
 
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.engine.dyn4j.drawers.VoxelDrawer;
 import it.units.erallab.mrsim.viewer.drawers.ComponentsDrawer;
+import it.units.erallab.mrsim.viewer.drawers.EnginProfilingDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.actions.AttractAnchor;
 import it.units.erallab.mrsim.viewer.drawers.actions.CreateLink;
@@ -43,7 +43,8 @@ public class Drawers {
     return Drawer.of(
         Drawer.clear(),
         world(),
-        new InfoDrawer(string)
+        new InfoDrawer(string),
+        new EnginProfilingDrawer()
     );
   }
 

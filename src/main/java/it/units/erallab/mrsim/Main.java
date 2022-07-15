@@ -22,8 +22,11 @@ import it.units.erallab.mrsim.agents.gridvsr.ShapeUtils;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
-import it.units.erallab.mrsim.core.actions.*;
-import it.units.erallab.mrsim.core.bodies.*;
+import it.units.erallab.mrsim.core.actions.AddAndTranslateAgent;
+import it.units.erallab.mrsim.core.actions.CreateAndTranslateRigidBody;
+import it.units.erallab.mrsim.core.actions.CreateUnmovableBody;
+import it.units.erallab.mrsim.core.actions.SenseDirectedVelocity;
+import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
 import it.units.erallab.mrsim.engine.Engine;
@@ -35,8 +38,6 @@ import it.units.erallab.mrsim.util.TimedRealFunction;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -133,7 +134,7 @@ public class Main {
         },
         0, 8
     );
-    while (engine.t() < 60) {
+    while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (engine.t() > lastT + interval) {

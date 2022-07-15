@@ -21,7 +21,7 @@ import it.units.erallab.mrsim.engine.EngineSnapshot;
 import it.units.erallab.mrsim.viewer.Drawer;
 import it.units.erallab.mrsim.viewer.DrawingUtils;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -33,10 +33,16 @@ import java.util.stream.Collectors;
  */
 public class InfoDrawer implements Drawer {
   public enum EngineInfo implements Function<EngineSnapshot, String> {
-    ENGINE_T(s -> String.format("eT=%5.1fms", s.engineT() * 1000d)),
-    WALL_T(s -> String.format("wT=%5.1fs", s.wallT())),
-    ENGINE_TPS(s -> String.format("eTPS=%5.1f", s.nOfTicks() / s.engineT())),
-    WALL_TPS(s -> String.format("wTPS=%5.1f", s.nOfTicks() / s.wallT())),
+    ENGINE_T(s -> String.format("tT=%5.1fms", s.times().get(EngineSnapshot.TimeType.TICK) * 1000d)),
+    WALL_T(s -> String.format("wT=%5.1fs", s.times().get(EngineSnapshot.TimeType.WALL))),
+    ENGINE_TPS(s -> String.format(
+        "tTPS=%5.1f",
+        s.counters().get(EngineSnapshot.CounterType.TICK) / s.times().get(EngineSnapshot.TimeType.TICK)
+    )),
+    WALL_TPS(s -> String.format(
+        "wTPS=%5.1f",
+        s.counters().get(EngineSnapshot.CounterType.TICK) / s.times().get(EngineSnapshot.TimeType.WALL)
+    )),
     N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())),
     N_OF_AGENTS(s -> String.format("#agents=%d", s.agents().size())),
     N_OF_ACTIONS(s -> String.format("#actions=%d", s.actionOutcomes().size()));
@@ -71,7 +77,7 @@ public class InfoDrawer implements Drawer {
 
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
-    Snapshot snapshot = snapshots.get(snapshots.size()-1);
+    Snapshot snapshot = snapshots.get(snapshots.size() - 1);
     //prepare string
     StringBuilder sb = new StringBuilder();
     if (!string.isEmpty()) {

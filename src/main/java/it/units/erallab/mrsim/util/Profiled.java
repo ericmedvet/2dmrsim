@@ -22,5 +22,5 @@ import java.util.Map;
  * @author "Eric Medvet" on 2022/07/12 for 2dmrsim
  */
 public interface Profiled {
-  Map<String, Double> values();
+  Map<String, Number> values();
 }

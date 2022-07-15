@@ -22,10 +22,7 @@ import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Profiled;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.time.Duration;
@@ -158,7 +155,7 @@ public interface Drawer {
     AtomicDouble drawingT = new AtomicDouble(0d);
     return new ProfiledDrawer() {
       @Override
-      public Map<String, Double> values() {
+      public Map<String, Number> values() {
         return Map.ofEntries(
             Map.entry("drawingT", drawingT.get())
         );

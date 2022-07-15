@@ -31,6 +31,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -62,12 +64,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
   private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
 
-  private final AtomicInteger nOfTicks;
-  private final AtomicDouble engineT;
   private final Instant startingInstant;
-  private final AtomicInteger nOfActions;
-  private final AtomicInteger nOfUnsupportedActions;
-  private final AtomicInteger nOfIllegalActions;
+  private final EnumMap<EngineSnapshot.TimeType, AtomicDouble> times;
+  private final EnumMap<EngineSnapshot.CounterType, AtomicInteger> counters;
   private final List<ActionOutcome<?, ?>> lastTickPerformedActions;
 
 
@@ -77,13 +76,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
     agentPairs = new ArrayList<>();
     actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
-    nOfTicks = new AtomicInteger(0);
-    engineT = new AtomicDouble(0d);
-    startingInstant = Instant.now();
-    nOfActions = new AtomicInteger(0);
-    nOfUnsupportedActions = new AtomicInteger(0);
-    nOfIllegalActions = new AtomicInteger(0);
     lastTickPerformedActions = new ArrayList<>();
+    times = new EnumMap<>(EngineSnapshot.TimeType.class);
+    counters = new EnumMap<>(EngineSnapshot.CounterType.class);
+    Arrays.stream(EngineSnapshot.TimeType.values()).forEach(t -> times.put(t, new AtomicDouble(0d)));
+    Arrays.stream(EngineSnapshot.CounterType.values()).forEach(t -> counters.put(t, new AtomicInteger(0)));
+    startingInstant = Instant.now();
     registerActionSolvers();
   }
 
@@ -98,7 +96,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
   @Override
   public Snapshot tick() {
     Instant tickStartingInstant = Instant.now();
-    nOfTicks.incrementAndGet();
+    counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
       List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
       for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
@@ -107,38 +105,46 @@ public abstract class AbstractEngine implements Engine, Profiled {
       Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(agentPairs.get(i).first(), outcomes);
       agentPairs.set(i, pair);
     }
+    Instant innerTickStartingInstant = Instant.now();
     double newT = innerTick();
     t.set(newT);
-    engineT.add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
+    times.get(EngineSnapshot.TimeType.INNER_TICK).add(Duration.between(innerTickStartingInstant, Instant.now())
+        .toNanos() / 1000000000d);
+    times.get(EngineSnapshot.TimeType.TICK).add(Duration.between(tickStartingInstant, Instant.now())
+        .toNanos() / 1000000000d);
+    times.get(EngineSnapshot.TimeType.WALL).set(Duration.between(startingInstant, Instant.now()).toMillis() / 1000d);
+    times.get(EngineSnapshot.TimeType.ENVIRONMENT).set(t.get());
     EngineSnapshot snapshot = new EngineSnapshot(
         t.get(),
         List.copyOf(getBodies()),
         agentPairs.stream().map(Pair::first).toList(),
         List.copyOf(lastTickPerformedActions),
-        engineT.get(),
-        Duration.between(startingInstant, Instant.now()).toMillis() / 1000d,
-        nOfTicks.get(),
-        nOfActions.get(),
-        nOfUnsupportedActions.get(),
-        nOfIllegalActions.get()
+        times.entrySet().stream()
+            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+        counters.entrySet().stream()
+            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
     );
     lastTickPerformedActions.clear();
     return snapshot;
   }
 
   @Override
-  public Map<String, Double> values() {
-    return Map.ofEntries(
-        Map.entry("engineT", engineT.get()),
-        Map.entry("t", t.get()),
-        Map.entry("wallT", Duration.between(startingInstant, Instant.now()).toMillis() / 1000d)
-    );
+  public Map<String, Number> values() {
+    return Stream.of(
+            times.entrySet().stream().map(e -> Map.entry("time_"+e.getKey(), e.getValue().get())),
+            counters.entrySet().stream().map(e -> Map.entry("counter_"+e.getKey(), e.getValue().get()))
+        ).flatMap(m -> m)
+        .map(e -> Map.entry(e.getKey().toLowerCase(), e.getValue()))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
-    nOfActions.incrementAndGet();
+    Instant performStartingInstant = Instant.now();
+    counters.get(EngineSnapshot.CounterType.ACTION).incrementAndGet();
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
     O o = null;
     if (actionSolver == null) {
@@ -148,28 +154,31 @@ public abstract class AbstractEngine implements Engine, Profiled {
           o = (O) selfDescribedAction.perform(this, agent);
         } catch (ActionException e) {
           L.finer(String.format("Ignoring illegal action %s due to %s", action.getClass().getSimpleName(), e));
-          nOfIllegalActions.incrementAndGet();
+          counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
         } catch (RuntimeException e) {
           L.warning(String.format("Ignoring action %s throwing exception: %s", action.getClass().getSimpleName(), e));
-          nOfIllegalActions.incrementAndGet();
+          counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
         }
+      } else {
+        //keep note as unsupported action
+        L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
+        counters.get(EngineSnapshot.CounterType.UNSUPPORTED_ACTION).incrementAndGet();
       }
-      //keep note as unsupported action
-      L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
-      nOfUnsupportedActions.incrementAndGet();
     } else {
       try {
         o = actionSolver.solve(action, agent);
       } catch (ActionException e) {
         L.finer(String.format("Ignoring illegal action %s due to %s", action.getClass().getSimpleName(), e));
-        nOfIllegalActions.incrementAndGet();
+        counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
       } catch (RuntimeException e) {
         L.warning(String.format("Ignoring action %s throwing exception: %s", action.getClass().getSimpleName(), e));
-        nOfIllegalActions.incrementAndGet();
+        counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
       }
     }
-    ActionOutcome<A,O> outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
+    ActionOutcome<A, O> outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
     lastTickPerformedActions.add(outcome);
+    times.get(EngineSnapshot.TimeType.PERFORM).add(Duration.between(performStartingInstant, Instant.now())
+        .toNanos() / 1000000000d);
     return outcome;
   }
 

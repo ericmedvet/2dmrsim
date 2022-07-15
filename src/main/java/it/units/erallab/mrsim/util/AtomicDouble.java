@@ -37,4 +37,9 @@ public class AtomicDouble {
   public void add(double addValue) {
     this.value = value + addValue;
   }
+
+  @Override
+  public String toString() {
+    return Double.toString(value);
+  }
 }

@@ -20,10 +20,9 @@ import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.bodies.Body;
-import it.units.erallab.mrsim.util.Pair;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -33,11 +32,11 @@ public record EngineSnapshot(
     Collection<Body> bodies,
     Collection<Agent> agents,
     Collection<ActionOutcome<?, ?>> actionOutcomes,
-    double engineT,
-    double wallT,
-    int nOfTicks,
-    int nOfAction,
-    int nOfUnsupportedActions,
-    int nOfIllegalActions
+    Map<TimeType, Double> times,
+    Map<CounterType, Integer> counters
 ) implements Snapshot {
+  public enum TimeType {ENVIRONMENT, WALL, TICK, INNER_TICK, PERFORM}
+
+  public enum CounterType {TICK, ACTION, ILLEGAL_ACTION, UNSUPPORTED_ACTION}
+
 }
