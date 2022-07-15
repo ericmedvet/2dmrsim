@@ -16,7 +16,6 @@
 
 package it.units.erallab.mrsim.viewer.drawers;
 
-import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.EngineSnapshot;
 import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.util.Pair;
@@ -25,6 +24,7 @@ import it.units.erallab.mrsim.viewer.DrawingUtils;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -32,15 +32,17 @@ import java.util.stream.Collectors;
 /**
  * @author "Eric Medvet" on 2022/07/15 for 2dmrsim
  */
-public class EnginProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSnapshot.TimeType, Double>,
+public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSnapshot.TimeType, Double>,
     Map<EngineSnapshot.CounterType, Integer>>> {
   private final static double WINDOW_T = 1;
   private final static double BAR_W = 50;
-  private final static double BAR_H = 15;
+  private final static double BAR_H = 10;
   private final static double GAP_W = 10;
   private final static double GAP_H = 10;
 
-  public EnginProfilingDrawer(double windowT) {
+  private final Map<EngineSnapshot.CounterType, Integer> maxCounterValues;
+
+  public EngineProfilingDrawer(double windowT) {
     super(
         snapshot -> {
           if (snapshot instanceof EngineSnapshot engineSnapshot) {
@@ -52,9 +54,12 @@ public class EnginProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSn
         windowT,
         WindowType.WALL_TIME
     );
+    maxCounterValues = new EnumMap<>(EngineSnapshot.CounterType.class);
+    Arrays.stream(EngineSnapshot.CounterType.values())
+        .forEach(k -> maxCounterValues.put(k, 0));
   }
 
-  public EnginProfilingDrawer() {
+  public EngineProfilingDrawer() {
     this(WINDOW_T);
   }
 
@@ -63,9 +68,13 @@ public class EnginProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSn
       SortedMap<Double, Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>> memory,
       Graphics2D g
   ) {
+    //check if empty
+    if (memory.get(memory.firstKey()).first().isEmpty()) {
+      return false;
+    }
+    //prepare
     double x = g.getClipBounds().width - BAR_W - GAP_W;
     double y = GAP_H;
-    Point size = new Point(BAR_W, BAR_H);
     //obtain relative data
     Map<EngineSnapshot.TimeType, Double> relTimes = Arrays.stream(EngineSnapshot.TimeType.values())
         .collect(Collectors.toMap(
@@ -78,9 +87,44 @@ public class EnginProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSn
             k -> memory.get(memory.lastKey()).second().get(k) - memory.get(memory.firstKey()).second().get(k)
         ));
     //update bounds
-    DoubleRange range = new DoubleRange(0, relTimes.get(EngineSnapshot.TimeType.WALL));
+    DoubleRange percRange = new DoubleRange(0, 100);
+    Arrays.stream(EngineSnapshot.CounterType.values())
+        .forEach(k -> maxCounterValues.put(k, Math.max(maxCounterValues.get(k), relCounters.get(k))));
     //draw
-    DrawingUtils.drawFilledBar(new Point(x, y), size, relTimes.get(EngineSnapshot.TimeType.TICK), range, g);
+    g.setFont(DrawingUtils.FONT);
+    DrawingUtils.drawFilledBar(
+        x,
+        y,
+        BAR_W,
+        BAR_H,
+        100 * relTimes.get(EngineSnapshot.TimeType.TICK) / relTimes.get(EngineSnapshot.TimeType.WALL),
+        percRange,
+        "t/w=%3.0f%%",
+        g
+    );
+    y = y + g.getFontMetrics().getMaxAscent();
+    DrawingUtils.drawFilledBar(
+        x,
+        y,
+        BAR_W,
+        BAR_H,
+        100 * relTimes.get(EngineSnapshot.TimeType.INNER_TICK) / relTimes.get(EngineSnapshot.TimeType.TICK),
+        percRange,
+        "it/t=%3.0f%%",
+        g
+    );
+    y = y + g.getFontMetrics().getMaxAscent();
+    DrawingUtils.drawFilledBar(
+        x,
+        y,
+        BAR_W,
+        BAR_H,
+        relCounters.get(EngineSnapshot.CounterType.ACTION),
+        new DoubleRange(0, maxCounterValues.get(EngineSnapshot.CounterType.ACTION)),
+        "#a=%4.0f",
+        g
+    );
     return true;
   }
+
 }

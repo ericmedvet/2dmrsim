@@ -43,6 +43,8 @@ public class DrawingUtils {
     public final static Color DATA_ZERO = Color.BLACK;
   }
 
+  public final static Font FONT = new Font("Monospaced", Font.PLAIN, 12);
+
   public static Color alphaed(Color color, float alpha) {
     return new Color(
         (float) color.getRed() / 255f,
@@ -99,28 +101,44 @@ public class DrawingUtils {
   }
 
   public static void drawFilledBar(
-      Point p,
-      Point size,
+      double x,
+      double y,
+      double w,
+      double h,
       double value,
       DoubleRange range,
+      String format,
       Graphics2D g,
       Color lineColor,
       Color fillColor
   ) {
     g.setColor(fillColor);
-    g.fill(new Rectangle2D.Double(p.x(), p.y(), size.x() * range.normalize(value), size.y()));
+    g.fill(new Rectangle2D.Double(x, y, w * range.normalize(value), h));
     g.setColor(lineColor);
-    g.draw(new Rectangle2D.Double(p.x(), p.y(), size.x(), size.y()));
+    g.draw(new Rectangle2D.Double(x, y, w, h));
+    if (format != null) {
+      String s = String.format(format, value);
+      double nW = g.getFontMetrics().stringWidth(s);
+      g.setColor(Colors.TEXT);
+      g.drawString(
+          s,
+          Math.round(x - nW - g.getFontMetrics().charWidth('x')),
+          Math.round(y + g.getFontMetrics().getMaxAscent())
+      );
+    }
   }
 
   public static void drawFilledBar(
-      Point p,
-      Point size,
+      double x,
+      double y,
+      double w,
+      double h,
       double value,
       DoubleRange range,
+      String format,
       Graphics2D g
   ) {
-    drawFilledBar(p, size, value, range, g, Colors.AXES, Colors.DATA);
+    drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA);
   }
 
 }

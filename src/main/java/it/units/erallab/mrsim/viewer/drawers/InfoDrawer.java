@@ -33,16 +33,6 @@ import java.util.stream.Collectors;
  */
 public class InfoDrawer implements Drawer {
   public enum EngineInfo implements Function<EngineSnapshot, String> {
-    ENGINE_T(s -> String.format("tT=%5.1fms", s.times().get(EngineSnapshot.TimeType.TICK) * 1000d)),
-    WALL_T(s -> String.format("wT=%5.1fs", s.times().get(EngineSnapshot.TimeType.WALL))),
-    ENGINE_TPS(s -> String.format(
-        "tTPS=%5.1f",
-        s.counters().get(EngineSnapshot.CounterType.TICK) / s.times().get(EngineSnapshot.TimeType.TICK)
-    )),
-    WALL_TPS(s -> String.format(
-        "wTPS=%5.1f",
-        s.counters().get(EngineSnapshot.CounterType.TICK) / s.times().get(EngineSnapshot.TimeType.WALL)
-    )),
     N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())),
     N_OF_AGENTS(s -> String.format("#agents=%d", s.agents().size())),
     N_OF_ACTIONS(s -> String.format("#actions=%d", s.actionOutcomes().size()));
@@ -68,7 +58,7 @@ public class InfoDrawer implements Drawer {
   }
 
   public InfoDrawer(String string) {
-    this(string, EnumSet.allOf(EngineInfo.class));
+    this(string, EnumSet.of(EngineInfo.N_OF_BODIES, EngineInfo.N_OF_AGENTS));
   }
 
   public InfoDrawer() {
@@ -92,6 +82,7 @@ public class InfoDrawer implements Drawer {
       }
     }
     //write
+    g.setFont(DrawingUtils.FONT);
     g.setColor(DrawingUtils.Colors.TEXT);
     int relY = g.getClipBounds().y + 1;
     for (String line : sb.toString().split(String.format("%n"))) {

@@ -33,7 +33,6 @@ import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.PolyUtils;
-import it.units.erallab.mrsim.util.Profiled;
 import it.units.erallab.mrsim.util.TimedRealFunction;
 import it.units.erallab.mrsim.viewer.*;
 
@@ -64,16 +63,10 @@ public class Main {
     Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
     Engine engine = new Dyn4JEngine();
     //do thing
-    vsr(engine, terrain, viewer);
-    //iVsrs(engine, terrain, viewer);
+    //vsr(engine, terrain, viewer);
+    iVsrs(engine, terrain, viewer);
     //do final stuff
     videoBuilder.get();
-    if (drawer instanceof Profiled profiled) {
-      System.out.println(profiled.values());
-    }
-    if (engine instanceof Profiled profiled) {
-      System.out.println(profiled.values());
-    }
   }
 
   private static void vsr(Engine engine, Poly terrain, Consumer<Snapshot> consumer) {
@@ -134,7 +127,7 @@ public class Main {
         },
         0, 8
     );
-    while (engine.t() < 10) {
+    while (engine.t() < 100) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       if (engine.t() > lastT + interval) {
