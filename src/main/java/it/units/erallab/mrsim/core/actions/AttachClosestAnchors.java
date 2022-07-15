@@ -16,11 +16,16 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.engine.ActionException;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
@@ -30,5 +35,19 @@ public record AttachClosestAnchors(
     Anchorable sourceAnchorable,
     Anchorable targetAnchorable,
     Anchor.Link.Type type
-) implements Action<Collection<Anchor.Link>> {
+) implements SelfDescribedAction<Collection<Anchor.Link>> {
+
+  @Override
+  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) throws ActionException {
+    Point targetCenter = Point.average(targetAnchorable
+        .anchors()
+        .stream()
+        .map(Anchor::point)
+        .toArray(Point[]::new));
+    return sourceAnchorable.anchors().stream()
+        .sorted(Comparator.comparingDouble(a -> a.point().distance(targetCenter)))
+        .limit(nOfAnchors)
+        .map(a -> performer.perform(new AttachAnchor(a, targetAnchorable, type), agent).outcome().orElseThrow())
+        .toList();
+  }
 }

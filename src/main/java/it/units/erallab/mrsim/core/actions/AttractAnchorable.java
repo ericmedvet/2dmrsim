@@ -16,17 +16,43 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.engine.ActionException;
 import it.units.erallab.mrsim.util.Pair;
 
-import java.util.Collection;
+import java.util.*;
 
 /**
  * @author "Eric Medvet" on 2022/07/12 for 2dmrsim
  */
 public record AttractAnchorable(
     Collection<Anchor> anchors, Anchorable anchorable, double magnitude
-) implements Action<Collection<Pair<Anchor, Anchor>>> {
+) implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>> {
+  @Override
+  public Collection<Pair<Anchor, Anchor>> perform(ActionPerformer performer, Agent agent) throws ActionException {
+    //discard already attached
+    Collection<Anchor> srcAnchors = anchors.stream()
+        .filter(a -> a.links().stream()
+            .map(l -> l.destination().anchorable())
+            .filter(dst -> dst == anchorable).toList().isEmpty())
+        .toList();
+    //match anchor pairs
+    Collection<Anchor> dstAnchors = new HashSet<>(anchorable.anchors());
+    Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
+    srcAnchors.forEach(src -> {
+      Optional<Anchor> closest = dstAnchors.stream()
+          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())));
+      if (closest.isPresent()) {
+        pairs.add(new Pair<>(src, closest.get()));
+        dstAnchors.remove(closest.get());
+      }
+    });
+    //attract
+    pairs.forEach(p -> performer.perform(new AttractAnchor(p.first(), p.second(), magnitude)));
+    return pairs;
+  }
 }

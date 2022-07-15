@@ -16,9 +16,14 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.engine.ActionException;
+
+import java.util.Optional;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
@@ -26,5 +31,17 @@ import it.units.erallab.mrsim.core.bodies.Anchorable;
 public record DetachAnchorFromAnchorable(
     Anchor anchor,
     Anchorable anchorable
-) implements Action<Anchor.Link> {
+) implements SelfDescribedAction<Anchor.Link> {
+  @Override
+  public Anchor.Link perform(ActionPerformer performer, Agent agent) throws ActionException {
+    //find anchor
+    Optional<Anchor.Link> optionalLink = anchor
+        .links()
+        .stream()
+        .filter(l -> l.destination().anchorable() == anchorable)
+        .findFirst();
+    return optionalLink
+        .flatMap(l -> performer.perform(new RemoveLink(optionalLink.get()), agent).outcome())
+        .orElse(null);
+  }
 }

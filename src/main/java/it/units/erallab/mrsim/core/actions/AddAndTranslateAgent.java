@@ -16,12 +16,22 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.engine.ActionException;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record AddAndTranslateAgent(EmbodiedAgent agent, Point translation) implements Action<EmbodiedAgent> {
+public record AddAndTranslateAgent(EmbodiedAgent agent, Point translation) implements SelfDescribedAction<EmbodiedAgent> {
+  @Override
+  public EmbodiedAgent perform(ActionPerformer performer, Agent agent) throws ActionException {
+    EmbodiedAgent embodiedAgent = (EmbodiedAgent) performer.perform(new AddAgent(agent()), agent)
+        .outcome().orElseThrow(() -> new ActionException(this, "Undoable addition"));
+    performer.perform(new TranslateAgent(embodiedAgent, translation), agent);
+    return embodiedAgent;
+  }
 }

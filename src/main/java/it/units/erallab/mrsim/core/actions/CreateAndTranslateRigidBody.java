@@ -16,10 +16,13 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.RigidBody;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
+import it.units.erallab.mrsim.engine.ActionException;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -28,5 +31,15 @@ public record CreateAndTranslateRigidBody(
     Poly poly,
     double mass,
     Point translation
-) implements Action<RigidBody> {
+) implements SelfDescribedAction<RigidBody> {
+
+  @Override
+  public RigidBody perform(ActionPerformer performer, Agent agent) throws ActionException {
+    RigidBody rigidBody = performer.perform(
+        new CreateRigidBody(poly, mass),
+        agent
+    ).outcome().orElseThrow(() -> new ActionException(this, "Undoable creation"));
+    performer.perform(new TranslateBody(rigidBody, translation), agent);
+    return rigidBody;
+  }
 }

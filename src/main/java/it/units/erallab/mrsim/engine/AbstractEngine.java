@@ -18,8 +18,9 @@ package it.units.erallab.mrsim.engine;
 
 import it.units.erallab.mrsim.core.*;
 import it.units.erallab.mrsim.core.actions.*;
-import it.units.erallab.mrsim.core.bodies.*;
-import it.units.erallab.mrsim.core.geometry.Point;
+import it.units.erallab.mrsim.core.bodies.Anchor;
+import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.util.AtomicDouble;
 import it.units.erallab.mrsim.util.Pair;
 import it.units.erallab.mrsim.util.PolyUtils;
@@ -30,7 +31,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -140,25 +140,35 @@ public abstract class AbstractEngine implements Engine, Profiled {
   public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
     nOfActions.incrementAndGet();
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
-    ActionOutcome<A, O> outcome;
+    O o = null;
     if (actionSolver == null) {
+      //try composite action
+      if (action instanceof SelfDescribedAction<?> selfDescribedAction) {
+        try {
+          o = (O) selfDescribedAction.perform(this, agent);
+        } catch (ActionException e) {
+          L.finer(String.format("Ignoring illegal action %s due to %s", action.getClass().getSimpleName(), e));
+          nOfIllegalActions.incrementAndGet();
+        } catch (RuntimeException e) {
+          L.warning(String.format("Ignoring action %s throwing exception: %s", action.getClass().getSimpleName(), e));
+          nOfIllegalActions.incrementAndGet();
+        }
+      }
+      //keep note as unsupported action
       L.finer(String.format("Ignoring unsupported action: %s", action.getClass().getSimpleName()));
       nOfUnsupportedActions.incrementAndGet();
-      outcome = new ActionOutcome<>(agent, action, Optional.empty());
     } else {
       try {
-        O o = actionSolver.solve(action, agent);
-        outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
+        o = actionSolver.solve(action, agent);
       } catch (ActionException e) {
         L.finer(String.format("Ignoring illegal action %s due to %s", action.getClass().getSimpleName(), e));
         nOfIllegalActions.incrementAndGet();
-        outcome = new ActionOutcome<>(agent, action, Optional.empty());
       } catch (RuntimeException e) {
         L.warning(String.format("Ignoring action %s throwing exception: %s", action.getClass().getSimpleName(), e));
         nOfIllegalActions.incrementAndGet();
-        outcome = new ActionOutcome<>(agent, action, Optional.empty());
       }
     }
+    ActionOutcome<A,O> outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
     lastTickPerformedActions.add(outcome);
     return outcome;
   }
@@ -181,22 +191,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
 
   protected void registerActionSolvers() {
     registerActionSolver(AddAgent.class, this::addAgent);
-    registerActionSolver(CreateAndTranslateRigidBody.class, this::createAndTranslateRigidBody);
-    registerActionSolver(CreateAndTranslateUnmovableBody.class, this::createAndTranslateUnmovableBody);
-    registerActionSolver(CreateAndTranslateVoxel.class, this::createAndTranslateVoxel);
-    registerActionSolver(TranslateAgent.class, this::translateAgent);
-    registerActionSolver(AddAndTranslateAgent.class, this::addAndTranslateAgent);
-    registerActionSolver(AttachClosestAnchors.class, this::attachClosestAnchors);
-    registerActionSolver(AttachAnchor.class, this::attachAnchor);
-    registerActionSolver(DetachAnchors.class, this::detachAnchors);
-    registerActionSolver(DetachAnchorsFromAnchorable.class, this::detachAnchorsFromAnchorable);
-    registerActionSolver(DetachAllAnchorsFromAnchorable.class, this::detachAllAnchorsFromAnchorable);
-    registerActionSolver(DetachAnchorFromAnchorable.class, this::detachAnchorFromAnchorable);
-    registerActionSolver(AttractAnchorable.class, this::attractAnchorable);
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
-    registerActionSolver(AttractAndLinkAnchorable.class, this::attractAndLinkAnchorable);
     registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
-    registerActionSolver(SenseDirectedVelocity.class, this::senseDirectedVelocity);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -207,145 +203,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
       agentPairs.add(new Pair<>(action.agent(), List.of()));
     }
     return action.agent();
-  }
-
-  protected RigidBody createAndTranslateRigidBody(
-      CreateAndTranslateRigidBody action,
-      Agent agent
-  ) throws ActionException {
-    RigidBody rigidBody = perform(
-        new CreateRigidBody(action.poly(), action.mass()),
-        agent
-    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
-    perform(new TranslateBody(rigidBody, action.translation()), agent);
-    return rigidBody;
-  }
-
-  protected UnmovableBody createAndTranslateUnmovableBody(
-      CreateAndTranslateUnmovableBody action,
-      Agent agent
-  ) throws ActionException {
-    UnmovableBody unmovableBody = perform(
-        new CreateUnmovableBody(action.poly()),
-        agent
-    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
-    perform(new TranslateBody(unmovableBody, action.translation()), agent);
-    return unmovableBody;
-  }
-
-  protected Voxel createAndTranslateVoxel(
-      CreateAndTranslateVoxel action,
-      Agent agent
-  ) throws ActionException {
-    Voxel voxel = perform(
-        new CreateVoxel(action.sideLength(), action.mass(), action.material()),
-        agent
-    ).outcome().orElseThrow(() -> new ActionException(action, "Undoable creation"));
-    perform(new TranslateBody(voxel, action.translation()), agent);
-    return voxel;
-  }
-
-  private Anchor.Link attachAnchor(AttachAnchor action, Agent agent) {
-    // find already attached anchors
-    Collection<Anchor> attachedAnchors = action.anchor().links().stream()
-        .map(Anchor.Link::destination)
-        .filter(a -> a.anchorable() == action.anchorable())
-        .collect(Collectors.toSet());
-    //find closest anchor on destination
-    Anchor destination = action.anchorable().anchors().stream()
-        .filter(a -> !attachedAnchors.contains(a))
-        .min(Comparator.comparingDouble(a -> a.point().distance(action.anchor().point())))
-        .orElse(null);
-    //create link
-    if (destination != null) {
-      return perform(new CreateLink(action.anchor(), destination, action.type()), agent).outcome().orElse(null);
-    }
-    return null;
-  }
-
-  private Anchor.Link detachAnchorFromAnchorable(DetachAnchorFromAnchorable action, Agent agent) {
-    //find anchor
-    Optional<Anchor.Link> optionalLink = action.anchor()
-        .links()
-        .stream()
-        .filter(l -> l.destination().anchorable() == action.anchorable())
-        .findFirst();
-    return optionalLink
-        .flatMap(l -> perform(new RemoveLink(optionalLink.get()), agent).outcome())
-        .orElse(null);
-  }
-
-  protected Collection<Anchor.Link> attachClosestAnchors(AttachClosestAnchors action, Agent agent) {
-    Point targetCenter = Point.average(action.targetAnchorable()
-        .anchors()
-        .stream()
-        .map(Anchor::point)
-        .toArray(Point[]::new));
-    return action.sourceAnchorable().anchors().stream()
-        .sorted(Comparator.comparingDouble(a -> a.point().distance(targetCenter)))
-        .limit(action.nOfAnchors())
-        .map(a -> perform(new AttachAnchor(a, action.targetAnchorable(), action.type()), agent).outcome().orElseThrow())
-        .toList();
-  }
-
-  protected Collection<Anchor.Link> detachAnchorsFromAnchorable(
-      DetachAnchorsFromAnchorable action,
-      Agent agent
-  ) {
-    return action.sourceAnchorable().anchors().stream()
-        .map(a -> perform(new DetachAnchorFromAnchorable(a, action.targetAnchorable()), agent).outcome())
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .toList();
-  }
-
-  protected Collection<Anchor.Link> detachAllAnchorsFromAnchorable(DetachAllAnchorsFromAnchorable action, Agent agent) {
-    Set<Anchorable> anchorables = action.anchorable().anchors().stream()
-        .map(a -> a.links().stream().map(l -> l.destination().anchorable()).collect(Collectors.toSet()))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
-    return anchorables.stream()
-        .map(target -> perform(new DetachAnchorsFromAnchorable(action.anchorable(), target), agent).outcome()
-            .orElseThrow())
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
-  }
-
-  protected EmbodiedAgent addAndTranslateAgent(AddAndTranslateAgent action, Agent agent) throws ActionException {
-    EmbodiedAgent embodiedAgent = (EmbodiedAgent) perform(
-        new AddAgent(action.agent()), agent)
-        .outcome().orElseThrow(() -> new ActionException(action, "Undoable addition")
-        );
-    perform(new TranslateAgent(embodiedAgent, action.translation()), agent);
-    return embodiedAgent;
-  }
-
-  protected EmbodiedAgent translateAgent(TranslateAgent action, Agent agent) {
-    action.agent().bodyParts().forEach(b -> perform(new TranslateBody(b, action.translation()), agent));
-    return action.agent();
-  }
-
-  protected Collection<Pair<Anchor, Anchor>> attractAnchorable(AttractAnchorable action, Agent agent) {
-    //discard already attached
-    Collection<Anchor> srcAnchors = action.anchors().stream()
-        .filter(a -> a.links().stream()
-            .map(l -> l.destination().anchorable())
-            .filter(dst -> dst == action.anchorable()).toList().isEmpty())
-        .toList();
-    //match anchor pairs
-    Collection<Anchor> dstAnchors = new HashSet<>(action.anchorable().anchors());
-    Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
-    srcAnchors.forEach(src -> {
-      Optional<Anchor> closest = dstAnchors.stream()
-          .min(Comparator.comparingDouble(a -> a.point().distance(src.point())));
-      if (closest.isPresent()) {
-        pairs.add(new Pair<>(src, closest.get()));
-        dstAnchors.remove(closest.get());
-      }
-    });
-    //attract
-    pairs.forEach(p -> perform(new AttractAnchor(p.first(), p.second(), action.magnitude())));
-    return pairs;
   }
 
   protected AttractAndLinkAnchor.Outcome attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
@@ -361,40 +218,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
           Optional.empty()
       );
     }
-  }
-
-  protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkAnchorable(
-      AttractAndLinkAnchorable action,
-      Agent agent
-  ) {
-    //discard already attached
-    Collection<Anchor> srcAnchors = action.anchors().stream()
-        .filter(a -> a.links().stream()
-            .map(l -> l.destination().anchorable())
-            .filter(dst -> dst == action.anchorable()).toList().isEmpty())
-        .toList();
-    //match anchor pairs
-    Collection<Anchor> dstAnchors = new HashSet<>(action.anchorable().anchors());
-    Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
-    srcAnchors.forEach(src -> dstAnchors.stream()
-        .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
-        .ifPresent(dstAnchor -> {
-          pairs.add(new Pair<>(src, dstAnchor));
-          dstAnchors.remove(dstAnchor);
-        }));
-    //attract and link
-    Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new HashMap<>();
-    for (Pair<Anchor, Anchor> pair : pairs) {
-      perform(new AttractAndLinkAnchor(
-          pair.first(),
-          pair.second(),
-          action.magnitude(),
-          action.type()
-      ), agent)
-          .outcome()
-          .ifPresent(outcome -> map.put(pair, outcome));
-    }
-    return map;
   }
 
   protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkClosestAnchorable(
@@ -425,24 +248,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
       ), agent).outcome().orElse(Map.of());
     }
     return Map.of();
-  }
-
-  protected Collection<Anchor.Link> detachAnchors(DetachAnchors action, Agent agent) {
-    Collection<Anchor.Link> toRemoveLinks = action.anchors().stream()
-        .map(Anchor::links)
-        .flatMap(Collection::stream)
-        .toList();
-    return toRemoveLinks.stream()
-        .map(l -> perform(new RemoveLink(l), agent).outcome())
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .toList();
-  }
-
-  protected double senseDirectedVelocity(SenseDirectedVelocity action, Agent agent) {
-    Point v = action.body().centerLinearVelocity();
-    double a = v.direction() - action.direction();
-    return v.magnitude() * Math.cos(a);
   }
 
 }

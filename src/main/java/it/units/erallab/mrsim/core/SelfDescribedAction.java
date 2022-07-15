@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.core.actions;
+package it.units.erallab.mrsim.core;
 
-import it.units.erallab.mrsim.core.ActionPerformer;
-import it.units.erallab.mrsim.core.Agent;
-import it.units.erallab.mrsim.core.EmbodiedAgent;
-import it.units.erallab.mrsim.core.SelfDescribedAction;
-import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.engine.ActionException;
 
 /**
- * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
+ * @author "Eric Medvet" on 2022/07/15 for 2dmrsim
  */
-public record TranslateAgent(EmbodiedAgent agent, Point translation) implements SelfDescribedAction<EmbodiedAgent> {
-  @Override
-  public EmbodiedAgent perform(ActionPerformer performer, Agent agent) throws ActionException {
-    agent().bodyParts().forEach(b -> performer.perform(new TranslateBody(b, translation), agent));
-    return agent();
-  }
+public interface SelfDescribedAction<O> extends Action<O> {
+  O perform(ActionPerformer performer, Agent agent) throws ActionException;
 }

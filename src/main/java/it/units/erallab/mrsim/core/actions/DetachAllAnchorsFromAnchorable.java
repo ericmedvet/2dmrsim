@@ -16,14 +16,33 @@
 
 package it.units.erallab.mrsim.core.actions;
 
-import it.units.erallab.mrsim.core.Action;
+import it.units.erallab.mrsim.core.ActionPerformer;
+import it.units.erallab.mrsim.core.Agent;
+import it.units.erallab.mrsim.core.SelfDescribedAction;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
+import it.units.erallab.mrsim.engine.ActionException;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record DetachAllAnchorsFromAnchorable(Anchorable anchorable) implements Action<Collection<Anchor.Link>> {
+public record DetachAllAnchorsFromAnchorable(
+    Anchorable anchorable
+) implements SelfDescribedAction<Collection<Anchor.Link>> {
+  @Override
+  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) throws ActionException {
+    Set<Anchorable> anchorables = anchorable.anchors().stream()
+        .map(a -> a.links().stream().map(l -> l.destination().anchorable()).collect(Collectors.toSet()))
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+    return anchorables.stream()
+        .map(target -> performer.perform(new DetachAnchorsFromAnchorable(anchorable, target), agent).outcome()
+            .orElseThrow())
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+  }
 }
