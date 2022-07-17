@@ -133,8 +133,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
   @Override
   public Map<String, Number> values() {
     return Stream.of(
-            times.entrySet().stream().map(e -> Map.entry("time_"+e.getKey(), e.getValue().get())),
-            counters.entrySet().stream().map(e -> Map.entry("counter_"+e.getKey(), e.getValue().get()))
+            times.entrySet().stream().map(e -> Map.entry("time_" + e.getKey(), e.getValue().get())),
+            counters.entrySet().stream().map(e -> Map.entry("counter_" + e.getKey(), e.getValue().get()))
         ).flatMap(m -> m)
         .map(e -> Map.entry(e.getKey().toLowerCase(), e.getValue()))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -202,6 +202,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(AddAgent.class, this::addAgent);
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
     registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
+    registerActionSolver(SenseSinusoidal.class, this::senseSinusoidal);
   }
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
@@ -257,6 +258,10 @@ public abstract class AbstractEngine implements Engine, Profiled {
       ), agent).outcome().orElse(Map.of());
     }
     return Map.of();
+  }
+
+  protected double senseSinusoidal(SenseSinusoidal action, Agent agent) {
+    return Math.sin(2d * Math.PI * action.f() * t() + action.phi());
   }
 
 }

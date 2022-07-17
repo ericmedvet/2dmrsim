@@ -39,7 +39,7 @@ public class CentralizedNumGridVSR extends NumGridVSR {
       Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
       TimedRealFunction timedRealFunction
   ) {
-    super(materialGrid, voxelSideLength, voxelMass, sensorsGrid, null);
+    super(materialGrid, voxelSideLength, voxelMass, sensorsGrid, buildGridFunction(timedRealFunction, sensorsGrid));
   }
 
   public CentralizedNumGridVSR(

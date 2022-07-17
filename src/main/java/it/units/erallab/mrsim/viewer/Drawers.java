@@ -22,6 +22,7 @@ import it.units.erallab.mrsim.viewer.drawers.EngineProfilingDrawer;
 import it.units.erallab.mrsim.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim.viewer.drawers.actions.AttractAnchor;
 import it.units.erallab.mrsim.viewer.drawers.actions.SenseDistanceToBody;
+import it.units.erallab.mrsim.viewer.drawers.actions.SenseRotatedVelocity;
 import it.units.erallab.mrsim.viewer.drawers.bodies.AnchorableBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.RigidBodyDrawer;
 import it.units.erallab.mrsim.viewer.drawers.bodies.SoftBodyDrawer;
@@ -67,9 +68,8 @@ public class Drawers {
                     //new CreateLink(), // both slow, because they add continuously drawers...
                     //new RemoveLink(),
                     new AttractAnchor(),
-                    new SenseDistanceToBody()
-                    //new SenseVelocity(),
-                    //new SenseRotatedVelocity()
+                    new SenseDistanceToBody(),
+                    new SenseRotatedVelocity()
                 ), Snapshot::actionOutcomes
             )
         )
