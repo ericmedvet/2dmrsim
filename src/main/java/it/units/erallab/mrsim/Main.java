@@ -23,6 +23,7 @@ import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
+import it.units.erallab.mrsim.core.bodies.Body;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Poly;
@@ -57,11 +58,12 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Poly terrain = PolyUtils.createTerrain("hilly-0.25-4-1", 50, 5, 1, 5);
+    Poly terrain = PolyUtils.createTerrain("downhill-5", 50, 5, 1, 5);
     Engine engine = new Dyn4JEngine();
     //do thing
     //vsr(engine, terrain, viewer);
-    iVsrs(engine, terrain, viewer);
+    //iVsrs(engine, terrain, viewer);
+    ball(engine, terrain, viewer);
     //do final stuff
     videoBuilder.get();
   }
@@ -123,7 +125,9 @@ public class Main {
         v -> new SenseSideCompression(Voxel.Side.N, v),
         v -> new SenseSideCompression(Voxel.Side.E, v),
         v -> new SenseSideCompression(Voxel.Side.S, v),
-        v -> new SenseSideCompression(Voxel.Side.W, v)
+        v -> new SenseSideCompression(Voxel.Side.W, v),
+        v -> new SenseDistanceToBody(0, 2, v),
+        v -> new SenseDistanceToBody(Math.PI, 2, v)
     );
     Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
         (oT, in) -> {
@@ -146,6 +150,22 @@ public class Main {
         EmbodiedAgent agent = new NumIndependentVoxel(sensors, functionProvider.apply(snapshot.agents().size()));
         engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 5, 5)));
       }
+    }
+  }
+
+  private static void ball(Engine engine, Poly terrain, Consumer<Snapshot> consumer) {
+    engine.perform(new CreateUnmovableBody(terrain));
+    Body ball = engine.perform(new CreateAndTranslateRigidBody(Poly.regular(1, 32), 1, new Point(2, 2)))
+        .outcome()
+        .orElseThrow();
+    Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(10, 1))).outcome().orElseThrow();
+    while (engine.t() < 100) {
+      Snapshot snapshot = engine.tick();
+      consumer.accept(snapshot);
+      engine.perform(new SenseDistanceToBody(0, 2, ball));
+      engine.perform(new SenseVelocity(0, ball));
+      engine.perform(new SenseRotatedVelocity(0, ball));
+      engine.perform(new SenseDistanceToBody(0, 2, voxel));
     }
   }
 

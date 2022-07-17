@@ -56,11 +56,19 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
 
   private enum BodyType {VERTEX, CENTRAL}
 
-  private record OwnerFilter(Object owner, BodyType bodyType) implements Filter {
+  private static class VoxelFilter extends BodyOwnerFilter {
+
+    private final BodyType bodyType;
+
+    public VoxelFilter(it.units.erallab.mrsim.core.bodies.Body owner, BodyType bodyType) {
+      super(owner);
+      this.bodyType = bodyType;
+    }
+
     @Override
     public boolean isAllowed(Filter otherFilter) {
-      if (otherFilter instanceof OwnerFilter otherOwnerFilter) {
-        return owner != otherOwnerFilter.owner || bodyType.equals(otherOwnerFilter.bodyType);
+      if (otherFilter instanceof VoxelFilter otherVoxelFilter) {
+        return getOwner() != otherVoxelFilter.getOwner() || bodyType.equals(otherVoxelFilter.bodyType);
       }
       return true;
     }
@@ -121,10 +129,13 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   }
 
   private Vector2 getSidesAverageDirection() {
-    Poly poly = poly();
     return new Vector2(
-        poly.vertexes()[0].x() - poly.vertexes()[1].x() + poly.vertexes()[3].x() - poly.vertexes()[2].x(),
-        poly.vertexes()[0].y() - poly.vertexes()[1].y() + poly.vertexes()[3].y() - poly.vertexes()[2].y()
+        vertexes.get(Vertex.NW).getWorldCenter().x - vertexes.get(Vertex.NE)
+            .getWorldCenter().x + vertexes.get(Vertex.SW).getWorldCenter().x - vertexes.get(Vertex.SE)
+            .getWorldCenter().x,
+        vertexes.get(Vertex.NW).getWorldCenter().y - vertexes.get(Vertex.NE)
+            .getWorldCenter().y + vertexes.get(Vertex.SW).getWorldCenter().y - vertexes.get(Vertex.SE)
+            .getWorldCenter().y
     );
   }
 
@@ -327,8 +338,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
       }
     }
     //set collision filter
-    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this, BodyType.VERTEX))));
+    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.VERTEX))));
     //add central mass
+    //noinspection ConstantConditions
     if (CENTRAL_MASS_RATIO > 0) {
       Body centralMass = new Body();
       centralMass.addFixture(
@@ -341,7 +353,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
       centralMass.setLinearDamping(linearDamping);
       centralMass.setAngularDamping(angularDamping);
       centralMass.translate(sideLength / 2d, sideLength / 2d);
-      centralMass.getFixtures().forEach(f -> f.setFilter(new OwnerFilter(this, BodyType.CENTRAL)));
+      centralMass.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.CENTRAL)));
       otherBodies.add(centralMass);
       for (Body vertex : vertexes.values()) {
         DistanceJoint<Body> joint = new DistanceJoint<>(
@@ -482,7 +494,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   @Override
   public double angle() {
     Vector2 currentSidesAverageDirection = getSidesAverageDirection();
-    return currentSidesAverageDirection.getAngleBetween(initialSidesAverageDirection);
+    return -currentSidesAverageDirection.getAngleBetween(initialSidesAverageDirection);
   }
 
   @Override

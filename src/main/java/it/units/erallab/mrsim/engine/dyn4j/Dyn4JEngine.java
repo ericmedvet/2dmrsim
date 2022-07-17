@@ -27,15 +27,20 @@ import it.units.erallab.mrsim.engine.AbstractEngine;
 import it.units.erallab.mrsim.engine.IllegalActionException;
 import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.util.PolyUtils;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.WeldJoint;
+import org.dyn4j.geometry.Ray;
 import org.dyn4j.geometry.Vector2;
+import org.dyn4j.world.DetectFilter;
 import org.dyn4j.world.World;
+import org.dyn4j.world.result.RaycastResult;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -106,6 +111,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
     registerActionSolver(AttractAnchor.class, this::attractAnchor);
+    registerActionSolver(SenseDistanceToBody.class, this::senseDistanceToBody);
     super.registerActionSolvers();
   }
 
@@ -188,8 +194,10 @@ public class Dyn4JEngine extends AbstractEngine {
               )
           );
         } else if (Anchor.Link.Type.SOFT.equals(action.type())) {
-          double d = PolyUtils.minAnchorDistance(action.source(),
-              action.destination()) * configuration.softLinkRestDistanceRatio;
+          double d = PolyUtils.minAnchorDistance(
+              action.source(),
+              action.destination()
+          ) * configuration.softLinkRestDistanceRatio;
           DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
               src.getBody(),
               dst.getBody(),
@@ -296,6 +304,23 @@ public class Dyn4JEngine extends AbstractEngine {
             action.destination().getClass().getSimpleName()
         )
     );
+  }
+
+  private Double senseDistanceToBody(SenseDistanceToBody action, Agent agent) {
+    Ray ray = new Ray(
+        new Vector2(action.body().poly().center().x(), action.body().poly().center().y()),
+        action.direction() + action.body().angle()
+    );
+    List<RaycastResult<org.dyn4j.dynamics.Body, BodyFixture>> results = world.raycast(
+        ray,
+        action.distanceRange(),
+        new DetectFilter<>(
+            true,
+            true,
+            new BodyOwnerFilter(action.body())
+        )
+    );
+    return results.stream().mapToDouble(r -> r.getRaycast().getDistance()).min().orElse(action.distanceRange());
   }
 
 }

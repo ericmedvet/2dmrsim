@@ -103,6 +103,6 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, 
   @Override
   public double angle() {
     Vector2 currentFirstSideDirection = getFirstSideDirection();
-    return currentFirstSideDirection.getAngleBetween(initialFirstSideDirection);
+    return -currentFirstSideDirection.getAngleBetween(initialFirstSideDirection);
   }
 }
