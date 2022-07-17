@@ -24,7 +24,7 @@ import it.units.erallab.mrsim.core.actions.DetachAnchors;
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Voxel;
-import it.units.erallab.mrsim.util.TimedRealFunction;
+import it.units.erallab.mrsim.functions.TimedRealFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -18,8 +18,8 @@ package it.units.erallab.mrsim.agents.gridvsr;
 
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.util.Grid;
-import it.units.erallab.mrsim.util.TimedRealFunction;
 import it.units.erallab.mrsim.util.Utils;
 
 import java.util.List;
