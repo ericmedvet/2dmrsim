@@ -41,6 +41,7 @@ import org.dyn4j.world.result.RaycastResult;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -112,6 +113,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
     registerActionSolver(AttractAnchor.class, this::attractAnchor);
     registerActionSolver(SenseDistanceToBody.class, this::senseDistanceToBody);
+    registerActionSolver(FindInContactBodies.class, this::findInContactBodies);
     super.registerActionSolvers();
   }
 
@@ -321,6 +323,22 @@ public class Dyn4JEngine extends AbstractEngine {
         )
     );
     return results.stream().mapToDouble(r -> r.getRaycast().getDistance()).min().orElse(action.distanceRange());
+  }
+
+  private Collection<Body> findInContactBodies(FindInContactBodies action, Agent agent) throws IllegalActionException {
+    if (action.body() instanceof MultipartBody multipartBody) {
+      return multipartBody.getBodies().stream()
+          .map(b -> world.getInContactBodies(b, false))
+          .flatMap(Collection::stream)
+          .filter(b -> !multipartBody.getBodies()
+              .contains(b) && b.getUserData() != null && b.getUserData() instanceof Body)
+          .map(b -> (Body) b.getUserData())
+          .collect(Collectors.toList());
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Unsupported body type %s", action.body().getClass().getSimpleName())
+    );
   }
 
 }

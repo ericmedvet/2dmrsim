@@ -22,10 +22,12 @@ import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Utils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
@@ -81,6 +83,9 @@ public class CentralizedNumGridVSR extends NumGridVSR {
         ));
       }
       //compute outputs
+
+      System.out.println(Arrays.stream(inputs).mapToObj(v -> String.format("%4.2f", v)).collect(Collectors.joining(";")));
+
       double[] outputs = timedRealFunction.apply(t, inputs);
       //split outputs
       Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);

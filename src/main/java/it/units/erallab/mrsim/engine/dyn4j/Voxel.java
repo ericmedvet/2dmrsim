@@ -377,6 +377,9 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         joint.setDampingRatio(SPRING_D);
       }
     });
+    //set user data
+    vertexes.values().forEach(b -> b.setUserData(this));
+    otherBodies.forEach(b -> b.setUserData(this));
   }
 
   protected void actuate(EnumMap<Side, Double> sideValues) {

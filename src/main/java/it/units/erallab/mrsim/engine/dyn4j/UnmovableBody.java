@@ -63,6 +63,7 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
         })
         .toList();
     initialCenter = center(bodies);
+    bodies.forEach(b -> b.setUserData(this));
   }
 
   private static Point center(List<Body> bodies) {

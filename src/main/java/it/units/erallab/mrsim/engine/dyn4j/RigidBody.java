@@ -54,6 +54,7 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, 
     body.setMass(MassType.NORMAL);
     body.setLinearDamping(linearDamping);
     body.setAngularDamping(angularDamping);
+    body.setUserData(this);
     initialFirstSideDirection = getFirstSideDirection();
   }
 

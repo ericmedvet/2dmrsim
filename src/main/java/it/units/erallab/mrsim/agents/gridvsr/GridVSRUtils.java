@@ -21,10 +21,7 @@ import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -39,13 +36,18 @@ public class GridVSRUtils {
       Map.entry("sd90", v -> new SenseDistanceToBody(Math.PI / 2d, 1, v)),
       Map.entry("sd180", v -> new SenseDistanceToBody(Math.PI, 1, v)),
       Map.entry("sd270", v -> new SenseDistanceToBody(Math.PI / 2d * 3d, 1, v)),
+      Map.entry("ld0", v -> new SenseDistanceToBody(0, 8, v)),
+      Map.entry("ld90", v -> new SenseDistanceToBody(Math.PI / 2d, 8, v)),
+      Map.entry("ld180", v -> new SenseDistanceToBody(Math.PI, 8, v)),
+      Map.entry("ld270", v -> new SenseDistanceToBody(Math.PI / 2d * 3d, 8, v)),
       Map.entry("ar", SenseAreaRatio::new),
       Map.entry("a", SenseAngle::new),
       Map.entry("ln", v -> new SenseSideCompression(Voxel.Side.N, v)),
       Map.entry("le", v -> new SenseSideCompression(Voxel.Side.E, v)),
       Map.entry("ls", v -> new SenseSideCompression(Voxel.Side.S, v)),
       Map.entry("lw", v -> new SenseSideCompression(Voxel.Side.W, v)),
-      Map.entry("sin1", v -> new SenseSinusoidal(1,0,v))
+      Map.entry("t", SenseContact::new),
+      Map.entry("sin1", v -> new SenseSinusoidal(1, 0, v))
   );
 
   private GridVSRUtils() {
@@ -105,6 +107,10 @@ public class GridVSRUtils {
   }
 
   public static Grid<List<Function<Voxel, Sense<? super Voxel>>>> buildSensors(String name, Grid<Boolean> shape) {
+    String sensorsRegex = "("
+        + String.join("|", SENSORS.keySet()) + ")(\\+("
+        + String.join("|", SENSORS.keySet())
+        + "))*";
     Function<String, Optional<Grid<List<Function<Voxel, Sense<? super Voxel>>>>>> provider =
         StringUtils.formattedProvider(
             Map.ofEntries(
@@ -112,17 +118,55 @@ public class GridVSRUtils {
                   List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of();
                   return Grid.create(shape, b -> b == null ? null : sensors);
                 }),
-                Map.entry("uniform-(?<sensors>(" + String.join("|", SENSORS.keySet()) + ")(\\+(" + String.join(
-                    "|",
-                    SENSORS.keySet()
-                ) + "))*)", p -> {
+                Map.entry("uniform-(?<sensors>" + sensorsRegex + ")", p -> {
                   List<Function<Voxel, Sense<? super Voxel>>> sensors = Arrays.stream(p.s().get("sensors").split("\\+"))
                       .map(SENSORS::get)
                       .toList();
                   return Grid.create(shape, b -> b == null ? null : sensors);
+                }),
+                Map.entry("top-(?<topSensors>" + sensorsRegex + ")-bottom-(?<bottomSensors>" + sensorsRegex + ")" +
+                    "-front-" +
+                    "(?<frontSensors" +
+                    ">" + sensorsRegex + ")", p -> {
+                  List<Function<Voxel, Sense<? super Voxel>>> topSensors = Arrays.stream(p.s()
+                          .get("topSensors")
+                          .split("\\+"))
+                      .map(SENSORS::get)
+                      .toList();
+                  List<Function<Voxel, Sense<? super Voxel>>> bottomSensors = Arrays.stream(p.s()
+                          .get("bottomSensors")
+                          .split("\\+"))
+                      .map(SENSORS::get)
+                      .toList();
+                  List<Function<Voxel, Sense<? super Voxel>>> frontSensors = Arrays.stream(p.s()
+                          .get("frontSensors")
+                          .split("\\+"))
+                      .map(SENSORS::get)
+                      .toList();
+                  return Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
+                    if (!shape.get(x, y)) {
+                      return null;
+                    }
+                    int maxX = shape.entries()
+                        .stream()
+                        .filter(e -> e.key().y() == y && e.value())
+                        .mapToInt(e -> e.key().x())
+                        .max()
+                        .orElse(0);
+                    List<Function<Voxel, Sense<? super Voxel>>> localSensors = new ArrayList<>();
+                    if (x == maxX) {
+                      localSensors.addAll(frontSensors);
+                    }
+                    if (y == 0) {
+                      localSensors.addAll(bottomSensors);
+                    }
+                    if (y == shape.h() - 1) {
+                      localSensors.addAll(topSensors);
+                    }
+                    return localSensors;
+                  });
                 })
             ));
-    System.out.println(provider.apply(name).orElseThrow());
     return provider.apply(name).orElseThrow();
   }
 
