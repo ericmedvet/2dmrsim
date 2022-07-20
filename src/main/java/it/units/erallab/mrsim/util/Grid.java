@@ -297,16 +297,4 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
     return Grid.create(this, f);
   }
 
-  public static void main(String[] args) {
-    Grid<Integer> g = Grid.create(3, 2, 0);
-    g.set(0, 0, 1);
-    g.set(0, 1, 2);
-    g.set(1, 0, 3);
-    g.set(1, 1, 4);
-    g.set(2, 0, 5);
-    g.set(2, 1, 6);
-    System.out.println(g.values());
-    System.out.println(g.entries());
-  }
-
 }
