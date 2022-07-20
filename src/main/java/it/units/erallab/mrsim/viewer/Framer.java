@@ -47,4 +47,18 @@ public interface Framer {
       return new BoundingBox(new Point(x - w / 2d, y - h / 2d), new Point(x + w / 2d, y + h / 2d));
     };
   }
+
+  default Framer largest(double windowT) {
+    Framer thisFramer = this;
+    Map<Double, BoundingBox> memory = new HashMap<>();
+    return (snapshot, ratio) -> {
+      BoundingBox currentBB = thisFramer.getFrame(snapshot, ratio);
+      //update memory
+      memory.put(snapshot.t(), currentBB);
+      List<Double> toRemoveKeys = memory.keySet().stream().filter(t -> t < snapshot.t() - windowT).toList();
+      toRemoveKeys.forEach(memory::remove);
+      //take largest bounding box
+      return memory.values().stream().reduce(BoundingBox::enclosing).orElse(currentBB);
+    };
+  }
 }

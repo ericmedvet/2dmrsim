@@ -83,9 +83,6 @@ public class CentralizedNumGridVSR extends NumGridVSR {
         ));
       }
       //compute outputs
-
-      System.out.println(Arrays.stream(inputs).mapToObj(v -> String.format("%4.2f", v)).collect(Collectors.joining(";")));
-
       double[] outputs = timedRealFunction.apply(t, inputs);
       //split outputs
       Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);

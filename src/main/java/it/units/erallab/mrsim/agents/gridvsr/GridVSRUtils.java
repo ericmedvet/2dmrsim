@@ -116,13 +116,13 @@ public class GridVSRUtils {
             Map.ofEntries(
                 Map.entry("empty", p -> {
                   List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of();
-                  return Grid.create(shape, b -> b == null ? null : sensors);
+                  return shape.map(b -> b == null ? null : sensors);
                 }),
                 Map.entry("uniform-(?<sensors>" + sensorsRegex + ")", p -> {
                   List<Function<Voxel, Sense<? super Voxel>>> sensors = Arrays.stream(p.s().get("sensors").split("\\+"))
                       .map(SENSORS::get)
                       .toList();
-                  return Grid.create(shape, b -> b == null ? null : sensors);
+                  return shape.map(b -> b == null ? null : sensors);
                 }),
                 Map.entry("top-(?<topSensors>" + sensorsRegex + ")-bottom-(?<bottomSensors>" + sensorsRegex + ")" +
                     "-front-" +

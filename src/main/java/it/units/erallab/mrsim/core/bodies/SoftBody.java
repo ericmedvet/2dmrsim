@@ -16,8 +16,6 @@
 
 package it.units.erallab.mrsim.core.bodies;
 
-import it.units.erallab.mrsim.core.geometry.Poly;
-
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
@@ -25,6 +23,6 @@ public interface SoftBody extends Body {
   double restArea();
 
   default double areaRatio() {
-    return restArea() / poly().area();
+    return poly().area() / restArea();
   }
 }

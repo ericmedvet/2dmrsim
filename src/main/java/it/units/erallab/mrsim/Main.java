@@ -77,8 +77,8 @@ public class Main {
     double lastBallT = 0d;
     Grid<Boolean> shape = GridVSRUtils.buildShape("biped-4x3");
     Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
-        //"uniform-a+ar+sd0+v0+v90+sin1",
-        "top-a+ar-bottom-t+v0-front-ld0",
+        //"uniform-t+sin1",
+        "top-a+ar-bottom-sd270-front-ld0",
         shape
     );
     int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
