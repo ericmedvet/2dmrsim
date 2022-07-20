@@ -20,6 +20,8 @@ import it.units.erallab.mrsim.core.Snapshot;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
 import java.time.Duration;
 import java.time.Instant;
@@ -40,10 +42,12 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
   private final Drawer drawer;
 
   private final Canvas canvas;
+  private final JButton pauseButton;
   private double lastDrawnT;
   private double lastDrawingMillis;
   private Instant startingInstant;
   private final List<Snapshot> snapshots;
+  private boolean isPaused;
 
   public RealtimeViewer(double frameRate, Drawer drawer) {
     super("Realtime simulation viewer");
@@ -57,6 +61,14 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     canvas.setMinimumSize(dimension);
     canvas.setMaximumSize(dimension);
     getContentPane().add(canvas, BorderLayout.CENTER);
+    pauseButton = new JButton();
+    pauseButton.setText("Pause");
+    isPaused = false;
+    pauseButton.addActionListener(e -> {
+      isPaused = !isPaused;
+      pauseButton.setText(isPaused ? "Unpause" : "Pause");
+    });
+    getContentPane().add(pauseButton, BorderLayout.PAGE_END);
     //pack
     pack();
     //start
@@ -82,7 +94,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
       //wait
       while (true) {
         double currentWallTime = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
-        if (snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
+        if (isPaused || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
           try {
             Thread.sleep(WAIT_MILLIS);
           } catch (InterruptedException e) {
