@@ -263,9 +263,14 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
     return b;
   }
 
-  @SuppressWarnings("unchecked")
   public List<T> values() {
-    return Arrays.stream(ts).map(o -> (T) o).toList();
+    List<T> values = new ArrayList<>(w * h);
+    for (int x = 0; x < w; x++) {
+      for (int y = 0; y < h; y++) {
+        values.add(get(x, y));
+      }
+    }
+    return Collections.unmodifiableList(values);
   }
 
   public List<Key> keys() {
@@ -290,6 +295,18 @@ public class Grid<T> implements Iterable<Grid.Entry<T>>, Serializable {
 
   public <R> Grid<R> map(Function<T, R> f) {
     return Grid.create(this, f);
+  }
+
+  public static void main(String[] args) {
+    Grid<Integer> g = Grid.create(3, 2, 0);
+    g.set(0, 0, 1);
+    g.set(0, 1, 2);
+    g.set(1, 0, 3);
+    g.set(1, 1, 4);
+    g.set(2, 0, 5);
+    g.set(2, 1, 6);
+    System.out.println(g.values());
+    System.out.println(g.entries());
   }
 
 }
