@@ -66,7 +66,7 @@ public class Main {
     Terrain terrain = PolyUtils.createTerrain("downhill-5", 500, 5, 1, 5);
     Engine engine = new Dyn4JEngine();
     //do thing
-    locomotion(engine, terrain, s -> {});
+    locomotion(engine, terrain, viewer);
     //vsr(engine, terrain, viewer);
     //iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
@@ -78,7 +78,7 @@ public class Main {
     Grid<Boolean> shape = GridVSRUtils.buildShape("biped-4x3");
     Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
         //"uniform-t+sin1",
-        "top-a+ar-bottom-sd270-front-ld0",
+        "top-a+ar-bottom-sd270+sin1-front-ld0",
         shape
     );
     int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
