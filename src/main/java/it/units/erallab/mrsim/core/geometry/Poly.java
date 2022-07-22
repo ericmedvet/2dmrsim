@@ -16,7 +16,9 @@
 
 package it.units.erallab.mrsim.core.geometry;
 
-import java.util.Arrays;
+import it.units.erallab.mrsim.util.Pair;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -73,4 +75,14 @@ public record Poly(Point... vertexes) implements Shape {
   public String toString() {
     return "[" + Arrays.stream(vertexes).map(Point::toString).collect(Collectors.joining("->")) + "]";
   }
+
+  public List<Segment> sides() {
+    List<Segment> sides = new ArrayList<>(vertexes.length);
+    for (int i = 0; i < vertexes.length - 1; i++) {
+      sides.add(new Segment(vertexes[i], vertexes[i + 1]));
+    }
+    sides.add(new Segment(vertexes[vertexes.length - 1], vertexes[0]));
+    return Collections.unmodifiableList(sides);
+  }
+
 }

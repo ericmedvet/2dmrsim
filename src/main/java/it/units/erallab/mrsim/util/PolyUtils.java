@@ -17,11 +17,7 @@
 package it.units.erallab.mrsim.util;
 
 import it.units.erallab.mrsim.core.bodies.Anchor;
-import it.units.erallab.mrsim.core.geometry.Path;
-import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.core.geometry.Poly;
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Polygon;
+import it.units.erallab.mrsim.core.geometry.*;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.SweepLine;
@@ -44,11 +40,11 @@ public class PolyUtils {
   private PolyUtils() {
   }
 
-  public static Poly createTerrain(String name) {
+  public static Terrain createTerrain(String name) {
     return createTerrain(name, TERRAIN_WIDTH, TERRAIN_BORDER_HEIGHT, TERRAIN_BORDER_WIDTH, TERRAIN_BORDER_HEIGHT);
   }
 
-  public static Poly createTerrain(String name, double terrainW, double terrainH, double borderW, double borderH) {
+  public static Terrain createTerrain(String name, double terrainW, double terrainH, double borderW, double borderH) {
     Function<String, Optional<Path>> provider = StringUtils.formattedProvider(Map.ofEntries(
         Map.entry("flat", p -> new Path(new Point(terrainW, 0))),
         Map.entry("hilly-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)", p -> {
@@ -103,7 +99,7 @@ public class PolyUtils {
     path = path
         .add(maxX, minY - terrainH)
         .moveTo(-maxX, 0);
-    return path.toPoly();
+    return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
   public static Set<Poly> decompose(Poly poly) {
@@ -180,6 +176,21 @@ public class PolyUtils {
     double d1 = PolyUtils.distance(anchor1.point(), anchor1.anchorable().poly());
     double d2 = PolyUtils.distance(anchor2.point(), anchor2.anchorable().poly());
     return d1 + d2;
+  }
+
+  public static double maxYAtX(Poly poly, double x) {
+    return poly.sides().stream()
+        .mapToDouble(s -> yAtX(s, x))
+        .filter(y -> !Double.isNaN(y))
+        .max().orElse(Double.NaN);
+  }
+
+  public static double yAtX(Segment s, double x) {
+    BoundingBox bb = s.boundingBox();
+    if (x < bb.min().x() || x > bb.max().x()) {
+      return Double.NaN;
+    }
+    return s.p1().y() + (s.p2().y() - s.p1().y()) * (x - s.p1().x()) / (s.p2().x() - s.p1().x());
   }
 
 }

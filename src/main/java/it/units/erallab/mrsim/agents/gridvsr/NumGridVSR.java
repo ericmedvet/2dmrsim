@@ -66,7 +66,6 @@ public class NumGridVSR extends AbstractGridVSR {
   @Override
   public List<Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
-    System.out.println(t);
     if (!previousActionOutcomes.isEmpty()) {
       int c = 0;
       for (Grid.Key key : inputsGrid.keys()) {
