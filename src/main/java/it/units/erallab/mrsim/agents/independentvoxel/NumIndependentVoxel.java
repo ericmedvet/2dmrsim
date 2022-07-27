@@ -27,10 +27,8 @@ import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.functions.TimedRealFunction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
