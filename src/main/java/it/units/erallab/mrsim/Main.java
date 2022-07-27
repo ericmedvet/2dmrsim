@@ -63,12 +63,12 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = PolyUtils.createTerrain("downhill-5", 500, 5, 1, 5);
+    Terrain terrain = PolyUtils.createTerrain("downhill-5");
     Engine engine = new Dyn4JEngine();
     //do thing
-    locomotion(engine, terrain, viewer);
+    //locomotion(engine, terrain, viewer);
     //vsr(engine, terrain, viewer);
-    //iVsrs(engine, terrain, viewer);
+    iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //do final stuff
     videoBuilder.get();
@@ -161,6 +161,10 @@ public class Main {
         v -> new SenseSideCompression(Voxel.Side.E, v),
         v -> new SenseSideCompression(Voxel.Side.S, v),
         v -> new SenseSideCompression(Voxel.Side.W, v),
+        v -> new SenseSideAttachment(Voxel.Side.N, v),
+        v -> new SenseSideAttachment(Voxel.Side.E, v),
+        v -> new SenseSideAttachment(Voxel.Side.S, v),
+        v -> new SenseSideAttachment(Voxel.Side.W, v),
         v -> new SenseDistanceToBody(0, 2, v),
         v -> new SenseDistanceToBody(Math.PI, 2, v)
     );
@@ -183,7 +187,7 @@ public class Main {
       if (engine.t() > lastT + interval) {
         lastT = engine.t();
         EmbodiedAgent agent = new NumIndependentVoxel(sensors, functionProvider.apply(snapshot.agents().size()));
-        engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 5, 5)));
+        engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 15, 5)));
       }
     }
   }

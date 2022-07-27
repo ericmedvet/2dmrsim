@@ -46,6 +46,10 @@ public class GridVSRUtils {
       Map.entry("le", v -> new SenseSideCompression(Voxel.Side.E, v)),
       Map.entry("ls", v -> new SenseSideCompression(Voxel.Side.S, v)),
       Map.entry("lw", v -> new SenseSideCompression(Voxel.Side.W, v)),
+      Map.entry("attn", v -> new SenseSideAttachment(Voxel.Side.N, v)),
+      Map.entry("atte", v -> new SenseSideAttachment(Voxel.Side.E, v)),
+      Map.entry("atts", v -> new SenseSideAttachment(Voxel.Side.S, v)),
+      Map.entry("attw", v -> new SenseSideAttachment(Voxel.Side.W, v)),
       Map.entry("t", SenseContact::new),
       Map.entry("sin1", v -> new SenseSinusoidal(1, 0, v))
   );

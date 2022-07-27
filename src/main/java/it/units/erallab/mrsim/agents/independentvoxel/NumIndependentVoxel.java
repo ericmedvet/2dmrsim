@@ -88,12 +88,6 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
     double[] outputs = function.apply(t, inputs);
-    System.out.printf(
-        "%10.10s -> %s%n",
-        hashCode(),
-        Arrays.stream(inputs).mapToObj(d -> String.format("%5.2f", d)).collect(
-            Collectors.joining(" "))
-    ); // TODO remove
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions

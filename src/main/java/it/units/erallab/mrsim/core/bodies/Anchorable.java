@@ -18,10 +18,28 @@ package it.units.erallab.mrsim.core.bodies;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Anchorable extends Body {
   List<Anchor> anchors();
+
+  default boolean isAnchoredTo(Anchor otherAnchor) {
+    return anchors().stream().anyMatch(a -> a.isAnchoredTo(otherAnchor));
+  }
+
+  default boolean isAnchoredTo(Anchorable otherAnchorable) {
+    return anchors().stream().anyMatch(a -> a.isAnchoredTo(otherAnchorable));
+  }
+
+  default Set<Anchor> attachedAnchors() {
+    return anchors().stream().map(Anchor::attachedAnchors).flatMap(Collection::stream).collect(Collectors.toSet());
+  }
+
+  default Set<Anchorable> attachedAnchorables() {
+    return anchors().stream().map(Anchor::attachedAnchorables).flatMap(Collection::stream).collect(Collectors.toSet());
+  }
 }
