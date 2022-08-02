@@ -45,7 +45,7 @@ public record AttractAndLinkAnchorable(
             .filter(dst -> dst == anchorable).toList().isEmpty())
         .toList();
     //match anchor pairs
-    Collection<Anchor> dstAnchors = new HashSet<>(anchorable.anchors());
+    Collection<Anchor> dstAnchors = new LinkedHashSet<>(anchorable.anchors());
     Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
     srcAnchors.forEach(src -> dstAnchors.stream()
         .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
@@ -54,7 +54,7 @@ public record AttractAndLinkAnchorable(
           dstAnchors.remove(dstAnchor);
         }));
     //attract and link
-    Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new HashMap<>();
+    Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new LinkedHashMap<>();
     for (Pair<Anchor, Anchor> pair : pairs) {
       performer.perform(new AttractAndLinkAnchor(
               pair.first(),

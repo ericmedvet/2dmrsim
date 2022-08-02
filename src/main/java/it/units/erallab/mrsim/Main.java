@@ -35,12 +35,13 @@ import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.PolyUtils;
-import it.units.erallab.mrsim.viewer.*;
+import it.units.erallab.mrsim.viewer.Drawer;
+import it.units.erallab.mrsim.viewer.Drawers;
+import it.units.erallab.mrsim.viewer.VideoBuilder;
+import it.units.erallab.mrsim.viewer.VideoUtils;
 
 import java.io.File;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
@@ -62,16 +63,17 @@ public class Main {
         new File("/home/eric/experiments/balls.mp4"),
         drawer
     );
-    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    //RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Terrain terrain = PolyUtils.createTerrain("downhill-5");
     Engine engine = new Dyn4JEngine();
     //do thing
     //locomotion(engine, terrain, viewer);
     //vsr(engine, terrain, viewer);
-    iVsrs(engine, terrain, viewer);
+    //iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //do final stuff
-    videoBuilder.get();
+    //videoBuilder.get();
+    verifyDetermisticBehavior();
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
@@ -198,13 +200,77 @@ public class Main {
         .outcome()
         .orElseThrow();
     Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(10, 1))).outcome().orElseThrow();
-    while (engine.t() < 100) {
+    while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
       engine.perform(new SenseDistanceToBody(0, 2, ball));
       engine.perform(new SenseVelocity(0, ball));
       engine.perform(new SenseRotatedVelocity(0, ball));
       engine.perform(new SenseDistanceToBody(0, 2, voxel));
+    }
+  }
+
+  private static void verifyDetermisticBehavior() {
+    Map<Double, List<Double>> vsrCenters = new TreeMap<>();
+    Map<Double, List<Double>> ballCenters = new TreeMap<>();
+    for (int i = 0; i < 2; i++) {
+      Engine engine = new Dyn4JEngine();
+      engine.perform(new CreateUnmovableBody(PolyUtils.createTerrain("downhill-5").poly()));
+      Body ball = engine.perform(new CreateAndTranslateRigidBody(Poly.regular(1, 32), 1, new Point(12, 2)))
+          .outcome()
+          .orElseThrow();
+      Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(13, 1))).outcome().orElseThrow();
+      engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(13.5, 3))).outcome().orElseThrow();
+      Grid<Boolean> shape = GridVSRUtils.buildShape("biped-4x3");
+      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
+          //"uniform-t+sin1",
+          "top-a-bottom-a-front-ld0",
+          shape
+      );
+      int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+      int nOfOutputs = (int) sensors.values().stream().filter(Objects::nonNull).count();
+      MultiLayerPerceptron mlp = new MultiLayerPerceptron(
+          MultiLayerPerceptron.ActivationFunction.TANH,
+          nOfInputs,
+          new int[10],
+          nOfOutputs
+      );
+      RandomGenerator rg = new Random(1);
+      double[] params = IntStream.range(0, mlp.getParams().length).mapToDouble(j -> rg.nextDouble(-10, 10)).toArray();
+      mlp.setParams(params);
+      AbstractGridVSR vsr = new CentralizedNumGridVSR(
+          shape.map(b -> b ? new Voxel.Material() : null),
+          sensors,
+          mlp
+      );
+      engine.perform(new AddAndTranslateAgent(vsr, new Point(20, 5)));
+      while (engine.t() < 0.02) {
+        vsrCenters.computeIfAbsent(engine.t(), k -> new ArrayList<>()).add(vsr.center().x());
+        ballCenters.computeIfAbsent(engine.t(), k -> new ArrayList<>()).add(ball.poly().center().x());
+/*
+        vsr.bodyParts().forEach(b -> System.out.println(b.poly().center()));
+        System.out.println(vsr.center().x());
+*/
+
+        engine.tick();
+        engine.perform(new SenseDistanceToBody(0, 2, ball));
+        engine.perform(new SenseVelocity(0, ball));
+        engine.perform(new SenseRotatedVelocity(0, ball));
+        engine.perform(new SenseDistanceToBody(0, 2, voxel));
+      }
+      System.out.printf("ball.center.x=%.10f\tvsr.center.x=%.10f%n", ball.poly().center().x(), vsr.center().x());
+    }
+    for (double t : vsrCenters.keySet()) {
+      if (vsrCenters.get(t).stream().distinct().count() > 1) {
+        System.out.printf("t=%.3fs\tvsrCenters=%s%n", t, vsrCenters.get(t));
+        break;
+      }
+    }
+    for (double t : ballCenters.keySet()) {
+      if (ballCenters.get(t).stream().distinct().count() > 1) {
+        System.out.printf("t=%.3fs\tballCenters=%s%n", t, ballCenters.get(t));
+        break;
+      }
     }
   }
 

@@ -38,7 +38,7 @@ public class StringUtils {
     while (m.find()) {
       groupNames.add(m.group(1));
     }
-    Map<String, String> params = new HashMap<>();
+    Map<String, String> params = new LinkedHashMap<>();
     for (String groupName : groupNames) {
       String value = param(pattern, string, groupName);
       if (value != null) {
@@ -69,7 +69,7 @@ public class StringUtils {
       Map<String, String> s
   ) {
     public TypedParams() {
-      this(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+      this(new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
     }
   }
 

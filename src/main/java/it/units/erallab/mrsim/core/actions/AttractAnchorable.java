@@ -41,7 +41,7 @@ public record AttractAnchorable(
             .filter(dst -> dst == anchorable).toList().isEmpty())
         .toList();
     //match anchor pairs
-    Collection<Anchor> dstAnchors = new HashSet<>(anchorable.anchors());
+    Collection<Anchor> dstAnchors = new LinkedHashSet<>(anchorable.anchors());
     Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
     srcAnchors.forEach(src -> {
       Optional<Anchor> closest = dstAnchors.stream()

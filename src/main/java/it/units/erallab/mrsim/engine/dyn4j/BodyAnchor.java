@@ -19,13 +19,14 @@ package it.units.erallab.mrsim.engine.dyn4j;
 import it.units.erallab.mrsim.core.bodies.Anchor;
 import it.units.erallab.mrsim.core.bodies.Anchorable;
 import it.units.erallab.mrsim.core.geometry.Point;
-import it.units.erallab.mrsim.util.Pair;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Vector2;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
@@ -39,7 +40,7 @@ public class BodyAnchor implements Anchor {
   public BodyAnchor(Body body, Anchorable anchorable) {
     this.body = body;
     this.anchorable = anchorable;
-    jointMap = new HashMap<>();
+    jointMap = new LinkedHashMap<>();
   }
 
   @Override
