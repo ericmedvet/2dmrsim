@@ -176,10 +176,10 @@ public class Main {
           .orElseThrow();
       Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(13, 1))).outcome().orElseThrow();
       engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(13.5, 3))).outcome().orElseThrow();
-      Grid<Boolean> shape = GridVSRUtils.buildShape("biped-5x3");
+      Grid<Boolean> shape = GridVSRUtils.buildShape("biped-5x4");
       Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
           //"uniform-t+sin1",
-          "top-a-bottom-a-front-ld0",
+          "top-a+ar-bottom-a+ar-front-ld0",
           shape
       );
       int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
