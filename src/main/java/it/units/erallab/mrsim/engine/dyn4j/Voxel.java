@@ -24,7 +24,10 @@ import org.dyn4j.collision.Filter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.geometry.*;
+import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Convex;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
 import java.util.function.DoubleFunction;
@@ -446,14 +449,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
         centralJoints
     ).flatMap(Collection::stream).toList();
     return (List) allJoints;
-  }
-
-  private Point getIndexedVertex(Vertex vertex, int j) {
-    Transform t = vertexes.get(vertex).getTransform();
-    Rectangle rectangle = (Rectangle) vertexes.get(vertex).getFixture(0).getShape();
-    Vector2 tV = rectangle.getVertices()[j].copy();
-    t.transform(tV);
-    return new Point(tV.x, tV.y);
   }
 
   private Vector2 getSidesAverageDirection() {
