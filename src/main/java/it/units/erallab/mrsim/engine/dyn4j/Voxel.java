@@ -40,40 +40,11 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   protected static final double SPRING_D = 0.3d;
   private static final double CENTRAL_MASS_RATIO = 0.5d;
   private static final DoubleFunction<Convex> MASS_SHAPE_PROVIDER = l -> new Circle(l / 2d);
-
-
-  private record SpringRange(double min, double rest, double max) {
-
-    public SpringRange {
-      if ((min > rest) || (max < rest) || (min < 0)) {
-        throw new IllegalArgumentException(String.format("Wrong spring range [%f, %f, %f]", min, rest, max));
-      }
-    }
-
-  }
-
-  protected enum SpringScaffolding {SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS}
-
-  private enum BodyType {VERTEX, CENTRAL}
-
-  private static class VoxelFilter extends BodyOwnerFilter {
-
-    private final BodyType bodyType;
-
-    public VoxelFilter(it.units.erallab.mrsim.core.bodies.Body owner, BodyType bodyType) {
-      super(owner);
-      this.bodyType = bodyType;
-    }
-
-    @Override
-    public boolean isAllowed(Filter otherFilter) {
-      if (otherFilter instanceof VoxelFilter otherVoxelFilter) {
-        return getOwner() != otherVoxelFilter.getOwner() || bodyType.equals(otherVoxelFilter.bodyType);
-      }
-      return true;
-    }
-  }
-
+  protected final Map<Vertex, Body> vertexes;
+  protected final List<Body> otherBodies;
+  protected final Map<Side, List<DistanceJoint<Body>>> sideJoints;
+  protected final List<DistanceJoint<Body>> centralJoints;
+  protected final Map<Vertex, BodyAnchor> anchors;
   private final double sideLength;
   private final double mass;
   private final double friction;
@@ -84,15 +55,7 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   private final double vertexMassSideLengthRatio;
   private final DoubleRange areaRatioActiveRange;
   private final EnumSet<SpringScaffolding> springScaffoldings;
-
-  protected final Map<Vertex, Body> vertexes;
-  protected final List<Body> otherBodies;
-  protected final Map<Side, List<DistanceJoint<Body>>> sideJoints;
-  protected final List<DistanceJoint<Body>> centralJoints;
-  protected final Map<Vertex, BodyAnchor> anchors;
   private final Vector2 initialSidesAverageDirection;
-
-
   public Voxel(
       double sideLength,
       double mass,
@@ -127,16 +90,95 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     ));
     initialSidesAverageDirection = getSidesAverageDirection();
   }
+  private enum BodyType {VERTEX, CENTRAL}
+  protected enum SpringScaffolding {SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS}
 
-  private Vector2 getSidesAverageDirection() {
-    return new Vector2(
-        vertexes.get(Vertex.NW).getWorldCenter().x - vertexes.get(Vertex.NE)
-            .getWorldCenter().x + vertexes.get(Vertex.SW).getWorldCenter().x - vertexes.get(Vertex.SE)
-            .getWorldCenter().x,
-        vertexes.get(Vertex.NW).getWorldCenter().y - vertexes.get(Vertex.NE)
-            .getWorldCenter().y + vertexes.get(Vertex.SW).getWorldCenter().y - vertexes.get(Vertex.SE)
-            .getWorldCenter().y
-    );
+  private record SpringRange(double min, double rest, double max) {
+
+    public SpringRange {
+      if ((min > rest) || (max < rest) || (min < 0)) {
+        throw new IllegalArgumentException(String.format("Wrong spring range [%f, %f, %f]", min, rest, max));
+      }
+    }
+
+  }
+
+  private static class VoxelFilter extends BodyOwnerFilter {
+
+    private final BodyType bodyType;
+
+    public VoxelFilter(it.units.erallab.mrsim.core.bodies.Body owner, BodyType bodyType) {
+      super(owner);
+      this.bodyType = bodyType;
+    }
+
+    @Override
+    public boolean isAllowed(Filter otherFilter) {
+      if (otherFilter instanceof VoxelFilter otherVoxelFilter) {
+        return getOwner() != otherVoxelFilter.getOwner() || bodyType.equals(otherVoxelFilter.bodyType);
+      }
+      return true;
+    }
+  }
+
+  protected void actuate(EnumMap<Side, Double> sideValues) {
+    //apply on sides
+    for (Map.Entry<Side, Double> sideEntry : sideValues.entrySet()) {
+      double v = sideEntry.getValue();
+      if (Math.abs(v) > 1d) {
+        v = Math.signum(v);
+      }
+      for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
+        Voxel.SpringRange range = (SpringRange) joint.getUserData();
+        if (v >= 0) { // shrink
+          joint.setRestDistance(range.rest - (range.rest - range.min) * v);
+        } else if (v < 0) { // expand
+          joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
+        }
+      }
+    }
+    //apply on central
+    double v = sideValues.values().stream().mapToDouble(Double::doubleValue).average().orElse(0d);
+    if (Math.abs(v) > 1d) {
+      v = Math.signum(v);
+    }
+    for (DistanceJoint<Body> joint : centralJoints) {
+      Voxel.SpringRange range = (SpringRange) joint.getUserData();
+      if (v >= 0) { // shrink
+        joint.setRestDistance(range.rest - (range.rest - range.min) * v);
+      } else if (v < 0) { // expand
+        joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
+      }
+    }
+  }
+
+  @Override
+  public Anchor anchorOn(Vertex vertex) {
+    return anchors.get(vertex);
+  }
+
+  @Override
+  public Collection<Anchor> anchorsOn(Side side) {
+    return switch (side) {
+      case N -> List.of(anchors.get(Vertex.NW), anchors.get(Vertex.NE));
+      case E -> List.of(anchors.get(Vertex.NE), anchors.get(Vertex.SE));
+      case S -> List.of(anchors.get(Vertex.SE), anchors.get(Vertex.SW));
+      case W -> List.of(anchors.get(Vertex.SW), anchors.get(Vertex.NW));
+    };
+  }
+
+  @Override
+  public Point vertex(Vertex vertex) {
+    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
+    Point c = Point.average(centers.toArray(Point[]::new));
+    double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
+    return enlongForm(c, toPoint(vertexes.get(vertex).getWorldCenter()), d);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @Override
+  public List<Anchor> anchors() {
+    return (List) anchors.values().stream().toList();
   }
 
   protected void assemble() {
@@ -382,35 +424,8 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     otherBodies.forEach(b -> b.setUserData(this));
   }
 
-  protected void actuate(EnumMap<Side, Double> sideValues) {
-    //apply on sides
-    for (Map.Entry<Side, Double> sideEntry : sideValues.entrySet()) {
-      double v = sideEntry.getValue();
-      if (Math.abs(v) > 1d) {
-        v = Math.signum(v);
-      }
-      for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
-        Voxel.SpringRange range = (SpringRange) joint.getUserData();
-        if (v >= 0) { // shrink
-          joint.setRestDistance(range.rest - (range.rest - range.min) * v);
-        } else if (v < 0) { // expand
-          joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
-        }
-      }
-    }
-    //apply on central
-    double v = sideValues.values().stream().mapToDouble(Double::doubleValue).average().orElse(0d);
-    if (Math.abs(v) > 1d) {
-      v = Math.signum(v);
-    }
-    for (DistanceJoint<Body> joint : centralJoints) {
-      Voxel.SpringRange range = (SpringRange) joint.getUserData();
-      if (v >= 0) { // shrink
-        joint.setRestDistance(range.rest - (range.rest - range.min) * v);
-      } else if (v < 0) { // expand
-        joint.setRestDistance(range.rest + (range.max - range.rest) * -v);
-      }
-    }
+  private Point enlongForm(Point src, Point dst, double d) {
+    return dst.sum(new Point(dst.diff(src).direction()).scale(d));
   }
 
   @Override
@@ -441,18 +456,15 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     return new Point(tV.x, tV.y);
   }
 
-  private Point toPoint(Vector2 v) {
-    return new Point(v.x, v.y);
-  }
-
-  private Point enlongForm(Point src, Point dst, double d) {
-    return dst.sum(new Point(dst.diff(src).direction()).scale(d));
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  @Override
-  public List<Anchor> anchors() {
-    return (List) anchors.values().stream().toList();
+  private Vector2 getSidesAverageDirection() {
+    return new Vector2(
+        vertexes.get(Vertex.NW).getWorldCenter().x - vertexes.get(Vertex.NE)
+            .getWorldCenter().x + vertexes.get(Vertex.SW).getWorldCenter().x - vertexes.get(Vertex.SE)
+            .getWorldCenter().x,
+        vertexes.get(Vertex.NW).getWorldCenter().y - vertexes.get(Vertex.NE)
+            .getWorldCenter().y + vertexes.get(Vertex.SW).getWorldCenter().y - vertexes.get(Vertex.SE)
+            .getWorldCenter().y
+    );
   }
 
   @Override
@@ -463,14 +475,6 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
     return new Poly(centers.stream()
         .map(vc -> enlongForm(c, vc, d))
         .toArray(Point[]::new));
-  }
-
-  @Override
-  public Point vertex(Vertex vertex) {
-    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
-    Point c = Point.average(centers.toArray(Point[]::new));
-    double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
-    return enlongForm(c, toPoint(vertexes.get(vertex).getWorldCenter()), d);
   }
 
   @Override
@@ -490,28 +494,22 @@ public class Voxel implements it.units.erallab.mrsim.core.bodies.Voxel, Multipar
   }
 
   @Override
-  public double restArea() {
-    return sideLength * sideLength;
-  }
-
-  @Override
   public double angle() {
     Vector2 currentSidesAverageDirection = getSidesAverageDirection();
     return -currentSidesAverageDirection.getAngleBetween(initialSidesAverageDirection);
   }
 
   @Override
-  public Anchor anchorOn(Vertex vertex) {
-    return anchors.get(vertex);
+  public double restArea() {
+    return sideLength * sideLength;
+  }
+
+  private Point toPoint(Vector2 v) {
+    return new Point(v.x, v.y);
   }
 
   @Override
-  public Collection<Anchor> anchorsOn(Side side) {
-    return switch (side) {
-      case N -> List.of(anchors.get(Vertex.NW), anchors.get(Vertex.NE));
-      case E -> List.of(anchors.get(Vertex.NE), anchors.get(Vertex.SE));
-      case S -> List.of(anchors.get(Vertex.SE), anchors.get(Vertex.SW));
-      case W -> List.of(anchors.get(Vertex.SW), anchors.get(Vertex.NW));
-    };
+  public String toString() {
+    return String.format("%s at %s", this.getClass().getSimpleName(), poly().center());
   }
 }

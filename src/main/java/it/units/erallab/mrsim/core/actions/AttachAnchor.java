@@ -25,7 +25,6 @@ import it.units.erallab.mrsim.engine.ActionException;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
@@ -42,7 +41,8 @@ public record AttachAnchor(
     Collection<Anchor> attachedAnchors = anchor.links().stream()
         .map(Anchor.Link::destination)
         .filter(a -> a.anchorable() == anchorable)
-        .collect(Collectors.toSet());
+        .distinct()
+        .toList();
     //find closest anchor on destination
     Anchor destination = anchorable.anchors().stream()
         .filter(a -> !attachedAnchors.contains(a))

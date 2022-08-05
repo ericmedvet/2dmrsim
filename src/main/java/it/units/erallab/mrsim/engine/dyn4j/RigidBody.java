@@ -58,14 +58,6 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, 
     initialFirstSideDirection = getFirstSideDirection();
   }
 
-  private Vector2 getFirstSideDirection() {
-    Poly poly = poly();
-    return new Vector2(
-        poly.vertexes()[1].x() - poly.vertexes()[0].x(),
-        poly.vertexes()[1].y() - poly.vertexes()[0].y()
-    );
-  }
-
   @Override
   public Collection<Body> getBodies() {
     return List.of(body);
@@ -74,6 +66,14 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, 
   @Override
   public Collection<Joint<Body>> getJoints() {
     return List.of();
+  }
+
+  private Vector2 getFirstSideDirection() {
+    Poly poly = poly();
+    return new Vector2(
+        poly.vertexes()[1].x() - poly.vertexes()[0].x(),
+        poly.vertexes()[1].y() - poly.vertexes()[0].y()
+    );
   }
 
   @Override
@@ -105,5 +105,10 @@ public class RigidBody implements it.units.erallab.mrsim.core.bodies.RigidBody, 
   public double angle() {
     Vector2 currentFirstSideDirection = getFirstSideDirection();
     return -currentFirstSideDirection.getAngleBetween(initialFirstSideDirection);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s at %s", this.getClass().getSimpleName(), poly().center());
   }
 }

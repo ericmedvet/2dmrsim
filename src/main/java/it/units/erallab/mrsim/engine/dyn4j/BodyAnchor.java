@@ -44,20 +44,19 @@ public class BodyAnchor implements Anchor {
   }
 
   @Override
-  public Point point() {
-    Vector2 center = body.getWorldCenter();
-    return new Point(center.x, center.y);
-  }
-
-  @Override
   public Anchorable anchorable() {
     return anchorable;
   }
 
-
   @Override
   public Collection<Link> links() {
     return jointMap.keySet();
+  }
+
+  @Override
+  public Point point() {
+    Vector2 center = body.getWorldCenter();
+    return new Point(center.x, center.y);
   }
 
   protected Body getBody() {
@@ -66,6 +65,11 @@ public class BodyAnchor implements Anchor {
 
   protected Map<Link, Joint<Body>> getJointMap() {
     return jointMap;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(body);
   }
 
   @Override
@@ -79,7 +83,8 @@ public class BodyAnchor implements Anchor {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(body);
+  public String toString() {
+    return String.format("%s at %s", this.getClass().getSimpleName(), point());
+
   }
 }

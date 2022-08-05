@@ -30,7 +30,6 @@ import org.dyn4j.geometry.Vector2;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -48,7 +47,7 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
       double restitution
   ) {
     this.poly = poly;
-    Set<Poly> parts = (poly.vertexes().length > 3) ? PolyUtils.decompose(poly) : Set.of(poly);
+    List<Poly> parts = (poly.vertexes().length > 3) ? PolyUtils.decompose(poly) : List.of(poly);
     bodies = parts.stream()
         .map(c -> {
           Convex convex = new Polygon(
@@ -74,6 +73,16 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
   }
 
   @Override
+  public Collection<Body> getBodies() {
+    return bodies;
+  }
+
+  @Override
+  public Collection<Joint<Body>> getJoints() {
+    return List.of();
+  }
+
+  @Override
   public Poly poly() {
     // assuming it can only be translated, we just check diff wrt initial center
     Point t = center(bodies).diff(initialCenter);
@@ -83,12 +92,7 @@ public class UnmovableBody implements it.units.erallab.mrsim.core.bodies.Unmovab
   }
 
   @Override
-  public Collection<Body> getBodies() {
-    return bodies;
-  }
-
-  @Override
-  public Collection<Joint<Body>> getJoints() {
-    return List.of();
+  public String toString() {
+    return String.format("%s at %s", this.getClass().getSimpleName(), poly().center());
   }
 }
