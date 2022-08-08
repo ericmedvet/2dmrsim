@@ -19,7 +19,6 @@ package it.units.erallab.mrsim.core.bodies;
 import it.units.erallab.mrsim.core.geometry.Point;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -40,11 +39,11 @@ public interface Anchor {
 
   Point point();
 
-  default List<Anchorable> attachedAnchorables() {
-    return links().stream().map(l -> l.destination.anchorable()).toList();
+  default Collection<Anchorable> attachedAnchorables() {
+    return links().stream().map(l -> l.destination.anchorable()).distinct().toList();
   }
 
-  default List<Anchor> attachedAnchors() {
+  default Collection<Anchor> attachedAnchors() {
     return links().stream().map(l -> l.destination).toList();
   }
 
