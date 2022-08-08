@@ -69,7 +69,13 @@ public class StringUtils {
       Map<String, String> s
   ) {
     public TypedParams() {
-      this(new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+      this(
+          new LinkedHashMap<>(),
+          new LinkedHashMap<>(),
+          new LinkedHashMap<>(),
+          new LinkedHashMap<>(),
+          new LinkedHashMap<>()
+      );
     }
   }
 
@@ -105,6 +111,22 @@ public class StringUtils {
         return result == null ? Optional.empty() : Optional.of(result);
       }
       return Optional.empty();
+    };
+  }
+
+  public static <T> Function<String, Optional<T>> namedParamMapBuilder(Map<String, Function<NamedParamMap, T>> builders) {
+    return s -> {
+      try {
+        NamedParamMap params = NamedParamMap.parse(s);
+        try {
+          T t = builders.getOrDefault(params.getName(), p -> null).apply(params);
+          return t == null ? Optional.empty() : Optional.of(t);
+        } catch (RuntimeException e) {
+          return Optional.empty();
+        }
+      } catch (IllegalArgumentException p) {
+        return Optional.empty();
+      }
     };
   }
 

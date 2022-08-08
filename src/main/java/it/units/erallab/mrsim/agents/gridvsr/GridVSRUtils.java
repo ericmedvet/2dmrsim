@@ -58,54 +58,45 @@ public class GridVSRUtils {
   }
 
   public static Grid<Boolean> buildShape(String name) {
-    Function<String, Optional<Grid<Boolean>>> provider = StringUtils.formattedProvider(Map.ofEntries(
-        Map.entry("(box|worm)-(?<w>\\d+)x(?<h>\\d+)", p -> {
-          int w = p.i().get("w");
-          int h = p.i().get("h");
-          return Grid.create(w, h, true);
-        }),
-        Map.entry("biped-(?<w>\\d+)x(?<h>\\d+)", p -> {
-          int w = p.i().get("w");
-          int h = p.i().get("h");
-          return Grid.create(w, h, (x, y) -> !(y < h / 2 && x >= w / 4 && x < w * 3 / 4));
-        }),
-        Map.entry("tripod-(?<w>\\d+)x(?<h>\\d+)", p -> {
-          int w = p.i().get("w");
-          int h = p.i().get("h");
-          return Grid.create(w, h, (x, y) -> !(y < h / 2 && x != 0 && x != w - 1 && x != w / 2));
-        }),
-        Map.entry("ball-(?<d>\\d+)", p -> {
-          int d = p.i().get("d");
-          return Grid.create(
-              d,
-              d,
-              (x, y) -> Math.round(Math.sqrt((x - (d - 1) / 2d) * (x - (d - 1) / 2d) + (y - (d - 1) / 2d) * (y - (d - 1) / 2d))) <= (int) Math.floor(
-                  d / 2d)
-          );
-        }),
-        Map.entry("comb-(?<w>\\d+)x(?<h>\\d+)", p -> {
-          int w = p.i().get("w");
-          int h = p.i().get("h");
-          return Grid.create(w, h, (x, y) -> (y >= h / 2 || x % 2 == 0));
-        }),
-        Map.entry("t-(?<w>\\d+)x(?<h>\\d+)", p -> {
-          int w = p.i().get("w");
-          int h = p.i().get("h");
+    Function<String, Optional<Grid<Boolean>>> provider = StringUtils.namedParamMapBuilder(Map.ofEntries(
+        Map.entry("box", p -> Grid.create(p.i("w"), p.i("h"), true)),
+        Map.entry(
+            "biped",
+            p -> Grid.create(p.i("w"),
+                p.i("h"),
+                (x, y) -> !(y < p.i("h") / 2 && x >= p.i("w") / 4 && x < p.i("w") * 3 / 4)
+            )
+        ),
+        Map.entry(
+            "tripod",
+            p -> Grid.create(p.i("w"),
+                p.i("h"),
+                (x, y) -> !(y < p.i("h") / 2 && x != 0 && x != p.i("w") - 1 && x != p.i("w") / 2)
+            )
+        ),
+        Map.entry("ball", p -> Grid.create(
+            p.i("d"),
+            p.i("d"),
+            (x, y) -> Math.round(Math.sqrt((x - (p.i("d") - 1) / 2d) * (x - (p.i("d") - 1) / 2d) + (y - (p.i("d") - 1) / 2d) * (y - (p.i(
+                "d") - 1) / 2d))) <= (int) Math.floor(
+                p.i("d") / 2d)
+        )),
+        Map.entry("comb", p -> Grid.create(p.i("w"), p.i("h"), (x, y) -> (y >= p.i("h") / 2 || x % 2 == 0))),
+        Map.entry("t", p -> {
+          int w = p.i("w");
+          int h = p.i("h");
           int pad = (int) Math.floor((Math.floor((double) w / 2) / 2));
           return Grid.create(w, h, (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)));
         }),
-        Map.entry("free-(?<s>[01-]+)", p -> {
-          String s = p.s().get("s");
+        Map.entry("free", p -> {
+          String s = p.s("s", "[01]+(-[01]+)?");
           return Grid.create(
               s.split("-").length,
               s.split("-")[0].length(),
               (x, y) -> s.split("-")[x].charAt(y) == '1'
           );
         }),
-        Map.entry("triangle-(?<l>\\d+)", p -> {
-          int l = p.i().get("l");
-          return Grid.create(l, l, (x, y) -> (y >= x));
-        })
+        Map.entry("triangle", p -> Grid.create(p.i("l"), p.i("l"), (x, y) -> (y >= x)))
     ));
     return provider.apply(name).orElseThrow();
   }
