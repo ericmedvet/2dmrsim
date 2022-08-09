@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.util;
+package it.units.erallab.mrsim.util.builder;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * @author "Eric Medvet" on 2022/08/08 for 2d-robot-evolution
  */
-public class NamedParamMap {
+public class ParsableNamedParamMap implements NamedParamMap {
 
   // BNF
   // <e> ::= <n>(<nps>)
@@ -35,29 +35,79 @@ public class NamedParamMap {
   // <ds> ::= <d> | <ds>;<d>
   // <ns> ::= <n> | <ns>;<s>
 
-  private interface Node {
-    Token token();
+
+  // new BNF
+  // <e> ::= <n>(<nps>)
+  // <nps> ::= <np> | <nps>;<np>
+  // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=[<es>] | <n>=[<ds>] | <n>=[<ns>] | <n>=[<es>]*<np>
+  // <es> ::= <e> | <es>;<e>
+  // <ds> ::= <d> | <ds>;<d>
+  // <ns> ::= <n> | <ns>;<s>
+
+
+  private final String name;
+  private final Map<String, Double> dMap;
+  private final Map<String, String> sMap;
+  private final Map<String, ParsableNamedParamMap> npmMap;
+  private final Map<String, List<Double>> dsMap;
+  private final Map<String, List<String>> ssMap;
+  private final Map<String, List<ParsableNamedParamMap>> npmsMap;
+
+  private ParsableNamedParamMap(
+      String name,
+      Map<String, Double> dMap,
+      Map<String, String> sMap,
+      Map<String, ParsableNamedParamMap> npmMap,
+      Map<String, List<Double>> dsMap,
+      Map<String, List<String>> ssMap,
+      Map<String, List<ParsableNamedParamMap>> npmsMap
+  ) {
+    this.name = name;
+    this.dMap = dMap;
+    this.sMap = sMap;
+    this.npmMap = npmMap;
+    this.dsMap = dsMap;
+    this.ssMap = ssMap;
+    this.npmsMap = npmsMap;
   }
 
-  private record ENode(Token token, List<NPNode> children, String name) implements Node {}
-
-  private record NPNode(Token token, String name, Node value) implements Node {}
-
-  private record DNode(Token token, Number value) implements Node {}
-
-  private record SNode(Token token, String value) implements Node {}
-
-  private record DSNode(Token token, List<DNode> children) implements Node {}
-
-  private record SSNode(Token token, List<SNode> children) implements Node {}
-
-  private record ESNode(Token token, List<ENode> children) implements Node {}
-
-  private record Token(int start, int end) {}
+  private ParsableNamedParamMap(ENode eNode) {
+    this(
+        eNode.name(),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof DNode)
+            .collect(Collectors.toMap(NPNode::name, n -> ((DNode) n.value()).value().doubleValue())),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof SNode)
+            .collect(Collectors.toMap(NPNode::name, n -> ((SNode) n.value()).value())),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof ENode)
+            .collect(Collectors.toMap(NPNode::name, n -> new ParsableNamedParamMap((ENode) n.value))),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof DSNode)
+            .collect(Collectors.toMap(
+                NPNode::name,
+                n -> ((DSNode) n.value()).children().stream().map(c -> c.value().doubleValue()).toList()
+            )),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof SSNode)
+            .collect(Collectors.toMap(
+                NPNode::name,
+                n -> ((SSNode) n.value()).children().stream().map(SNode::value).toList()
+            )),
+        eNode.children.stream()
+            .filter(n -> n.value() instanceof ESNode)
+            .collect(Collectors.toMap(
+                NPNode::name,
+                n -> ((ESNode) n.value()).children().stream().map(ParsableNamedParamMap::new).toList()
+            ))
+    );
+  }
 
   private enum TokenType {
     NUM("-?[0-9]+(\\.[0-9]+)?", ""),
     STRING("[A-Za-z][A-Za-z0-9_]*", ""),
+    NAME("[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*", ""),
     OPEN_CONTENT("\\(", "("),
     CLOSED_CONTENT("\\)", ")"),
     ASSIGN_SEPARATOR("=", "="),
@@ -83,14 +133,30 @@ public class NamedParamMap {
       return Optional.of(new Token(matcher.start(), matcher.end()));
     }
 
-    public String regex() {
-      return regex;
-    }
-
     public String rendered() {
       return rendered;
     }
   }
+
+  private interface Node {
+    Token token();
+  }
+
+  private record DNode(Token token, Number value) implements Node {}
+
+  private record DSNode(Token token, List<DNode> children) implements Node {}
+
+  private record ENode(Token token, List<NPNode> children, String name) implements Node {}
+
+  private record ESNode(Token token, List<ENode> children) implements Node {}
+
+  private record NPNode(Token token, String name, Node value) implements Node {}
+
+  private record SNode(Token token, String value) implements Node {}
+
+  private record SSNode(Token token, List<SNode> children) implements Node {}
+
+  private record Token(int start, int end) {}
 
   private static Supplier<IllegalArgumentException> error(TokenType tokenType, String s, int i) {
     return () -> new IllegalArgumentException(String.format(
@@ -105,8 +171,39 @@ public class NamedParamMap {
     return v.intValue() == v;
   }
 
+  public static ParsableNamedParamMap parse(String string) throws IllegalArgumentException {
+    ENode eNode = parseE(string, 0);
+    return new ParsableNamedParamMap(eNode);
+  }
+
+  private static DSNode parseDS(String s, int i) {
+    List<DNode> nodes = new ArrayList<>();
+    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+    TokenType.NUM.next(s, openT.end())
+        .map(t -> new DNode(t, Double.parseDouble(s.substring(t.start(), t.end()))))
+        .ifPresent(nodes::add);
+    while (!nodes.isEmpty()) {
+      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+      if (sepT.isEmpty()) {
+        break;
+      }
+      Token valueT = TokenType.NUM.next(s, sepT.get().end()).orElseThrow(error(TokenType.NUM, s, sepT.get().end()));
+      nodes.add(new DNode(valueT, Double.parseDouble(s.substring(valueT.start(), valueT.end()))));
+    }
+    Token closedT = TokenType.CLOSED_LIST.next(
+            s,
+            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
+        )
+        .orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
+        ));
+    return new DSNode(new Token(openT.start(), closedT.end()), nodes);
+  }
+
   private static ENode parseE(String s, int i) {
-    Token tName = TokenType.STRING.next(s, i).orElseThrow(error(TokenType.STRING, s, i));
+    Token tName = TokenType.NAME.next(s, i).orElseThrow(error(TokenType.NAME, s, i));
     Token tOpenPar = TokenType.OPEN_CONTENT.next(s, tName.end()).orElseThrow(error(
         TokenType.OPEN_CONTENT,
         s,
@@ -124,19 +221,34 @@ public class NamedParamMap {
     return new ENode(new Token(tName.start(), tClosedPar.end()), nodes, s.substring(tName.start(), tName.end()));
   }
 
-  private static List<NPNode> parseNPS(String s, int i) {
-    List<NPNode> nodes = new ArrayList<>();
-    nodes.add(parseNP(s, i));
-    while (true) {
-      Optional<Token> ot = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (ot.isEmpty()) {
+  private static ESNode parseES(String s, int i) {
+    List<ENode> nodes = new ArrayList<>();
+    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+    try {
+      nodes.add(parseE(s, openT.end()));
+    } catch (IllegalArgumentException e) {
+      //ignore
+    }
+    while (!nodes.isEmpty()) {
+      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+      if (sepT.isEmpty()) {
         break;
       }
-      nodes.add(parseNP(s, ot.get().end()));
+      nodes.add(parseE(s, sepT.get().end()));
     }
-    return nodes;
+    Token closedT = TokenType.CLOSED_LIST.next(
+            s,
+            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
+        )
+        .orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
+        ));
+    return new ESNode(new Token(openT.start(), closedT.end()), nodes);
   }
 
+  //TODO update to match new grammar
   private static NPNode parseNP(String s, int i) {
     Token tName = TokenType.STRING.next(s, i).orElseThrow(error(TokenType.STRING, s, i));
     Token tAssign = TokenType.ASSIGN_SEPARATOR.next(s, tName.end()).orElseThrow(error(
@@ -188,30 +300,17 @@ public class NamedParamMap {
     );
   }
 
-  private static DSNode parseDS(String s, int i) {
-    List<DNode> nodes = new ArrayList<>();
-    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-    TokenType.NUM.next(s, openT.end())
-        .map(t -> new DNode(t, Double.parseDouble(s.substring(t.start(), t.end()))))
-        .ifPresent(nodes::add);
-    while (!nodes.isEmpty()) {
-      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (sepT.isEmpty()) {
+  private static List<NPNode> parseNPS(String s, int i) {
+    List<NPNode> nodes = new ArrayList<>();
+    nodes.add(parseNP(s, i));
+    while (true) {
+      Optional<Token> ot = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+      if (ot.isEmpty()) {
         break;
       }
-      Token valueT = TokenType.NUM.next(s, sepT.get().end()).orElseThrow(error(TokenType.NUM, s, sepT.get().end()));
-      nodes.add(new DNode(valueT, Double.parseDouble(s.substring(valueT.start(), valueT.end()))));
+      nodes.add(parseNP(s, ot.get().end()));
     }
-    Token closedT = TokenType.CLOSED_LIST.next(
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        )
-        .orElseThrow(error(
-            TokenType.CLOSED_LIST,
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        ));
-    return new DSNode(new Token(openT.start(), closedT.end()), nodes);
+    return nodes;
   }
 
   private static SSNode parseSS(String s, int i) {
@@ -244,97 +343,72 @@ public class NamedParamMap {
     return new SSNode(new Token(openT.start(), closedT.end()), nodes);
   }
 
-  private static ESNode parseES(String s, int i) {
-    List<ENode> nodes = new ArrayList<>();
-    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-    try {
-      nodes.add(parseE(s, openT.end()));
-    } catch (IllegalArgumentException e) {
-      //ignore
+  @Override
+  public boolean b(String n) {
+    return sMap.getOrDefault(n, "false").equalsIgnoreCase(Boolean.TRUE.toString());
+  }
+
+  @Override
+  public List<Boolean> bs(String n) {
+    if (!ssMap.containsKey(n)) {
+      return null;
     }
-    while (!nodes.isEmpty()) {
-      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (sepT.isEmpty()) {
-        break;
-      }
-      nodes.add(parseE(s, sepT.get().end()));
+    return ssMap.get(n).stream().map(s -> s.equalsIgnoreCase(Boolean.TRUE.toString())).toList();
+  }
+
+  @Override
+  public Double d(String n) {
+    return dMap.get(n);
+  }
+
+  @Override
+  public List<Double> ds(String n) {
+    return dsMap.get(n);
+  }
+
+  @Override
+  public Integer i(String n) {
+    if (!dMap.containsKey(n)) {
+      return null;
     }
-    Token closedT = TokenType.CLOSED_LIST.next(
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        )
-        .orElseThrow(error(
-            TokenType.CLOSED_LIST,
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        ));
-    return new ESNode(new Token(openT.start(), closedT.end()), nodes);
+    double v = dMap.get(n);
+    return isInt(v) ? (int) v : null;
   }
 
-  public static NamedParamMap parse(String string) throws IllegalArgumentException {
-    ENode eNode = parseE(string, 0);
-    return new NamedParamMap(eNode);
+  @Override
+  public List<Integer> is(String n) {
+    if (!dsMap.containsKey(n)) {
+      return null;
+    }
+    List<Double> vs = dsMap.get(n);
+    List<Integer> is = vs.stream().filter(ParsableNamedParamMap::isInt).map(Double::intValue).toList();
+    if (is.size() == vs.size()) {
+      return is;
+    }
+    return null;
   }
 
-  private final String name;
-  private final Map<String, Double> dMap;
-  private final Map<String, String> sMap;
-  private final Map<String, NamedParamMap> npmMap;
-  private final Map<String, List<Double>> dsMap;
-  private final Map<String, List<String>> ssMap;
-  private final Map<String, List<NamedParamMap>> npmsMap;
-
-  private NamedParamMap(
-      String name,
-      Map<String, Double> dMap,
-      Map<String, String> sMap,
-      Map<String, NamedParamMap> npmMap,
-      Map<String, List<Double>> dsMap,
-      Map<String, List<String>> ssMap,
-      Map<String, List<NamedParamMap>> npmsMap
-  ) {
-    this.name = name;
-    this.dMap = dMap;
-    this.sMap = sMap;
-    this.npmMap = npmMap;
-    this.dsMap = dsMap;
-    this.ssMap = ssMap;
-    this.npmsMap = npmsMap;
+  @Override
+  public ParsableNamedParamMap npm(String n) {
+    return npmMap.get(n);
   }
 
-  private NamedParamMap(ENode eNode) {
-    this(
-        eNode.name(),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof DNode)
-            .collect(Collectors.toMap(NPNode::name, n -> ((DNode) n.value()).value().doubleValue())),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof SNode)
-            .collect(Collectors.toMap(NPNode::name, n -> ((SNode) n.value()).value())),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof ENode)
-            .collect(Collectors.toMap(NPNode::name, n -> new NamedParamMap((ENode) n.value))),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof DSNode)
-            .collect(Collectors.toMap(
-                NPNode::name,
-                n -> ((DSNode) n.value()).children().stream().map(c -> c.value().doubleValue()).toList()
-            )),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof SSNode)
-            .collect(Collectors.toMap(
-                NPNode::name,
-                n -> ((SSNode) n.value()).children().stream().map(SNode::value).toList()
-            )),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof ESNode)
-            .collect(Collectors.toMap(
-                NPNode::name,
-                n -> ((ESNode) n.value()).children().stream().map(NamedParamMap::new).toList()
-            ))
-    );
+  @Override
+  public List<ParsableNamedParamMap> npms(String n) {
+    return npmsMap.get(n);
   }
 
+  @Override
+  public String s(String n) {
+    return sMap.get(n);
+  }
+
+  @Override
+  public List<String> ss(String n) {
+    return ssMap.get(n);
+  }
+
+  @Override
   public String getName() {
     return name;
   }
@@ -377,80 +451,6 @@ public class NamedParamMap {
         .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered())));
     sb.append(TokenType.CLOSED_CONTENT.rendered());
     return sb.toString();
-  }
-
-  public Integer i(String n) {
-    if (!dMap.containsKey(n)) {
-      return null;
-    }
-    double v = dMap.get(n);
-    return isInt(v) ? (int) v : null;
-  }
-
-  public Double d(String n) {
-    return dMap.get(n);
-  }
-
-  public String s(String n) {
-    return sMap.get(n);
-  }
-
-  public String s(String n, String regex) {
-    String s = sMap.get(n);
-    if (!s.matches(regex)) {
-      return null;
-    }
-    return s;
-  }
-
-  public boolean b(String n) {
-    return sMap.getOrDefault(n, "false").equalsIgnoreCase(Boolean.TRUE.toString());
-  }
-
-  public NamedParamMap npm(String n) {
-    return npmMap.get(n);
-  }
-
-  public List<Integer> is(String n) {
-    if (!dsMap.containsKey(n)) {
-      return null;
-    }
-    List<Double> vs = dsMap.get(n);
-    List<Integer> is = vs.stream().filter(NamedParamMap::isInt).map(Double::intValue).toList();
-    if (is.size() == vs.size()) {
-      return is;
-    }
-    return null;
-  }
-
-  public List<String> ss(String n) {
-    return ssMap.get(n);
-  }
-
-  public List<String> ss(String n, String regex) {
-    if (!ssMap.containsKey(n)) {
-      return null;
-    }
-    List<String> ss = ssMap.getOrDefault(n, List.of()).stream().filter(s -> s.matches(regex)).toList();
-    if (ss.size() == ssMap.getOrDefault(n, List.of()).size()) {
-      return ss;
-    }
-    return null;
-  }
-
-  public List<Double> ds(String n) {
-    return dsMap.get(n);
-  }
-
-  public List<Boolean> bs(String n) {
-    if (!ssMap.containsKey(n)) {
-      return null;
-    }
-    return ssMap.get(n).stream().map(s -> s.equalsIgnoreCase(Boolean.TRUE.toString())).toList();
-  }
-
-  public List<NamedParamMap> npms(String n) {
-    return npmsMap.get(n);
   }
 
 }

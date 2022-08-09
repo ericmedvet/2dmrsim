@@ -16,6 +16,8 @@
 
 package it.units.erallab.mrsim.util;
 
+import it.units.erallab.mrsim.util.builder.ParsableNamedParamMap;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -27,38 +29,6 @@ import java.util.regex.Pattern;
 public class StringUtils {
 
   private StringUtils() {
-  }
-
-  public static Map<String, String> params(String pattern, String string) {
-    if (!string.matches(pattern)) {
-      return null;
-    }
-    Matcher m = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>").matcher(pattern);
-    List<String> groupNames = new ArrayList<>();
-    while (m.find()) {
-      groupNames.add(m.group(1));
-    }
-    Map<String, String> params = new LinkedHashMap<>();
-    for (String groupName : groupNames) {
-      String value = param(pattern, string, groupName);
-      if (value != null) {
-        params.put(groupName, value);
-      }
-    }
-    return params;
-  }
-
-  public static String param(String pattern, String string, String paramName) {
-    Matcher matcher = Pattern.compile(pattern).matcher(string);
-    if (matcher.matches()) {
-      return matcher.group(paramName);
-    }
-    throw new IllegalStateException(String.format(
-        "Param %s not found in %s with pattern %s",
-        paramName,
-        string,
-        pattern
-    ));
   }
 
   public record TypedParams(
@@ -114,10 +84,10 @@ public class StringUtils {
     };
   }
 
-  public static <T> Function<String, Optional<T>> namedParamMapBuilder(Map<String, Function<NamedParamMap, T>> builders) {
+  public static <T> Function<String, Optional<T>> namedParamMapBuilder(Map<String, Function<ParsableNamedParamMap, T>> builders) {
     return s -> {
       try {
-        NamedParamMap params = NamedParamMap.parse(s);
+        ParsableNamedParamMap params = ParsableNamedParamMap.parse(s);
         try {
           T t = builders.getOrDefault(params.getName(), p -> null).apply(params);
           return t == null ? Optional.empty() : Optional.of(t);
@@ -128,6 +98,38 @@ public class StringUtils {
         return Optional.empty();
       }
     };
+  }
+
+  public static String param(String pattern, String string, String paramName) {
+    Matcher matcher = Pattern.compile(pattern).matcher(string);
+    if (matcher.matches()) {
+      return matcher.group(paramName);
+    }
+    throw new IllegalStateException(String.format(
+        "Param %s not found in %s with pattern %s",
+        paramName,
+        string,
+        pattern
+    ));
+  }
+
+  public static Map<String, String> params(String pattern, String string) {
+    if (!string.matches(pattern)) {
+      return null;
+    }
+    Matcher m = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>").matcher(pattern);
+    List<String> groupNames = new ArrayList<>();
+    while (m.find()) {
+      groupNames.add(m.group(1));
+    }
+    Map<String, String> params = new LinkedHashMap<>();
+    for (String groupName : groupNames) {
+      String value = param(pattern, string, groupName);
+      if (value != null) {
+        params.put(groupName, value);
+      }
+    }
+    return params;
   }
 
 }
