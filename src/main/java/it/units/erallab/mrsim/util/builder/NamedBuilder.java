@@ -35,6 +35,15 @@ public class NamedBuilder {
   }
 
   public static void main(String[] args) {
+
+    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4])"));
+    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=33)"));
+    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=1))"));
+    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=[a;b]))"));
+    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=[a;b];es=[j(a=1);k(b=2)]))"));
+    System.out.println(ParsableNamedParamMap.parse("exp(runs=(seed=[1;2;3])*(mapper=[a;b])*[run(ea=numga)])"));
+    System.exit(0);
+
     NamedBuilder stringNB = new NamedBuilder();
     stringNB.register("one", (m, nb) -> m.s("value"));
     stringNB.register("list", (m, nb) -> Collections.nCopies(m.i("n"), m.s("value")));

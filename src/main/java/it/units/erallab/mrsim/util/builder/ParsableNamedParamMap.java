@@ -29,20 +29,14 @@ public class ParsableNamedParamMap implements NamedParamMap {
 
   // BNF
   // <e> ::= <n>(<nps>)
-  // <nps> ::= <np> | <nps>;<np>
-  // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=[<es>] | <n>=[<ds>] | <n>=[<ns>]
-  // <es> ::= <e> | <es>;<e>
-  // <ds> ::= <d> | <ds>;<d>
-  // <ns> ::= <n> | <ns>;<s>
-
-
-  // new BNF
-  // <e> ::= <n>(<nps>)
-  // <nps> ::= <np> | <nps>;<np>
-  // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=[<es>] | <n>=[<ds>] | <n>=[<ns>] | <n>=[<es>]*<np>
-  // <es> ::= <e> | <es>;<e>
-  // <ds> ::= <d> | <ds>;<d>
-  // <ns> ::= <n> | <ns>;<s>
+  // <nps> ::= ∅ | <np> | <nps>;<np>
+  // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=<le> | <n>=<ld> | <n>=<ls>
+  // <le> ::= (<np>)*<le> | [<es>]
+  // <ld> ::= [<ds>]
+  // <ls> ::= [<ss>]
+  // <es> ::= ∅ | <e> | <es>;<e>
+  // <ds> ::= ∅ | <d> | <ds>;<d>
+  // <ns> ::= ∅ |<n> | <ns>;<s>
 
 
   private final String name;
@@ -74,32 +68,32 @@ public class ParsableNamedParamMap implements NamedParamMap {
   private ParsableNamedParamMap(ENode eNode) {
     this(
         eNode.name(),
-        eNode.children.stream()
+        eNode.child().children().stream()
             .filter(n -> n.value() instanceof DNode)
             .collect(Collectors.toMap(NPNode::name, n -> ((DNode) n.value()).value().doubleValue())),
-        eNode.children.stream()
+        eNode.child().children().stream()
             .filter(n -> n.value() instanceof SNode)
             .collect(Collectors.toMap(NPNode::name, n -> ((SNode) n.value()).value())),
-        eNode.children.stream()
+        eNode.child().children().stream()
             .filter(n -> n.value() instanceof ENode)
             .collect(Collectors.toMap(NPNode::name, n -> new ParsableNamedParamMap((ENode) n.value))),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof DSNode)
+        eNode.child().children().stream()
+            .filter(n -> n.value() instanceof LDNode)
             .collect(Collectors.toMap(
                 NPNode::name,
-                n -> ((DSNode) n.value()).children().stream().map(c -> c.value().doubleValue()).toList()
+                n -> ((LDNode) n.value()).child().children().stream().map(c -> c.value().doubleValue()).toList()
             )),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof SSNode)
+        eNode.child().children().stream()
+            .filter(n -> n.value() instanceof LSNode)
             .collect(Collectors.toMap(
                 NPNode::name,
-                n -> ((SSNode) n.value()).children().stream().map(SNode::value).toList()
+                n -> ((LSNode) n.value()).child().children().stream().map(SNode::value).toList()
             )),
-        eNode.children.stream()
-            .filter(n -> n.value() instanceof ESNode)
+        eNode.child().children().stream()
+            .filter(n -> n.value() instanceof LENode)
             .collect(Collectors.toMap(
                 NPNode::name,
-                n -> ((ESNode) n.value()).children().stream().map(ParsableNamedParamMap::new).toList()
+                n -> ((LENode) n.value()).child().children().stream().map(ParsableNamedParamMap::new).toList()
             ))
     );
   }
@@ -113,7 +107,8 @@ public class ParsableNamedParamMap implements NamedParamMap {
     ASSIGN_SEPARATOR("=", "="),
     LIST_SEPARATOR(";", ";"),
     OPEN_LIST("\\[", "["),
-    CLOSED_LIST("\\]", "]");
+    CLOSED_LIST("\\]", "]"),
+    JOIN("\\*", "*");
     private final String regex;
     private final String rendered;
 
@@ -142,19 +137,292 @@ public class ParsableNamedParamMap implements NamedParamMap {
     Token token();
   }
 
-  private record DNode(Token token, Number value) implements Node {}
+  private record DNode(Token token, Number value) implements Node {
+    static DNode parse(String s, int i) {
+      return TokenType.NUM.next(s, i).map(t -> new DNode(
+          t,
+          Double.parseDouble(s.substring(t.start(), t.end()))
+      )).orElseThrow(error(TokenType.NUM, s, i));
+    }
+  }
 
-  private record DSNode(Token token, List<DNode> children) implements Node {}
+  private record DSNode(Token token, List<DNode> children) implements Node {
+    static DSNode parse(String s, int i) {
+      List<DNode> nodes = new ArrayList<>();
+      try {
+        nodes.add(DNode.parse(s, i));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      while (!nodes.isEmpty()) {
+        Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+        if (sepT.isEmpty()) {
+          break;
+        }
+        nodes.add(DNode.parse(s, sepT.get().end()));
+      }
+      return new DSNode(new Token(i, nodes.isEmpty() ? i : nodes.get(nodes.size() - 1).token().end()), nodes);
+    }
+  }
 
-  private record ENode(Token token, List<NPNode> children, String name) implements Node {}
+  private record ENode(Token token, NPSNode child, String name) implements Node {
+    static ENode parse(String s, int i) {
+      Token tName = TokenType.NAME.next(s, i).orElseThrow(error(TokenType.NAME, s, i));
+      Token tOpenPar = TokenType.OPEN_CONTENT.next(s, tName.end()).orElseThrow(error(
+          TokenType.OPEN_CONTENT,
+          s,
+          tName.end()
+      ));
+      NPSNode npsNode = NPSNode.parse(s, tOpenPar.end());
+      Token tClosedPar = TokenType.CLOSED_CONTENT.next(
+          s,
+          npsNode.token().end()
+      ).orElseThrow(error(
+          TokenType.CLOSED_CONTENT,
+          s,
+          npsNode.token().end()
+      ));
+      return new ENode(new Token(tName.start(), tClosedPar.end()), npsNode, s.substring(tName.start(), tName.end()));
+    }
+  }
 
-  private record ESNode(Token token, List<ENode> children) implements Node {}
+  private record ESNode(Token token, List<ENode> children) implements Node {
+    static ESNode parse(String s, int i) {
+      List<ENode> nodes = new ArrayList<>();
+      try {
+        nodes.add(ENode.parse(s, i));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      while (!nodes.isEmpty()) {
+        Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+        if (sepT.isEmpty()) {
+          break;
+        }
+        nodes.add(ENode.parse(s, sepT.get().end()));
+      }
+      return new ESNode(new Token(i, nodes.isEmpty() ? i : nodes.get(nodes.size() - 1).token().end()), nodes);
+    }
+  }
 
-  private record NPNode(Token token, String name, Node value) implements Node {}
+  private record NPSNode(Token token, List<NPNode> children) implements Node {
+    static NPSNode parse(String s, int i) {
+      List<NPNode> nodes = new ArrayList<>();
+      try {
+        nodes.add(NPNode.parse(s, i));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      while (!nodes.isEmpty()) {
+        Optional<Token> ot = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+        if (ot.isEmpty()) {
+          break;
+        }
+        nodes.add(NPNode.parse(s, ot.get().end()));
+      }
+      return new NPSNode(new Token(i, nodes.isEmpty() ? i : nodes.get(nodes.size() - 1).token().end()), nodes);
+    }
+  }
 
-  private record SNode(Token token, String value) implements Node {}
+  private record NPNode(Token token, String name, Node value) implements Node {
+    static NPNode parse(String s, int i) {
+      Token tName = TokenType.STRING.next(s, i).orElseThrow(error(TokenType.STRING, s, i));
+      Token tAssign = TokenType.ASSIGN_SEPARATOR.next(s, tName.end()).orElseThrow(error(
+          TokenType.ASSIGN_SEPARATOR,
+          s,
+          tName.end()
+      ));
+      Node value = null;
+      try {
+        value = ENode.parse(s, tAssign.end());
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      if (value == null) {
+        try {
+          value = DNode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        try {
+          value = SNode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        try {
+          value = LENode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
 
-  private record SSNode(Token token, List<SNode> children) implements Node {}
+        try {
+          value = LDNode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        try {
+          value = LSNode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        throw new IllegalArgumentException(String.format(
+            "Cannot find valid token as param value at `%s`",
+            s.substring(
+                tAssign.end())
+        ));
+      }
+      return new NPNode(
+          new Token(tName.start(), value.token().end()),
+          s.substring(tName.start(), tName.end()),
+          value
+      );
+    }
+  }
+
+  private record SNode(Token token, String value) implements Node {
+    static SNode parse(String s, int i) {
+      return TokenType.STRING.next(s, i).map(t -> new SNode(
+          t,
+          s.substring(t.start(), t.end())
+      )).orElseThrow(error(TokenType.STRING, s, i));
+    }
+  }
+
+  private record SSNode(Token token, List<SNode> children) implements Node {
+    static SSNode parse(String s, int i) {
+      List<SNode> nodes = new ArrayList<>();
+      try {
+        nodes.add(SNode.parse(s, i));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      while (!nodes.isEmpty()) {
+        Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
+        if (sepT.isEmpty()) {
+          break;
+        }
+        nodes.add(SNode.parse(s, sepT.get().end()));
+      }
+      return new SSNode(new Token(i, nodes.isEmpty() ? i : nodes.get(nodes.size() - 1).token().end()), nodes);
+    }
+
+  }
+
+  private record LENode(Token token, ESNode child) implements Node {
+    @SuppressWarnings("InfiniteRecursion")
+    static LENode parse(String s, int i) {
+      //list with join
+      try {
+        Token openT = TokenType.OPEN_CONTENT.next(s, i).orElseThrow(error(TokenType.OPEN_CONTENT, s, i));
+        NPNode npNode = NPNode.parse(s, openT.end());
+        Token closedT = TokenType.CLOSED_CONTENT.next(s, npNode.token().end()).orElseThrow(error(
+            TokenType.CLOSED_CONTENT,
+            s,
+            npNode.token().end()
+        ));
+        Token jointT = TokenType.JOIN.next(s, closedT.end()).orElseThrow(error(TokenType.JOIN, s, closedT.end()));
+        LENode outerLENode = LENode.parse(s, jointT.end());
+        //do cartesian product
+        List<ENode> originalENodes = outerLENode.child().children();
+        List<ENode> eNodes = new ArrayList<>();
+        for (ENode originalENode : originalENodes) {
+          if (npNode.value() instanceof DNode || npNode.value() instanceof SNode || npNode.value() instanceof ENode) {
+            eNodes.add(new ENode(
+                originalENode.token(),
+                new NPSNode(originalENode.child().token(), withAppended(originalENode.child().children(), npNode)),
+                originalENode.name()
+            ));
+          } else {
+            if (npNode.value() instanceof LDNode ldNode) {
+              for (DNode dNode : ldNode.child().children()) {
+                eNodes.add(new ENode(
+                    originalENode.token(),
+                    new NPSNode(originalENode.child().token(), withAppended(
+                        originalENode.child().children(),
+                        new NPNode(ldNode.token(), npNode.name(), dNode)
+                    )),
+                    originalENode.name()
+                ));
+              }
+            } else if (npNode.value() instanceof LSNode lsNode) {
+              for (SNode sNode : lsNode.child().children()) {
+                eNodes.add(new ENode(
+                    originalENode.token(),
+                    new NPSNode(originalENode.child().token(), withAppended(
+                        originalENode.child().children(),
+                        new NPNode(lsNode.token(), npNode.name(), sNode)
+                    )),
+                    originalENode.name()
+                ));
+              }
+            } else if (npNode.value() instanceof LENode leNode) {
+              for (ENode eNode : leNode.child().children()) {
+                eNodes.add(new ENode(
+                    originalENode.token(),
+                    new NPSNode(originalENode.child().token(), withAppended(
+                        originalENode.child().children(),
+                        new NPNode(leNode.token(), npNode.name(), eNode)
+                    )),
+                    originalENode.name()
+                ));
+              }
+            }
+          }
+        }
+        return new LENode(new Token(openT.start(), outerLENode.token().end()), new ESNode(
+            new Token(npNode.token().start(), outerLENode.token.end()),
+            eNodes
+        ));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      //just list
+      Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+      ESNode sNode = ESNode.parse(s, openT.end());
+      Token closedT = TokenType.CLOSED_LIST.next(s, sNode.token().end()).orElseThrow(error(
+          TokenType.CLOSED_LIST,
+          s,
+          sNode.token().end()
+      ));
+      return new LENode(new Token(openT.start(), closedT.end()), sNode);
+    }
+  }
+
+  private record LDNode(Token token, DSNode child) implements Node {
+    static LDNode parse(String s, int i) {
+      Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+      DSNode sNode = DSNode.parse(s, openT.end());
+      Token closedT = TokenType.CLOSED_LIST.next(s, sNode.token().end()).orElseThrow(error(
+          TokenType.CLOSED_LIST,
+          s,
+          sNode.token().end()
+      ));
+      return new LDNode(new Token(openT.start(), closedT.end()), sNode);
+    }
+  }
+
+  private record LSNode(Token token, SSNode child) implements Node {
+    static LSNode parse(String s, int i) {
+      Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+      SSNode sNode = SSNode.parse(s, openT.end());
+      Token closedT = TokenType.CLOSED_LIST.next(s, sNode.token().end()).orElseThrow(error(
+          TokenType.CLOSED_LIST,
+          s,
+          sNode.token().end()
+      ));
+      return new LSNode(new Token(openT.start(), closedT.end()), sNode);
+    }
+  }
 
   private record Token(int start, int end) {}
 
@@ -171,176 +439,15 @@ public class ParsableNamedParamMap implements NamedParamMap {
     return v.intValue() == v;
   }
 
+  private static <T> List<T> withAppended(List<T> ts, T t) {
+    List<T> newTs = new ArrayList<>(ts);
+    newTs.add(t);
+    return newTs;
+  }
+
   public static ParsableNamedParamMap parse(String string) throws IllegalArgumentException {
-    ENode eNode = parseE(string, 0);
+    ENode eNode = ENode.parse(string, 0);
     return new ParsableNamedParamMap(eNode);
-  }
-
-  private static DSNode parseDS(String s, int i) {
-    List<DNode> nodes = new ArrayList<>();
-    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-    TokenType.NUM.next(s, openT.end())
-        .map(t -> new DNode(t, Double.parseDouble(s.substring(t.start(), t.end()))))
-        .ifPresent(nodes::add);
-    while (!nodes.isEmpty()) {
-      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (sepT.isEmpty()) {
-        break;
-      }
-      Token valueT = TokenType.NUM.next(s, sepT.get().end()).orElseThrow(error(TokenType.NUM, s, sepT.get().end()));
-      nodes.add(new DNode(valueT, Double.parseDouble(s.substring(valueT.start(), valueT.end()))));
-    }
-    Token closedT = TokenType.CLOSED_LIST.next(
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        )
-        .orElseThrow(error(
-            TokenType.CLOSED_LIST,
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        ));
-    return new DSNode(new Token(openT.start(), closedT.end()), nodes);
-  }
-
-  private static ENode parseE(String s, int i) {
-    Token tName = TokenType.NAME.next(s, i).orElseThrow(error(TokenType.NAME, s, i));
-    Token tOpenPar = TokenType.OPEN_CONTENT.next(s, tName.end()).orElseThrow(error(
-        TokenType.OPEN_CONTENT,
-        s,
-        tName.end()
-    ));
-    List<NPNode> nodes = parseNPS(s, tOpenPar.end());
-    Token tClosedPar = TokenType.CLOSED_CONTENT.next(
-        s,
-        nodes.isEmpty() ? tOpenPar.end() : nodes.get(nodes.size() - 1).token().end()
-    ).orElseThrow(error(
-        TokenType.CLOSED_CONTENT,
-        s,
-        nodes.isEmpty() ? tOpenPar.end() : nodes.get(nodes.size() - 1).token().end()
-    ));
-    return new ENode(new Token(tName.start(), tClosedPar.end()), nodes, s.substring(tName.start(), tName.end()));
-  }
-
-  private static ESNode parseES(String s, int i) {
-    List<ENode> nodes = new ArrayList<>();
-    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-    try {
-      nodes.add(parseE(s, openT.end()));
-    } catch (IllegalArgumentException e) {
-      //ignore
-    }
-    while (!nodes.isEmpty()) {
-      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (sepT.isEmpty()) {
-        break;
-      }
-      nodes.add(parseE(s, sepT.get().end()));
-    }
-    Token closedT = TokenType.CLOSED_LIST.next(
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        )
-        .orElseThrow(error(
-            TokenType.CLOSED_LIST,
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        ));
-    return new ESNode(new Token(openT.start(), closedT.end()), nodes);
-  }
-
-  //TODO update to match new grammar
-  private static NPNode parseNP(String s, int i) {
-    Token tName = TokenType.STRING.next(s, i).orElseThrow(error(TokenType.STRING, s, i));
-    Token tAssign = TokenType.ASSIGN_SEPARATOR.next(s, tName.end()).orElseThrow(error(
-        TokenType.ASSIGN_SEPARATOR,
-        s,
-        tName.end()
-    ));
-    Node value = null;
-    try {
-      value = parseE(s, tAssign.end());
-    } catch (IllegalArgumentException e) {
-      //ignore
-    }
-    if (value == null) {
-      value = TokenType.NUM.next(s, tAssign.end()).map(t -> new DNode(
-          t,
-          Double.parseDouble(s.substring(t.start(), t.end()))
-      )).orElse(null);
-    }
-    if (value == null) {
-      value = TokenType.STRING.next(s, tAssign.end()).map(t -> new SNode(
-          t,
-          s.substring(t.start(), t.end())
-      )).orElse(null);
-    }
-    try {
-      value = parseDS(s, tAssign.end());
-    } catch (IllegalArgumentException e) {
-      //ignore
-    }
-    try {
-      value = parseES(s, tAssign.end());
-    } catch (IllegalArgumentException e) {
-      //ignore
-    }
-    try {
-      value = parseSS(s, tAssign.end());
-    } catch (IllegalArgumentException e) {
-      //ignore
-    }
-    if (value == null) {
-      throw new IllegalArgumentException(String.format("Cannot find valid token as param value at `%s`", s.substring(
-          tAssign.end())));
-    }
-    return new NPNode(
-        new Token(tName.start(), value.token().end()),
-        s.substring(tName.start(), tName.end()),
-        value
-    );
-  }
-
-  private static List<NPNode> parseNPS(String s, int i) {
-    List<NPNode> nodes = new ArrayList<>();
-    nodes.add(parseNP(s, i));
-    while (true) {
-      Optional<Token> ot = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (ot.isEmpty()) {
-        break;
-      }
-      nodes.add(parseNP(s, ot.get().end()));
-    }
-    return nodes;
-  }
-
-  private static SSNode parseSS(String s, int i) {
-    List<SNode> nodes = new ArrayList<>();
-    Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-    TokenType.STRING.next(s, openT.end())
-        .map(t -> new SNode(t, s.substring(t.start(), t.end())))
-        .ifPresent(nodes::add);
-    while (!nodes.isEmpty()) {
-      Optional<Token> sepT = TokenType.LIST_SEPARATOR.next(s, nodes.get(nodes.size() - 1).token().end());
-      if (sepT.isEmpty()) {
-        break;
-      }
-      Token valueT = TokenType.STRING.next(s, sepT.get().end()).orElseThrow(error(
-          TokenType.STRING,
-          s,
-          sepT.get().end()
-      ));
-      nodes.add(new SNode(valueT, s.substring(valueT.start(), valueT.end())));
-    }
-    Token closedT = TokenType.CLOSED_LIST.next(
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        )
-        .orElseThrow(error(
-            TokenType.CLOSED_LIST,
-            s,
-            nodes.isEmpty() ? openT.end() : nodes.get(nodes.size() - 1).token().end()
-        ));
-    return new SSNode(new Token(openT.start(), closedT.end()), nodes);
   }
 
   @Override
