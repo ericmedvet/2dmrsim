@@ -16,12 +16,16 @@
 
 package it.units.erallab.mrsim.util.builder;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 public class NamedBuilder {
 
   protected final static char NAME_SEPARATOR = '.';
+  private final static Logger L = Logger.getLogger(NamedBuilder.class.getName());
 
   private final Map<String, Builder<?>> builders;
 
@@ -34,44 +38,19 @@ public class NamedBuilder {
     T build(ParamMap map, NamedBuilder namedBuilder) throws IllegalArgumentException;
   }
 
-  public static void main(String[] args) {
-
-    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4])"));
-    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=33)"));
-    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=1))"));
-    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=[a;b]))"));
-    //System.out.println(ParsableNamedParamMap.parse("a(value=ciao;ns=[1;2;3.4];b=f(ss=[a;b];es=[j(a=1);k(b=2)]))"));
-    System.out.println(ParsableNamedParamMap.parse("exp(runs=(seed=[1;2;3])*(mapper=[a;b])*[run(ea=numga)])"));
-    System.exit(0);
-
-    NamedBuilder stringNB = new NamedBuilder();
-    stringNB.register("one", (m, nb) -> m.s("value"));
-    stringNB.register("list", (m, nb) -> Collections.nCopies(m.i("n"), m.s("value")));
-
-    NamedBuilder numNB = new NamedBuilder();
-    numNB.register("one", (m, nb) -> m.d("value"));
-
-    NamedBuilder allNb = new NamedBuilder();
-    allNb.register("strings", stringNB);
-    allNb.register("nums", numNB);
-
-    System.out.println(allNb.build(ParsableNamedParamMap.parse("strings.one(value=ciao)"), () -> ""));
-    List<String> ss = allNb.build(ParsableNamedParamMap.parse("strings.list(n=3;value=ciao)"), () -> new ArrayList<String>())
-        .get();
-    System.out.println(ss);
-    System.out.println(allNb.build(ParsableNamedParamMap.parse("nums.one(value=5.3)")));
-  }
-
   @SuppressWarnings("unchecked")
   public <T> Optional<T> build(NamedParamMap map, Supplier<T> defaultSupplier) {
     if (!builders.containsKey(map.getName())) {
-      return Optional.empty();
+      T t = defaultSupplier.get();
+      return t == null ? Optional.empty() : Optional.of(t);
     }
     try {
       T t = (T) builders.get(map.getName()).build(map, this);
       return t == null ? Optional.empty() : Optional.of(t);
     } catch (IllegalArgumentException e) {
-      return Optional.empty();
+      L.warning(String.format("Cannot use builder for %s: %s", map.getName(), e));
+      T t = defaultSupplier.get();
+      return t == null ? Optional.empty() : Optional.of(t);
     }
   }
 
