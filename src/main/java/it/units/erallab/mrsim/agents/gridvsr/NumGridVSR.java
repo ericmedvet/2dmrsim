@@ -27,6 +27,7 @@ import it.units.erallab.mrsim.util.Pair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -69,6 +70,14 @@ public class NumGridVSR extends AbstractGridVSR {
       BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
   ) {
     this(body, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, timedFunction);
+  }
+
+  public int nOfInputs() {
+    return sensorsGrid.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+  }
+
+  public int nOfOutputs() {
+    return (int) sensorsGrid.values().stream().filter(Objects::nonNull).count();
   }
 
   @SuppressWarnings("unchecked")
