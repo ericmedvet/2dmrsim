@@ -22,6 +22,7 @@ import it.units.erallab.mrsim.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Grid;
+import it.units.erallab.mrsim.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,16 @@ import java.util.function.Function;
  */
 public class NumGridVSR extends AbstractGridVSR {
 
+  public record Body(Grid<Pair<Voxel.Material, List<Function<Voxel, Sense<? super Voxel>>>>> grid) {
+    public Grid<Voxel.Material> materialGrid() {
+      return Grid.create(grid, Pair::first);
+    }
+
+    public Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid() {
+      return Grid.create(grid, Pair::second);
+    }
+  }
+
   private final Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid;
   private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
 
@@ -41,25 +52,23 @@ public class NumGridVSR extends AbstractGridVSR {
   private final Grid<Double> outputGrid;
 
   public NumGridVSR(
-      Grid<Voxel.Material> materialGrid,
+      Body body,
       double voxelSideLength,
       double voxelMass,
-      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
       BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
   ) {
-    super(materialGrid, voxelSideLength, voxelMass);
-    this.sensorsGrid = sensorsGrid;
+    super(body.materialGrid(), voxelSideLength, voxelMass);
+    this.sensorsGrid = body.sensorsGrid();
     this.timedFunction = timedFunction;
     inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
   }
 
   public NumGridVSR(
-      Grid<Voxel.Material> materialGrid,
-      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
+      Body body,
       BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
   ) {
-    this(materialGrid, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, sensorsGrid, timedFunction);
+    this(body, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, timedFunction);
   }
 
   @SuppressWarnings("unchecked")

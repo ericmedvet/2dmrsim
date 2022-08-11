@@ -33,21 +33,19 @@ import java.util.function.Function;
 public class CentralizedNumGridVSR extends NumGridVSR {
 
   public CentralizedNumGridVSR(
-      Grid<Voxel.Material> materialGrid,
+      Body body,
       double voxelSideLength,
       double voxelMass,
-      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
       TimedRealFunction timedRealFunction
   ) {
-    super(materialGrid, voxelSideLength, voxelMass, sensorsGrid, buildGridFunction(timedRealFunction, sensorsGrid));
+    super(body, voxelSideLength, voxelMass, buildGridFunction(timedRealFunction, body.sensorsGrid()));
   }
 
   public CentralizedNumGridVSR(
-      Grid<Voxel.Material> materialGrid,
-      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid,
+      Body body,
       TimedRealFunction timedRealFunction
   ) {
-    this(materialGrid, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, sensorsGrid, timedRealFunction);
+    this(body, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, timedRealFunction);
   }
 
   private static BiFunction<Double, Grid<double[]>, Grid<Double>> buildGridFunction(
