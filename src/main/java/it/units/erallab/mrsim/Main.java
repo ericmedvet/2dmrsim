@@ -35,7 +35,7 @@ import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.builder.GridShapeBuilder;
-import it.units.erallab.mrsim.util.builder.TerrainNamedBuilder;
+import it.units.erallab.mrsim.util.builder.TerrainBuilder;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -44,7 +44,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
@@ -115,7 +114,7 @@ public class Main {
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    Grid<Boolean> shape = (Grid<Boolean>)GridShapeBuilder.getInstance().build("biped(w=4;h=3)").get();
+    Grid<Boolean> shape = (Grid<Boolean>) GridShapeBuilder.getInstance().build("biped(w=4;h=3)").get();
     Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
         //"uniform-t+sin1",
         "top-a+ar-bottom-sd270+sin1-front-ld0",
@@ -154,7 +153,7 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = (Terrain)TerrainNamedBuilder.getInstance().build("downhill(a=5)").orElseThrow();
+    Terrain terrain = TerrainBuilder.getInstance().build("downhill(a=5)").orElseThrow();
     Engine engine = new Dyn4JEngine();
     //do thing
     locomotion(engine, terrain, viewer);
@@ -169,10 +168,7 @@ public class Main {
     Poly ball = Poly.regular(1, 20);
     double ballInterval = 5d;
     double lastBallT = 0d;
-    Grid<Boolean> shape = GridShapeBuilder.getInstance().build(
-        "biped(w=4;h=3)",
-        (Supplier<Grid<Boolean>>) () -> null
-    ).orElseThrow();
+    Grid<Boolean> shape = GridShapeBuilder.getInstance().build("biped(w=4;h=3)").orElseThrow();
     Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
         //"uniform-t+sin1",
         "top-a+ar-bottom-sd270-front-ld0",

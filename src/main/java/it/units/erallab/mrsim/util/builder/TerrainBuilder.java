@@ -28,7 +28,7 @@ import java.util.random.RandomGenerator;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class TerrainNamedBuilder extends NamedBuilder {
+public class TerrainBuilder extends NamedBuilder<Terrain> {
   public final static double BORDER_H = 100d;
   public static final double W = 2000d;
   public static final double H = 25d;
@@ -37,15 +37,15 @@ public class TerrainNamedBuilder extends NamedBuilder {
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
 
-  private TerrainNamedBuilder() {
-    register("flat", TerrainNamedBuilder::createFlat);
-    register("hilly", TerrainNamedBuilder::createHilly);
-    register("steppy", TerrainNamedBuilder::createSteppy);
-    register("downhill", TerrainNamedBuilder::createDownhill);
-    register("uphill", TerrainNamedBuilder::createUphill);
+  private TerrainBuilder() {
+    register("flat", TerrainBuilder::createFlat);
+    register("hilly", TerrainBuilder::createHilly);
+    register("steppy", TerrainBuilder::createSteppy);
+    register("downhill", TerrainBuilder::createDownhill);
+    register("uphill", TerrainBuilder::createUphill);
   }
 
-  private static Terrain createFlat(ParamMap m, NamedBuilder nb) {
+  private static Terrain createFlat(ParamMap m, NamedBuilder<?> nb) {
     return fromPath(
         new Path(new Point(m.d("w", W), 0)),
         m.d("h", H),
@@ -54,7 +54,7 @@ public class TerrainNamedBuilder extends NamedBuilder {
     );
   }
 
-  private static Terrain createHilly(ParamMap m, NamedBuilder nb) {
+  private static Terrain createHilly(ParamMap m, NamedBuilder<?> nb) {
     double h = m.d("hillH", CHUNK_H);
     double w = m.d("hillW", CHUNK_W);
     RandomGenerator random = new Random(m.i("seed", 1));
@@ -74,7 +74,7 @@ public class TerrainNamedBuilder extends NamedBuilder {
     );
   }
 
-  private static Terrain createSteppy(ParamMap m, NamedBuilder nb) {
+  private static Terrain createSteppy(ParamMap m, NamedBuilder<?> nb) {
     double h = m.d("hillH", CHUNK_H);
     double w = m.d("hillW", CHUNK_W);
     RandomGenerator random = new Random(m.i("seed", 1));
@@ -96,7 +96,7 @@ public class TerrainNamedBuilder extends NamedBuilder {
     );
   }
 
-  private static Terrain createDownhill(ParamMap m, NamedBuilder nb) {
+  private static Terrain createDownhill(ParamMap m, NamedBuilder<?> nb) {
     return fromPath(
         new Path(new Point(
             m.d("w", W),
@@ -108,7 +108,7 @@ public class TerrainNamedBuilder extends NamedBuilder {
     );
   }
 
-  private static Terrain createUphill(ParamMap m, NamedBuilder nb) {
+  private static Terrain createUphill(ParamMap m, NamedBuilder<?> nb) {
     return fromPath(
         new Path(new Point(
             m.d("w", W),
@@ -137,9 +137,9 @@ public class TerrainNamedBuilder extends NamedBuilder {
     return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
-  private final static TerrainNamedBuilder INSTANCE = new TerrainNamedBuilder();
+  private final static TerrainBuilder INSTANCE = new TerrainBuilder();
 
-  public static TerrainNamedBuilder getInstance() {
+  public static TerrainBuilder getInstance() {
     return INSTANCE;
   }
 }

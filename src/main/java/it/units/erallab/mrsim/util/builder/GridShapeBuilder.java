@@ -21,7 +21,7 @@ import it.units.erallab.mrsim.util.Grid;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class GridShapeBuilder extends NamedBuilder {
+public class GridShapeBuilder extends NamedBuilder<Grid<Boolean>> {
   private GridShapeBuilder() {
     register("worm", GridShapeBuilder::createWorm);
     register("biped", GridShapeBuilder::createBiped);
@@ -39,11 +39,11 @@ public class GridShapeBuilder extends NamedBuilder {
     return INSTANCE;
   }
 
-  private static Grid<Boolean> createWorm(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createWorm(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(m.i("w"), m.i("h"), true);
   }
 
-  private static Grid<Boolean> createBiped(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createBiped(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(
         m.i("w"),
         m.i("h"),
@@ -51,7 +51,7 @@ public class GridShapeBuilder extends NamedBuilder {
     );
   }
 
-  private static Grid<Boolean> createTripod(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createTripod(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(
         m.i("w"),
         m.i("h"),
@@ -59,7 +59,7 @@ public class GridShapeBuilder extends NamedBuilder {
     );
   }
 
-  private static Grid<Boolean> createBall(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createBall(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(
         m.i("d"),
         m.i("d"),
@@ -69,18 +69,18 @@ public class GridShapeBuilder extends NamedBuilder {
     );
   }
 
-  private static Grid<Boolean> createComb(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createComb(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(m.i("w"), m.i("h"), (x, y) -> (y >= m.i("h") / 2 || x % 2 == 0));
   }
 
-  private static Grid<Boolean> createT(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createT(ParamMap m, NamedBuilder<?> nb) {
     int w = m.i("w");
     int h = m.i("h");
     int pad = (int) Math.floor((Math.floor((double) w / 2) / 2));
     return Grid.create(w, h, (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)));
   }
 
-  private static Grid<Boolean> createFree(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createFree(ParamMap m, NamedBuilder<?> nb) {
     String s = m.fs("s", "[01]+(-[01]+)?");
     return Grid.create(
         s.split("-").length,
@@ -89,7 +89,7 @@ public class GridShapeBuilder extends NamedBuilder {
     );
   }
 
-  private static Grid<Boolean> createTriangle(ParamMap m, NamedBuilder nb) {
+  private static Grid<Boolean> createTriangle(ParamMap m, NamedBuilder<?> nb) {
     return Grid.create(m.i("l"), m.i("l"), (x, y) -> (y >= x));
   }
 
