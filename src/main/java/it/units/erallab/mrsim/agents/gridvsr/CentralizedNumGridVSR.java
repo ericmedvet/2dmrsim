@@ -16,16 +16,12 @@
 
 package it.units.erallab.mrsim.agents.gridvsr;
 
-import it.units.erallab.mrsim.core.actions.Sense;
-import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Utils;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
@@ -38,7 +34,7 @@ public class CentralizedNumGridVSR extends NumGridVSR {
       double voxelMass,
       TimedRealFunction timedRealFunction
   ) {
-    super(body, voxelSideLength, voxelMass, buildGridFunction(timedRealFunction, body.sensorsGrid()));
+    super(body, voxelSideLength, voxelMass, buildGridFunction(timedRealFunction, body));
   }
 
   public CentralizedNumGridVSR(
@@ -50,10 +46,10 @@ public class CentralizedNumGridVSR extends NumGridVSR {
 
   private static BiFunction<Double, Grid<double[]>, Grid<Double>> buildGridFunction(
       TimedRealFunction timedRealFunction,
-      Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid
+      Body body
   ) {
-    int nOfInputs = sensorsGrid.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) sensorsGrid.values().stream().filter(Objects::nonNull).count();
+    int nOfInputs = nOfInputs(body);
+    int nOfOutputs = nOfOutputs(body);
     if (timedRealFunction.nOfInputs() != nOfInputs) {
       throw new IllegalArgumentException(String.format(
           "Function expects %d inputs; %d found",

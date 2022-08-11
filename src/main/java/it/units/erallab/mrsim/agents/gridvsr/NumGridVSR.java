@@ -52,6 +52,8 @@ public class NumGridVSR extends AbstractGridVSR {
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
 
+  private final Body body;
+
   public NumGridVSR(
       Body body,
       double voxelSideLength,
@@ -61,6 +63,7 @@ public class NumGridVSR extends AbstractGridVSR {
     super(body.materialGrid(), voxelSideLength, voxelMass);
     this.sensorsGrid = body.sensorsGrid();
     this.timedFunction = timedFunction;
+    this.body = body;
     inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
   }
@@ -73,11 +76,19 @@ public class NumGridVSR extends AbstractGridVSR {
   }
 
   public int nOfInputs() {
-    return sensorsGrid.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+    return nOfInputs(body);
   }
 
   public int nOfOutputs() {
-    return (int) sensorsGrid.values().stream().filter(Objects::nonNull).count();
+    return nOfOutputs(body);
+  }
+
+  public static int nOfInputs(Body body) {
+    return body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+  }
+
+  public static int nOfOutputs(Body body) {
+    return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
   }
 
   @SuppressWarnings("unchecked")
@@ -119,4 +130,7 @@ public class NumGridVSR extends AbstractGridVSR {
     return actions;
   }
 
+  public Body getBody() {
+    return body;
+  }
 }
