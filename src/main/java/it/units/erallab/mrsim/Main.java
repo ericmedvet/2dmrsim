@@ -133,7 +133,7 @@ public class Main {
         mlp
     );
     Locomotion locomotion = new Locomotion(60, terrain);
-    Locomotion.Outcome outcome = locomotion.run(vsr, engine, consumer);
+    Locomotion.Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }
 

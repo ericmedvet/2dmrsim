@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package it.units.erallab.mrsim.tasks.locomotion;
 
 import it.units.erallab.mrsim.core.EmbodiedAgent;
@@ -14,8 +30,9 @@ import it.units.erallab.mrsim.util.PolyUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class Locomotion implements Task<EmbodiedAgent, Locomotion.Outcome> {
+public class Locomotion implements Task<Supplier<EmbodiedAgent>, Locomotion.Outcome> {
 
   private final static double INITIAL_X_GAP = 1;
   private final static double INITIAL_Y_GAP = 0.25;
@@ -70,7 +87,9 @@ public class Locomotion implements Task<EmbodiedAgent, Locomotion.Outcome> {
   }
 
   @Override
-  public Outcome run(EmbodiedAgent embodiedAgent, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+  public Outcome run(Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+    //create agent
+    EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();;
     //build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(embodiedAgent));
