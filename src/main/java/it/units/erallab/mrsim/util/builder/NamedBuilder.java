@@ -22,12 +22,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-public class NamedBuilder {
+public class NamedBuilder<X> {
 
   protected final static char NAME_SEPARATOR = '.';
   private final static Logger L = Logger.getLogger(NamedBuilder.class.getName());
 
-  private final Map<String, Builder<?>> builders;
+  private final Map<String, Builder<? extends X>> builders;
 
   public NamedBuilder() {
     this.builders = new LinkedHashMap<>();
@@ -35,11 +35,11 @@ public class NamedBuilder {
 
   @FunctionalInterface
   public interface Builder<T> {
-    T build(ParamMap map, NamedBuilder namedBuilder) throws IllegalArgumentException;
+    T build(ParamMap map, NamedBuilder<?> namedBuilder) throws IllegalArgumentException;
   }
 
   @SuppressWarnings("unchecked")
-  public <T> Optional<T> build(NamedParamMap map, Supplier<T> defaultSupplier) {
+  public <T extends X> Optional<T> build(NamedParamMap map, Supplier<T> defaultSupplier) {
     if (!builders.containsKey(map.getName())) {
       T t = defaultSupplier.get();
       return t == null ? Optional.empty() : Optional.of(t);
@@ -54,24 +54,30 @@ public class NamedBuilder {
     }
   }
 
-  public <T> Optional<T> build(String mapString, Supplier<T> defaultSupplier) {
+  public <T extends X> Optional<T> build(String mapString, Supplier<T> defaultSupplier) {
     return build(ParsableNamedParamMap.parse(mapString), defaultSupplier);
   }
 
-  public Optional<Object> build(NamedParamMap map) {
-    return build(map, Object::new);
+  public Optional<X> build(NamedParamMap map) {
+    return build(map, () -> null);
   }
 
-  public Optional<Object> build(String mapString) {
+  public Optional<X> build(String mapString) {
     return build(ParsableNamedParamMap.parse(mapString));
   }
 
-  public void register(String name, Builder<?> builder) {
+  public void register(String name, Builder<? extends X> builder) {
     builders.put(name, builder);
   }
 
-  public void register(String prefix, NamedBuilder namedBuilder) {
-    namedBuilder.builders.forEach((s, b) -> builders.put(prefix + NAME_SEPARATOR + s, b));
+  public void register(String prefix, NamedBuilder<? extends X> namedBuilder) {
+    namedBuilder.builders.forEach(
+        (s, b) -> builders.put(prefix.isEmpty() ? s : (prefix + NAME_SEPARATOR + s), b)
+    );
+  }
+
+  public void register(NamedBuilder<? extends X> namedBuilder) {
+    register("", namedBuilder);
   }
 
 }
