@@ -451,8 +451,11 @@ public class ParsableNamedParamMap implements NamedParamMap {
   }
 
   @Override
-  public boolean b(String n) {
-    return sMap.getOrDefault(n, "false").equalsIgnoreCase(Boolean.TRUE.toString());
+  public Boolean b(String n) {
+    if (sMap.containsKey(n)) {
+      return sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString());
+    }
+    return null;
   }
 
   @Override
@@ -501,8 +504,8 @@ public class ParsableNamedParamMap implements NamedParamMap {
   }
 
   @Override
-  public List<ParsableNamedParamMap> npms(String n) {
-    return npmsMap.get(n);
+  public List<NamedParamMap> npms(String n) {
+    return npmsMap.get(n).stream().map(m -> (NamedParamMap) m).toList();
   }
 
   @Override
