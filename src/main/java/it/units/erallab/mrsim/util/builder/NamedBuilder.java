@@ -85,4 +85,8 @@ public class NamedBuilder<X> {
     register("", namedBuilder);
   }
 
+  @Override
+  public String toString() {
+    return "NamedBuilder" + builders.keySet().stream().sorted(String::compareTo).toList();
+  }
 }
