@@ -20,6 +20,7 @@ import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Utils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
@@ -44,6 +45,21 @@ public class CentralizedNumGridVSR extends NumGridVSR {
     this(body, AbstractGridVSR.VOXEL_SIDE_LENGTH, AbstractGridVSR.VOXEL_MASS, timedRealFunction);
   }
 
+  public int nOfInputs() {
+    return nOfInputs(getBody());
+  }
+
+  public int nOfOutputs() {
+    return nOfOutputs(getBody());
+  }
+
+  public static int nOfInputs(Body body) {
+    return body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+  }
+
+  public static int nOfOutputs(Body body) {
+    return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+  }
   private static BiFunction<Double, Grid<double[]>, Grid<Double>> buildGridFunction(
       TimedRealFunction timedRealFunction,
       Body body
