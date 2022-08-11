@@ -57,50 +57,6 @@ public class GridVSRUtils {
   private GridVSRUtils() {
   }
 
-  public static Grid<Boolean> buildShape(String name) {
-    Function<String, Optional<Grid<Boolean>>> provider = StringUtils.namedParamMapBuilder(Map.ofEntries(
-        Map.entry("box", p -> Grid.create(p.i("w"), p.i("h"), true)),
-        Map.entry(
-            "biped",
-            p -> Grid.create(p.i("w"),
-                p.i("h"),
-                (x, y) -> !(y < p.i("h") / 2 && x >= p.i("w") / 4 && x < p.i("w") * 3 / 4)
-            )
-        ),
-        Map.entry(
-            "tripod",
-            p -> Grid.create(p.i("w"),
-                p.i("h"),
-                (x, y) -> !(y < p.i("h") / 2 && x != 0 && x != p.i("w") - 1 && x != p.i("w") / 2)
-            )
-        ),
-        Map.entry("ball", p -> Grid.create(
-            p.i("d"),
-            p.i("d"),
-            (x, y) -> Math.round(Math.sqrt((x - (p.i("d") - 1) / 2d) * (x - (p.i("d") - 1) / 2d) + (y - (p.i("d") - 1) / 2d) * (y - (p.i(
-                "d") - 1) / 2d))) <= (int) Math.floor(
-                p.i("d") / 2d)
-        )),
-        Map.entry("comb", p -> Grid.create(p.i("w"), p.i("h"), (x, y) -> (y >= p.i("h") / 2 || x % 2 == 0))),
-        Map.entry("t", p -> {
-          int w = p.i("w");
-          int h = p.i("h");
-          int pad = (int) Math.floor((Math.floor((double) w / 2) / 2));
-          return Grid.create(w, h, (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)));
-        }),
-        Map.entry("free", p -> {
-          String s = p.s("s", "[01]+(-[01]+)?");
-          return Grid.create(
-              s.split("-").length,
-              s.split("-")[0].length(),
-              (x, y) -> s.split("-")[x].charAt(y) == '1'
-          );
-        }),
-        Map.entry("triangle", p -> Grid.create(p.i("l"), p.i("l"), (x, y) -> (y >= x)))
-    ));
-    return provider.apply(name).orElseThrow();
-  }
-
   public static Grid<List<Function<Voxel, Sense<? super Voxel>>>> buildSensors(String name, Grid<Boolean> shape) {
     String sensorsRegex = "("
         + String.join("|", SENSORS.keySet()) + ")(\\+("

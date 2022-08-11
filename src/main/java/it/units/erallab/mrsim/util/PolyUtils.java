@@ -23,18 +23,13 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.decompose.SweepLine;
 import org.dyn4j.geometry.decompose.Triangulator;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.random.RandomGenerator;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/10 for 2dmrsim
  */
 public class PolyUtils {
-
-  public final static double TERRAIN_BORDER_HEIGHT = 100d;
-  public static final int TERRAIN_WIDTH = 2000;
-  public static final double TERRAIN_BORDER_WIDTH = 10d;
 
   private PolyUtils() {
   }
@@ -42,68 +37,6 @@ public class PolyUtils {
   private static double angle(Point a, Point b, Point c) {
     double angle = c.diff(b).direction() - a.diff(b).direction();
     return angle > 0 ? angle : (angle + 2d * Math.PI);
-  }
-
-  public static Terrain createTerrain(String name) {
-    return createTerrain(name, TERRAIN_WIDTH, TERRAIN_BORDER_HEIGHT, TERRAIN_BORDER_WIDTH, TERRAIN_BORDER_HEIGHT);
-  }
-
-  public static Terrain createTerrain(String name, double terrainW, double terrainH, double borderW, double borderH) {
-    Function<String, Optional<Path>> provider = StringUtils.formattedProvider(Map.ofEntries(
-        Map.entry("flat", p -> new Path(new Point(terrainW, 0))),
-        Map.entry("hilly-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)", p -> {
-          double h = p.d().get("h");
-          double w = p.d().get("w");
-          RandomGenerator random = new Random(p.i().get("seed"));
-          Path path = new Path(new Point(w, 0));
-          double dW = 0d;
-          while (dW < terrainW) {
-            double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-            double sH = random.nextGaussian() * h;
-            dW = dW + sW;
-            path = path.moveTo(sW, sH);
-          }
-          return path;
-        }),
-        Map.entry("steppy-(?<h>[0-9]+(\\.[0-9]+)?)-(?<w>[0-9]+(\\.[0-9]+)?)-(?<seed>[0-9]+)", p -> {
-          double h = p.d().get("h");
-          double w = p.d().get("w");
-          RandomGenerator random = new Random(p.i().get("seed"));
-          Path path = new Path(new Point(w, 0));
-          double dW = 0d;
-          while (dW < terrainW) {
-            double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-            double sH = random.nextGaussian() * h;
-            dW = dW + sW;
-            path = path
-                .moveTo(sW, 0)
-                .moveTo(0, sH);
-          }
-          return path;
-        }),
-        Map.entry("downhill-(?<angle>[0-9]+(\\.[0-9]+)?)", p -> {
-          double angle = p.d().get("angle");
-          return new Path(new Point(terrainW, -terrainW * Math.sin(angle / 180 * Math.PI)));
-        }),
-        Map.entry("uphill-(?<angle>[0-9]+(\\.[0-9]+)?)", p -> {
-          double angle = p.d().get("angle");
-          return new Path(new Point(terrainW, terrainW * Math.sin(angle / 180 * Math.PI)));
-        })
-    ));
-    Path path = new Path(new Point(0, 0))
-        .moveTo(0, borderH)
-        .moveTo(borderW, 0)
-        .moveTo(0, -borderH)
-        .moveTo(provider.apply(name).orElseThrow())
-        .moveTo(0, borderH)
-        .moveTo(borderW, 0)
-        .moveTo(0, -borderH);
-    double maxX = Arrays.stream(path.points()).mapToDouble(Point::x).max().orElse(borderW);
-    double minY = Arrays.stream(path.points()).mapToDouble(Point::y).min().orElse(borderW);
-    path = path
-        .add(maxX, minY - terrainH)
-        .moveTo(-maxX, 0);
-    return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
   public static List<Poly> decompose(Poly poly) {

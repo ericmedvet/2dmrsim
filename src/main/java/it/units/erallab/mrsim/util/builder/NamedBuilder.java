@@ -54,8 +54,16 @@ public class NamedBuilder {
     }
   }
 
+  public <T> Optional<T> build(String mapString, Supplier<T> defaultSupplier) {
+    return build(ParsableNamedParamMap.parse(mapString), defaultSupplier);
+  }
+
   public Optional<Object> build(NamedParamMap map) {
     return build(map, Object::new);
+  }
+
+  public Optional<Object> build(String mapString) {
+    return build(ParsableNamedParamMap.parse(mapString));
   }
 
   public void register(String name, Builder<?> builder) {
