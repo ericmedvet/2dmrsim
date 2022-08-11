@@ -29,7 +29,7 @@ import java.util.function.Function;
  */
 public class VSRSensorizingFunctionBuilder extends NamedBuilder<Object> {
   private VSRSensorizingFunctionBuilder() {
-    register("sensor", VoxelSensorBuilder.getInstance());
+    register(List.of("sensor","s"), VoxelSensorBuilder.getInstance());
     register("empty",VSRSensorizingFunctionBuilder::createEmpty);
     register("uniform",VSRSensorizingFunctionBuilder::createUniform);
     register("directional",VSRSensorizingFunctionBuilder::createDirectional);
@@ -61,16 +61,16 @@ public class VSRSensorizingFunctionBuilder extends NamedBuilder<Object> {
       NamedBuilder<?> nb
   ) {
     List<Function<Voxel, Sense<? super Voxel>>> nSensors = m.npms("nSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow())
+        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
         .toList();
     List<Function<Voxel, Sense<? super Voxel>>> sSensors = m.npms("sSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow())
+        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
         .toList();
     List<Function<Voxel, Sense<? super Voxel>>> eSensors = m.npms("eSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow())
+        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
         .toList();
     List<Function<Voxel, Sense<? super Voxel>>> wSensors = m.npms("wSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow())
+        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
         .toList();
     return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
       if (!shape.get(x, y)) {

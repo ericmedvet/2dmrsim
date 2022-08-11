@@ -17,6 +17,7 @@
 package it.units.erallab.mrsim.util.builder;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -74,6 +75,10 @@ public class NamedBuilder<X> {
     namedBuilder.builders.forEach(
         (s, b) -> builders.put(prefix.isEmpty() ? s : (prefix + NAME_SEPARATOR + s), b)
     );
+  }
+
+  public void register(List<String> prefixes, NamedBuilder<? extends X> namedBuilder) {
+    prefixes.forEach(prefix -> register(prefix, namedBuilder));
   }
 
   public void register(NamedBuilder<? extends X> namedBuilder) {

@@ -30,18 +30,20 @@ import java.util.function.Function;
  */
 public class GridVSRBodyBuilder extends NamedBuilder<Object> {
   private GridVSRBodyBuilder() {
-    register("shape", GridShapeBuilder.getInstance());
-    register("sensorizingFunction", VSRSensorizingFunctionBuilder.getInstance());
-    register("body", GridVSRBodyBuilder::createBody);
+    register(List.of("shape", "s"), GridShapeBuilder.getInstance());
+    register(List.of("sensorizingFunction", "sf"), VSRSensorizingFunctionBuilder.getInstance());
+    register("plain", GridVSRBodyBuilder::createBody);
   }
 
   @SuppressWarnings("unchecked")
   private static NumGridVSR.Body createBody(ParamMap m, NamedBuilder<?> nb) {
     Voxel.Material material = new Voxel.Material();
-    Grid<Boolean> shape = (Grid<Boolean>) nb.build(m.npm("shape")).orElseThrow();
+    Grid<Boolean> shape = (Grid<Boolean>) nb.build(m.npm("shape")).orElseThrow(() -> new IllegalArgumentException(
+        "No value for shape"));
     Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> sensorizingFunction =
         (Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>>) nb.build(
-            m.npm("sensorizingFunction")).orElseThrow();
+            m.npm("sensorizingFunction")).orElseThrow(() -> new IllegalArgumentException(
+            "No value for sensorizingFunction"));
     Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = sensorizingFunction.apply(shape);
     return new NumGridVSR.Body(Grid.create(
         shape.w(),

@@ -18,6 +18,7 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.CentralizedNumGridVSR;
+import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
@@ -32,10 +33,8 @@ import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
-import it.units.erallab.mrsim.util.Grid;
-import it.units.erallab.mrsim.util.builder.GridShapeBuilder;
+import it.units.erallab.mrsim.util.builder.GridVSRBodyBuilder;
 import it.units.erallab.mrsim.util.builder.TerrainBuilder;
-import it.units.erallab.mrsim.util.builder.VSRSensorizingFunctionBuilder;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -114,14 +113,13 @@ public class Main {
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    Grid<Boolean> shape = GridShapeBuilder.getInstance().build("biped(w=4;h=3)").orElseThrow();
-    //noinspection unchecked
-    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = ((Function<Grid<Boolean>, Grid<List<Function<Voxel,
-        Sense<? super Voxel>>>>>) VSRSensorizingFunctionBuilder.getInstance()
-        .build("directional(sSensors=[sensor.d(a=-90;r=1)];eSensors=[sensor.d(a=-15;r=5)])")
-        .orElseThrow()).apply(shape);
-    int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) sensors.values().stream().filter(Objects::nonNull).count();
+    NumGridVSR.Body body = (NumGridVSR.Body) GridVSRBodyBuilder.getInstance()
+        .build(
+            "plain(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[sf.s.d(a=-90;r=1)];" +
+                "eSensors=[sf.s.d(a=-15;r=5)]))")
+        .orElseThrow();
+    int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+    int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
         nOfInputs,
@@ -131,8 +129,7 @@ public class Main {
     RandomGenerator rg = new Random();
     mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-10, 10)).toArray());
     AbstractGridVSR vsr = new CentralizedNumGridVSR(
-        shape.map(b -> b ? new Voxel.Material() : null),
-        sensors,
+        body,
         mlp
     );
     Locomotion locomotion = new Locomotion(60, terrain);
@@ -162,51 +159,6 @@ public class Main {
     //ball(engine, terrain, viewer);
     //do final stuff
     //videoBuilder.get();
-  }
-
-  private static void vsr(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    Poly ball = Poly.regular(1, 20);
-    double ballInterval = 5d;
-    double lastBallT = 0d;
-    Grid<Boolean> shape = GridShapeBuilder.getInstance().build("biped(w=4;h=3)").orElseThrow();
-    //noinspection unchecked
-    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = ((Function<Grid<Boolean>, Grid<List<Function<Voxel,
-        Sense<? super Voxel>>>>>) VSRSensorizingFunctionBuilder.getInstance()
-        .build("directional(sSensors=[sensor.d(a=0;r=1)];nSensors=[sensor.d(a=36)])")
-        .orElseThrow()).apply(shape);
-    int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) sensors.values().stream().filter(Objects::nonNull).count();
-    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
-        MultiLayerPerceptron.ActivationFunction.TANH,
-        nOfInputs,
-        new int[10],
-        nOfOutputs
-    );
-    RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-10, 10)).toArray());
-    AbstractGridVSR vsr = new CentralizedNumGridVSR(
-        shape.map(b -> b ? new Voxel.Material() : null),
-        sensors,
-        mlp
-    );
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
-    engine.perform(new AddAndTranslateAgent(vsr, new Point(50, 5)));
-    while (engine.t() < 100) {
-      Snapshot snapshot = engine.tick();
-      consumer.accept(snapshot);
-      if (engine.t() > lastBallT + ballInterval) {
-        lastBallT = engine.t();
-        engine.perform(new CreateAndTranslateRigidBody(
-            ball,
-            2,
-            new Point(rg.nextDouble() * 10 + 2, snapshot.bodies()
-                .stream()
-                .mapToDouble(b -> b.poly().boundingBox().max().y())
-                .max()
-                .orElse(0) + Math.max(1d, 1d + rg.nextGaussian() * 1.1d))
-        ));
-      }
-    }
   }
 
 }
