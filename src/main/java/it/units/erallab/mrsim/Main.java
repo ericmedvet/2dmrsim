@@ -18,7 +18,6 @@ package it.units.erallab.mrsim;
 
 import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim.agents.gridvsr.GridVSRUtils;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
@@ -36,6 +35,7 @@ import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.builder.GridShapeBuilder;
 import it.units.erallab.mrsim.util.builder.TerrainBuilder;
+import it.units.erallab.mrsim.util.builder.VSRSensorizingFunctionBuilder;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -114,12 +114,12 @@ public class Main {
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    Grid<Boolean> shape = (Grid<Boolean>) GridShapeBuilder.getInstance().build("biped(w=4;h=3)").get();
-    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
-        //"uniform-t+sin1",
-        "top-a+ar-bottom-sd270+sin1-front-ld0",
-        shape
-    );
+    Grid<Boolean> shape = GridShapeBuilder.getInstance().build("biped(w=4;h=3)").orElseThrow();
+    //noinspection unchecked
+    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = ((Function<Grid<Boolean>, Grid<List<Function<Voxel,
+        Sense<? super Voxel>>>>>) VSRSensorizingFunctionBuilder.getInstance()
+        .build("directional(sSensors=[sensor.d(a=-90;r=1)];eSensors=[sensor.d(a=-15;r=5)])")
+        .orElseThrow()).apply(shape);
     int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) sensors.values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
@@ -169,11 +169,11 @@ public class Main {
     double ballInterval = 5d;
     double lastBallT = 0d;
     Grid<Boolean> shape = GridShapeBuilder.getInstance().build("biped(w=4;h=3)").orElseThrow();
-    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = GridVSRUtils.buildSensors(
-        //"uniform-t+sin1",
-        "top-a+ar-bottom-sd270-front-ld0",
-        shape
-    );
+    //noinspection unchecked
+    Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensors = ((Function<Grid<Boolean>, Grid<List<Function<Voxel,
+        Sense<? super Voxel>>>>>) VSRSensorizingFunctionBuilder.getInstance()
+        .build("directional(sSensors=[sensor.d(a=0;r=1)];nSensors=[sensor.d(a=36)])")
+        .orElseThrow()).apply(shape);
     int nOfInputs = sensors.values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) sensors.values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(

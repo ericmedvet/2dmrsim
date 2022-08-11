@@ -505,7 +505,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
 
   @Override
   public List<NamedParamMap> npms(String n) {
-    return npmsMap.get(n).stream().map(m -> (NamedParamMap) m).toList();
+    return npmsMap.containsKey(n) ? npmsMap.get(n).stream().map(m -> (NamedParamMap) m).toList() : null;
   }
 
   @Override
