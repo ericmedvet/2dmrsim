@@ -292,7 +292,7 @@ public class StringNamedParamMap implements NamedParamMap {
     static SNode parse(String s, int i) {
       return TokenType.STRING.next(s, i).map(t -> new SNode(
           t,
-          t.trimmedContent(s)
+          t.trimmedUnquotedContent(s)
       )).orElseThrow(error(TokenType.STRING, s, i));
     }
   }
@@ -426,6 +426,10 @@ public class StringNamedParamMap implements NamedParamMap {
   private record Token(int start, int end) {
     public String trimmedContent(String s) {
       return s.substring(start, end).trim();
+    }
+
+    public String trimmedUnquotedContent(String s) {
+      return trimmedContent(s).replaceAll("\"", "");
     }
   }
 
