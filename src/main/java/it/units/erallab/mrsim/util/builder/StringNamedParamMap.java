@@ -100,7 +100,7 @@ public class StringNamedParamMap implements NamedParamMap {
 
   private enum TokenType {
     NUM("\\s*-?[0-9]+(\\.[0-9]+)?\\s*", ""),
-    STRING("\\s*[A-Za-z][A-Za-z0-9_]*\\s*", ""),
+    STRING("\\s*([A-Za-z][A-Za-z0-9_]*)|(\"[./\\w]+\")\\s*", ""),
     NAME("\\s*[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*\\s*", ""),
     OPEN_CONTENT("\\s*\\(\\s*", "("),
     CLOSED_CONTENT("\\s*\\)\\s*", ")"),
