@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.util.builder;
+package it.units.erallab.mrsim.builders;
 
 import it.units.erallab.mrsim.core.geometry.Path;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Terrain;
 import it.units.erallab.mrsim.util.DoubleRange;
+import it.units.erallab.mrsim.util.builder.NamedBuilder;
+import it.units.erallab.mrsim.util.builder.ParamMap;
 
 import java.util.Arrays;
 import java.util.Random;

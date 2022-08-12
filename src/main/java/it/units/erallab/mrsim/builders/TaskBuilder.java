@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.util.builder;
+package it.units.erallab.mrsim.builders;
 
 import it.units.erallab.mrsim.core.geometry.Terrain;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
+import it.units.erallab.mrsim.util.builder.NamedBuilder;
+import it.units.erallab.mrsim.util.builder.ParamMap;
 
 import java.util.List;
 

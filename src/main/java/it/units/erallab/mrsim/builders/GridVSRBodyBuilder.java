@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.util.builder;
+package it.units.erallab.mrsim.builders;
 
 import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.util.builder.NamedBuilder;
+import it.units.erallab.mrsim.util.builder.ParamMap;
 
 import java.util.List;
 import java.util.function.Function;

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim.util.builder;
+package it.units.erallab.mrsim.builders;
 
 import it.units.erallab.mrsim.util.Grid;
+import it.units.erallab.mrsim.util.builder.NamedBuilder;
+import it.units.erallab.mrsim.util.builder.ParamMap;
 
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim

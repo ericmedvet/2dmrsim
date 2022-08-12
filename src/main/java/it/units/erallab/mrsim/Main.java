@@ -20,6 +20,8 @@ import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
+import it.units.erallab.mrsim.builders.GridVSRBodyBuilder;
+import it.units.erallab.mrsim.builders.TerrainBuilder;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
@@ -33,8 +35,6 @@ import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
-import it.units.erallab.mrsim.util.builder.GridVSRBodyBuilder;
-import it.units.erallab.mrsim.util.builder.TerrainBuilder;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
