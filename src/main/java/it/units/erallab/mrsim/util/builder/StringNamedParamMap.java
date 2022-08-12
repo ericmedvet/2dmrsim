@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * @author "Eric Medvet" on 2022/08/08 for 2d-robot-evolution
  */
-public class ParsableNamedParamMap implements NamedParamMap {
+public class StringNamedParamMap implements NamedParamMap {
 
   // BNF
   // <e> ::= <n>(<nps>)
@@ -40,32 +40,32 @@ public class ParsableNamedParamMap implements NamedParamMap {
 
 
   private final String name;
-  private final Map<String, Double> dMap;
-  private final Map<String, String> sMap;
-  private final Map<String, ParsableNamedParamMap> npmMap;
-  private final Map<String, List<Double>> dsMap;
-  private final Map<String, List<String>> ssMap;
-  private final Map<String, List<ParsableNamedParamMap>> npmsMap;
+  private final SortedMap<String, Double> dMap;
+  private final SortedMap<String, String> sMap;
+  private final SortedMap<String, StringNamedParamMap> npmMap;
+  private final SortedMap<String, List<Double>> dsMap;
+  private final SortedMap<String, List<String>> ssMap;
+  private final SortedMap<String, List<StringNamedParamMap>> npmsMap;
 
-  private ParsableNamedParamMap(
+  private StringNamedParamMap(
       String name,
       Map<String, Double> dMap,
       Map<String, String> sMap,
-      Map<String, ParsableNamedParamMap> npmMap,
+      Map<String, StringNamedParamMap> npmMap,
       Map<String, List<Double>> dsMap,
       Map<String, List<String>> ssMap,
-      Map<String, List<ParsableNamedParamMap>> npmsMap
+      Map<String, List<StringNamedParamMap>> npmsMap
   ) {
     this.name = name;
-    this.dMap = dMap;
-    this.sMap = sMap;
-    this.npmMap = npmMap;
-    this.dsMap = dsMap;
-    this.ssMap = ssMap;
-    this.npmsMap = npmsMap;
+    this.dMap = new TreeMap<>(dMap);
+    this.sMap = new TreeMap<>(sMap);
+    this.npmMap = new TreeMap<>(npmMap);
+    this.dsMap = new TreeMap<>(dsMap);
+    this.ssMap = new TreeMap<>(ssMap);
+    this.npmsMap = new TreeMap<>(npmsMap);
   }
 
-  private ParsableNamedParamMap(ENode eNode) {
+  private StringNamedParamMap(ENode eNode) {
     this(
         eNode.name(),
         eNode.child().children().stream()
@@ -76,7 +76,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
             .collect(Collectors.toMap(NPNode::name, n -> ((SNode) n.value()).value())),
         eNode.child().children().stream()
             .filter(n -> n.value() instanceof ENode)
-            .collect(Collectors.toMap(NPNode::name, n -> new ParsableNamedParamMap((ENode) n.value))),
+            .collect(Collectors.toMap(NPNode::name, n -> new StringNamedParamMap((ENode) n.value))),
         eNode.child().children().stream()
             .filter(n -> n.value() instanceof LDNode)
             .collect(Collectors.toMap(
@@ -93,22 +93,22 @@ public class ParsableNamedParamMap implements NamedParamMap {
             .filter(n -> n.value() instanceof LENode)
             .collect(Collectors.toMap(
                 NPNode::name,
-                n -> ((LENode) n.value()).child().children().stream().map(ParsableNamedParamMap::new).toList()
+                n -> ((LENode) n.value()).child().children().stream().map(StringNamedParamMap::new).toList()
             ))
     );
   }
 
   private enum TokenType {
-    NUM("-?[0-9]+(\\.[0-9]+)?", ""),
-    STRING("[A-Za-z][A-Za-z0-9_]*", ""),
-    NAME("[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*", ""),
-    OPEN_CONTENT("\\(", "("),
-    CLOSED_CONTENT("\\)", ")"),
-    ASSIGN_SEPARATOR("=", "="),
-    LIST_SEPARATOR(";", ";"),
-    OPEN_LIST("\\[", "["),
-    CLOSED_LIST("\\]", "]"),
-    JOIN("\\*", "*");
+    NUM("\\s*-?[0-9]+(\\.[0-9]+)?\\s*", ""),
+    STRING("\\s*[A-Za-z][A-Za-z0-9_]*\\s*", ""),
+    NAME("\\s*[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*\\s*", ""),
+    OPEN_CONTENT("\\s*\\(\\s*", "("),
+    CLOSED_CONTENT("\\s*\\)\\s*", ")"),
+    ASSIGN_SEPARATOR("\\s*=\\s*", "="),
+    LIST_SEPARATOR("\\s*;\\s*", ";"),
+    OPEN_LIST("\\s*\\[\\s*", "["),
+    CLOSED_LIST("\\s*\\]\\s*", "]"),
+    JOIN("\\s*\\*\\s*", "*");
     private final String regex;
     private final String rendered;
 
@@ -141,7 +141,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
     static DNode parse(String s, int i) {
       return TokenType.NUM.next(s, i).map(t -> new DNode(
           t,
-          Double.parseDouble(s.substring(t.start(), t.end()))
+          Double.parseDouble(t.trimmedContent(s))
       )).orElseThrow(error(TokenType.NUM, s, i));
     }
   }
@@ -182,7 +182,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
           s,
           npsNode.token().end()
       ));
-      return new ENode(new Token(tName.start(), tClosedPar.end()), npsNode, s.substring(tName.start(), tName.end()));
+      return new ENode(new Token(tName.start(), tClosedPar.end()), npsNode, tName.trimmedContent(s));
     }
   }
 
@@ -277,13 +277,12 @@ public class ParsableNamedParamMap implements NamedParamMap {
       if (value == null) {
         throw new IllegalArgumentException(String.format(
             "Cannot find valid token as param value at `%s`",
-            s.substring(
-                tAssign.end())
+            s.substring(tAssign.end())
         ));
       }
       return new NPNode(
           new Token(tName.start(), value.token().end()),
-          s.substring(tName.start(), tName.end()),
+          tName.trimmedContent(s),
           value
       );
     }
@@ -293,7 +292,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
     static SNode parse(String s, int i) {
       return TokenType.STRING.next(s, i).map(t -> new SNode(
           t,
-          s.substring(t.start(), t.end())
+          t.trimmedContent(s)
       )).orElseThrow(error(TokenType.STRING, s, i));
     }
   }
@@ -424,7 +423,11 @@ public class ParsableNamedParamMap implements NamedParamMap {
     }
   }
 
-  private record Token(int start, int end) {}
+  private record Token(int start, int end) {
+    public String trimmedContent(String s) {
+      return s.substring(start, end).trim();
+    }
+  }
 
   private static Supplier<IllegalArgumentException> error(TokenType tokenType, String s, int i) {
     return () -> new IllegalArgumentException(String.format(
@@ -445,9 +448,9 @@ public class ParsableNamedParamMap implements NamedParamMap {
     return newTs;
   }
 
-  public static ParsableNamedParamMap parse(String string) throws IllegalArgumentException {
+  public static StringNamedParamMap parse(String string) throws IllegalArgumentException {
     ENode eNode = ENode.parse(string, 0);
-    return new ParsableNamedParamMap(eNode);
+    return new StringNamedParamMap(eNode);
   }
 
   @Override
@@ -491,7 +494,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
       return null;
     }
     List<Double> vs = dsMap.get(n);
-    List<Integer> is = vs.stream().filter(ParsableNamedParamMap::isInt).map(Double::intValue).toList();
+    List<Integer> is = vs.stream().filter(StringNamedParamMap::isInt).map(Double::intValue).toList();
     if (is.size() == vs.size()) {
       return is;
     }
@@ -499,7 +502,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
   }
 
   @Override
-  public ParsableNamedParamMap npm(String n) {
+  public StringNamedParamMap npm(String n) {
     return npmMap.get(n);
   }
 
@@ -528,7 +531,7 @@ public class ParsableNamedParamMap implements NamedParamMap {
     StringBuilder sb = new StringBuilder();
     sb.append(name);
     sb.append(TokenType.OPEN_CONTENT.rendered());
-    Map<String, String> content = new HashMap<>();
+    Map<String, String> content = new TreeMap<>();
     dMap.forEach((key, value) -> content.put(key, value.toString()));
     npmMap.forEach((key, value) -> content.put(key, value.toString()));
     content.putAll(sMap);

@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim.util;
 
-import it.units.erallab.mrsim.util.builder.ParsableNamedParamMap;
+import it.units.erallab.mrsim.util.builder.StringNamedParamMap;
 
 import java.util.*;
 import java.util.function.Function;
@@ -84,10 +84,10 @@ public class StringUtils {
     };
   }
 
-  public static <T> Function<String, Optional<T>> namedParamMapBuilder(Map<String, Function<ParsableNamedParamMap, T>> builders) {
+  public static <T> Function<String, Optional<T>> namedParamMapBuilder(Map<String, Function<StringNamedParamMap, T>> builders) {
     return s -> {
       try {
-        ParsableNamedParamMap params = ParsableNamedParamMap.parse(s);
+        StringNamedParamMap params = StringNamedParamMap.parse(s);
         try {
           T t = builders.getOrDefault(params.getName(), p -> null).apply(params);
           return t == null ? Optional.empty() : Optional.of(t);

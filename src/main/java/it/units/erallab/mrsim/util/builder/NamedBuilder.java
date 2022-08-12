@@ -56,7 +56,7 @@ public class NamedBuilder<X> {
   }
 
   public <T extends X> Optional<T> build(String mapString, Supplier<T> defaultSupplier) {
-    return build(ParsableNamedParamMap.parse(mapString), defaultSupplier);
+    return build(StringNamedParamMap.parse(mapString), defaultSupplier);
   }
 
   public Optional<X> build(NamedParamMap map) {
@@ -64,7 +64,7 @@ public class NamedBuilder<X> {
   }
 
   public Optional<X> build(String mapString) {
-    return build(ParsableNamedParamMap.parse(mapString));
+    return build(StringNamedParamMap.parse(mapString));
   }
 
   public void register(String name, Builder<? extends X> builder) {
