@@ -18,63 +18,51 @@ package it.units.erallab.mrsim.builders;
 
 import it.units.erallab.mrsim.core.actions.*;
 import it.units.erallab.mrsim.core.bodies.Voxel;
-import it.units.erallab.mrsim.util.builder.NamedBuilder;
-import it.units.erallab.mrsim.util.builder.ParamMap;
+import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class VoxelSensorBuilder extends NamedBuilder<Function<Voxel, Sense<? super Voxel>>> {
+public class VoxelSensorBuilder {
 
-  private VoxelSensorBuilder() {
-    register("rv", VoxelSensorBuilder::createRotatedVelocity);
-    register("d", VoxelSensorBuilder::createDistance);
-    register("a", VoxelSensorBuilder::createAngle);
-    register("ar", VoxelSensorBuilder::createAreaRatio);
-    register("c", VoxelSensorBuilder::createContact);
-    register("sa", VoxelSensorBuilder::createSideAttachment);
-    register("sc", VoxelSensorBuilder::createSideCompression);
+  public static Function<Voxel, Sense<? super Voxel>> rv(@Param(value = "a", dD = 0) Double a) {
+    return v -> new SenseRotatedVelocity(a / 180d * Math.PI, v);
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createRotatedVelocity(ParamMap m, NamedBuilder<?> nb) {
-    return v -> new SenseRotatedVelocity(m.d("a", 0) / 180d * Math.PI, v);
+  public static Function<Voxel, Sense<? super Voxel>> d(
+      @Param(value = "a", dD = 0) Double a,
+      @Param(value = "r", dD = 0) Double r
+  ) {
+    return v -> new SenseDistanceToBody(a / 180d * Math.PI, r, v);
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createDistance(ParamMap m, NamedBuilder<?> nb) {
-    return v -> new SenseDistanceToBody(m.d("a", 0) / 180d * Math.PI, m.d("r", 0), v);
-  }
-
-  private static Function<Voxel, Sense<? super Voxel>> createAreaRatio(ParamMap m, NamedBuilder<?> nb) {
+  public static Function<Voxel, Sense<? super Voxel>> ar() {
     return SenseAreaRatio::new;
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createAngle(ParamMap m, NamedBuilder<?> nb) {
+  public static Function<Voxel, Sense<? super Voxel>> a() {
     return SenseAngle::new;
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createSideCompression(ParamMap m, NamedBuilder<?> nb) {
-    return v -> new SenseSideCompression(Voxel.Side.valueOf(m.fs("s", "[nesw]").toUpperCase()), v);
+  public static Function<Voxel, Sense<? super Voxel>> sc(@Param("s") String s) {
+    return v -> new SenseSideCompression(Voxel.Side.valueOf(s.toUpperCase()), v);
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createContact(ParamMap m, NamedBuilder<?> nb) {
+  public static Function<Voxel, Sense<? super Voxel>> c() {
     return SenseContact::new;
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createSideAttachment(ParamMap m, NamedBuilder<?> nb) {
-    return v -> new SenseSideAttachment(Voxel.Side.valueOf(m.fs("s", "[nesw]").toUpperCase()), v);
+  public static Function<Voxel, Sense<? super Voxel>> sa(@Param("s") String s) {
+    return v -> new SenseSideAttachment(Voxel.Side.valueOf(s.toUpperCase()), v);
   }
 
-  private static Function<Voxel, Sense<? super Voxel>> createSinusoidal(ParamMap m, NamedBuilder<?> nb) {
-    return v -> new SenseSinusoidal(m.d("f", 1), m.d("p", 0), v);
-  }
-
-
-  private final static VoxelSensorBuilder INSTANCE = new VoxelSensorBuilder();
-
-  public static VoxelSensorBuilder getInstance() {
-    return INSTANCE;
+  public static Function<Voxel, Sense<? super Voxel>> sin(
+      @Param(value = "f", dD = 0) Double f,
+      @Param(value = "p", dD = 0) Double p
+  ) {
+    return v -> new SenseSinusoidal(f, p, v);
   }
 
 }

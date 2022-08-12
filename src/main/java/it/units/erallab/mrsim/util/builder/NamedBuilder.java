@@ -16,27 +16,23 @@
 
 package it.units.erallab.mrsim.util.builder;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class NamedBuilder<X> {
+
+  private final static NamedBuilder<Object> EMPTY = new NamedBuilder<>(Map.of());
 
   protected final static char NAME_SEPARATOR = '.';
   private final static Logger L = Logger.getLogger(NamedBuilder.class.getName());
 
   private final Map<String, Builder<? extends X>> builders;
 
-  public NamedBuilder() {
-    this.builders = new LinkedHashMap<>();
-  }
-
-  @FunctionalInterface
-  public interface Builder<T> {
-    T build(ParamMap map, NamedBuilder<?> namedBuilder) throws IllegalArgumentException;
+  private NamedBuilder(Map<String, Builder<? extends X>> builders) {
+    this.builders = new TreeMap<>(builders);
   }
 
   @SuppressWarnings("unchecked")
@@ -50,6 +46,7 @@ public class NamedBuilder<X> {
       return t == null ? Optional.empty() : Optional.of(t);
     } catch (IllegalArgumentException e) {
       L.warning(String.format("Cannot use builder for %s: %s", map.getName(), e));
+      e.printStackTrace();
       T t = defaultSupplier.get();
       return t == null ? Optional.empty() : Optional.of(t);
     }
@@ -67,26 +64,82 @@ public class NamedBuilder<X> {
     return build(StringNamedParamMap.parse(mapString));
   }
 
-  public void register(String name, Builder<? extends X> builder) {
+  public NamedBuilder<X> register(String name, Builder<? extends X> builder) {
     builders.put(name, builder);
+    return this;
   }
 
-  public void register(String prefix, NamedBuilder<? extends X> namedBuilder) {
-    namedBuilder.builders.forEach(
-        (s, b) -> builders.put(prefix.isEmpty() ? s : (prefix + NAME_SEPARATOR + s), b)
+  public NamedBuilder<X> and(String prefix, NamedBuilder<? extends X> namedBuilder) {
+    return and(List.of(prefix), namedBuilder);
+  }
+
+  public NamedBuilder<X> and(List<String> prefixes, NamedBuilder<? extends X> namedBuilder) {
+    Map<String, Builder<? extends X>> allBuilders = new HashMap<>(builders);
+    prefixes.forEach(
+        prefix -> namedBuilder.builders
+            .forEach((k, v) -> allBuilders.put(prefix.isEmpty() ? k : (prefix + NAME_SEPARATOR + k), v))
     );
+    return new NamedBuilder<>(allBuilders);
   }
 
-  public void register(List<String> prefixes, NamedBuilder<? extends X> namedBuilder) {
-    prefixes.forEach(prefix -> register(prefix, namedBuilder));
+  public NamedBuilder<X> and(NamedBuilder<? extends X> namedBuilder) {
+    return and("", namedBuilder);
   }
 
-  public void register(NamedBuilder<? extends X> namedBuilder) {
-    register("", namedBuilder);
+  public static NamedBuilder<Object> empty() {
+    return EMPTY;
+  }
+
+  public static NamedBuilder<Object> fromUtilityClass(Class<?> c) {
+    return new NamedBuilder<>(Arrays.stream(c.getMethods())
+        .map(AutoBuiltDocumentedBuilder::from)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toMap(DocumentedBuilder::name, b -> b)));
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <C> NamedBuilder<C> fromClass(Class<? extends C> c) {
+    List<Constructor<?>> constructors = Arrays.stream(c.getConstructors()).toList();
+    if (constructors.size() > 1) {
+      constructors = constructors.stream()
+          .filter(constructor -> constructor.getAnnotation(BuilderMethod.class) != null)
+          .toList();
+    }
+    if (constructors.size() != 1) {
+      throw new IllegalArgumentException(String.format(
+          "Cannot build named builder from class %s that has %d!=1 constructors",
+          c.getSimpleName(),
+          c.getConstructors().length
+      ));
+    }
+    DocumentedBuilder<C> builder = (DocumentedBuilder<C>) AutoBuiltDocumentedBuilder.from(constructors.get(0));
+    if (builder != null) {
+      return new NamedBuilder<>(Map.of(
+          builder.name(), builder
+      ));
+    } else {
+      return (NamedBuilder<C>) empty();
+    }
   }
 
   @Override
   public String toString() {
-    return "NamedBuilder" + builders.keySet().stream().sorted(String::compareTo).toList();
+    return prettyToString(false);
+  }
+
+  public String prettyToString(boolean indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("NamedBuilder{");
+    sb.append(indent ? "\n" : "");
+    builders.forEach((k, v) -> {
+      sb.append(indent ? "\t" : "");
+      sb.append(k);
+      if (v instanceof DocumentedBuilder<?> db) {
+        sb.append(db);
+      }
+      sb.append(indent ? "\n" : "");
+    });
+    sb.append("}");
+    return sb.toString();
   }
 }

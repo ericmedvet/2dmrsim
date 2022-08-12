@@ -20,8 +20,7 @@ import it.units.erallab.mrsim.core.geometry.Path;
 import it.units.erallab.mrsim.core.geometry.Point;
 import it.units.erallab.mrsim.core.geometry.Terrain;
 import it.units.erallab.mrsim.util.DoubleRange;
-import it.units.erallab.mrsim.util.builder.NamedBuilder;
-import it.units.erallab.mrsim.util.builder.ParamMap;
+import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -30,7 +29,7 @@ import java.util.random.RandomGenerator;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class TerrainBuilder extends NamedBuilder<Terrain> {
+public class TerrainBuilder {
   public final static double BORDER_H = 100d;
   public static final double W = 2000d;
   public static final double H = 25d;
@@ -39,87 +38,89 @@ public class TerrainBuilder extends NamedBuilder<Terrain> {
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
 
-  private TerrainBuilder() {
-    register("flat", TerrainBuilder::createFlat);
-    register("hilly", TerrainBuilder::createHilly);
-    register("steppy", TerrainBuilder::createSteppy);
-    register("downhill", TerrainBuilder::createDownhill);
-    register("uphill", TerrainBuilder::createUphill);
-  }
-
-  private static Terrain createFlat(ParamMap m, NamedBuilder<?> nb) {
+  public static Terrain flat(
+      @Param(value = "w", dD = W) Double w,
+      @Param(value = "h", dD = H) Double h,
+      @Param(value = "borderW", dD = BORDER_W) Double borderW,
+      @Param(value = "borderH", dD = BORDER_H) Double borderH
+  ) {
     return fromPath(
-        new Path(new Point(m.d("w", W), 0)),
-        m.d("h", H),
-        m.d("borderW", BORDER_W),
-        m.d("borderH", BORDER_H)
+        new Path(new Point(w, 0)),
+        h,
+        borderW,
+        borderH
     );
   }
 
-  private static Terrain createHilly(ParamMap m, NamedBuilder<?> nb) {
-    double h = m.d("hillH", CHUNK_H);
-    double w = m.d("hillW", CHUNK_W);
-    RandomGenerator random = new Random(m.i("seed", 1));
+  public static Terrain hilly(
+      @Param(value = "w", dD = W) Double w,
+      @Param(value = "h", dD = H) Double h,
+      @Param(value = "borderW", dD = BORDER_W) Double borderW,
+      @Param(value = "borderH", dD = BORDER_H) Double borderH,
+      @Param(value = "chunkW", dD = CHUNK_W) Double chunkW,
+      @Param(value = "chunkH", dD = CHUNK_H) Double chunkH,
+      @Param(value = "seed", dI = 1) Integer seed //TODO may be replaced with randomGenerator
+  ) {
+    RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(w, 0));
     double dW = 0d;
-    while (dW < m.d("w", W)) {
-      double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-      double sH = random.nextGaussian() * h;
+    while (dW < w) {
+      double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * chunkW);
+      double sH = random.nextGaussian() * chunkH;
       dW = dW + sW;
       path = path.moveTo(sW, sH);
     }
-    return fromPath(
-        path,
-        m.d("h", H),
-        m.d("borderW", BORDER_W),
-        m.d("borderH", BORDER_H)
-    );
+    return fromPath(path, h, borderW, borderH);
   }
 
-  private static Terrain createSteppy(ParamMap m, NamedBuilder<?> nb) {
-    double h = m.d("hillH", CHUNK_H);
-    double w = m.d("hillW", CHUNK_W);
-    RandomGenerator random = new Random(m.i("seed", 1));
+  public static Terrain steppy(
+      @Param(value = "w", dD = W) Double w,
+      @Param(value = "h", dD = H) Double h,
+      @Param(value = "borderW", dD = BORDER_W) Double borderW,
+      @Param(value = "borderH", dD = BORDER_H) Double borderH,
+      @Param(value = "chunkW", dD = W) Double chunkW,
+      @Param(value = "chunkH", dD = H) Double chunkH,
+      @Param(value = "seed", dI = 1) Integer seed //TODO may be replaced with randomGenerator
+  ) {
+    RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(w, 0));
     double dW = 0d;
-    while (dW < m.d("w", W)) {
-      double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * w);
-      double sH = random.nextGaussian() * h;
+    while (dW < w) {
+      double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * chunkW);
+      double sH = random.nextGaussian() * chunkH;
       dW = dW + sW;
       path = path
           .moveTo(sW, 0)
           .moveTo(0, sH);
     }
+    return fromPath(path, h, borderW, borderH);
+  }
+
+  public static Terrain downhill(
+      @Param(value = "w", dD = W) Double w,
+      @Param(value = "h", dD = H) Double h,
+      @Param(value = "borderW", dD = BORDER_W) Double borderW,
+      @Param(value = "borderH", dD = BORDER_H) Double borderH,
+      @Param(value = "a", dD = ANGLE) Double a
+  ) {
     return fromPath(
-        path,
-        m.d("h", H),
-        m.d("borderW", BORDER_W),
-        m.d("borderH", BORDER_H)
+        new Path(new Point(w, -w * Math.sin(a / 180 * Math.PI))),
+        h, borderW, borderH
     );
   }
 
-  private static Terrain createDownhill(ParamMap m, NamedBuilder<?> nb) {
+  public static Terrain uphill(
+      @Param(value = "w", dD = W) Double w,
+      @Param(value = "h", dD = H) Double h,
+      @Param(value = "borderW", dD = BORDER_W) Double borderW,
+      @Param(value = "borderH", dD = BORDER_H) Double borderH,
+      @Param(value = "a", dD = ANGLE) Double a
+  ) {
     return fromPath(
-        new Path(new Point(
-            m.d("w", W),
-            -m.d("w", W) * Math.sin(m.d("a", ANGLE) / 180 * Math.PI)
-        )),
-        m.d("h", H),
-        m.d("borderW", BORDER_W),
-        m.d("borderH", BORDER_H)
+        new Path(new Point(w, w * Math.sin(a / 180 * Math.PI))),
+        h, borderW, borderH
     );
-  }
 
-  private static Terrain createUphill(ParamMap m, NamedBuilder<?> nb) {
-    return fromPath(
-        new Path(new Point(
-            m.d("w", W),
-            -m.d("w", W) * Math.sin(m.d("a", ANGLE) / 180 * Math.PI)
-        )),
-        m.d("h", H),
-        m.d("borderW", BORDER_W),
-        m.d("borderH", BORDER_H)
-    );
   }
 
   private static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
@@ -139,9 +140,4 @@ public class TerrainBuilder extends NamedBuilder<Terrain> {
     return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
-  private final static TerrainBuilder INSTANCE = new TerrainBuilder();
-
-  public static TerrainBuilder getInstance() {
-    return INSTANCE;
-  }
 }

@@ -20,8 +20,10 @@ import it.units.erallab.mrsim.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim.agents.independentvoxel.NumIndependentVoxel;
-import it.units.erallab.mrsim.builders.GridVSRBodyBuilder;
+import it.units.erallab.mrsim.builders.GridShapeBuilder;
 import it.units.erallab.mrsim.builders.TerrainBuilder;
+import it.units.erallab.mrsim.builders.VSRSensorizingFunctionBuilder;
+import it.units.erallab.mrsim.builders.VoxelSensorBuilder;
 import it.units.erallab.mrsim.core.EmbodiedAgent;
 import it.units.erallab.mrsim.core.Snapshot;
 import it.units.erallab.mrsim.core.actions.*;
@@ -35,6 +37,7 @@ import it.units.erallab.mrsim.engine.dyn4j.Dyn4JEngine;
 import it.units.erallab.mrsim.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim.functions.TimedRealFunction;
 import it.units.erallab.mrsim.tasks.locomotion.Locomotion;
+import it.units.erallab.mrsim.util.builder.NamedBuilder;
 import it.units.erallab.mrsim.viewer.*;
 
 import java.io.File;
@@ -112,11 +115,18 @@ public class Main {
     }
   }
 
-  private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    NumGridVSR.Body body = (NumGridVSR.Body) GridVSRBodyBuilder.getInstance()
+  private static void locomotion(Engine engine, String terrain, Consumer<Snapshot> consumer) {
+    NamedBuilder<Object> nb = NamedBuilder.empty()
+        .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
+        .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
+        .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
+        .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
+        .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
+    System.out.println(nb.prettyToString(true));
+    NumGridVSR.Body body = (NumGridVSR.Body) nb
         .build(
-            "plain(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[sf.s.d(a=-90;r=1)];" +
-                "eSensors=[sf.s.d(a=-15;r=5)]))")
+            "body(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[vs.d(a=-90;r=1)];" +
+                "eSensors=[vs.d(a=-15;r=5)]))")
         .orElseThrow();
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
@@ -132,7 +142,7 @@ public class Main {
         body,
         mlp
     );
-    Locomotion locomotion = new Locomotion(60, terrain);
+    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain).orElseThrow());
     Locomotion.Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }
@@ -150,10 +160,10 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.getInstance().build("downhill(a=5)").orElseThrow();
+    Terrain terrain = TerrainBuilder.downhill(100d, 10d, 10d, 10d, 10d);
     Engine engine = new Dyn4JEngine();
     //do thing
-    locomotion(engine, terrain, viewer);
+    locomotion(engine, "t.flat()", viewer);
     //vsr(engine, terrain, viewer);
     //iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);

@@ -27,6 +27,8 @@ import it.units.erallab.mrsim.engine.Engine;
 import it.units.erallab.mrsim.tasks.Task;
 import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.util.PolyUtils;
+import it.units.erallab.mrsim.util.builder.BuilderMethod;
+import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -82,14 +84,22 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Locomotion.Outc
     this.initialYGap = initialYGap;
   }
 
-  public Locomotion(double duration, Terrain terrain) {
+  @BuilderMethod
+  public Locomotion(
+      @Param(value = "duration", dD = 30) double duration,
+      @Param(value = "terrain", dNPM = "terrain.flat()") Terrain terrain
+  ) {
     this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
-  public Outcome run(Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+  public Outcome run(
+      Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      Engine engine,
+      Consumer<Snapshot> snapshotConsumer
+  ) {
     //create agent
-    EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();;
+    EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     //build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(embodiedAgent));

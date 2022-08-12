@@ -19,8 +19,7 @@ package it.units.erallab.mrsim.builders;
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Grid;
-import it.units.erallab.mrsim.util.builder.NamedBuilder;
-import it.units.erallab.mrsim.util.builder.ParamMap;
+import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,51 +28,27 @@ import java.util.function.Function;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class VSRSensorizingFunctionBuilder extends NamedBuilder<Object> {
-  private VSRSensorizingFunctionBuilder() {
-    register(List.of("sensor","s"), VoxelSensorBuilder.getInstance());
-    register("empty",VSRSensorizingFunctionBuilder::createEmpty);
-    register("uniform",VSRSensorizingFunctionBuilder::createUniform);
-    register("directional",VSRSensorizingFunctionBuilder::createDirectional);
-  }
+public class VSRSensorizingFunctionBuilder {
 
-  private static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> createEmpty(
-      ParamMap m,
-      NamedBuilder<?> nb
-  ) {
+  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> empty() {
     return shape -> Grid.create(shape, b -> List.of());
   }
 
-  @SuppressWarnings("unchecked")
-  private static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> createUniform(
-      ParamMap m,
-      NamedBuilder<?> nb
+  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> uniform(
+      @Param(value = "sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors
   ) {
     return shape -> Grid.create(
         shape,
-        b -> m.npms("sensors").stream()
-            .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow())
-            .toList()
+        b -> sensors
     );
   }
 
-  @SuppressWarnings("unchecked")
-  private static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> createDirectional(
-      ParamMap m,
-      NamedBuilder<?> nb
+  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> directional(
+      @Param(value = "nSsensors") List<Function<Voxel, Sense<? super Voxel>>> nSensors,
+      @Param(value = "eSensors") List<Function<Voxel, Sense<? super Voxel>>> eSensors,
+      @Param(value = "sSensors") List<Function<Voxel, Sense<? super Voxel>>> sSensors,
+      @Param(value = "wSensors") List<Function<Voxel, Sense<? super Voxel>>> wSensors
   ) {
-    List<Function<Voxel, Sense<? super Voxel>>> nSensors = m.npms("nSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
-        .toList();
-    List<Function<Voxel, Sense<? super Voxel>>> sSensors = m.npms("sSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
-        .toList();
-    List<Function<Voxel, Sense<? super Voxel>>> eSensors = m.npms("eSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
-        .toList();
-    List<Function<Voxel, Sense<? super Voxel>>> wSensors = m.npms("wSensors", List.of()).stream()
-        .map(sm -> (Function<Voxel, Sense<? super Voxel>>) nb.build(sm).orElseThrow(() -> new IllegalArgumentException("No value for "+sm.getName())))
-        .toList();
     return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
       if (!shape.get(x, y)) {
         return null;
@@ -105,12 +80,6 @@ public class VSRSensorizingFunctionBuilder extends NamedBuilder<Object> {
       }
       return localSensors;
     });
-  }
-
-  private final static VSRSensorizingFunctionBuilder INSTANCE = new VSRSensorizingFunctionBuilder();
-
-  public static VSRSensorizingFunctionBuilder getInstance() {
-    return INSTANCE;
   }
 
 }

@@ -38,37 +38,44 @@ public interface ParamMap {
   }
 
   List<Double> ds(String n);
+
   default List<Double> ds(String n, List<Double> defaultValue) {
     return ds(n) == null ? defaultValue : ds(n);
   }
 
   Integer i(String n);
+
   default int i(String n, int defaultValue) {
     return i(n) == null ? defaultValue : i(n);
   }
 
   List<Integer> is(String n);
+
   default List<Integer> is(String n, List<Integer> defaultValue) {
     return is(n) == null ? defaultValue : is(n);
   }
 
   NamedParamMap npm(String n);
-  default NamedParamMap npm(String n, NamedParamMap defaultValue){
+
+  default NamedParamMap npm(String n, NamedParamMap defaultValue) {
     return npm(n) == null ? defaultValue : npm(n);
   }
 
   List<NamedParamMap> npms(String n);
-  default List<NamedParamMap> npms(String n, List<NamedParamMap> defaultValue){
+
+  default List<NamedParamMap> npms(String n, List<NamedParamMap> defaultValue) {
     return npms(n) == null ? defaultValue : npms(n);
   }
 
   String s(String n);
-  default String s(String n, String defaultValue){
+
+  default String s(String n, String defaultValue) {
     return s(n) == null ? defaultValue : s(n);
   }
 
   List<String> ss(String n);
-  default List<String> ss(String n, List<String> defaultValue){
+
+  default List<String> ss(String n, List<String> defaultValue) {
     return ss(n) == null ? defaultValue : ss(n);
   }
 
@@ -87,4 +94,5 @@ public interface ParamMap {
     }
     return ss;
   }
+
 }

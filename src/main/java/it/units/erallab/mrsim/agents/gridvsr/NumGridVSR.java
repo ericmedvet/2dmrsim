@@ -23,6 +23,8 @@ import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Pair;
+import it.units.erallab.mrsim.util.builder.BuilderMethod;
+import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +44,21 @@ public class NumGridVSR extends AbstractGridVSR {
 
     public Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid() {
       return Grid.create(grid, Pair::second);
+    }
+
+    @BuilderMethod()
+    public Body(
+        @Param("shape") Grid<Boolean> shape,
+        @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> sensorizingFunction
+    ) {
+      this(Grid.create(
+          shape.w(),
+          shape.h(),
+          (x, y) -> new Pair<>(
+              shape.get(x, y) ? new Voxel.Material() : null,
+              shape.get(x, y) ? sensorizingFunction.apply(shape).get(x, y) : null
+          )
+      ));
     }
   }
 
