@@ -570,4 +570,15 @@ public class StringNamedParamMap implements NamedParamMap {
     return sb.toString();
   }
 
+  @Override
+  public Set<String> names() {
+    Set<String> names = new TreeSet<>();
+    names.addAll(dMap.keySet());
+    names.addAll(sMap.keySet());
+    names.addAll(npmMap.keySet());
+    names.addAll(dsMap.keySet());
+    names.addAll(ssMap.keySet());
+    names.addAll(npmsMap.keySet());
+    return names;
+  }
 }

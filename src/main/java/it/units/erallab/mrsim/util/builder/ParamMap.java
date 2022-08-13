@@ -17,8 +17,12 @@
 package it.units.erallab.mrsim.util.builder;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ParamMap {
+
+  Set<String> names();
+
   Boolean b(String n);
 
   default boolean b(String n, boolean defaultValue) {

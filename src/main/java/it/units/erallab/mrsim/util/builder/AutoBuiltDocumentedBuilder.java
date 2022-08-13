@@ -17,9 +17,7 @@
 package it.units.erallab.mrsim.util.builder;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -83,8 +81,9 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (builderMethodAnnotation != null && !builderMethodAnnotation.value().isEmpty()) {
       name = builderMethodAnnotation.value();
     }
+    String finalName = name;
     return new AutoBuiltDocumentedBuilder<>(
-        name,
+        finalName,
         buildType,
         paramInfos,
         (ParamMap map, NamedBuilder<?> namedBuilder) -> {
@@ -97,14 +96,33 @@ public record AutoBuiltDocumentedBuilder<T>(
             if (paramInfos.get(j).self()) {
               params[k] = map;
             } else {
-              //noinspection unchecked
-              params[k] = buildParam(
-                  paramInfos.get(j),
-                  map,
-                  executable.getParameters()[k],
-                  (NamedBuilder<Object>) namedBuilder
-              );
+              try {
+                //noinspection unchecked
+                params[k] = buildParam(
+                    paramInfos.get(j),
+                    map,
+                    executable.getParameters()[k],
+                    (NamedBuilder<Object>) namedBuilder
+                );
+              } catch (RuntimeException e) {
+                throw new BuilderException(String.format(
+                    "Cannot build param %s for %s: %s",
+                    paramInfos.get(j).name(),
+                    finalName,
+                    e
+                ), e);
+              }
             }
+          }
+          // check exceeding params
+          Set<String> exceedingParamNames = new TreeSet<>(map.names());
+          paramInfos.stream()
+              .filter(pi -> !pi.self())
+              .map(ParamInfo::name)
+              .toList()
+              .forEach(exceedingParamNames::remove);
+          if (!exceedingParamNames.isEmpty()) {
+            l.warning(String.format("Exceeding parameters while building %s: %s", finalName, exceedingParamNames));
           }
           try {
             if (executable instanceof Method method) {
@@ -239,8 +257,8 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (type.equals(Type.DOUBLE) && !Double.isNaN(pa.dD())) {
       return pa.dD();
     }
-    if (type.equals(Type.BOOLEAN) && pa.dB()) {
-      return true;
+    if (type.equals(Type.BOOLEAN)) {
+      return pa.dB();
     }
     if (type.equals(Type.STRING) && !pa.dS().isEmpty()) {
       return pa.dS();
