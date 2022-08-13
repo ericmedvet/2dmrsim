@@ -44,7 +44,7 @@ public class VSRSensorizingFunctionBuilder {
   }
 
   public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> directional(
-      @Param(value = "nSsensors") List<Function<Voxel, Sense<? super Voxel>>> nSensors,
+      @Param(value = "nSensors") List<Function<Voxel, Sense<? super Voxel>>> nSensors,
       @Param(value = "eSensors") List<Function<Voxel, Sense<? super Voxel>>> eSensors,
       @Param(value = "sSensors") List<Function<Voxel, Sense<? super Voxel>>> sSensors,
       @Param(value = "wSensors") List<Function<Voxel, Sense<? super Voxel>>> wSensors
