@@ -44,7 +44,7 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     }
   }
 
-  record ParamInfo(Type type, String name, Object defaultValue) {
+  record ParamInfo(Type type, String name, Object defaultValue, boolean self) {
     @Override
     public String toString() {
       return String.format(

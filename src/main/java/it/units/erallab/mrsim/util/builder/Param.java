@@ -49,4 +49,6 @@ public @interface Param {
   String[] dSs() default {};
 
   String[] dNPMs() default {};
+
+  boolean self() default false;
 }
