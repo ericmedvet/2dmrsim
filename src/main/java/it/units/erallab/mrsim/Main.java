@@ -126,17 +126,17 @@ public class Main {
     NumGridVSR.Body body = (NumGridVSR.Body) nb
         .build(
             "body(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[vs.d(a=-90;r=1)];" +
-                "eSensors=[vs.d(a=-15;r=5)]))");
+                "eSensors=[vs.d(a=-15;r=5)];nSensors=[vs.ar()];wSensors=[vs.sin()]))");
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
         nOfInputs,
-        new int[10],
+        new int[] {10},
         nOfOutputs
     );
     RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-10, 10)).toArray());
+    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
     AbstractGridVSR vsr = new CentralizedNumGridVSR(
         body,
         mlp
