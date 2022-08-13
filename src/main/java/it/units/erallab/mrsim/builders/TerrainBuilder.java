@@ -62,7 +62,7 @@ public class TerrainBuilder {
       @Param(value = "seed", dI = 1) Integer seed
   ) {
     RandomGenerator random = new Random(seed);
-    Path path = new Path(new Point(w, 0));
+    Path path = new Path(new Point(chunkW, 0));
     double dW = 0d;
     while (dW < w) {
       double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * chunkW);
@@ -83,7 +83,7 @@ public class TerrainBuilder {
       @Param(value = "seed", dI = 1) Integer seed
   ) {
     RandomGenerator random = new Random(seed);
-    Path path = new Path(new Point(w, 0));
+    Path path = new Path(new Point(chunkW, 0));
     double dW = 0d;
     while (dW < w) {
       double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * chunkW);
