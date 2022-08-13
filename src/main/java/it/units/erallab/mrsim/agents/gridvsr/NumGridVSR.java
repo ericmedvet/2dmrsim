@@ -21,6 +21,7 @@ import it.units.erallab.mrsim.core.ActionOutcome;
 import it.units.erallab.mrsim.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim.core.actions.Sense;
 import it.units.erallab.mrsim.core.bodies.Voxel;
+import it.units.erallab.mrsim.util.DoubleRange;
 import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.Pair;
 import it.units.erallab.mrsim.util.builder.BuilderMethod;
@@ -104,7 +105,9 @@ public class NumGridVSR extends AbstractGridVSR {
             ActionOutcome<?, ?> outcome = previousActionOutcomes.get(c);
             if (outcome.action() instanceof Sense<?>) {
               ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
-              inputs[i] = o.action().range().normalize(o.outcome().orElse(0d));
+              inputs[i] = DoubleRange.SYMMETRIC_UNIT.denormalize(
+                  o.action().range().normalize(o.outcome().orElse(0d))
+              );
               c = c + 1;
             }
           }
