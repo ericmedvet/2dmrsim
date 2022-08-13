@@ -17,9 +17,14 @@
 package it.units.erallab.mrsim.util.builder;
 
 /**
- * @author "Eric Medvet" on 2022/08/12 for 2dmrsim
+ * @author "Eric Medvet" on 2022/08/13 for 2dmrsim
  */
-@FunctionalInterface
-public interface Builder<T> {
-  T build(ParamMap map, NamedBuilder<?> namedBuilder) throws BuilderException;
+public class BuilderException extends RuntimeException {
+  public BuilderException(String message) {
+    super(message);
+  }
+
+  public BuilderException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

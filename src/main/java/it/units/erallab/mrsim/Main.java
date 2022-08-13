@@ -126,8 +126,7 @@ public class Main {
     NumGridVSR.Body body = (NumGridVSR.Body) nb
         .build(
             "body(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[vs.d(a=-90;r=1)];" +
-                "eSensors=[vs.d(a=-15;r=5)]))")
-        .orElseThrow();
+                "eSensors=[vs.d(a=-15;r=5)]))");
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
@@ -142,7 +141,7 @@ public class Main {
         body,
         mlp
     );
-    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain).orElseThrow());
+    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
     Locomotion.Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }

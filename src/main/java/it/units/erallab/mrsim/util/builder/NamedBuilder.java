@@ -36,31 +36,39 @@ public class NamedBuilder<X> {
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends X> Optional<T> build(NamedParamMap map, Supplier<T> defaultSupplier) {
+  public <T extends X> T build(NamedParamMap map, Supplier<T> defaultSupplier) throws BuilderException {
     if (!builders.containsKey(map.getName())) {
-      T t = defaultSupplier.get();
-      return t == null ? Optional.empty() : Optional.of(t);
+      if (defaultSupplier != null) {
+        return defaultSupplier.get();
+      }
+      throw new BuilderException(String.format(
+          "No builder for %s: closest matches are %s",
+          map.getName(),
+          builders.keySet().stream()
+              .sorted((Comparator.comparing(s -> distance(s, map.getName()))))
+              .limit(3)
+              .collect(Collectors.joining(", "))
+      ));
     }
     try {
-      T t = (T) builders.get(map.getName()).build(map, this);
-      return t == null ? Optional.empty() : Optional.of(t);
-    } catch (IllegalArgumentException e) {
-      L.warning(String.format("Cannot use builder for %s: %s", map.getName(), e));
-      e.printStackTrace();
-      T t = defaultSupplier.get();
-      return t == null ? Optional.empty() : Optional.of(t);
+      return (T) builders.get(map.getName()).build(map, this);
+    } catch (BuilderException e) {
+      if (defaultSupplier != null) {
+        return defaultSupplier.get();
+      }
+      throw new BuilderException(String.format("Cannot build %s: %s", map.getName(), e), e);
     }
   }
 
-  public <T extends X> Optional<T> build(String mapString, Supplier<T> defaultSupplier) {
+  public <T extends X> T build(String mapString, Supplier<T> defaultSupplier) throws BuilderException {
     return build(StringNamedParamMap.parse(mapString), defaultSupplier);
   }
 
-  public Optional<X> build(NamedParamMap map) {
-    return build(map, () -> null);
+  public X build(NamedParamMap map) throws BuilderException {
+    return build(map, null);
   }
 
-  public Optional<X> build(String mapString) {
+  public X build(String mapString) throws BuilderException {
     return build(StringNamedParamMap.parse(mapString));
   }
 
@@ -141,5 +149,33 @@ public class NamedBuilder<X> {
     });
     sb.append("}");
     return sb.toString();
+  }
+
+  private double distance(String s1, String s2) {
+    return distance(s1.chars().boxed().toList(), s2.chars().boxed().toList());
+  }
+
+  private <T> Double distance(List<T> ts1, List<T> ts2) {
+    int len0 = ts1.size() + 1;
+    int len1 = ts2.size() + 1;
+    int[] cost = new int[len0];
+    int[] newCost = new int[len0];
+    for (int i = 0; i < len0; i++) {
+      cost[i] = i;
+    }
+    for (int j = 1; j < len1; j++) {
+      newCost[0] = j;
+      for (int i = 1; i < len0; i++) {
+        int match = ts1.get(i - 1).equals(ts2.get(j - 1)) ? 0 : 1;
+        int cost_replace = cost[i - 1] + match;
+        int cost_insert = cost[i] + 1;
+        int cost_delete = newCost[i - 1] + 1;
+        newCost[i] = Math.min(Math.min(cost_insert, cost_delete), cost_replace);
+      }
+      int[] swap = cost;
+      cost = newCost;
+      newCost = swap;
+    }
+    return (double) cost[len0 - 1];
   }
 }

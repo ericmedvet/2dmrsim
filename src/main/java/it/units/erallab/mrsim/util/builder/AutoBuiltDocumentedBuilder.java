@@ -33,7 +33,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     Builder<T> builder
 ) implements DocumentedBuilder<T> {
   @Override
-  public T build(ParamMap map, NamedBuilder<?> namedBuilder) throws IllegalArgumentException {
+  public T build(ParamMap map, NamedBuilder<?> namedBuilder) throws BuilderException {
     return builder.build(map, namedBuilder);
   }
 
@@ -112,7 +112,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             }
             return ((Constructor<?>) executable).newInstance(params);
           } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new IllegalArgumentException(e);
+            throw new BuilderException(String.format("Cannot invoke %s: %s", executable.getName(), e), e);
           }
         }
     );
@@ -147,11 +147,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (actualParameter.getType().equals(NamedParamMap.class)) {
       return npm;
     }
-    return nb.build(npm).orElseThrow(() -> new IllegalArgumentException(String.format(
-        "Cannot build a %s from %s",
-        actualParameter.getType().getSimpleName(),
-        npm
-    )));
+    return nb.build(npm);
   }
 
   private static ParamInfo from(Parameter parameter) {
@@ -159,7 +155,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (paramAnnotation == null) {
       return null;
     }
-    if (paramAnnotation.self() && !parameter.getType().equals(NamedParamMap.class)) {
+    if (paramAnnotation.self() && !parameter.getType().equals(ParamMap.class)) {
       return null;
     }
     String name = paramAnnotation.value();

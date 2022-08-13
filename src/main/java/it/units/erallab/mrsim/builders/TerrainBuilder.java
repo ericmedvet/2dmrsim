@@ -59,7 +59,7 @@ public class TerrainBuilder {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "chunkW", dD = CHUNK_W) Double chunkW,
       @Param(value = "chunkH", dD = CHUNK_H) Double chunkH,
-      @Param(value = "seed", dI = 1) Integer seed //TODO may be replaced with randomGenerator
+      @Param(value = "seed", dI = 1) Integer seed
   ) {
     RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(w, 0));
@@ -80,7 +80,7 @@ public class TerrainBuilder {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "chunkW", dD = W) Double chunkW,
       @Param(value = "chunkH", dD = H) Double chunkH,
-      @Param(value = "seed", dI = 1) Integer seed //TODO may be replaced with randomGenerator
+      @Param(value = "seed", dI = 1) Integer seed
   ) {
     RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(w, 0));
