@@ -122,7 +122,7 @@ public class Main {
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
-    System.out.println(nb.prettyToString(true));
+    System.out.println(nb.prettyToString());
     NumGridVSR.Body body = (NumGridVSR.Body) nb
         .build(
             "body(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[vs.d(a=-90;r=1)];" +
@@ -162,7 +162,7 @@ public class Main {
     Terrain terrain = TerrainBuilder.downhill(100d, 10d, 10d, 10d, 10d);
     Engine engine = new Dyn4JEngine();
     //do thing
-    locomotion(engine, "t.flat()", viewer);
+    locomotion(engine, "t.hilly()", viewer);
     //vsr(engine, terrain, viewer);
     //iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);

@@ -19,7 +19,6 @@ package it.units.erallab.mrsim.util.builder;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class NamedBuilder<X> {
@@ -27,7 +26,6 @@ public class NamedBuilder<X> {
   private final static NamedBuilder<Object> EMPTY = new NamedBuilder<>(Map.of());
 
   protected final static char NAME_SEPARATOR = '.';
-  private final static Logger L = Logger.getLogger(NamedBuilder.class.getName());
 
   private final Map<String, Builder<? extends X>> builders;
 
@@ -135,7 +133,11 @@ public class NamedBuilder<X> {
     return prettyToString(false);
   }
 
-  public String prettyToString(boolean indent) {
+  public String prettyToString() {
+    return prettyToString(true);
+  }
+
+  private String prettyToString(boolean indent) {
     StringBuilder sb = new StringBuilder();
     sb.append("NamedBuilder{");
     sb.append(indent ? "\n" : "");

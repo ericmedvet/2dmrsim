@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author "Eric Medvet" on 2022/08/08 for 2d-robot-evolution
@@ -567,6 +568,94 @@ public class StringNamedParamMap implements NamedParamMap {
         .map(e -> e.getKey() + TokenType.ASSIGN_SEPARATOR.rendered() + e.getValue())
         .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered())));
     sb.append(TokenType.CLOSED_CONTENT.rendered());
+    return sb.toString();
+  }
+
+  public String prettyToString() {
+    StringBuilder sb = new StringBuilder();
+    prettyToString(sb, 40, 0, 2, " ");
+    return sb.toString();
+  }
+
+  public void prettyToString(StringBuilder sb, int maxW, int w, int indent, String space) {
+    //build overall map
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    Map<String, Object> items = new TreeMap<>();
+    items.putAll(dMap);
+    items.putAll(sMap);
+    items.putAll(npmMap);
+    items.putAll(dsMap);
+    items.putAll(ssMap);
+    items.putAll(npmsMap);
+    //iterate
+    sb.append(name).append(TokenType.OPEN_CONTENT.rendered());
+    String content = items.entrySet().stream()
+        .map(e -> itemToString(e.getKey(), e.getValue(), space))
+        .collect(Collectors.joining());
+    if (content.length() + currentLineLength(sb.toString()) < maxW) {
+      sb.append(content);
+    } else {
+      List<Map.Entry<String, Object>> entries = new ArrayList<>(items.entrySet());
+      for (int i = 0; i < entries.size(); i++) {
+        sb.append("\n").append(indent(w + indent))
+            .append(entries.get(i).getKey()).append(space).append(TokenType.ASSIGN_SEPARATOR.rendered()).append(space);
+        if (entries.get(i).getValue() instanceof List<?> l) {
+          sb.append(TokenType.OPEN_LIST.rendered());
+          String listContent = l.stream()
+              .map(Object::toString)
+              .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space));
+          if (listContent.length() + currentLineLength(sb.toString()) < maxW) {
+            sb.append(listContent);
+          } else {
+            for (int j = 0; j < l.size(); j++) {
+              sb.append("\n").append(indent(w + indent + indent));
+              if (l.get(j) instanceof StringNamedParamMap m) {
+                m.prettyToString(sb, maxW, w + indent + indent, indent, space);
+              } else {
+                sb.append(l.get(j).toString());
+              }
+              if (j < l.size() - 1) {
+                sb.append(TokenType.LIST_SEPARATOR.rendered());
+              }
+            }
+            sb.append("\n");
+          }
+          sb.append(TokenType.CLOSED_LIST.rendered());
+        } else if (entries.get(i).getValue() instanceof StringNamedParamMap m) {
+          m.prettyToString(sb, maxW, w + indent, indent, space);
+        } else {
+          sb.append(entries.get(i).getValue().toString());
+        }
+        if (i < entries.size() - 1) {
+          sb.append(TokenType.LIST_SEPARATOR.rendered());
+        }
+      }
+      sb.append("\n").append(indent(w));
+    }
+    sb.append(TokenType.CLOSED_CONTENT.rendered());
+  }
+
+  private static String indent(int w) {
+    return IntStream.range(0, w).mapToObj(i -> " ").collect(Collectors.joining());
+  }
+
+  private static int currentLineLength(String s) {
+    String[] lines = s.split("\n");
+    return lines[lines.length - 1].length();
+  }
+
+  private static String itemToString(String name, Object value, String space) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(name).append(space).append(TokenType.ASSIGN_SEPARATOR.rendered()).append(space);
+    if (value instanceof List<?> list) {
+      sb.append(space).append(TokenType.OPEN_LIST.rendered()).append(space);
+      sb.append(list.stream()
+          .map(Objects::toString)
+          .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space)));
+      sb.append(space).append(TokenType.CLOSED_LIST.rendered()).append(space);
+    } else {
+      sb.append(value.toString());
+    }
     return sb.toString();
   }
 
