@@ -618,7 +618,7 @@ public class StringNamedParamMap implements NamedParamMap {
                 sb.append(TokenType.LIST_SEPARATOR.rendered());
               }
             }
-            sb.append("\n");
+            sb.append("\n").append(indent(w + indent));
           }
           sb.append(TokenType.CLOSED_LIST.rendered());
         } else if (entries.get(i).getValue() instanceof StringNamedParamMap m) {
