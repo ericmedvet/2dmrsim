@@ -572,8 +572,12 @@ public class StringNamedParamMap implements NamedParamMap {
   }
 
   public String prettyToString() {
+    return prettyToString(80);
+  }
+
+  public String prettyToString(int maxW) {
     StringBuilder sb = new StringBuilder();
-    prettyToString(sb, 40, 0, 2, " ");
+    prettyToString(sb, maxW, 0, 2, " ");
     return sb.toString();
   }
 
@@ -592,7 +596,7 @@ public class StringNamedParamMap implements NamedParamMap {
     String content = items.entrySet().stream()
         .map(e -> itemToString(e.getKey(), e.getValue(), space))
         .collect(Collectors.joining());
-    if (content.length() + currentLineLength(sb.toString()) < maxW) {
+    if (items.isEmpty() || content.length() + currentLineLength(sb.toString()) < maxW) {
       sb.append(content);
     } else {
       List<Map.Entry<String, Object>> entries = new ArrayList<>(items.entrySet());
@@ -604,7 +608,7 @@ public class StringNamedParamMap implements NamedParamMap {
           String listContent = l.stream()
               .map(Object::toString)
               .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space));
-          if (listContent.length() + currentLineLength(sb.toString()) < maxW) {
+          if (l.isEmpty() || listContent.length() + currentLineLength(sb.toString()) < maxW) {
             sb.append(listContent);
           } else {
             for (int j = 0; j < l.size(); j++) {
