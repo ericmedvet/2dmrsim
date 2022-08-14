@@ -571,28 +571,23 @@ public class StringNamedParamMap implements NamedParamMap {
     return sb.toString();
   }
 
-  public String prettyToString() {
-    return prettyToString(80);
+  public static String prettyToString(NamedParamMap map) {
+    return prettyToString(map,80);
   }
 
-  public String prettyToString(int maxW) {
+  public static String prettyToString(NamedParamMap map, int maxW) {
     StringBuilder sb = new StringBuilder();
-    prettyToString(sb, maxW, 0, 2, " ");
+    prettyToString(map, sb, maxW, 0, 2, " ");
     return sb.toString();
   }
 
-  public void prettyToString(StringBuilder sb, int maxW, int w, int indent, String space) {
+  public static void prettyToString(NamedParamMap map, StringBuilder sb, int maxW, int w, int indent, String space) {
     //build overall map
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    Map<String, Object> items = new TreeMap<>();
-    items.putAll(dMap);
-    items.putAll(sMap);
-    items.putAll(npmMap);
-    items.putAll(dsMap);
-    items.putAll(ssMap);
-    items.putAll(npmsMap);
+    Map<String, Object> items = new TreeMap<>(map.names().stream()
+        .collect(Collectors.toMap(n -> n, map::value))
+    );
     //iterate
-    sb.append(name).append(TokenType.OPEN_CONTENT.rendered());
+    sb.append(map.getName()).append(TokenType.OPEN_CONTENT.rendered());
     String content = items.entrySet().stream()
         .map(e -> itemToString(e.getKey(), e.getValue(), space))
         .collect(Collectors.joining());
@@ -606,15 +601,15 @@ public class StringNamedParamMap implements NamedParamMap {
         if (entries.get(i).getValue() instanceof List<?> l) {
           sb.append(TokenType.OPEN_LIST.rendered());
           String listContent = l.stream()
-              .map(Object::toString)
+              .map(Object::toString)// TODO should treat lists and npm differently
               .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space));
           if (l.isEmpty() || listContent.length() + currentLineLength(sb.toString()) < maxW) {
             sb.append(listContent);
           } else {
             for (int j = 0; j < l.size(); j++) {
               sb.append("\n").append(indent(w + indent + indent));
-              if (l.get(j) instanceof StringNamedParamMap m) {
-                m.prettyToString(sb, maxW, w + indent + indent, indent, space);
+              if (l.get(j) instanceof NamedParamMap m) {
+                prettyToString(m, sb, maxW, w + indent + indent, indent, space);
               } else {
                 sb.append(l.get(j).toString());
               }
@@ -625,8 +620,8 @@ public class StringNamedParamMap implements NamedParamMap {
             sb.append("\n").append(indent(w + indent));
           }
           sb.append(TokenType.CLOSED_LIST.rendered());
-        } else if (entries.get(i).getValue() instanceof StringNamedParamMap m) {
-          m.prettyToString(sb, maxW, w + indent, indent, space);
+        } else if (entries.get(i).getValue() instanceof NamedParamMap m) {
+          prettyToString(m, sb, maxW, w + indent, indent, space);
         } else {
           sb.append(entries.get(i).getValue().toString());
         }
@@ -638,6 +633,7 @@ public class StringNamedParamMap implements NamedParamMap {
     }
     sb.append(TokenType.CLOSED_CONTENT.rendered());
   }
+
 
   private static String indent(int w) {
     return IntStream.range(0, w).mapToObj(i -> " ").collect(Collectors.joining());
@@ -675,4 +671,17 @@ public class StringNamedParamMap implements NamedParamMap {
     return names;
   }
 
+  public static void main(String[] args) {
+    String bodyS = """
+        body(
+          shape=s.biped(w=4;h=3);
+          sensorizingFunction=sf.directional(
+            sSensors=[vs.d(a=-90)];
+            headSensors=[vs.sin();vs.d(a=-15;r=5)];
+            nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
+          )
+        )
+        """;
+    System.out.println(StringNamedParamMap.prettyToString(StringNamedParamMap.parse(bodyS), 60));
+  }
 }

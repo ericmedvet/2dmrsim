@@ -23,6 +23,40 @@ public interface ParamMap {
 
   Set<String> names();
 
+  default Object value(String n) {
+    if (b(n) != null) {
+      return b(n);
+    }
+    if (i(n) != null) {
+      return i(n);
+    }
+    if (d(n) != null) {
+      return d(n);
+    }
+    if (s(n) != null) {
+      return s(n);
+    }
+    if (npm(n) != null) {
+      return npm(n);
+    }
+    if (bs(n) != null) {
+      return bs(n);
+    }
+    if (is(n) != null) {
+      return is(n);
+    }
+    if (ds(n) != null) {
+      return ds(n);
+    }
+    if (ss(n) != null) {
+      return ss(n);
+    }
+    if (npms(n) != null) {
+      return npms(n);
+    }
+    return null;
+  }
+
   Boolean b(String n);
 
   default boolean b(String n, boolean defaultValue) {
