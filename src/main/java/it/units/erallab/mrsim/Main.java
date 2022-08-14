@@ -122,17 +122,23 @@ public class Main {
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
-    System.out.println(nb.prettyToString());
-    NumGridVSR.Body body = (NumGridVSR.Body) nb
-        .build(
-            "body(shape=s.biped(w=4;h=3);sensorizingFunction=sf.directional(sSensors=[vs.d(a=-90;r=1)];" +
-                "eSensors=[vs.d(a=-15;r=5)];nSensors=[vs.ar()];wSensors=[vs.sin()]))");
+    String bodyS = """
+        body(
+          shape=s.biped(w=4;h=3);
+          sensorizingFunction=sf.directional(
+            sSensors=[vs.d(a=-90)];
+            headSensors=[vs.sin();vs.d(a=-15;r=5)];
+            nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
+          )
+        )
+        """;
+    NumGridVSR.Body body = (NumGridVSR.Body) nb.build(bodyS);
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
         nOfInputs,
-        new int[] {10},
+        new int[]{10},
         nOfOutputs
     );
     RandomGenerator rg = new Random();

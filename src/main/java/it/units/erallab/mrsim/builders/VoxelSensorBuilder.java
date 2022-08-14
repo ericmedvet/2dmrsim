@@ -33,7 +33,7 @@ public class VoxelSensorBuilder {
 
   public static Function<Voxel, Sense<? super Voxel>> d(
       @Param(value = "a", dD = 0) Double a,
-      @Param(value = "r", dD = 0) Double r
+      @Param(value = "r", dD = 1) Double r
   ) {
     return v -> new SenseDistanceToBody(a / 180d * Math.PI, r, v);
   }
@@ -59,7 +59,7 @@ public class VoxelSensorBuilder {
   }
 
   public static Function<Voxel, Sense<? super Voxel>> sin(
-      @Param(value = "f", dD = 0) Double f,
+      @Param(value = "f", dD = 1) Double f,
       @Param(value = "p", dD = 0) Double p
   ) {
     return v -> new SenseSinusoidal(f, p, v);

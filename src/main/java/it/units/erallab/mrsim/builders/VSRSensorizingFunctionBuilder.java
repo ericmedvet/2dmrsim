@@ -22,6 +22,7 @@ import it.units.erallab.mrsim.util.Grid;
 import it.units.erallab.mrsim.util.builder.Param;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -47,7 +48,8 @@ public class VSRSensorizingFunctionBuilder {
       @Param(value = "nSensors") List<Function<Voxel, Sense<? super Voxel>>> nSensors,
       @Param(value = "eSensors") List<Function<Voxel, Sense<? super Voxel>>> eSensors,
       @Param(value = "sSensors") List<Function<Voxel, Sense<? super Voxel>>> sSensors,
-      @Param(value = "wSensors") List<Function<Voxel, Sense<? super Voxel>>> wSensors
+      @Param(value = "wSensors") List<Function<Voxel, Sense<? super Voxel>>> wSensors,
+      @Param(value = "headSensors") List<Function<Voxel, Sense<? super Voxel>>> headSensors
   ) {
     return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
       if (!shape.get(x, y)) {
@@ -65,6 +67,13 @@ public class VSRSensorizingFunctionBuilder {
           .mapToInt(e -> e.key().x())
           .min()
           .orElse(0);
+      Grid.Key headKey = shape.entries().stream()
+          .filter(Grid.Entry::value)
+          .sorted(Comparator.comparingInt(e -> -e.key().x() - e.key().y()))
+          .limit(1)
+          .toList()
+          .get(0)
+          .key();
       List<Function<Voxel, Sense<? super Voxel>>> localSensors = new ArrayList<>();
       if (x == maxX) {
         localSensors.addAll(eSensors);
@@ -77,6 +86,9 @@ public class VSRSensorizingFunctionBuilder {
       }
       if (y == shape.h() - 1) {
         localSensors.addAll(nSensors);
+      }
+      if (x == headKey.x() && y == headKey.y()) {
+        localSensors.addAll(headSensors);
       }
       return localSensors;
     });
