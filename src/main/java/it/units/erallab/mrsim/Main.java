@@ -122,6 +122,7 @@ public class Main {
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
+    System.out.println(NamedBuilder.prettyToString(nb,true));
     String bodyS = """
         body(
           shape=s.biped(w=4;h=3);

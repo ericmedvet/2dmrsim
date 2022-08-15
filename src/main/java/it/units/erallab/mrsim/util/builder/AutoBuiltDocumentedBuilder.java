@@ -40,6 +40,10 @@ public record AutoBuiltDocumentedBuilder<T>(
     return "(" + params.stream().map(ParamInfo::toString).collect(Collectors.joining("; ")) + ") -> " + builtType;
   }
 
+  private static String returnTypeName(Method method) {
+    return method.getGenericReturnType().toString();
+  }
+
   public static AutoBuiltDocumentedBuilder<Object> from(Executable executable) {
     Logger l = Logger.getLogger(DocumentedBuilder.class.getName());
     //check annotation
@@ -72,7 +76,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     String name;
     String buildType;
     if (executable instanceof Method method) {
-      buildType = method.getReturnType().getName(); //TODO can be improved
+      buildType = returnTypeName(method);
       name = method.getName();
     } else {
       buildType = ((Constructor<?>) executable).getDeclaringClass().getName();

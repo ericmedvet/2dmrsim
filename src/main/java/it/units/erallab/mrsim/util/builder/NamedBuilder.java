@@ -70,11 +70,6 @@ public class NamedBuilder<X> {
     return build(StringNamedParamMap.parse(mapString));
   }
 
-  public NamedBuilder<X> register(String name, Builder<? extends X> builder) {
-    builders.put(name, builder);
-    return this;
-  }
-
   public NamedBuilder<X> and(String prefix, NamedBuilder<? extends X> namedBuilder) {
     return and(List.of(prefix), namedBuilder);
   }
@@ -130,27 +125,19 @@ public class NamedBuilder<X> {
 
   @Override
   public String toString() {
-    return prettyToString(false);
+    return prettyToString(this, false);
   }
 
-  public String prettyToString() {
-    return prettyToString(true);
-  }
-
-  private String prettyToString(boolean indent) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("NamedBuilder{");
-    sb.append(indent ? "\n" : "");
-    builders.forEach((k, v) -> {
-      sb.append(indent ? "\t" : "");
-      sb.append(k);
-      if (v instanceof DocumentedBuilder<?> db) {
-        sb.append(db);
-      }
-      sb.append(indent ? "\n" : "");
-    });
-    sb.append("}");
-    return sb.toString();
+  public static String prettyToString(NamedBuilder<?> namedBuilder, boolean newLine) {
+    return namedBuilder.builders.entrySet().stream()
+        .map(e -> {
+          String s = e.getKey();
+          if (e.getValue() instanceof DocumentedBuilder<?> db) {
+            s = s + db;
+          }
+          return s;
+        })
+        .collect(Collectors.joining(newLine ? "\n" : "; "));
   }
 
   private double distance(String s1, String s2) {
