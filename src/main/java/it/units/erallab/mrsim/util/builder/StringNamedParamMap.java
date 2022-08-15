@@ -571,69 +571,142 @@ public class StringNamedParamMap implements NamedParamMap {
     return sb.toString();
   }
 
-  public static String prettyToString(NamedParamMap map) {
-    return prettyToString(map,80);
+  public static String prettyToString(ParamMap map) {
+    return prettyToString(map, 80);
   }
 
-  public static String prettyToString(NamedParamMap map, int maxW) {
+  public static String prettyToString(ParamMap map, int maxW) {
     StringBuilder sb = new StringBuilder();
     prettyToString(map, sb, maxW, 0, 2, " ");
     return sb.toString();
   }
 
-  public static void prettyToString(NamedParamMap map, StringBuilder sb, int maxW, int w, int indent, String space) {
-    //build overall map
-    Map<String, Object> items = new TreeMap<>(map.names().stream()
-        .collect(Collectors.toMap(n -> n, map::value))
-    );
+  public static void prettyToString(ParamMap map, StringBuilder sb, int maxW, int w, int indent, String space) {
     //iterate
-    sb.append(map.getName()).append(TokenType.OPEN_CONTENT.rendered());
-    String content = items.entrySet().stream()
-        .map(e -> itemToString(e.getKey(), e.getValue(), space))
-        .collect(Collectors.joining());
-    if (items.isEmpty() || content.length() + currentLineLength(sb.toString()) < maxW) {
+    if (map instanceof NamedParamMap namedParamMap) {
+      sb.append(namedParamMap.getName());
+    }
+    sb.append(TokenType.OPEN_CONTENT.rendered());
+    String content = mapContentToInlineString(map, space);
+    if (map.names().isEmpty() || content.length() + currentLineLength(sb.toString()) < maxW) {
       sb.append(content);
     } else {
-      List<Map.Entry<String, Object>> entries = new ArrayList<>(items.entrySet());
-      for (int i = 0; i < entries.size(); i++) {
-        sb.append("\n").append(indent(w + indent))
-            .append(entries.get(i).getKey()).append(space).append(TokenType.ASSIGN_SEPARATOR.rendered()).append(space);
-        if (entries.get(i).getValue() instanceof List<?> l) {
-          sb.append(TokenType.OPEN_LIST.rendered());
-          String listContent = l.stream()
-              .map(Object::toString)// TODO should treat lists and npm differently
-              .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space));
-          if (l.isEmpty() || listContent.length() + currentLineLength(sb.toString()) < maxW) {
-            sb.append(listContent);
-          } else {
-            for (int j = 0; j < l.size(); j++) {
-              sb.append("\n").append(indent(w + indent + indent));
-              if (l.get(j) instanceof NamedParamMap m) {
-                prettyToString(m, sb, maxW, w + indent + indent, indent, space);
-              } else {
-                sb.append(l.get(j).toString());
-              }
-              if (j < l.size() - 1) {
-                sb.append(TokenType.LIST_SEPARATOR.rendered());
-              }
-            }
-            sb.append("\n").append(indent(w + indent));
-          }
-          sb.append(TokenType.CLOSED_LIST.rendered());
-        } else if (entries.get(i).getValue() instanceof NamedParamMap m) {
-          prettyToString(m, sb, maxW, w + indent, indent, space);
-        } else {
-          sb.append(entries.get(i).getValue().toString());
-        }
-        if (i < entries.size() - 1) {
-          sb.append(TokenType.LIST_SEPARATOR.rendered());
-        }
-      }
-      sb.append("\n").append(indent(w));
+      mapContentToMultilineString(sb, maxW, w, indent, space, map);
     }
     sb.append(TokenType.CLOSED_CONTENT.rendered());
   }
 
+  private static void listContentToMultilineString(
+      StringBuilder sb,
+      int maxW,
+      int w,
+      int indent,
+      String space,
+      List<?> l
+  ) {
+    for (int j = 0; j < l.size(); j++) {
+      sb.append("\n").append(indent(w + indent + indent));
+      if (l.get(j) instanceof NamedParamMap m) {
+        prettyToString(m, sb, maxW, w + indent + indent, indent, space);
+      } else {
+        sb.append(l.get(j).toString());
+      }
+      if (j < l.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered());
+      }
+    }
+    sb.append("\n").append(indent(w + indent));
+  }
+
+  private static String listContentToInlineString(List<?> l, String space) {
+    StringBuilder sb = new StringBuilder();
+    for (int j = 0; j < l.size(); j++) {
+      if (l.get(j) instanceof ParamMap m) {
+        if (m instanceof NamedParamMap namedParamMap) {
+          sb.append(namedParamMap.getName())
+              .append(TokenType.OPEN_CONTENT.rendered());
+        }
+        sb.append(mapContentToInlineString(m, space));
+        if (m instanceof NamedParamMap) {
+          sb.append(TokenType.CLOSED_CONTENT.rendered());
+        }
+      } else {
+        sb.append(l.get(j).toString());
+      }
+      if (j < l.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
+      }
+    }
+    return sb.toString();
+  }
+
+  private static void mapContentToMultilineString(
+      StringBuilder sb,
+      int maxW,
+      int w,
+      int indent,
+      String space,
+      ParamMap map
+  ) {
+    List<String> names = new ArrayList<>(map.names());
+    for (int i = 0; i < names.size(); i++) {
+      sb.append("\n")
+          .append(indent(w + indent))
+          .append(names.get(i))
+          .append(space)
+          .append(TokenType.ASSIGN_SEPARATOR.rendered())
+          .append(space);
+      Object value = map.value(names.get(i));
+      if (value instanceof List<?> l) {
+        sb.append(TokenType.OPEN_LIST.rendered());
+        String listContent = listContentToInlineString(l, space);
+        if (l.isEmpty() || listContent.length() + currentLineLength(sb.toString()) < maxW) {
+          sb.append(listContent);
+        } else {
+          listContentToMultilineString(sb, maxW, w, indent, space, l);
+        }
+        sb.append(TokenType.CLOSED_LIST.rendered());
+      } else if (value instanceof NamedParamMap m) {
+        prettyToString(m, sb, maxW, w + indent, indent, space);
+      } else {
+        sb.append(value.toString());
+      }
+      if (i < names.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered());
+      }
+    }
+    sb.append("\n").append(indent(w));
+  }
+
+  private static String mapContentToInlineString(ParamMap m, String space) {
+    StringBuilder sb = new StringBuilder();
+    List<String> names = new ArrayList<>(m.names());
+    for (int i = 0; i < names.size(); i++) {
+      sb.append(names.get(i))
+          .append(space)
+          .append(TokenType.ASSIGN_SEPARATOR.rendered())
+          .append(space);
+      Object value = m.value(names.get(i));
+      if (value instanceof List<?> l) {
+        sb.append(listContentToInlineString(l, space));
+      } else if (value instanceof ParamMap innerMap) {
+        if (innerMap instanceof NamedParamMap namedParamMap) {
+          sb.append(namedParamMap.getName())
+              .append(TokenType.OPEN_CONTENT.rendered());
+        }
+        sb.append(mapContentToInlineString(innerMap, space));
+        if (innerMap instanceof NamedParamMap) {
+          sb.append(TokenType.CLOSED_CONTENT.rendered());
+        }
+      } else {
+        sb.append(value.toString());
+      }
+      if (i < names.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
+      }
+    }
+    return sb.toString();
+  }
 
   private static String indent(int w) {
     return IntStream.range(0, w).mapToObj(i -> " ").collect(Collectors.joining());
@@ -642,21 +715,6 @@ public class StringNamedParamMap implements NamedParamMap {
   private static int currentLineLength(String s) {
     String[] lines = s.split("\n");
     return lines[lines.length - 1].length();
-  }
-
-  private static String itemToString(String name, Object value, String space) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(name).append(space).append(TokenType.ASSIGN_SEPARATOR.rendered()).append(space);
-    if (value instanceof List<?> list) {
-      sb.append(space).append(TokenType.OPEN_LIST.rendered()).append(space);
-      sb.append(list.stream()
-          .map(Objects::toString)
-          .collect(Collectors.joining(TokenType.LIST_SEPARATOR.rendered() + space)));
-      sb.append(space).append(TokenType.CLOSED_LIST.rendered()).append(space);
-    } else {
-      sb.append(value.toString());
-    }
-    return sb.toString();
   }
 
   @Override
@@ -671,17 +729,4 @@ public class StringNamedParamMap implements NamedParamMap {
     return names;
   }
 
-  public static void main(String[] args) {
-    String bodyS = """
-        body(
-          shape=s.biped(w=4;h=3);
-          sensorizingFunction=sf.directional(
-            sSensors=[vs.d(a=-90)];
-            headSensors=[vs.sin();vs.d(a=-15;r=5)];
-            nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
-          )
-        )
-        """;
-    System.out.println(StringNamedParamMap.prettyToString(StringNamedParamMap.parse(bodyS), 60));
-  }
 }
