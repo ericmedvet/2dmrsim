@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mrsim2d</artifactId>
         <groupId>it.units.erallab</groupId>
-        <version>0.4.1</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>it.units.erallab</groupId>
             <artifactId>mrsim2d.builder</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 
