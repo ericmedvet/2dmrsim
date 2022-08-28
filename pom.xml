@@ -88,14 +88,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.4.0</version>
-                <configuration>
-                    <mainClass>it.units.erallab.mrsim2d.sample.Main</mainClass>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
