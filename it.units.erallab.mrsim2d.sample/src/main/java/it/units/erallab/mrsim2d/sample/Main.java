@@ -37,7 +37,10 @@ import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
-import it.units.erallab.mrsim2d.viewer.*;
+import it.units.erallab.mrsim2d.viewer.Drawer;
+import it.units.erallab.mrsim2d.viewer.Drawers;
+import it.units.erallab.mrsim2d.viewer.VideoBuilder;
+import it.units.erallab.mrsim2d.viewer.VideoUtils;
 
 import java.io.File;
 import java.util.List;
@@ -122,7 +125,6 @@ public class Main {
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
-    System.out.println(NamedBuilder.prettyToString(nb,true));
     String bodyS = """
         body(
           shape=s.biped(w=4;h=3);
@@ -148,7 +150,7 @@ public class Main {
         body,
         mlp
     );
-    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
+    Locomotion locomotion = new Locomotion(30, (Terrain) nb.build(terrain));
     Locomotion.Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }
@@ -156,25 +158,25 @@ public class Main {
   public static void main(String[] args) {
     Drawer drawer = Drawers.basic().profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
-        600,
-        400,
+        300,
+        200,
         0,
         50,
         30,
         VideoUtils.EncoderFacility.FFMPEG_LARGE,
-        new File("/home/eric/experiments/balls.mp4"),
+        new File("/home/eric/experiments/out-locomotion.mp4"),
         drawer
     );
-    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.downhill(100d, 10d, 10d, 10d, 10d);
+    //RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 10d, 10d, 10d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
-    locomotion(engine, "t.hilly()", viewer);
+    locomotion(engine, "t.hilly()", videoBuilder);
     //vsr(engine, terrain, viewer);
     //iVsrs(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //do final stuff
-    //videoBuilder.get();
+    videoBuilder.get();
   }
 
 }

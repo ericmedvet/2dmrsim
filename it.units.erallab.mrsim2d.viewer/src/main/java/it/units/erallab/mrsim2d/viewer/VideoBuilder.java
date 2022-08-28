@@ -46,7 +46,9 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
   private final Drawer drawer;
   private final List<BufferedImage> images;
   private final List<Snapshot> snapshots;
+  private final List<Double> snapshotTs;
   private double lastDrawnT;
+  private double lastT;
 
   public VideoBuilder(
       int w,
@@ -68,15 +70,22 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
     this.drawer = drawer;
     images = new ArrayList<>((int) Math.ceil((endTime - startTime) * frameRate));
     snapshots = new ArrayList<>();
+    snapshotTs = new ArrayList<>();
+    lastT = Double.NaN;
   }
 
   @Override
   public void accept(Snapshot snapshot) {
+    if (!Double.isNaN(lastT)) {
+      snapshotTs.add(snapshot.t() - lastT);
+    }
+    lastT = snapshot.t();
     if (snapshot.t() < startTime || snapshot.t() > endTime) {
       return;
     }
+    double tolerance = snapshotTs.stream().mapToDouble(t -> t).average().orElse(0d) / 2d;
     snapshots.add(snapshot);
-    if (snapshot.t() >= lastDrawnT + (1d / frameRate)) {
+    if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
       lastDrawnT = snapshot.t();
       //create image
       BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
