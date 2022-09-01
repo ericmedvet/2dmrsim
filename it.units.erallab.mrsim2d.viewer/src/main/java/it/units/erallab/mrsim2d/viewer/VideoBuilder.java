@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
 
   @Override
   public File get() {
-    if (snapshots.isEmpty()) {
+    if (images.isEmpty()) {
       L.warning("No snapshot to save: abort");
       return null;
     }
