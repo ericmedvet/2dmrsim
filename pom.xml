@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+  ~ Copyright 2022 eric
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>18</jdk.version>
-        <revision>0.5.1</revision>
+        <revision>0.5.2</revision>
     </properties>
     <dependencies>
         <!--
