@@ -57,4 +57,15 @@ public record DoubleRange(double min, double max) implements Serializable {
     return (clip(value) - min) / (max - min);
   }
 
+  public DoubleRange delta(double v) {
+    return new DoubleRange(min + v, max + v);
+  }
+
+  public boolean overlaps(DoubleRange other) {
+    if (max < other.min) {
+      return false;
+    }
+    return !(min > other.max);
+  }
+
 }
