@@ -27,14 +27,13 @@ import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.*;
 import it.units.erallab.mrsim2d.core.tasks.Task;
-import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Locomotion implements Task<Supplier<EmbodiedAgent>, Locomotion.Outcome> {
+public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
 
   private final static double INITIAL_X_GAP = 1;
   private final static double INITIAL_Y_GAP = 0.25;
@@ -55,39 +54,6 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Locomotion.Outc
       @Param(value = "terrain", dNPM = "terrain.flat()") Terrain terrain
   ) {
     this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
-  }
-
-  public record Outcome(SortedMap<Double, Observation> observations) {
-    public record Observation(List<Poly> bodyPartPolies, double terrainHeight) {}
-
-    public double duration() {
-      return observations.lastKey() - observations.firstKey();
-    }
-
-    public Outcome subOutcome(DoubleRange tRange) {
-      return new Outcome(observations.subMap(tRange.min(), tRange.max()));
-    }
-
-    @Override
-    public String toString() {
-      return "Outcome{" +
-          "xVelocity=" + xVelocity() +
-          '}';
-    }
-
-    public double xDistance() {
-      double initX = observations.get(observations.firstKey()).bodyPartPolies().stream()
-          .mapToDouble(p -> p.boundingBox().min().x())
-          .min().orElseThrow(() -> new IllegalArgumentException("Unable to find agent"));
-      double finalX = observations.get(observations.lastKey()).bodyPartPolies().stream()
-          .mapToDouble(p -> p.boundingBox().min().x())
-          .min().orElseThrow(() -> new IllegalArgumentException("Unable to find agent"));
-      return finalX - initX;
-    }
-
-    public double xVelocity() {
-      return xDistance() / duration();
-    }
   }
 
   @Override
@@ -133,6 +99,6 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Locomotion.Outc
       );
     }
     //return
-    return new Locomotion.Outcome(new TreeMap<>(observations));
+    return new Outcome(new TreeMap<>(observations));
   }
 }

@@ -37,6 +37,7 @@ import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
+import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
 import it.units.erallab.mrsim2d.viewer.VideoBuilder;
@@ -151,7 +152,7 @@ public class Main {
         mlp
     );
     Locomotion locomotion = new Locomotion(30, (Terrain) nb.build(terrain));
-    Locomotion.Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
+    Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }
 
