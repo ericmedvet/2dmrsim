@@ -16,5 +16,6 @@ module it.units.erallab.mrsim2d.core {
   exports it.units.erallab.mrsim2d.core.geometry;
   exports it.units.erallab.mrsim2d.core.tasks;
   exports it.units.erallab.mrsim2d.core.tasks.locomotion;
+  exports it.units.erallab.mrsim2d.core.tasks.piling;
   exports it.units.erallab.mrsim2d.core.util;
 }
