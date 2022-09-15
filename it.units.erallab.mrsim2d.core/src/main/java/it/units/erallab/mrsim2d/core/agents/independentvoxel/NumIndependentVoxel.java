@@ -101,4 +101,16 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
     }
     return actions;
   }
+
+  public static int nOfInputs(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
+    return sensors.size();
+  }
+
+  public static int nOfOutputs() {
+    return 8;
+  }
+
+  public int nOfInputs() {
+    return nOfInputs(sensors);
+  }
 }
