@@ -113,4 +113,12 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
   public int nOfInputs() {
     return nOfInputs(sensors);
   }
+
+  public TimedRealFunction getFunction() {
+    return function;
+  }
+
+  public List<Function<Voxel, Sense<? super Voxel>>> getSensors() {
+    return sensors;
+  }
 }
