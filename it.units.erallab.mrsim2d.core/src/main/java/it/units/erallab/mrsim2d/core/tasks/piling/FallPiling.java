@@ -62,7 +62,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
       @Param("nOfAgents") int nOfAgents,
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
       @Param(value = "randomGenerator") RandomGenerator randomGenerator,
-      @Param(value = "terrain", dNPM = "terrain.flat()") Terrain terrain,
+      @Param(value = "terrain") Terrain terrain,
       @Param(value = "yGapRatio", dD = 1d) double yGapRatio
   ) {
     this(duration, fallInterval, nOfAgents, xSigmaRatio, randomGenerator, terrain, yGapRatio, X_GAP);
