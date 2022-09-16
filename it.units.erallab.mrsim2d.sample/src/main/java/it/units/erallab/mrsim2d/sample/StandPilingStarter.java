@@ -7,8 +7,8 @@ import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
-import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.Outcome;
+import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
-public class FallPilingStarter {
+public class StandPilingStarter {
   public static void main(String[] args) {
     Drawer drawer = Drawers.basic().profiled();
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
@@ -53,7 +53,7 @@ public class FallPilingStarter {
     RandomGenerator rg = new Random(1);
     mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
     Supplier<EmbodiedAgent> supplier = () -> new NumIndependentVoxel(sensors, mlp);
-    FallPiling task = new FallPiling(60d, 5d, 5, 0.11d, rg, TerrainBuilder.flat(100d, 10d, 1d, 10d), 1, 10);
+    StandPiling task = new StandPiling(60d, 5, 2d, TerrainBuilder.flat(100d, 10d, 1d, 10d));
     Outcome outcome = task.run(supplier, engine, viewer);
     System.out.println(outcome);
   }
