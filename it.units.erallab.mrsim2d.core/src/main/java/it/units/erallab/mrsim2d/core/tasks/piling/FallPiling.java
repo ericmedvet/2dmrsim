@@ -11,11 +11,9 @@ import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
-import it.units.erallab.mrsim2d.core.geometry.Segment;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -57,7 +55,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
 
   @BuilderMethod
   public FallPiling(
-      @Param(value = "duration", dD = 34d) double duration,
+      @Param(value = "duration", dD = 45d) double duration,
       @Param(value = "fallInterval", dD = 5d) double fallInterval,
       @Param("nOfAgents") int nOfAgents,
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
@@ -76,17 +74,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
     ).delta(terrain.withinBordersXRange().min() + xGap);
     double baseY;
     if (agents.isEmpty()) {
-      double step = terrain.poly()
-          .sides()
-          .stream()
-          .mapToDouble(Segment::length)
-          .min()
-          .orElseThrow(() -> new IllegalArgumentException("Cannot find a valid step size"));
-      double terrainMaxY = Double.NEGATIVE_INFINITY;
-      for (double x = xRange.min(); x < xRange.max(); x = x + step) {
-        terrainMaxY = Math.max(terrainMaxY, PolyUtils.maxYAtX(terrain.poly(), x));
-      }
-      baseY = terrainMaxY;
+      baseY = terrain.maxHeightAt(xRange);
     } else {
       baseY = agents.stream()
           .map(EmbodiedAgent::boundingBox)
@@ -115,7 +103,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     //run for defined time
     Map<Double, Outcome.Observation> observations = new HashMap<>();
-    List<EmbodiedAgent> agents = new ArrayList<>((int) Math.ceil(duration / fallInterval));
+    List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);
     while (engine.t() < duration) {
       //check if new agent needed
       if (agents.size() < Math.ceil(engine.t() / fallInterval) && agents.size() < nOfAgents) {

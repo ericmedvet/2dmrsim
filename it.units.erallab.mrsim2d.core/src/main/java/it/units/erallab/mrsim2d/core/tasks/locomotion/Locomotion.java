@@ -25,11 +25,15 @@ import it.units.erallab.mrsim2d.core.actions.CreateUnmovableBody;
 import it.units.erallab.mrsim2d.core.actions.TranslateAgent;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.engine.Engine;
-import it.units.erallab.mrsim2d.core.geometry.*;
+import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
+import it.units.erallab.mrsim2d.core.geometry.Point;
+import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -69,18 +73,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
     engine.perform(new AddAgent(embodiedAgent));
     //place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();
-    double step = terrain.poly()
-        .sides()
-        .stream()
-        .mapToDouble(Segment::length)
-        .min()
-        .orElseThrow(() -> new IllegalArgumentException("Cannot find a valid step size"));
-    double maxY = Double.NEGATIVE_INFINITY;
-    for (double x = terrain.withinBordersXRange().min() + initialXGap;
-         x < terrain.withinBordersXRange().min() + initialXGap + agentBB.width();
-         x = x + step) {
-      maxY = Math.max(maxY, PolyUtils.maxYAtX(terrain.poly(), x));
-    }
+    double maxY = terrain.maxHeightAt(agentBB.xRange());
     engine.perform(new TranslateAgent(embodiedAgent, new Point(
         terrain.withinBordersXRange().min() + initialXGap - agentBB.min().x(),
         maxY + initialYGap - agentBB.min().y()
