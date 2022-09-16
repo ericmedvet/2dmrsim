@@ -42,6 +42,13 @@ public record Outcome(SortedMap<Double, Observation> observations) {
         - observations.get(observations.firstKey()).pileHeight();
   }
 
+  public double averageMaxHeight() {
+    return observations.values().stream()
+        .mapToDouble(Observation::pileHeight)
+        .average()
+        .orElse(0d);
+  }
+
   public Outcome subOutcome(DoubleRange tRange) {
     return new Outcome(observations.subMap(tRange.min(), tRange.max()));
   }
