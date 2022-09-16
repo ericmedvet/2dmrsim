@@ -19,18 +19,27 @@ package it.units.erallab.mrsim2d.core.geometry;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public record Terrain(Poly poly, DoubleRange withinBordersXRange) {
 
   public double maxHeightAt(DoubleRange xRange) {
-    return Arrays.stream(poly().vertexes())
-        .filter(v -> v.x() >= xRange.min() && v.x() <= xRange.max())
-        .mapToDouble(v -> PolyUtils.maxYAtX(poly, v.x()))
+    List<Double> xs = new ArrayList<>(
+        Arrays.stream(poly().vertexes())
+            .filter(v -> v.x() >= xRange.min() && v.x() <= xRange.max())
+            .map(Point::x)
+            .toList()
+    );
+    xs.add(xRange.min());
+    xs.add(xRange.max());
+    return xs.stream().mapToDouble(x -> PolyUtils.maxYAtX(poly, x))
         .max()
         .orElseThrow(() -> new IllegalArgumentException("Cannot find a terrain max y in range %.1f, %.1f.".formatted(
-            xRange.min(),
-            xRange.max()))
+                xRange.min(),
+                xRange.max()
+            ))
         );
   }
 }
