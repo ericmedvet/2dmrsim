@@ -16,6 +16,8 @@
 
 package it.units.erallab.mrsim2d.core.geometry;
 
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
+
 import java.util.Arrays;
 
 /**
@@ -52,5 +54,13 @@ public record BoundingBox(Point min, Point max) implements Shape {
 
   public double width() {
     return max.x() - min.x();
+  }
+
+  public DoubleRange xRange() {
+    return new DoubleRange(min.x(), max.x());
+  }
+
+  public DoubleRange yRange() {
+    return new DoubleRange(min.y(), max.y());
   }
 }
