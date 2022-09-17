@@ -25,6 +25,7 @@ import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.bodies.Body;
+import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -38,10 +39,7 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
-import it.units.erallab.mrsim2d.viewer.Drawer;
-import it.units.erallab.mrsim2d.viewer.Drawers;
-import it.units.erallab.mrsim2d.viewer.VideoBuilder;
-import it.units.erallab.mrsim2d.viewer.VideoUtils;
+import it.units.erallab.mrsim2d.viewer.*;
 
 import java.io.File;
 import java.util.List;
@@ -168,16 +166,21 @@ public class Main {
         new File("/home/eric/experiments/out-locomotion.mp4"),
         drawer
     );
-    //RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 10d, 10d, 10d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
-    locomotion(engine, "t.hilly()", videoBuilder);
-    //vsr(engine, terrain, viewer);
-    //iVsrs(engine, terrain, viewer);
-    //ball(engine, terrain, viewer);
-    //do final stuff
-    videoBuilder.get();
+    rotationalJoint(engine, terrain, viewer);
+    //videoBuilder.get();
   }
 
+  private static void rotationalJoint(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(2d,1d,1d, new Point(11,0))).outcome().orElseThrow();
+    while (engine.t() < 10) {
+      Snapshot snapshot = engine.tick();
+      consumer.accept(snapshot);
+    }
+
+  }
 }

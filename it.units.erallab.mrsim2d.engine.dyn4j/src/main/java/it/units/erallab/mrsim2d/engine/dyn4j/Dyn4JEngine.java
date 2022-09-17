@@ -57,6 +57,7 @@ public class Dyn4JEngine extends AbstractEngine {
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
+
   public Dyn4JEngine(Configuration configuration) {
     this.configuration = configuration;
     world = new World<>();
@@ -224,6 +225,22 @@ public class Dyn4JEngine extends AbstractEngine {
     return voxel;
   }
 
+  private RotationalJoint createRotationalJoint(CreateRotationalJoint action, Agent agent) {
+    RotationalJoint rotationalJoint = new RotationalJoint(
+        action.length(),
+        action.width(),
+        action.mass(),
+        configuration.rigidBodyFriction,
+        configuration.rigidBodyRestitution,
+        configuration.rigidBodyLinearDamping,
+        configuration.rigidBodyAngularDamping
+    );
+    rotationalJoint.getBodies().forEach(world::addBody);
+    rotationalJoint.getJoints().forEach(world::addJoint);
+    bodies.add(rotationalJoint);
+    return rotationalJoint;
+  }
+
   private Collection<Body> findInContactBodies(FindInContactBodies action, Agent agent) throws IllegalActionException {
     if (action.body() instanceof MultipartBody multipartBody) {
       return multipartBody.getBodies().stream()
@@ -257,6 +274,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
     registerActionSolver(TranslateBody.class, this::translateBody);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
+    registerActionSolver(CreateRotationalJoint.class, this::createRotationalJoint);
     registerActionSolver(CreateLink.class, this::createLink);
     registerActionSolver(RemoveLink.class, this::removeLink);
     registerActionSolver(RemoveBody.class, this::removeBody);

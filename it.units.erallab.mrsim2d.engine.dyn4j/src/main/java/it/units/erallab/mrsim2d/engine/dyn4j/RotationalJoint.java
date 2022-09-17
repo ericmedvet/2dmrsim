@@ -48,10 +48,10 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
         .moveBy(width / 2d, width / 2d)
         .moveBy(-width / 2d, width / 2d)
         .moveBy(-(length / 2d - width / 2d), 0);
-    Path path2 = new Path(new Point(length / 2d - width / 2d, width / 2d))
+    Path path2 = new Path(new Point(length / 2d, width / 2d))
         .moveBy(width / 2d, -width / 2d)
         .moveBy(length / 2d - width / 2d, 0)
-        .moveBy(0, -width)
+        .moveBy(0, width)
         .moveBy(-(length / 2d - width / 2d), 0);
     body1 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, new Poly(path1.points()));
     body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, new Poly(path2.points()));
