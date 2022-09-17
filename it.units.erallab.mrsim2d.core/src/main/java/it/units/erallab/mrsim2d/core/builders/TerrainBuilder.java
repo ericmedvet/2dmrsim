@@ -67,18 +67,18 @@ public class TerrainBuilder {
 
   private static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
     Path path = new Path(new Point(0, 0))
-        .moveTo(0, borderH)
-        .moveTo(borderW, 0)
-        .moveTo(0, -borderH)
-        .moveTo(partialPath)
-        .moveTo(0, borderH)
-        .moveTo(borderW, 0)
-        .moveTo(0, -borderH);
+        .moveBy(0, borderH)
+        .moveBy(borderW, 0)
+        .moveBy(0, -borderH)
+        .moveBy(partialPath)
+        .moveBy(0, borderH)
+        .moveBy(borderW, 0)
+        .moveBy(0, -borderH);
     double maxX = Arrays.stream(path.points()).mapToDouble(Point::x).max().orElse(borderW);
     double minY = Arrays.stream(path.points()).mapToDouble(Point::y).min().orElse(borderW);
     path = path
         .add(maxX, minY - terrainH)
-        .moveTo(-maxX, 0);
+        .moveBy(-maxX, 0);
     return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
@@ -98,7 +98,7 @@ public class TerrainBuilder {
       double sW = Math.max(1d, (random.nextGaussian() * 0.25 + 1) * chunkW);
       double sH = random.nextGaussian() * chunkH;
       dW = dW + sW;
-      path = path.moveTo(sW, sH);
+      path = path.moveBy(sW, sH);
     }
     return fromPath(path, h, borderW, borderH);
   }
@@ -120,8 +120,8 @@ public class TerrainBuilder {
       double sH = random.nextGaussian() * chunkH;
       dW = dW + sW;
       path = path
-          .moveTo(sW, 0)
-          .moveTo(0, sH);
+          .moveBy(sW, 0)
+          .moveBy(0, sH);
     }
     return fromPath(path, h, borderW, borderH);
   }

@@ -97,13 +97,13 @@ public class PolyUtils {
     double a = dL.direction() + Math.PI / 2d;
     Point dP = new Point(a).scale(w);
     Path p = new Path(src)
-        .moveTo(dL.diff(dP.scale(0.5)));
+        .moveBy(dL.diff(dP.scale(0.5)));
     for (int i = 0; i < n - 1; i++) {
       p = p
-          .moveTo(dL.sum(dP))
-          .moveTo(dL.diff(dP));
+          .moveBy(dL.sum(dP))
+          .moveBy(dL.diff(dP));
     }
-    return p.moveTo(dL.sum(dP.scale(0.5)));
+    return p.moveBy(dL.sum(dP.scale(0.5)));
   }
 
 }

@@ -44,11 +44,11 @@ public class VoxelSensorBuilder {
       @Param(value = "a", dD = 0) Double a,
       @Param(value = "r", dD = 1) Double r
   ) {
-    return v -> new SenseDistanceToBody(a / 180d * Math.PI, r, v);
+    return v -> new SenseDistanceToBody(Math.toRadians(a), r, v);
   }
 
   public static Function<Voxel, Sense<? super Voxel>> rv(@Param(value = "a", dD = 0) Double a) {
-    return v -> new SenseRotatedVelocity(a / 180d * Math.PI, v);
+    return v -> new SenseRotatedVelocity(Math.toRadians(a), v);
   }
 
   public static Function<Voxel, Sense<? super Voxel>> sa(@Param("s") String s) {
