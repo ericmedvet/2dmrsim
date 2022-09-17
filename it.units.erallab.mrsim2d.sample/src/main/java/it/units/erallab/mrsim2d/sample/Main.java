@@ -167,7 +167,7 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 10d, 10d, 10d);
+    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 10d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     rotationalJoint(engine, terrain, viewer);
@@ -176,10 +176,12 @@ public class Main {
 
   private static void rotationalJoint(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
     engine.perform(new CreateUnmovableBody(terrain.poly()));
-    RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(2d,1d,1d, new Point(11,0))).outcome().orElseThrow();
+    RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(2d,1d,1d, new Point(3,0))).outcome().orElseThrow();
+    engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new Point(6,0))).outcome().orElseThrow();
     while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
+      System.out.println(rj.jointAngle());
     }
 
   }

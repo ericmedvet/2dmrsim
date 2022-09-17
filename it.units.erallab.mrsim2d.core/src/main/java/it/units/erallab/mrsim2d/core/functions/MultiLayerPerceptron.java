@@ -76,7 +76,7 @@ public class MultiLayerPerceptron implements RealFunction, Parametrized {
   }
 
   public enum ActivationFunction implements Function<Double, Double> {
-    RELU(x -> (x < 0) ? 0d : x, DoubleRange.of(0d, Double.POSITIVE_INFINITY)),
+    RELU(x -> (x < 0) ? 0d : x, new DoubleRange(0d, Double.POSITIVE_INFINITY)),
     SIGMOID(x -> 1d / (1d + Math.exp(-x)), DoubleRange.UNIT),
     SIN(Math::sin, DoubleRange.SYMMETRIC_UNIT),
     TANH(Math::tanh, DoubleRange.SYMMETRIC_UNIT),

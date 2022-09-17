@@ -250,7 +250,7 @@ public class Voxel implements it.units.erallab.mrsim2d.core.bodies.Voxel, Multip
       body.setAngularDamping(angularDamping);
     }
     //build distance joints constraints
-    DoubleRange activeSideRange = DoubleRange.of(
+    DoubleRange activeSideRange = new DoubleRange(
         Math.sqrt(sideLength * sideLength * areaRatioActiveRange.min()),
         Math.sqrt(sideLength * sideLength * areaRatioActiveRange.max())
     );

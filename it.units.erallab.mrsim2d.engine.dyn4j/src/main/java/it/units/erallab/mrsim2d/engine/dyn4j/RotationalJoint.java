@@ -4,6 +4,7 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.geometry.Path;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -14,13 +15,14 @@ import java.util.Collection;
 import java.util.List;
 
 public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.RotationalJoint, MultipartBody {
+  private static final DoubleRange JOINT_ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
 
   private static final double ANCHOR_REL_GAP = 0.1;
-
   private final double mass;
   private final Body body1;
   private final Body body2;
   private final RevoluteJoint<Body> joint;
+  private final double jointLength;
 
   private final List<Anchor> anchors;
   private final Vector2 initialRefDirection;
@@ -43,22 +45,26 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
       ));
     }
     this.mass = mass;
+    jointLength = Math.sqrt(2d) * width / 2d;
     //create bodies
-    Path path1 = new Path(new Point(0, 0)).moveBy(length / 2d - width / 2d, 0)
+    Poly poly1 = new Path(new Point(0, 0)).moveBy(length / 2d - width / 2d, 0)
         .moveBy(width / 2d, width / 2d)
         .moveBy(-width / 2d, width / 2d)
-        .moveBy(-(length / 2d - width / 2d), 0);
-    Path path2 = new Path(new Point(length / 2d, width / 2d))
+        .moveBy(-(length / 2d - width / 2d), 0)
+        .toPoly();
+    @SuppressWarnings("SuspiciousNameCombination")
+    Poly poly2 = new Path(new Point(length / 2d, width / 2d))
         .moveBy(width / 2d, -width / 2d)
         .moveBy(length / 2d - width / 2d, 0)
         .moveBy(0, width)
-        .moveBy(-(length / 2d - width / 2d), 0);
-    body1 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, new Poly(path1.points()));
-    body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, new Poly(path2.points()));
+        .moveBy(-(length / 2d - width / 2d), 0)
+        .toPoly();
+    body1 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly1);
+    body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly2);
     //create joint
     joint = new RevoluteJoint<>(body1, body2, new Vector2(length / 2d, width / 2d));
     joint.setReferenceAngle(0);
-    joint.setLimits(Math.toRadians(-90), Math.toRadians(90));
+    joint.setLimits(JOINT_ANGLE_RANGE.min(), JOINT_ANGLE_RANGE.max());
     joint.setLimitEnabled(true);
     //create anchors
     anchors = List.of(
@@ -132,16 +138,8 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
   }
 
   @Override
-  public Poly poly() {
-    Poly poly1 = polyFromBody(body1);
-    Poly poly2 = polyFromBody(body1);
-    Point[] ps1 = poly1.vertexes();
-    Point[] ps2 = poly2.vertexes();
-    Point[] ps = new Point[10];
-    System.arraycopy(ps1, 0, ps, 0, 3);
-    System.arraycopy(ps2, 0, ps, 3, 5);
-    System.arraycopy(ps1, 3, ps, 8, 2);
-    return new Poly(ps);
+  public double jointAngle() {
+    return joint.getJointAngle();
   }
 
   @Override
@@ -152,5 +150,33 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
   @Override
   public Collection<Joint<Body>> getJoints() {
     return List.of(joint);
+  }
+
+  @Override
+  public DoubleRange jointAngleRange() {
+    return JOINT_ANGLE_RANGE;
+  }
+
+  @Override
+  public double jointLength() {
+    return jointLength;
+  }
+
+  @Override
+  public Point jointPoint() {
+    return poly().vertexes()[2];
+  }
+
+  @Override
+  public Poly poly() {
+    Poly poly1 = polyFromBody(body1);
+    Poly poly2 = polyFromBody(body2);
+    Point[] ps1 = poly1.vertexes();
+    Point[] ps2 = poly2.vertexes();
+    Point[] ps = new Point[10];
+    System.arraycopy(ps1, 0, ps, 0, 2);
+    System.arraycopy(ps2, 0, ps, 2, 5);
+    System.arraycopy(ps1, 2, ps, 7, 3);
+    return new Poly(ps);
   }
 }

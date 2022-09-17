@@ -37,10 +37,6 @@ public record DoubleRange(double min, double max) implements Serializable {
     }
   }
 
-  public static DoubleRange of(double min, double max) {
-    return new DoubleRange(min, max);
-  }
-
   public double clip(double value) {
     return Math.min(Math.max(value, min), max);
   }

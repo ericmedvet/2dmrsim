@@ -23,10 +23,7 @@ import it.units.erallab.mrsim2d.viewer.drawers.InfoDrawer;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
-import it.units.erallab.mrsim2d.viewer.drawers.bodies.AnchorableBodyDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.bodies.RigidBodyDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.bodies.SoftBodyDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.bodies.UnmovableBodyDrawer;
+import it.units.erallab.mrsim2d.viewer.drawers.bodies.*;
 import it.units.erallab.mrsim2d.viewer.framers.AllAgentsFramer;
 
 import java.util.List;
@@ -59,6 +56,7 @@ public class Drawers {
             new ComponentsDrawer(
                 List.of(
                     new UnmovableBodyDrawer(),
+                    new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
                     new RigidBodyDrawer(),
                     new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
                 ), Snapshot::bodies
