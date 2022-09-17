@@ -16,9 +16,6 @@
 
 package it.units.erallab.mrsim2d.builder;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -622,13 +619,6 @@ public class StringNamedParamMap implements NamedParamMap {
     names.addAll(ssMap.keySet());
     names.addAll(npmsMap.keySet());
     return names;
-  }
-
-  public static void main(String[] args) throws FileNotFoundException {
-    BufferedReader br = new BufferedReader(new FileReader("/home/eric/Documenti/experiments/vsrs/exp-stand-piling.txt"));
-    String s = br.lines().collect(Collectors.joining("\n"));
-    NamedParamMap m = parse(s);
-    System.out.println(prettyToString(m));
   }
 
   @Override
