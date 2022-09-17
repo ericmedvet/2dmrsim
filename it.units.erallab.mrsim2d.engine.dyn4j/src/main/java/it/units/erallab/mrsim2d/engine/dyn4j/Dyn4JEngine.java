@@ -99,6 +99,20 @@ public class Dyn4JEngine extends AbstractEngine {
     );
   }
 
+  private RotationalJoint actuateRotationalJoint(
+      ActuateRotationalJoint action,
+      Agent agent
+  ) throws IllegalActionException {
+    if (action.rotationalJoint() instanceof RotationalJoint rotationalJoint) {
+      rotationalJoint.setJointTargetAngle(action.targetAngle());
+      return rotationalJoint;
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Unsupported rotationalJoint type %s", action.rotationalJoint().getClass().getSimpleName())
+    );
+  }
+
   private Double attractAnchor(AttractAnchor action, Agent agent) throws IllegalActionException {
     if (action.source().anchorable() == action.destination().anchorable()) {
       throw new IllegalActionException(action, "Cannot attract an anchor of the same body");
@@ -264,6 +278,13 @@ public class Dyn4JEngine extends AbstractEngine {
 
   @Override
   protected double innerTick() {
+    //control rotational joint
+    bodies.forEach(b -> {
+      if (b instanceof RotationalJoint rotationalJoint) {
+        rotationalJoint.actuate();
+      }
+    });
+    //tick
     world.step(1);
     return t() + configuration.innerSettings().getStepFrequency();
   }
@@ -279,6 +300,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(RemoveLink.class, this::removeLink);
     registerActionSolver(RemoveBody.class, this::removeBody);
     registerActionSolver(ActuateVoxel.class, this::actuateVoxel);
+    registerActionSolver(ActuateRotationalJoint.class, this::actuateRotationalJoint);
     registerActionSolver(AttractAnchor.class, this::attractAnchor);
     registerActionSolver(SenseDistanceToBody.class, this::senseDistanceToBody);
     registerActionSolver(FindInContactBodies.class, this::findInContactBodies);

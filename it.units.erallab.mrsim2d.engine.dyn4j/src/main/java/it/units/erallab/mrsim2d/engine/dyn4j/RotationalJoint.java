@@ -26,6 +26,7 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
 
   private final List<Anchor> anchors;
   private final Vector2 initialRefDirection;
+  private double jointTargetAngle;
 
   public RotationalJoint(
       double length,
@@ -46,6 +47,7 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     }
     this.mass = mass;
     jointLength = Math.sqrt(2d) * width / 2d;
+    jointTargetAngle = 0;
     //create bodies
     Poly poly1 = new Path(new Point(0, 0)).moveBy(length / 2d - width / 2d, 0)
         .moveBy(width / 2d, width / 2d)
@@ -66,13 +68,14 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     joint.setReferenceAngle(0);
     joint.setLimits(JOINT_ANGLE_RANGE.min(), JOINT_ANGLE_RANGE.max());
     joint.setLimitEnabled(true);
+    joint.setMotorEnabled(true);
     //create anchors
     anchors = List.of(
         new BodyAnchor(body1, this),
         new BodyAnchor(body2, this)
     );
     //set initial first direction
-    initialRefDirection = getRefDirection(poly());
+    initialRefDirection = getRefDirection();
   }
 
   private static Body createBody(
@@ -96,13 +99,19 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     return body;
   }
 
-  private static Vector2 getRefDirection(Poly poly) {
-    Point pEast = poly.sides().get(9).center();
-    Point pWest = poly.sides().get(4).center();
-    return new Vector2(
-        pEast.x(), pEast.y(),
-        pWest.x(), pEast.y()
+  protected void actuate() { // TODO remove printing, add constants
+    System.out.printf(
+        "t=%.1f s=%.1f ca=%.0f ta=%.0f%n",
+        joint.getMaximumMotorTorque(),
+        joint.getJointSpeed(),
+        Math.toDegrees(jointAngle()),
+        Math.toDegrees(jointTargetAngle)
     );
+    if (jointAngle() < jointTargetAngle * 0.9) {
+      joint.setMotorSpeed(1);
+    } else if (jointAngle() > jointTargetAngle * 1.1) {
+      joint.setMotorSpeed(-1);
+    }
   }
 
   private static Poly polyFromBody(Body body) {
@@ -121,7 +130,7 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
 
   @Override
   public double angle() {
-    Vector2 currentRefDirection = getRefDirection(poly());
+    Vector2 currentRefDirection = getRefDirection();
     return -currentRefDirection.getAngleBetween(initialRefDirection);
   }
 
@@ -178,5 +187,23 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     System.arraycopy(ps2, 0, ps, 2, 5);
     System.arraycopy(ps1, 2, ps, 7, 3);
     return new Poly(ps);
+  }
+
+  private Vector2 getRefDirection() {
+    Vector2 c1 = body1.getWorldCenter();
+    Vector2 c2 = body2.getWorldCenter();
+    return new Vector2(
+        c1.x, c1.y,
+        c2.x, c2.y
+    );
+  }
+
+  @Override
+  public double jointTargetAngle() {
+    return jointTargetAngle;
+  }
+
+  protected void setJointTargetAngle(double jointTargetAngle) {
+    this.jointTargetAngle = jointAngleRange().clip(jointTargetAngle);
   }
 }
