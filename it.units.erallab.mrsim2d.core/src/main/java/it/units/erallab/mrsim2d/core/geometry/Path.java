@@ -47,15 +47,15 @@ public record Path(Point[] points) {
     return path;
   }
 
-  public Path moveTo(double x, double y) {
-    return moveTo(new Point(x, y));
+  public Path moveBy(double x, double y) {
+    return moveBy(new Point(x, y));
   }
 
-  public Path moveTo(Point point) {
+  public Path moveBy(Point point) {
     return add(points[points.length - 1].sum(point));
   }
 
-  public Path moveTo(Path other) {
+  public Path moveBy(Path other) {
     Path path = this;
     for (Point p : other.points) {
       path = path.add(p.sum(points[points.length - 1]));
