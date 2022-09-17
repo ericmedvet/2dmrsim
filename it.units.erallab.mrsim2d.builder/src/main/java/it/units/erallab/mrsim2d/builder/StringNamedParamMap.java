@@ -16,6 +16,9 @@
 
 package it.units.erallab.mrsim2d.builder;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -621,12 +624,11 @@ public class StringNamedParamMap implements NamedParamMap {
     return names;
   }
 
-  @Override
-  public Boolean b(String n) {
-    if (sMap.containsKey(n)) {
-      return sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString());
-    }
-    return null;
+  public static void main(String[] args) throws FileNotFoundException {
+    BufferedReader br = new BufferedReader(new FileReader("/home/eric/Documenti/experiments/vsrs/exp-stand-piling.txt"));
+    String s = br.lines().collect(Collectors.joining("\n"));
+    NamedParamMap m = parse(s);
+    System.out.println(prettyToString(m));
   }
 
   @Override
@@ -729,4 +731,13 @@ public class StringNamedParamMap implements NamedParamMap {
     return sb.toString();
   }
 
+  @Override
+  public Boolean b(String n) {
+    if (sMap.containsKey(n) &&
+        (sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString()) ||
+            sMap.get(n).equalsIgnoreCase(Boolean.FALSE.toString()))) {
+      return sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString());
+    }
+    return null;
+  }
 }
