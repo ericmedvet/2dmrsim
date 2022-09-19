@@ -55,10 +55,10 @@ public class Drawers {
         Drawer.of(
             new ComponentsDrawer(
                 List.of(
-                    new UnmovableBodyDrawer(),
+                    new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
                     new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-                    new RigidBodyDrawer(),
-                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer())
+                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                    new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
                 ), Snapshot::bodies
             ).onLastSnapshot(),
             new ComponentsDrawer(

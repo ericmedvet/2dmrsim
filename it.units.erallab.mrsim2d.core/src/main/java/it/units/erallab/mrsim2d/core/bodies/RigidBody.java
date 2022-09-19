@@ -19,5 +19,5 @@ package it.units.erallab.mrsim2d.core.bodies;
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public interface RigidBody extends Body {
+public interface RigidBody extends Anchorable {
 }

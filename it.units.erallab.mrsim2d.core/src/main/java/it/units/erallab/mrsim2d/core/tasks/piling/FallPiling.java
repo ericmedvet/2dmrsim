@@ -100,7 +100,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
       Consumer<Snapshot> snapshotConsumer
   ) {
     //build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
     //run for defined time
     Map<Double, Outcome.Observation> observations = new HashMap<>();
     List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);

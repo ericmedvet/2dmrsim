@@ -53,7 +53,7 @@ public class Dyn4JEngine extends AbstractEngine {
       1, 0.5,
       1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(Voxel.SpringScaffolding.class),
       8d, 0.3d, 0.5d,
-      10
+      10, 0.2
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
@@ -85,7 +85,8 @@ public class Dyn4JEngine extends AbstractEngine {
       double softLinkSpringF,
       double softLinkSpringD,
       double softLinkRestDistanceRatio,
-      double attractionMaxMagnitude
+      double attractionMaxMagnitude,
+      double anchorVertexToCenterRatio
   ) {}
 
   private RotationalJoint actuateRotationalJoint(
@@ -199,10 +200,12 @@ public class Dyn4JEngine extends AbstractEngine {
     RigidBody rigidBody = new RigidBody(
         action.poly(),
         action.mass(),
+        action.useAnchors(),
         configuration.rigidBodyFriction,
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
-        configuration.rigidBodyAngularDamping
+        configuration.rigidBodyAngularDamping,
+        configuration.anchorVertexToCenterRatio
     );
     rigidBody.getBodies().forEach(world::addBody);
     bodies.add(rigidBody);
@@ -218,7 +221,8 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.rigidBodyFriction,
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
-        configuration.rigidBodyAngularDamping
+        configuration.rigidBodyAngularDamping,
+        configuration.anchorVertexToCenterRatio
     );
     rotationalJoint.getBodies().forEach(world::addBody);
     rotationalJoint.getJoints().forEach(world::addJoint);
@@ -229,6 +233,7 @@ public class Dyn4JEngine extends AbstractEngine {
   private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
     UnmovableBody unmovableBody = new UnmovableBody(
         action.poly(),
+        action.useAnchors(),
         configuration.unmovableBodyFriction,
         configuration.unmovableBodyRestitution
     );

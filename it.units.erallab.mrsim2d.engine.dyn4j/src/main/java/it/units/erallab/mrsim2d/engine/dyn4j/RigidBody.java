@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.engine.dyn4j;
 
+import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import org.dyn4j.dynamics.Body;
@@ -25,6 +26,7 @@ import org.dyn4j.geometry.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -34,14 +36,17 @@ public class RigidBody implements it.units.erallab.mrsim2d.core.bodies.RigidBody
   private final Body body;
   private final double mass;
   private final Vector2 initialFirstSideDirection;
+  private final List<Anchor> anchors;
 
   public RigidBody(
       Poly convexPoly,
       double mass,
+      boolean useAnchors,
       double friction,
       double restitution,
       double linearDamping,
-      double angularDamping
+      double angularDamping,
+      double anchorVertexToCenterRatio
   ) {
     this.mass = mass;
     Convex convex = new Polygon(
@@ -56,6 +61,19 @@ public class RigidBody implements it.units.erallab.mrsim2d.core.bodies.RigidBody
     body.setAngularDamping(angularDamping);
     body.setUserData(this);
     initialFirstSideDirection = getFirstSideDirection();
+    if (useAnchors) {
+      anchors = Arrays.stream(convexPoly.vertexes())
+          .map(v -> v.diff(convexPoly.center()).scale(1 - anchorVertexToCenterRatio))
+          .map(v -> new BodyAnchor(body, v, this))
+          .collect(Collectors.toList());
+    } else {
+      anchors = List.of();
+    }
+  }
+
+  @Override
+  public List<Anchor> anchors() {
+    return anchors;
   }
 
   @Override

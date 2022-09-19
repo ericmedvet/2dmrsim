@@ -24,6 +24,7 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public record CreateUnmovableBody(
-    Poly poly
+    Poly poly,
+    boolean useAnchors
 ) implements Action<UnmovableBody> {
 }

@@ -24,6 +24,7 @@ import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
+import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
@@ -55,9 +56,9 @@ import java.util.stream.IntStream;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public class Main {
-  private static void ball(Engine engine, Poly terrain, Consumer<Snapshot> consumer) {
-    engine.perform(new CreateUnmovableBody(terrain));
-    Body ball = engine.perform(new CreateAndTranslateRigidBody(Poly.regular(1, 32), 1, new Point(2, 2)))
+  private static void ball(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
+    Body ball = engine.perform(new CreateAndTranslateRigidBody(Poly.regular(1, 8), 1, true, new Point(2, 2)))
         .outcome()
         .orElseThrow();
     Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(10, 1))).outcome().orElseThrow();
@@ -75,7 +76,7 @@ public class Main {
     double interval = 5d;
     double lastT = Double.NEGATIVE_INFINITY;
     double sideInterval = 2d;
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
     RandomGenerator rg = new Random();
     List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of(
         v -> new SenseRotatedVelocity(0, v),
@@ -117,10 +118,9 @@ public class Main {
     }
   }
 
-  private static void locomotion(Engine engine, String terrain, Consumer<Snapshot> consumer) {
+  private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = NamedBuilder.empty()
         .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
-        .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
@@ -149,7 +149,7 @@ public class Main {
         body,
         mlp
     );
-    Locomotion locomotion = new Locomotion(30, (Terrain) nb.build(terrain));
+    Locomotion locomotion = new Locomotion(30, terrain);
     Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
   }
@@ -157,36 +157,44 @@ public class Main {
   public static void main(String[] args) {
     Drawer drawer = Drawers.basic().profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
+        400,
         300,
-        200,
         0,
-        50,
+        30,
         30,
         VideoUtils.EncoderFacility.FFMPEG_LARGE,
-        new File("/home/eric/experiments/out-locomotion.mp4"),
+        new File("/home/eric/experiments/2dmrsim/rot-joint-pid.mp4"),
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 1d);
+    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 5d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     rotationalJoint(engine, terrain, viewer);
+    //locomotion(engine, terrain, viewer);
+    //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
 
   private static void rotationalJoint(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
     //engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new Point(4,0))).outcome().orElseThrow();
     RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(
         3d,
         1d,
         1d,
         new RotationalJoint.Motor(),
-        new Point(5, 2)
+        new Point(5, 5)
     )).outcome().orElseThrow();
-    engine.perform(new RotateBody(rj, Math.toRadians(90)));
-    //engine.perform(new ActuateRotationalJoint(rj, Math.toRadians(-60)));
+    //engine.perform(new RotateBody(rj, new Point(5, 5), Math.toRadians(90)));
+    Voxel v1 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(4.5, 5.5))).outcome().orElseThrow();
+    Voxel v2 = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(8.5, 5.5))).outcome().orElseThrow();
+    engine.perform(new AttachClosestAnchors(2, v1, rj, Anchor.Link.Type.RIGID));
+    engine.perform(new AttachClosestAnchors(2, v2, rj, Anchor.Link.Type.RIGID));
+    double f = 0.5d;
+    double a = 60d;
     while (engine.t() < 10) {
+      engine.perform(new ActuateRotationalJoint(rj, Math.toRadians(a * Math.sin(2 * Math.PI * f * engine.t()))));
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
     }

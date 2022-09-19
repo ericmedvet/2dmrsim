@@ -41,7 +41,8 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
       double friction,
       double restitution,
       double linearDamping,
-      double angularDamping
+      double angularDamping,
+      double anchorVertexToCenterRatio
   ) {
     //check length and with consistency
     if (length < width) {
@@ -55,7 +56,7 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     this.motor = motor;
     jointLength = Math.sqrt(2d) * width / 2d;
     //create bodies
-    Poly poly1 = new Path(new Point(0, 0)).moveBy(length / 2d - width / 2d, 0)
+    Poly poly1 = new Path(Point.ORIGIN).moveBy(length / 2d - width / 2d, 0)
         .moveBy(width / 2d, width / 2d)
         .moveBy(-width / 2d, width / 2d)
         .moveBy(-(length / 2d - width / 2d), 0)
@@ -78,8 +79,26 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     joint.setMaximumMotorTorque(motor.maxTorque());
     //create anchors
     anchors = List.of(
-        new BodyAnchor(body1, this),
-        new BodyAnchor(body2, this)
+        new BodyAnchor(
+            body1,
+            poly1.vertexes()[0].diff(poly1.center()).scale(1 - anchorVertexToCenterRatio),
+            this
+        ),
+        new BodyAnchor(
+            body1,
+            poly1.vertexes()[4].diff(poly1.center()).scale(1 - anchorVertexToCenterRatio),
+            this
+        ),
+        new BodyAnchor(
+            body2,
+            poly2.vertexes()[2].diff(poly2.center()).scale(1 - anchorVertexToCenterRatio),
+            this
+        ),
+        new BodyAnchor(
+            body2,
+            poly2.vertexes()[3].diff(poly2.center()).scale(1 - anchorVertexToCenterRatio),
+            this
+        )
     );
     //set initial first direction
     initialRefDirection = getRefDirection();
@@ -227,4 +246,10 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
   protected void setJointTargetAngle(double jointTargetAngle) {
     this.jointTargetAngle = jointAngleRange().clip(jointTargetAngle);
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s at %s", this.getClass().getSimpleName(), poly().center());
+  }
+
 }

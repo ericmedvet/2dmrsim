@@ -30,7 +30,7 @@ public record Poly(Point... vertexes) implements Shape {
 
   public static Poly rectangle(double w, double h) {
     return new Poly(
-        new Point(0, 0),
+        Point.ORIGIN,
         new Point(w, 0),
         new Point(w, h),
         new Point(0, h)

@@ -25,6 +25,7 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
  */
 public record CreateRigidBody(
     Poly poly,
-    double mass
+    double mass,
+    boolean useAnchors
 ) implements Action<RigidBody> {
 }

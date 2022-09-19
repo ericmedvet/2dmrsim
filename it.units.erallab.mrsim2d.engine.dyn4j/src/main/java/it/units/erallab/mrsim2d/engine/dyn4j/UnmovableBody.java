@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.engine.dyn4j;
 
+import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import org.dyn4j.dynamics.AbstractPhysicsBody;
@@ -29,6 +30,7 @@ import org.dyn4j.geometry.Vector2;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -37,11 +39,13 @@ public class UnmovableBody implements it.units.erallab.mrsim2d.core.bodies.Unmov
 
   private final Poly poly;
   private final List<Body> bodies;
+  private final List<Anchor> anchors;
 
   private final Point initialCenter;
 
   public UnmovableBody(
       Poly poly,
+      boolean useAnchors,
       double friction,
       double restitution
   ) {
@@ -62,6 +66,17 @@ public class UnmovableBody implements it.units.erallab.mrsim2d.core.bodies.Unmov
         .toList();
     initialCenter = center(bodies);
     bodies.forEach(b -> b.setUserData(this));
+    if (useAnchors) {
+      anchors = poly.sides().stream()
+          .map(s -> new BodyAnchor(
+              bodies.get(0),
+              new Point(bodies.get(0).getWorldCenter().x, bodies.get(0).getWorldCenter().y).diff(s.center()),
+              this
+          ))
+          .collect(Collectors.toList());
+    } else {
+      anchors = List.of();
+    }
   }
 
   private static Point center(List<Body> bodies) {
@@ -69,6 +84,11 @@ public class UnmovableBody implements it.units.erallab.mrsim2d.core.bodies.Unmov
         .map(AbstractPhysicsBody::getWorldCenter)
         .map(v -> new Point(v.x, v.y))
         .toArray(Point[]::new));
+  }
+
+  @Override
+  public List<Anchor> anchors() {
+    return anchors;
   }
 
   @Override

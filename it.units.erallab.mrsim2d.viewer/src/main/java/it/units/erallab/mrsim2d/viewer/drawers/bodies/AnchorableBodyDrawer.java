@@ -32,7 +32,7 @@ import java.awt.geom.Line2D;
  */
 public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
 
-  private final static Color ANCHOR_COLOR = Color.GRAY;
+  private final static Color ANCHOR_COLOR = Color.LIGHT_GRAY;
   private final static double ANCHOR_DOT_RADIUS = .05;
   private final static int SOFT_LINK_POINTS = 3;
   private final static double SOFT_LINK_WIDTH = .1;
@@ -65,15 +65,13 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
               anchor.point().x(), anchor.point().y(),
               midPoint.x(), midPoint.y()
           ));
-          case SOFT -> {
-            g.draw(DrawingUtils.toPath(
-                PolyUtils.zigZag(anchor.point(), midPoint, SOFT_LINK_POINTS, SOFT_LINK_WIDTH).points()
-            ));
-          }
+          case SOFT -> g.draw(DrawingUtils.toPath(
+              PolyUtils.zigZag(anchor.point(), midPoint, SOFT_LINK_POINTS, SOFT_LINK_WIDTH).points()
+          ));
         }
       }
     }
-    return !anchorable.anchors().isEmpty();
+    return true;
   }
 
 }

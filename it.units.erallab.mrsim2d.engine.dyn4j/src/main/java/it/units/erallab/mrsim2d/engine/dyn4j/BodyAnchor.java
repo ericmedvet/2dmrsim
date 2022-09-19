@@ -21,6 +21,7 @@ import it.units.erallab.mrsim2d.core.bodies.Anchorable;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
+import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 import java.util.Collection;
@@ -34,13 +35,19 @@ import java.util.Objects;
 public class BodyAnchor implements Anchor {
 
   private final Body body;
+  private final Point displacement;
   private final Anchorable anchorable;
   private final Map<Link, Joint<Body>> jointMap;
 
-  public BodyAnchor(Body body, Anchorable anchorable) {
+  public BodyAnchor(Body body, Point displacement, Anchorable anchorable) {
     this.body = body;
+    this.displacement = displacement;
     this.anchorable = anchorable;
     jointMap = new LinkedHashMap<>();
+  }
+
+  public BodyAnchor(Body body, Anchorable anchorable) {
+    this(body, Point.ORIGIN, anchorable);
   }
 
   @Override
@@ -55,8 +62,10 @@ public class BodyAnchor implements Anchor {
 
   @Override
   public Point point() {
-    Vector2 center = body.getWorldCenter();
-    return new Point(center.x, center.y);
+    Transform t = body.getTransform();
+    Vector2 dV = new Vector2(displacement.x(), displacement.y()).add(body.getLocalCenter());
+    t.transform(dV);
+    return new Point(dV.x, dV.y);
   }
 
   protected Body getBody() {

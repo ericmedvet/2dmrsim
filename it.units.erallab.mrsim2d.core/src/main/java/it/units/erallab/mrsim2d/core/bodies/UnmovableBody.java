@@ -29,7 +29,7 @@ public interface UnmovableBody extends RigidBody {
 
   @Override
   default Point centerLinearVelocity() {
-    return new Point(0d, 0d);
+    return Point.ORIGIN;
   }
 
   @Override

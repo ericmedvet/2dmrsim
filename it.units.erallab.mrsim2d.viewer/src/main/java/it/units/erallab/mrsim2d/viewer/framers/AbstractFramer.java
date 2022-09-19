@@ -25,7 +25,7 @@ import it.units.erallab.mrsim2d.viewer.Framer;
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
 public abstract class AbstractFramer implements Framer {
-  public static final BoundingBox DEFAULT_BOUNDING_BOX = new BoundingBox(new Point(0, 0), new Point(10, 5));
+  public static final BoundingBox DEFAULT_BOUNDING_BOX = new BoundingBox(Point.ORIGIN, new Point(10, 5));
   private final double sizeRelativeMargin;
 
   public AbstractFramer(double sizeRelativeMargin) {
