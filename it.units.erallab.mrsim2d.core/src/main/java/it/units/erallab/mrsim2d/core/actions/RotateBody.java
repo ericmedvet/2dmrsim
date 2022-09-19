@@ -18,12 +18,17 @@ package it.units.erallab.mrsim2d.core.actions;
 
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.bodies.Body;
+import it.units.erallab.mrsim2d.core.geometry.Point;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
 public record RotateBody(
     Body body,
+    Point point,
     double angle
 ) implements Action<Body> {
+  public RotateBody(Body body, double angle) {
+    this(body, body.poly().center(), angle);
+  }
 }

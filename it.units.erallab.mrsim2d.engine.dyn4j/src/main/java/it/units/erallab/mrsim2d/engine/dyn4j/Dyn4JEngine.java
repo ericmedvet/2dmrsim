@@ -295,6 +295,7 @@ public class Dyn4JEngine extends AbstractEngine {
     registerActionSolver(CreateRigidBody.class, this::createRigidBody);
     registerActionSolver(CreateUnmovableBody.class, this::createUnmovableBody);
     registerActionSolver(TranslateBody.class, this::translateBody);
+    registerActionSolver(RotateBody.class, this::rotateBody);
     registerActionSolver(CreateVoxel.class, this::createVoxel);
     registerActionSolver(CreateRotationalJoint.class, this::createRotationalJoint);
     registerActionSolver(CreateLink.class, this::createLink);
@@ -344,6 +345,17 @@ public class Dyn4JEngine extends AbstractEngine {
             action.link().source().getClass().getSimpleName(),
             action.link().destination().getClass().getSimpleName()
         )
+    );
+  }
+
+  private Body rotateBody(RotateBody action, Agent agent) throws IllegalActionException {
+    if (action.body() instanceof MultipartBody multipartBody) {
+      multipartBody.getBodies().forEach(b -> b.rotate(action.angle(), action.point().x(), action.point().y()));
+      return action.body();
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Untranslatable body type: %s", action.body().getClass().getName())
     );
   }
 
