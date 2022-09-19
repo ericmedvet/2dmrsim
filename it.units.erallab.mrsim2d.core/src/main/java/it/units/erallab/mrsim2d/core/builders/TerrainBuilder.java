@@ -46,7 +46,7 @@ public class TerrainBuilder {
       @Param(value = "a", dD = ANGLE) Double a
   ) {
     return fromPath(
-        new Path(new Point(w, -w * Math.sin(a / 180 * Math.PI))),
+        new Path(new Point(w, -w * Math.toRadians(a))),
         h, borderW, borderH
     );
   }
@@ -66,7 +66,7 @@ public class TerrainBuilder {
   }
 
   private static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
-    Path path = new Path(new Point(0, 0))
+    Path path = new Path(Point.ORIGIN)
         .moveBy(0, borderH)
         .moveBy(borderW, 0)
         .moveBy(0, -borderH)
@@ -134,7 +134,7 @@ public class TerrainBuilder {
       @Param(value = "a", dD = ANGLE) Double a
   ) {
     return fromPath(
-        new Path(new Point(w, w * Math.sin(a / 180 * Math.PI))),
+        new Path(new Point(w, w * Math.toRadians(a))),
         h, borderW, borderH
     );
 
