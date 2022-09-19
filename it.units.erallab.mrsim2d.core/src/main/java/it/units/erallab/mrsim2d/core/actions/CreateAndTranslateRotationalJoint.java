@@ -11,12 +11,13 @@ public record CreateAndTranslateRotationalJoint(
     double length,
     double width,
     double mass,
+    RotationalJoint.Motor motor,
     Point translation
 ) implements SelfDescribedAction<RotationalJoint> {
   @Override
   public RotationalJoint perform(ActionPerformer performer, Agent agent) throws ActionException {
     RotationalJoint rotationalJoint = performer.perform(
-        new CreateRotationalJoint(length, width, mass),
+        new CreateRotationalJoint(length, width, mass, motor),
         agent
     ).outcome().orElseThrow(() -> new ActionException(this, "Undoable creation"));
     performer.perform(new TranslateBody(rotationalJoint, translation), agent);

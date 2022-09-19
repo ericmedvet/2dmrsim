@@ -177,7 +177,7 @@ public class Main {
   private static void rotationalJoint(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     //engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new Point(4,0))).outcome().orElseThrow();
-    RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new Point(5,1.5))).outcome().orElseThrow();
+    RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new RotationalJoint.Motor(), new Point(5,1.5))).outcome().orElseThrow();
     engine.perform(new ActuateRotationalJoint(rj, Math.toRadians(-60)));
     while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();

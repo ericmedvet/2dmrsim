@@ -6,6 +6,7 @@ import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 public record CreateRotationalJoint(
     double length,
     double width,
-    double mass
+    double mass,
+    RotationalJoint.Motor motor
 ) implements Action<RotationalJoint> {
 }

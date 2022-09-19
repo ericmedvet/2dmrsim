@@ -88,17 +88,6 @@ public class Dyn4JEngine extends AbstractEngine {
       double attractionMaxMagnitude
   ) {}
 
-  private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
-    if (action.voxel() instanceof Voxel voxel) {
-      voxel.actuate(action.values());
-      return voxel;
-    }
-    throw new IllegalActionException(
-        action,
-        String.format("Unsupported voxel type %s", action.voxel().getClass().getSimpleName())
-    );
-  }
-
   private RotationalJoint actuateRotationalJoint(
       ActuateRotationalJoint action,
       Agent agent
@@ -110,6 +99,17 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format("Unsupported rotationalJoint type %s", action.rotationalJoint().getClass().getSimpleName())
+    );
+  }
+
+  private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
+    if (action.voxel() instanceof Voxel voxel) {
+      voxel.actuate(action.values());
+      return voxel;
+    }
+    throw new IllegalActionException(
+        action,
+        String.format("Unsupported voxel type %s", action.voxel().getClass().getSimpleName())
     );
   }
 
@@ -209,6 +209,23 @@ public class Dyn4JEngine extends AbstractEngine {
     return rigidBody;
   }
 
+  private RotationalJoint createRotationalJoint(CreateRotationalJoint action, Agent agent) {
+    RotationalJoint rotationalJoint = new RotationalJoint(
+        action.length(),
+        action.width(),
+        action.mass(),
+        action.motor(),
+        configuration.rigidBodyFriction,
+        configuration.rigidBodyRestitution,
+        configuration.rigidBodyLinearDamping,
+        configuration.rigidBodyAngularDamping
+    );
+    rotationalJoint.getBodies().forEach(world::addBody);
+    rotationalJoint.getJoints().forEach(world::addJoint);
+    bodies.add(rotationalJoint);
+    return rotationalJoint;
+  }
+
   private UnmovableBody createUnmovableBody(CreateUnmovableBody action, Agent agent) {
     UnmovableBody unmovableBody = new UnmovableBody(
         action.poly(),
@@ -239,22 +256,6 @@ public class Dyn4JEngine extends AbstractEngine {
     return voxel;
   }
 
-  private RotationalJoint createRotationalJoint(CreateRotationalJoint action, Agent agent) {
-    RotationalJoint rotationalJoint = new RotationalJoint(
-        action.length(),
-        action.width(),
-        action.mass(),
-        configuration.rigidBodyFriction,
-        configuration.rigidBodyRestitution,
-        configuration.rigidBodyLinearDamping,
-        configuration.rigidBodyAngularDamping
-    );
-    rotationalJoint.getBodies().forEach(world::addBody);
-    rotationalJoint.getJoints().forEach(world::addJoint);
-    bodies.add(rotationalJoint);
-    return rotationalJoint;
-  }
-
   private Collection<Body> findInContactBodies(FindInContactBodies action, Agent agent) throws IllegalActionException {
     if (action.body() instanceof MultipartBody multipartBody) {
       return multipartBody.getBodies().stream()
@@ -280,8 +281,8 @@ public class Dyn4JEngine extends AbstractEngine {
   protected double innerTick() {
     //control rotational joint
     bodies.forEach(b -> {
-      if (b instanceof RotationalJoint rotationalJoint) {
-        rotationalJoint.actuate();
+      if (b instanceof Actuable actuable) {
+        actuable.actuate();
       }
     });
     //tick
