@@ -34,7 +34,8 @@ public record Terrain(Poly poly, DoubleRange withinBordersXRange) {
     );
     xs.add(xRange.min());
     xs.add(xRange.max());
-    return xs.stream().mapToDouble(x -> PolyUtils.maxYAtX(poly, x))
+    return xs.stream().distinct().mapToDouble(x -> PolyUtils.maxYAtX(poly, x))
+        .filter(d -> !Double.isNaN(d))
         .max()
         .orElseThrow(() -> new IllegalArgumentException("Cannot find a terrain max y in range %.1f, %.1f.".formatted(
                 xRange.min(),

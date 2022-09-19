@@ -69,13 +69,18 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
     //create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     //build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
     engine.perform(new AddAgent(embodiedAgent));
     //place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();
-    double maxY = terrain.maxHeightAt(agentBB.xRange());
     engine.perform(new TranslateAgent(embodiedAgent, new Point(
         terrain.withinBordersXRange().min() + initialXGap - agentBB.min().x(),
+        0
+    )));
+    agentBB = embodiedAgent.boundingBox();
+    double maxY = terrain.maxHeightAt(agentBB.xRange());
+    engine.perform(new TranslateAgent(embodiedAgent, new Point(
+        0,
         maxY + initialYGap - agentBB.min().y()
     )));
     //run for defined time
