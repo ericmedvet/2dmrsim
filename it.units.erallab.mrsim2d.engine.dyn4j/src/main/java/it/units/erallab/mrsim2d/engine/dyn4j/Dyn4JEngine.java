@@ -282,7 +282,7 @@ public class Dyn4JEngine extends AbstractEngine {
     //control rotational joint
     bodies.forEach(b -> {
       if (b instanceof Actuable actuable) {
-        actuable.actuate();
+        actuable.actuate(t(), t() - configuration.innerSettings().getStepFrequency());
       }
     });
     //tick

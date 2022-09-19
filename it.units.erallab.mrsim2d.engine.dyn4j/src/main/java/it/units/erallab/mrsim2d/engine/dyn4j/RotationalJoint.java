@@ -19,15 +19,19 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
 
   private static final double ANCHOR_REL_GAP = 0.1;
   private final double mass;
+  private final Motor motor;
+
   private final Body body1;
   private final Body body2;
   private final RevoluteJoint<Body> joint;
   private final double jointLength;
-  private final Motor motor;
 
   private final List<Anchor> anchors;
   private final Vector2 initialRefDirection;
+
   private double jointTargetAngle;
+  private double angleErrorSummation;
+  private double lastAngleError;
 
   public RotationalJoint(
       double length,
@@ -50,7 +54,6 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     this.mass = mass;
     this.motor = motor;
     jointLength = Math.sqrt(2d) * width / 2d;
-    jointTargetAngle = 0;
     //create bodies
     Poly poly1 = new Path(new Point(0, 0)).moveBy(length / 2d - width / 2d, 0)
         .moveBy(width / 2d, width / 2d)
@@ -80,6 +83,10 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     );
     //set initial first direction
     initialRefDirection = getRefDirection();
+    //set control vars
+    jointTargetAngle = 0;
+    angleErrorSummation = 0;
+    lastAngleError = 0;
   }
 
   private static Body createBody(
@@ -113,14 +120,28 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
   }
 
   @Override
-  public void actuate() {
-    if (jointAngle() < jointTargetAngle * 0.9) {
-      joint.setMotorSpeed(motor.speed());
-    } else if (jointAngle() > jointTargetAngle * 1.1) {
-      joint.setMotorSpeed(-motor.speed());
-    } else {
-      joint.setMotorSpeed(0);
+  public void actuate(double t, double lastT) {
+    //compute things
+    double dT = t - lastT;
+    double angleError = jointTargetAngle - jointAngle();
+    angleErrorSummation = angleErrorSummation + angleError * dT;
+    double angleDerivate = (angleError - lastAngleError) / dT;
+    lastAngleError = angleError;
+    //check if need to control
+    if (Math.abs(angleError) < motor.angleTolerance()) {
+      joint.setMotorSpeed(0d);
+      return;
     }
+    //control
+    double motorSpeed = motor.controlP() * angleError
+        + motor.controlI() * angleErrorSummation
+        + motor.controlD() * angleDerivate;
+    if (motorSpeed > motor.maxSpeed()) {
+      motorSpeed = motor.maxSpeed();
+    } else if (motorSpeed < -motor.maxSpeed()) {
+      motorSpeed = -motor.maxSpeed();
+    }
+    joint.setMotorSpeed(motorSpeed);
   }
 
   @Override
