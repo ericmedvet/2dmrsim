@@ -28,9 +28,10 @@ public interface ComponentDrawer {
   default ComponentDrawer andThen(ComponentDrawer otherDrawer) {
     ComponentDrawer thisDrawer = this;
     return (t, component, g) -> {
-      boolean firstDrawn = thisDrawer.draw(t, component, g);
-      boolean otherDrawn = otherDrawer.draw(t, component, g);
-      return firstDrawn || otherDrawn;
+      if (thisDrawer.draw(t, component, g)) {
+        return otherDrawer.draw(t, component, g);
+      }
+      return false;
     };
   }
 
