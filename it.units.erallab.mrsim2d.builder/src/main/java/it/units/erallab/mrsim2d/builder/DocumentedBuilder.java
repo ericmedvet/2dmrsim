@@ -27,11 +27,13 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     DOUBLE("d"),
     STRING("s"),
     BOOLEAN("b"),
+    ENUM("e"),
     NAMED_PARAM_MAP("npm"),
     INTS("i[]"),
     DOUBLES("d[]"),
     STRINGS("s[]"),
     BOOLEANS("b[]"),
+    ENUMS("e[]"),
     NAMED_PARAM_MAPS("npm[]");
     private final String rendered;
 
@@ -44,7 +46,7 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     }
   }
 
-  record ParamInfo(Type type, String name, Object defaultValue, boolean self) {
+  record ParamInfo(Type type, Class<?> clazz, String name, Object defaultValue, boolean self) {
     @Override
     public String toString() {
       return String.format(

@@ -43,6 +43,22 @@ public interface ParamMap {
 
   List<String> ss(String n);
 
+  default <E extends Enum<E>> E e(String n, Class<E> enumClass) {
+    return s(n) == null ? null : Enum.valueOf(enumClass, s(n).toUpperCase());
+  }
+
+  default <E extends Enum<E>> E e(String n, Class<E> enumClass, E defaultValue) {
+    return e(n, enumClass) == null ? defaultValue : e(n, defaultValue.getDeclaringClass());
+  }
+
+  default <E extends Enum<E>> List<E> es(String n, Class<E> enumClass) {
+    return ss(n) == null ? null : ss(n).stream().map(s -> Enum.valueOf(enumClass, s.toUpperCase())).toList();
+  }
+
+  default <E extends Enum<E>> List<E> es(String n, Class<E> enumClass, List<E> defaultValue) {
+    return es(n, enumClass) == null ? defaultValue : es(n, enumClass);
+  }
+
   default boolean b(String n, boolean defaultValue) {
     return b(n) == null ? defaultValue : b(n);
   }
