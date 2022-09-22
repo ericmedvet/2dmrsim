@@ -57,6 +57,7 @@ public class NumGridVSR extends AbstractGridVSR {
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
   }
 
+  @BuilderMethod
   public NumGridVSR(@Param("body") Body body) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
   }

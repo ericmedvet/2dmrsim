@@ -21,9 +21,7 @@ import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
@@ -42,7 +40,6 @@ import it.units.erallab.mrsim2d.viewer.*;
 
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -117,33 +114,27 @@ public class Main {
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get()
-        .and(NamedBuilder.fromClass(NumGridVSR.Body.class));
-    String bodyS = """
-        body(
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.centralizedNumGridVSR(body=s.vsr.body(
           shape=s.vsr.s.biped(w=4;h=3);
           sensorizingFunction=s.vsr.sf.directional(
             sSensors=[s.s.d(a=-90)];
             headSensors=[s.s.sin();s.s.d(a=-15;r=5)];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           )
-        )
+        ))
         """;
-    NumGridVSR.Body body = (NumGridVSR.Body) nb.build(bodyS);
-    int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
-        nOfInputs,
+        vsr.getTimedRealFunction().nOfInputs(),
         new int[]{10},
-        nOfOutputs
+        vsr.getTimedRealFunction().nOfOutputs()
     );
     RandomGenerator rg = new Random();
     mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    AbstractGridVSR vsr = new CentralizedNumGridVSR(
-        body,
-        mlp
-    );
+    vsr.setTimedRealFunction(mlp);
     Locomotion locomotion = new Locomotion(30, terrain);
     Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
     System.out.println(outcome);
