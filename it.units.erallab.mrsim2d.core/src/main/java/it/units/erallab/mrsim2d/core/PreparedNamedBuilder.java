@@ -19,9 +19,9 @@ package it.units.erallab.mrsim2d.core;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
+import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
 import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctionBuilder;
-import it.units.erallab.mrsim2d.core.builders.VoxelSensorBuilder;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
@@ -38,6 +38,7 @@ public class PreparedNamedBuilder {
               .and(NamedBuilder.fromClass(FallPiling.class))
               .and(NamedBuilder.fromClass(StandPiling.class))
           )
+          .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(SensorBuilder.class))
           .and(List.of("vsr"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
               .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
@@ -45,7 +46,6 @@ public class PreparedNamedBuilder {
                   List.of("sensorizingFunction", "sf"),
                   NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class)
               )
-              .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class))
           ));
 
   public static NamedBuilder<Object> get() {

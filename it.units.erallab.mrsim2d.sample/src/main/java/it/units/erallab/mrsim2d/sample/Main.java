@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package it.units.erallab.mrsim2d.sample;
 
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
+import it.units.erallab.mrsim2d.core.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
@@ -28,10 +29,7 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
-import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctionBuilder;
-import it.units.erallab.mrsim2d.core.builders.VoxelSensorBuilder;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
@@ -119,18 +117,15 @@ public class Main {
   }
 
   private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    NamedBuilder<Object> nb = NamedBuilder.empty()
-        .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
-        .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
-        .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
-        .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(VoxelSensorBuilder.class));
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get()
+        .and(NamedBuilder.fromClass(NumGridVSR.Body.class));
     String bodyS = """
         body(
-          shape=s.biped(w=4;h=3);
-          sensorizingFunction=sf.directional(
-            sSensors=[vs.d(a=-90)];
-            headSensors=[vs.sin();vs.d(a=-15;r=5)];
-            nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
+          shape=s.vsr.s.biped(w=4;h=3);
+          sensorizingFunction=s.vsr.sf.directional(
+            sSensors=[s.s.d(a=-90)];
+            headSensors=[s.s.sin();s.s.d(a=-15;r=5)];
+            nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           )
         )
         """;
@@ -170,8 +165,8 @@ public class Main {
     Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 5d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
-    rotationalJoint(engine, terrain, viewer);
-    //locomotion(engine, terrain, viewer);
+    //rotationalJoint(engine, terrain, viewer);
+    locomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }

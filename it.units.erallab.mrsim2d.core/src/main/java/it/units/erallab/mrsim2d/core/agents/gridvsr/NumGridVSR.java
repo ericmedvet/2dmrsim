@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.util.function.Function;
  */
 public class NumGridVSR extends AbstractGridVSR {
 
-  private final Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid;
+  private final Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid;
   private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
@@ -66,11 +66,12 @@ public class NumGridVSR extends AbstractGridVSR {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
   }
 
-  public record Body(Grid<Pair<Voxel.Material, List<Function<Voxel, Sense<? super Voxel>>>>> grid) {
+  public record Body(Grid<Pair<Voxel.Material, List<Function<? super Voxel, Sense<? super Voxel>>>>> grid) {
     @BuilderMethod()
     public Body(
         @Param("shape") Grid<Boolean> shape,
-        @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> sensorizingFunction
+        @Param("sensorizingFunction") Function<Grid<Boolean>,
+            Grid<List<Function<? super Voxel, Sense<? super Voxel>>>>> sensorizingFunction
     ) {
       this(Grid.create(
           shape.w(),
@@ -86,7 +87,7 @@ public class NumGridVSR extends AbstractGridVSR {
       return Grid.create(grid, Pair::first);
     }
 
-    public Grid<List<Function<Voxel, Sense<? super Voxel>>>> sensorsGrid() {
+    public Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid() {
       return Grid.create(grid, Pair::second);
     }
   }
