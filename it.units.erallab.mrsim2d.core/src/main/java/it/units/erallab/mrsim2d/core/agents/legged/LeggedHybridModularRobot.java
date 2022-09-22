@@ -42,11 +42,6 @@ public class LeggedHybridModularRobot implements EmbodiedAgent {
 
   public enum Connector {NONE, SOFT, RIGID}
 
-  public record Leg(
-      @Param("legChunks") List<LegChunk> legChunks,
-      @Param("downConnector") Connector downConnector
-  ) {}
-
   public record LegChunk(
       double length,
       double width,
@@ -56,30 +51,30 @@ public class LeggedHybridModularRobot implements EmbodiedAgent {
   ) {
     @BuilderMethod
     public LegChunk(
-        @Param(value = "length", dD = LEG_LENGTH) double length,
+        @Param(value = "trunkLength", dD = LEG_LENGTH) double length,
         @Param(value = "width", dD = LEG_WIDTH) double width,
         @Param(value = "mass", dD = LEG_MASS) double mass,
-        @Param("upConnector") Connector upConnector
+        @Param(value = "upConnector", dS = "rigid") Connector upConnector
     ) {
       this(length, width, mass, new RotationalJoint.Motor(), upConnector);
     }
   }
 
   public record Module(
-      @Param("length") double length,
-      @Param("width") double width,
-      @Param("mass") double mass,
-      @Param("rightConnector") Connector rightConnector
+      @Param(value = "trunkLength", dD = TRUNK_LENGTH) double trunkLength,
+      @Param(value = "trunkWidth", dD = TRUNK_WIDTH) double trunkWidth,
+      @Param(value = "trunkMass", dD = TRUNK_MASS) double trunkMass,
+      @Param("legChunks") List<LegChunk> legChunks,
+      @Param(value = "downConnector", dS = "rigid") Connector downConnector,
+      @Param(value = "rightConnector", dS = "rigid") Connector rightConnector
   ) {}
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.empty()
         .and(NamedBuilder.fromClass(Module.class))
-        .and(NamedBuilder.fromClass(Leg.class))
         .and(NamedBuilder.fromClass(LegChunk.class));
     System.out.println(NamedBuilder.prettyToString(nb, true));
-    System.out.println(nb.build("legChunk(upConnector=none)"));
-    //TODO add enums to autobuilder
+    System.out.println(nb.build("module(legChunks=[legChunk(upConnector=soft);legChunk(upConnector=rigid)])"));
   }
 
   @Override
