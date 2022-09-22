@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ public interface TimedRealFunction {
         return nOfOutputs;
       }
     };
+  }
+
+  static TimedRealFunction zeros(int nOfInputs, int nOfOutputs) {
+    return from((t, in) -> new double[nOfOutputs], nOfInputs, nOfOutputs);
   }
 
   default TimedRealFunction stepped(double step) {
