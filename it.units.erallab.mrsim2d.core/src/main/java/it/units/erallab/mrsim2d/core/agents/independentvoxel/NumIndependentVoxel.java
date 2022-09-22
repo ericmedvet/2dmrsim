@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
 import it.units.erallab.mrsim2d.core.actions.DetachAnchors;
 import it.units.erallab.mrsim2d.core.actions.Sense;
+import it.units.erallab.mrsim2d.core.agents.WithTimedRealFunction;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
@@ -33,43 +34,41 @@ import java.util.function.Function;
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
  */
-public class NumIndependentVoxel extends AbstractIndependentVoxel {
+public class NumIndependentVoxel extends AbstractIndependentVoxel implements WithTimedRealFunction {
 
   private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
+  private final static int N_OF_OUTPUTS = 8;
 
   private final List<Function<Voxel, Sense<? super Voxel>>> sensors;
-  private final TimedRealFunction function;
-
   private final double[] inputs;
+  private TimedRealFunction timedRealFunction;
 
   public NumIndependentVoxel(
       Voxel.Material material,
       double voxelSideLength,
       double voxelMass,
-      List<Function<Voxel, Sense<? super Voxel>>> sensors,
-      TimedRealFunction function
+      List<Function<Voxel, Sense<? super Voxel>>> sensors
   ) {
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
-    this.function = function;
     inputs = new double[sensors.size()];
-    if (function.nOfInputs() != inputs.length) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function input size: %d found vs. %d expected",
-          function.nOfInputs(),
-          inputs.length
-      ));
-    }
-    if (function.nOfOutputs() != 8) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function output size: %d found vs. 8 expected",
-          function.nOfInputs()
-      ));
-    }
   }
 
-  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction function) {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors, function);
+  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
+    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors);
+  }
+
+  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction timedRealFunction) {
+    this(sensors);
+    setTimedRealFunction(timedRealFunction);
+  }
+
+  public static int nOfInputs(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
+    return sensors.size();
+  }
+
+  public static int nOfOutputs() {
+    return N_OF_OUTPUTS;
   }
 
   @SuppressWarnings("unchecked")
@@ -85,7 +84,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
         .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
-    double[] outputs = function.apply(t, inputs);
+    double[] outputs = timedRealFunction.apply(t, inputs);
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions
@@ -102,23 +101,31 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel {
     return actions;
   }
 
-  public static int nOfInputs(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
-    return sensors.size();
-  }
-
-  public static int nOfOutputs() {
-    return 8;
-  }
-
-  public int nOfInputs() {
-    return nOfInputs(sensors);
-  }
-
-  public TimedRealFunction getFunction() {
-    return function;
-  }
-
   public List<Function<Voxel, Sense<? super Voxel>>> getSensors() {
     return sensors;
+  }
+
+  @Override
+  public TimedRealFunction getTimedRealFunction() {
+    return timedRealFunction;
+  }
+
+  @Override
+  public void setTimedRealFunction(TimedRealFunction timedRealFunction) {
+    if (timedRealFunction.nOfInputs() != nOfInputs(sensors)) {
+      throw new IllegalArgumentException(String.format(
+          "Invalid function input size: %d found vs. %d expected",
+          timedRealFunction.nOfInputs(),
+          nOfInputs(sensors)
+      ));
+    }
+    if (timedRealFunction.nOfOutputs() != N_OF_OUTPUTS) {
+      throw new IllegalArgumentException(String.format(
+          "Invalid function output size: %d found vs. %d expected",
+          timedRealFunction.nOfInputs(),
+          N_OF_OUTPUTS
+      ));
+    }
+    this.timedRealFunction = timedRealFunction;
   }
 }

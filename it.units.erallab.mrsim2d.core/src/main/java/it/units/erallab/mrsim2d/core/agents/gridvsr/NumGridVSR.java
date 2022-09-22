@@ -40,30 +40,30 @@ import java.util.function.Function;
 public class NumGridVSR extends AbstractGridVSR {
 
   private final Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid;
-  private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
   private final Body body;
+  private BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
 
   public NumGridVSR(
       Body body,
       double voxelSideLength,
-      double voxelMass,
-      BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
+      double voxelMass
   ) {
     super(body.materialGrid(), voxelSideLength, voxelMass);
     this.sensorsGrid = body.sensorsGrid();
-    this.timedFunction = timedFunction;
     this.body = body;
     inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
   }
 
-  public NumGridVSR(
-      Body body,
-      BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
-  ) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
+  public NumGridVSR(Body body) {
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
+  }
+
+  public NumGridVSR(Body body, BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
+    this(body);
+    setTimedFunction(timedFunction);
   }
 
   public record Body(Grid<Pair<Voxel.Material, List<Function<? super Voxel, Sense<? super Voxel>>>>> grid) {
@@ -135,5 +135,13 @@ public class NumGridVSR extends AbstractGridVSR {
 
   public Body getBody() {
     return body;
+  }
+
+  public BiFunction<Double, Grid<double[]>, Grid<Double>> getTimedFunction() {
+    return timedFunction;
+  }
+
+  public void setTimedFunction(BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
+    this.timedFunction = timedFunction;
   }
 }
