@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.core.agents.independentvoxel;
 
+import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
@@ -54,7 +55,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Wit
     inputs = new double[sensors.size()];
   }
 
-  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
+  public NumIndependentVoxel(@Param("sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors) {
     this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors);
   }
 

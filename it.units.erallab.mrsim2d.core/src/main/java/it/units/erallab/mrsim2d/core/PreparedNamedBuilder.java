@@ -17,7 +17,9 @@
 package it.units.erallab.mrsim2d.core;
 
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -37,6 +39,11 @@ public class PreparedNamedBuilder {
               .and(NamedBuilder.fromClass(Locomotion.class))
               .and(NamedBuilder.fromClass(FallPiling.class))
               .and(NamedBuilder.fromClass(StandPiling.class))
+          )
+          .and(List.of("agent", "a"), NamedBuilder.empty()
+              .and(NamedBuilder.fromClass(NumGridVSR.class))
+              .and(NamedBuilder.fromClass(CentralizedNumGridVSR.class))
+              .and(NamedBuilder.fromClass(NumIndependentVoxel.class))
           )
           .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(SensorBuilder.class))
           .and(List.of("vsr"), NamedBuilder.empty()

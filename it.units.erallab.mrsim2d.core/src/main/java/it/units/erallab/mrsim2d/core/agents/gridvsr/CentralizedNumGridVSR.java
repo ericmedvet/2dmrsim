@@ -17,6 +17,7 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 
+import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.agents.WithTimedRealFunction;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
@@ -41,7 +42,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements WithTimedRealFu
     super(body, voxelSideLength, voxelMass);
   }
 
-  public CentralizedNumGridVSR(Body body) {
+  public CentralizedNumGridVSR(@Param("body") Body body) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
   }
 
