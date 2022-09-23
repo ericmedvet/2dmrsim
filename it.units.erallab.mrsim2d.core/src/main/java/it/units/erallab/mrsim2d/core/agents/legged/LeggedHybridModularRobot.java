@@ -23,10 +23,18 @@ import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.ActionPerformer;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
+import it.units.erallab.mrsim2d.core.actions.CreateRigidBody;
+import it.units.erallab.mrsim2d.core.actions.CreateVoxel;
+import it.units.erallab.mrsim2d.core.actions.TranslateBodyAt;
 import it.units.erallab.mrsim2d.core.bodies.Body;
+import it.units.erallab.mrsim2d.core.bodies.RigidBody;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
+import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.engine.ActionException;
+import it.units.erallab.mrsim2d.core.geometry.Point;
+import it.units.erallab.mrsim2d.core.geometry.Poly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LeggedHybridModularRobot implements EmbodiedAgent {
@@ -39,6 +47,17 @@ public class LeggedHybridModularRobot implements EmbodiedAgent {
   private final static double TRUNK_WIDTH = 2d;
   private final static double TRUNK_CONNECTOR_MASS = TRUNK_LENGTH * TRUNK_WIDTH;
   private final static double TRUNK_MASS = 6d;
+  private final List<Module> modules;
+  private final List<Body> bodies;
+  private final List<RotationalJoint> rotationalJoints;
+
+  public LeggedHybridModularRobot(
+      @Param("modules") List<Module> modules
+  ) {
+    this.modules = modules;
+    bodies = new ArrayList<>();
+    rotationalJoints = new ArrayList<>();
+  }
 
   public enum Connector {NONE, SOFT, RIGID}
 
@@ -83,12 +102,41 @@ public class LeggedHybridModularRobot implements EmbodiedAgent {
   }
 
   @Override
-  public void assemble(ActionPerformer actionPerformer) throws ActionException {
-
+  public void assemble(ActionPerformer performer) throws ActionException {
+    for (Module module : modules) {
+      //create trunk
+      double rigidTrunkMass = module.rightConnector()
+          .equals(Connector.NONE) ? module.trunkMass() :
+          (module.trunkMass() * module.trunkLength() / (module.trunkLength() + module.trunkWidth()));
+      RigidBody trunk = performer.perform(new CreateRigidBody(
+          Poly.rectangle(module.trunkLength(), module.trunkWidth()),
+          rigidTrunkMass,
+          true
+      ), this).outcome().orElseThrow();
+      bodies.add(trunk);
+      double cX = trunk.poly().boundingBox().center().x();
+      //create leg
+      Body upperBody = trunk;
+      for (LegChunk legChunk : module.legChunks()) {
+        double rotationalJointMass = legChunk.upConnector()
+            .equals(Connector.NONE) ? legChunk.mass() :
+            (legChunk.mass() * legChunk.length() / (legChunk.length()) + legChunk.width());
+        //create up connector
+        if (legChunk.upConnector().equals(Connector.SOFT)) {
+          Voxel voxel = performer.perform(new CreateVoxel(legChunk.width(), legChunk.mass() - rotationalJointMass))
+              .outcome()
+              .orElseThrow();
+          bodies.add(voxel);
+          performer.perform(new TranslateBodyAt(voxel,new Point(cX- legChunk.width()/2d,upperBody.poly().boundingBox().min().y())));
+          upperBody = voxel;
+        }
+      }
+      //create
+    }
   }
 
   @Override
   public List<Body> bodyParts() {
-    return null;
+    return bodies;
   }
 }
