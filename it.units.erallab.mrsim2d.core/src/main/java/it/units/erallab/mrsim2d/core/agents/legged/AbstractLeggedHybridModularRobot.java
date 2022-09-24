@@ -17,7 +17,6 @@
 package it.units.erallab.mrsim2d.core.agents.legged;
 
 import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.ActionPerformer;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
@@ -76,14 +75,6 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       @Param(value = "downConnector", dS = "rigid") Connector downConnector,
       @Param(value = "rightConnector", dS = "rigid") Connector rightConnector
   ) {}
-
-  public static void main(String[] args) {
-    NamedBuilder<Object> nb = NamedBuilder.empty()
-        .and(NamedBuilder.fromClass(Module.class))
-        .and(NamedBuilder.fromClass(LegChunk.class));
-    System.out.println(NamedBuilder.prettyToString(nb, true));
-    System.out.println(nb.build("module(legChunks=[legChunk(upConnector=soft);legChunk(upConnector=rigid)])"));
-  }
 
   @Override
   public void assemble(ActionPerformer performer) throws ActionException {
