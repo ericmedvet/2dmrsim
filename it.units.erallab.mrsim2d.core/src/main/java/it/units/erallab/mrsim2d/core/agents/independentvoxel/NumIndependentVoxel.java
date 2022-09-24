@@ -77,7 +77,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Wit
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
+  public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
     double[] readInputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)

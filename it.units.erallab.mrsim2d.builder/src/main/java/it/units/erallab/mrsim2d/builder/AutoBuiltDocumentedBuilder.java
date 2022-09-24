@@ -30,18 +30,83 @@ public record AutoBuiltDocumentedBuilder<T>(
     List<ParamInfo> params,
     Builder<T> builder
 ) implements DocumentedBuilder<T> {
-  @Override
-  public T build(ParamMap map, NamedBuilder<?> namedBuilder) throws BuilderException {
-    return builder.build(map, namedBuilder);
+  private static Object buildDefaultValue(Type type, Class<?> clazz, Param pa) {
+    if (type.equals(Type.INT) && pa.dI() != Integer.MIN_VALUE) {
+      return pa.dI();
+    }
+    if (type.equals(Type.DOUBLE) && !Double.isNaN(pa.dD())) {
+      return pa.dD();
+    }
+    if (type.equals(Type.BOOLEAN)) {
+      return pa.dB();
+    }
+    if (type.equals(Type.STRING) && !pa.dS().isEmpty()) {
+      return pa.dS();
+    }
+    if (type.equals(Type.ENUM) && !pa.dS().isEmpty()) {
+      //noinspection rawtypes,unchecked
+      return Enum.valueOf((Class) clazz, pa.dS().toUpperCase());
+    }
+    if (type.equals(Type.NAMED_PARAM_MAP) && !pa.dNPM().isEmpty()) {
+      return StringNamedParamMap.parse(pa.dNPM());
+    }
+    if (type.equals(Type.INTS)) {
+      return Arrays.stream(pa.dIs()).boxed().toList();
+    }
+    if (type.equals(Type.DOUBLES)) {
+      return Arrays.stream(pa.dDs()).boxed().toList();
+    }
+    if (type.equals(Type.BOOLEANS)) {
+      return List.of(pa.dBs());
+    }
+    if (type.equals(Type.STRINGS)) {
+      return List.of(pa.dSs());
+    }
+    if (type.equals(Type.ENUMS)) {
+      //noinspection unchecked,rawtypes
+      return Arrays.stream(pa.dSs()).map(s -> Enum.valueOf((Class) clazz, s.toUpperCase())).toList();
+    }
+    if (type.equals(Type.NAMED_PARAM_MAPS)) {
+      return Arrays.stream(pa.dNPMs()).map(StringNamedParamMap::parse).toList();
+    }
+    return null;
   }
 
-  @Override
-  public String toString() {
-    return "(" + params.stream().map(ParamInfo::toString).collect(Collectors.joining("; ")) + ") -> " + builtType;
-  }
-
-  private static String returnTypeName(Method method) {
-    return method.getGenericReturnType().toString();
+  @SuppressWarnings("unchecked")
+  private static Object buildParam(ParamInfo pi, ParamMap m, Parameter ap, NamedBuilder<Object> nb) {
+    return switch (pi.type()) {
+      case INT -> pi.defaultValue() == null ? m.i(pi.name()) : m.i(pi.name(), (Integer) pi.defaultValue());
+      case DOUBLE -> pi.defaultValue() == null ? m.d(pi.name()) : m.d(pi.name(), (Double) pi.defaultValue());
+      case STRING -> pi.defaultValue() == null ? m.s(pi.name()) : m.s(pi.name(), (String) pi.defaultValue());
+      case BOOLEAN -> pi.defaultValue() == null ? m.b(pi.name()) : m.b(pi.name(), (Boolean) pi.defaultValue());
+      case ENUM -> //noinspection rawtypes
+          pi.defaultValue() == null ? m.e(pi.name(), (Class) pi.clazz()) : m.e(
+              pi.name(),
+              (Class) pi.clazz(),
+              (Enum) pi.defaultValue()
+          );
+      case NAMED_PARAM_MAP -> processNPM(pi.defaultValue() == null ? m.npm(pi.name()) : m.npm(
+          pi.name(),
+          (NamedParamMap) pi.defaultValue()
+      ), ap, nb);
+      case INTS -> pi.defaultValue() == null ? m.is(pi.name()) : m.is(pi.name(), (List<Integer>) pi.defaultValue());
+      case DOUBLES -> pi.defaultValue() == null ? m.ds(pi.name()) : m.ds(pi.name(), (List<Double>) pi.defaultValue());
+      case STRINGS -> pi.defaultValue() == null ? m.ss(pi.name()) : m.ss(pi.name(), (List<String>) pi.defaultValue());
+      case BOOLEANS -> pi.defaultValue() == null ? m.bs(pi.name()) : m.bs(pi.name(), (List<Boolean>) pi.defaultValue());
+      case ENUMS -> //noinspection rawtypes
+          pi.defaultValue() == null ? m.es(pi.name(), (Class) pi.clazz()) : m.es(
+              pi.name(),
+              (Class) pi.clazz(),
+              (List) pi.defaultValue()
+          );
+      case NAMED_PARAM_MAPS -> pi.defaultValue() == null ? m.npms(pi.name()) : m.npms(
+              pi.name(),
+              (List<NamedParamMap>) pi.defaultValue()
+          )
+          .stream()
+          .map(npm -> processNPM(npm, ap, nb))
+          .toList();
+    };
   }
 
   public static AutoBuiltDocumentedBuilder<Object> from(Executable executable) {
@@ -140,85 +205,6 @@ public record AutoBuiltDocumentedBuilder<T>(
     );
   }
 
-  private static Object buildDefaultValue(Type type, Class<?> clazz, Param pa) {
-    if (type.equals(Type.INT) && pa.dI() != Integer.MIN_VALUE) {
-      return pa.dI();
-    }
-    if (type.equals(Type.DOUBLE) && !Double.isNaN(pa.dD())) {
-      return pa.dD();
-    }
-    if (type.equals(Type.BOOLEAN)) {
-      return pa.dB();
-    }
-    if (type.equals(Type.STRING) && !pa.dS().isEmpty()) {
-      return pa.dS();
-    }
-    if (type.equals(Type.ENUM) && !pa.dS().isEmpty()) {
-      //noinspection rawtypes,unchecked
-      return Enum.valueOf((Class) clazz, pa.dS().toUpperCase());
-    }
-    if (type.equals(Type.NAMED_PARAM_MAP) && !pa.dNPM().isEmpty()) {
-      return StringNamedParamMap.parse(pa.dNPM());
-    }
-    if (type.equals(Type.INTS)) {
-      return Arrays.stream(pa.dIs()).boxed().toList();
-    }
-    if (type.equals(Type.DOUBLES)) {
-      return Arrays.stream(pa.dDs()).boxed().toList();
-    }
-    if (type.equals(Type.BOOLEANS)) {
-      return List.of(pa.dBs());
-    }
-    if (type.equals(Type.STRINGS)) {
-      return List.of(pa.dSs());
-    }
-    if (type.equals(Type.ENUMS)) {
-      //noinspection unchecked,rawtypes
-      return Arrays.stream(pa.dSs()).map(s -> Enum.valueOf((Class) clazz, s.toUpperCase())).toList();
-    }
-    if (type.equals(Type.NAMED_PARAM_MAPS)) {
-      return Arrays.stream(pa.dNPMs()).map(StringNamedParamMap::parse).toList();
-    }
-    return null;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static Object buildParam(ParamInfo pi, ParamMap m, Parameter ap, NamedBuilder<Object> nb) {
-    return switch (pi.type()) {
-      case INT -> pi.defaultValue() == null ? m.i(pi.name()) : m.i(pi.name(), (Integer) pi.defaultValue());
-      case DOUBLE -> pi.defaultValue() == null ? m.d(pi.name()) : m.d(pi.name(), (Double) pi.defaultValue());
-      case STRING -> pi.defaultValue() == null ? m.s(pi.name()) : m.s(pi.name(), (String) pi.defaultValue());
-      case BOOLEAN -> pi.defaultValue() == null ? m.b(pi.name()) : m.b(pi.name(), (Boolean) pi.defaultValue());
-      case ENUM -> //noinspection rawtypes
-          pi.defaultValue() == null ? m.e(pi.name(), (Class) pi.clazz()) : m.e(
-              pi.name(),
-              (Class) pi.clazz(),
-              (Enum) pi.defaultValue()
-          );
-      case NAMED_PARAM_MAP -> processNPM(pi.defaultValue() == null ? m.npm(pi.name()) : m.npm(
-          pi.name(),
-          (NamedParamMap) pi.defaultValue()
-      ), ap, nb);
-      case INTS -> pi.defaultValue() == null ? m.is(pi.name()) : m.is(pi.name(), (List<Integer>) pi.defaultValue());
-      case DOUBLES -> pi.defaultValue() == null ? m.ds(pi.name()) : m.ds(pi.name(), (List<Double>) pi.defaultValue());
-      case STRINGS -> pi.defaultValue() == null ? m.ss(pi.name()) : m.ss(pi.name(), (List<String>) pi.defaultValue());
-      case BOOLEANS -> pi.defaultValue() == null ? m.bs(pi.name()) : m.bs(pi.name(), (List<Boolean>) pi.defaultValue());
-      case ENUMS -> //noinspection rawtypes
-          pi.defaultValue() == null ? m.es(pi.name(), (Class) pi.clazz()) : m.es(
-              pi.name(),
-              (Class) pi.clazz(),
-              (List) pi.defaultValue()
-          );
-      case NAMED_PARAM_MAPS -> pi.defaultValue() == null ? m.npms(pi.name()) : m.npms(
-              pi.name(),
-              (List<NamedParamMap>) pi.defaultValue()
-          )
-          .stream()
-          .map(npm -> processNPM(npm, ap, nb))
-          .toList();
-    };
-  }
-
   private static ParamInfo from(Parameter parameter) {
     Param paramAnnotation = parameter.getAnnotation(Param.class);
     if (paramAnnotation == null) {
@@ -311,22 +297,20 @@ public record AutoBuiltDocumentedBuilder<T>(
     }
     if (parameter.getType()
         .equals(List.class) && parameter.getParameterizedType() instanceof ParameterizedType parameterizedType) {
+      Class<?> clazz = Objects.class;
       try {
-        Class<?> clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
-        if (clazz.isEnum()) {
-          return new ParamInfo(
-              Type.ENUMS,
-              clazz,
-              name,
-              buildDefaultValue(Type.ENUMS, clazz, paramAnnotation),
-              paramAnnotation.self()
-          );
-        }
+        clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
       } catch (ClassNotFoundException e) {
-        throw new RuntimeException("Cannot find generic param type class %s: %s".formatted(
-            parameterizedType.getActualTypeArguments()[0].getTypeName(),
-            e
-        ));
+        //ignore
+      }
+      if (clazz.isEnum()) {
+        return new ParamInfo(
+            Type.ENUMS,
+            clazz,
+            name,
+            buildDefaultValue(Type.ENUMS, clazz, paramAnnotation),
+            paramAnnotation.self()
+        );
       }
     }
     if (parameter.getType()
@@ -343,22 +327,19 @@ public record AutoBuiltDocumentedBuilder<T>(
     }
     if (parameter.getType()
         .equals(List.class) && parameter.getParameterizedType() instanceof ParameterizedType parameterizedType) {
+      Class<?> clazz = Objects.class;
       try {
-        Class<?> clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
-        return new ParamInfo(
-            Type.NAMED_PARAM_MAPS,
-            clazz,
-            name,
-            buildDefaultValue(Type.NAMED_PARAM_MAPS, Object.class, paramAnnotation),
-            paramAnnotation.self()
-        );
+        clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
       } catch (ClassNotFoundException e) {
-        throw new RuntimeException("Cannot find generic param type class %s: %s".formatted(
-            parameterizedType.getActualTypeArguments()[0].getTypeName(),
-            e
-        ));
+        //ignore
       }
-
+      return new ParamInfo(
+          Type.NAMED_PARAM_MAPS,
+          clazz,
+          name,
+          buildDefaultValue(Type.NAMED_PARAM_MAPS, Object.class, paramAnnotation),
+          paramAnnotation.self()
+      );
     }
     return new ParamInfo(
         Type.NAMED_PARAM_MAP,
@@ -376,8 +357,22 @@ public record AutoBuiltDocumentedBuilder<T>(
     return nb.build(npm);
   }
 
+  private static String returnTypeName(Method method) {
+    return method.getGenericReturnType().toString();
+  }
+
   private static String toLowerCamelCase(String s) {
     return s.substring(0, 1).toLowerCase() + s.substring(1);
+  }
+
+  @Override
+  public T build(ParamMap map, NamedBuilder<?> namedBuilder) throws BuilderException {
+    return builder.build(map, namedBuilder);
+  }
+
+  @Override
+  public String toString() {
+    return "(" + params.stream().map(ParamInfo::toString).collect(Collectors.joining("; ")) + ") -> " + builtType;
   }
 
 }

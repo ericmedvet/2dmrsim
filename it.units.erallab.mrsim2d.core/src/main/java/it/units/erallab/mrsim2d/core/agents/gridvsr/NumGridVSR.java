@@ -95,7 +95,7 @@ public class NumGridVSR extends AbstractGridVSR {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
+  public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
     if (!previousActionOutcomes.isEmpty()) {
       int c = 0;

@@ -23,6 +23,7 @@ import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
+import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
@@ -113,30 +114,29 @@ public class Main {
     }
   }
 
-  private static void locomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+  private static void leggedLocomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
-        s.a.centralizedNumGridVSR(body=s.vsr.body(
-          shape=s.vsr.s.biped(w=4;h=3);
-          sensorizingFunction=s.vsr.sf.directional(
-            sSensors=[s.s.d(a=-90)];
-            headSensors=[s.s.sin();s.s.d(a=-15;r=5)];
-            nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
-          )
-        ))
+        s.a.numLeggedHybridModularRobot(modules=[
+          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
+          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
+          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft)
+        ])
         """;
-    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
-        MultiLayerPerceptron.ActivationFunction.TANH,
-        vsr.getTimedRealFunction().nOfInputs(),
-        new int[]{10},
-        vsr.getTimedRealFunction().nOfOutputs()
-    );
-    RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    vsr.setTimedRealFunction(mlp);
+    NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
+    double a = Math.toRadians(45);
+    double f = 1d;
+    double maxP = Math.PI;
+    lhmr.setTimedRealFunction(TimedRealFunction.from(
+        (t, in) -> IntStream.range(0, lhmr.getTimedRealFunction().nOfOutputs())
+            .mapToDouble(i -> a * Math.sin(2d * Math.PI * f * t + maxP * (double) i / (double) lhmr.getTimedRealFunction()
+                .nOfOutputs()))
+            .toArray(),
+        lhmr.getTimedRealFunction().nOfInputs(),
+        lhmr.getTimedRealFunction().nOfOutputs()
+    ));
     Locomotion locomotion = new Locomotion(30, terrain);
-    Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
+    Outcome outcome = locomotion.run(() -> lhmr, engine, consumer);
     System.out.println(outcome);
   }
 
@@ -157,7 +157,8 @@ public class Main {
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
-    locomotion(engine, terrain, viewer);
+    //vsrLocomotion(engine, terrain, viewer);
+    leggedLocomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
@@ -184,5 +185,32 @@ public class Main {
       Snapshot snapshot = engine.tick();
       consumer.accept(snapshot);
     }
+  }
+
+  private static void vsrLocomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.centralizedNumGridVSR(body=s.vsr.body(
+          shape=s.vsr.s.biped(w=4;h=3);
+          sensorizingFunction=s.vsr.sf.directional(
+            sSensors=[s.s.d(a=-90)];
+            headSensors=[s.s.sin();s.s.d(a=-15;r=5)];
+            nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+          )
+        ))
+        """;
+    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
+        MultiLayerPerceptron.ActivationFunction.TANH,
+        vsr.getTimedRealFunction().nOfInputs(),
+        new int[]{10},
+        vsr.getTimedRealFunction().nOfOutputs()
+    );
+    RandomGenerator rg = new Random();
+    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
+    vsr.setTimedRealFunction(mlp);
+    Locomotion locomotion = new Locomotion(30, terrain);
+    Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
+    System.out.println(outcome);
   }
 }

@@ -29,6 +29,11 @@ public class ActionException extends Exception {
     this.action = action;
   }
 
+  public ActionException(String message) {
+    super(message);
+    this.action = null;
+  }
+
   public Action<?> getAction() {
     return action;
   }

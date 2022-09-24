@@ -20,6 +20,8 @@ import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
+import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
+import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -44,6 +46,11 @@ public class PreparedNamedBuilder {
               .and(NamedBuilder.fromClass(NumGridVSR.class))
               .and(NamedBuilder.fromClass(CentralizedNumGridVSR.class))
               .and(NamedBuilder.fromClass(NumIndependentVoxel.class))
+              .and(NamedBuilder.fromClass(NumLeggedHybridModularRobot.class))
+              .and(List.of("legged", "l"), NamedBuilder.empty()
+                  .and(NamedBuilder.fromClass(AbstractLeggedHybridModularRobot.Module.class))
+                  .and(NamedBuilder.fromClass(AbstractLeggedHybridModularRobot.LegChunk.class))
+              )
           )
           .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(SensorBuilder.class))
           .and(List.of("vsr"), NamedBuilder.empty()
