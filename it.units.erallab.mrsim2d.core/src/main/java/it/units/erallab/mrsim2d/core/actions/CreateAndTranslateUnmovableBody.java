@@ -29,13 +29,13 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
  */
 public record CreateAndTranslateUnmovableBody(
     Poly poly,
-    boolean useAnchors,
+    double anchorsDensity,
     Point translation
 ) implements SelfDescribedAction<UnmovableBody> {
   @Override
   public UnmovableBody perform(ActionPerformer performer, Agent agent) throws ActionException {
     UnmovableBody unmovableBody = performer.perform(
-        new CreateUnmovableBody(poly, useAnchors),
+        new CreateUnmovableBody(poly, anchorsDensity),
         agent
     ).outcome().orElseThrow(() -> new ActionException(this, "Undoable creation"));
     performer.perform(new TranslateBody(unmovableBody, translation), agent);

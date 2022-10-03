@@ -19,6 +19,8 @@ package it.units.erallab.mrsim2d.engine.dyn4j;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
+import it.units.erallab.mrsim2d.core.geometry.Segment;
+import it.units.erallab.mrsim2d.core.util.Pair;
 import org.dyn4j.dynamics.AbstractPhysicsBody;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
@@ -27,10 +29,7 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -45,13 +44,13 @@ public class UnmovableBody implements it.units.erallab.mrsim2d.core.bodies.Unmov
 
   public UnmovableBody(
       Poly poly,
-      boolean useAnchors,
+      double anchorsDensity,
       double friction,
       double restitution
   ) {
     this.poly = poly;
     List<Poly> parts = (poly.vertexes().length > 3) ? Utils.decompose(poly) : List.of(poly);
-    bodies = parts.stream()
+    List<Pair<Body, Poly>> bodyPairs = parts.stream()
         .map(c -> {
           Convex convex = new Polygon(
               Arrays.stream(c.vertexes()).sequential()
@@ -61,19 +60,35 @@ public class UnmovableBody implements it.units.erallab.mrsim2d.core.bodies.Unmov
           Body body = new Body();
           body.addFixture(convex, 1d, friction, restitution);
           body.setMass(MassType.INFINITE);
-          return body;
+          return new Pair<>(body, c);
         })
         .toList();
+    bodies = bodyPairs.stream().map(Pair::first).toList();
     initialCenter = center(bodies);
     bodies.forEach(b -> b.setUserData(this));
-    if (useAnchors) {
-      anchors = poly.sides().stream()
-          .map(s -> new BodyAnchor(
-              bodies.get(0),
-              new Point(bodies.get(0).getWorldCenter().x, bodies.get(0).getWorldCenter().y).diff(s.center()),
+    if (Double.isFinite(anchorsDensity)) {
+      List<Anchor> localAnchors = new ArrayList<>();
+      for (Segment segment : poly.sides()) {
+        Point p1 = segment.p1();
+        Point p2 = segment.p2();
+        double l = p1.distance(p2);
+        double nOfAnchors = Math.floor(l * anchorsDensity);
+        double anchorInterval = l / nOfAnchors;
+        Point dir = new Point(p2.diff(p1).direction());
+        for (int i = 0; i < nOfAnchors; i = i + 1) {
+          Point aP = p1.sum(dir.scale(anchorInterval * (double) i));
+          Pair<Body, Poly> closest = bodyPairs.stream().min(Comparator.comparingDouble(pair -> pair.second()
+              .center()
+              .distance(aP))).orElseThrow();
+          localAnchors.add(new BodyAnchor(
+              closest.first(),
+              aP.diff(closest.second().center()),
               this
-          ))
-          .collect(Collectors.toList());
+          ));
+        }
+
+      }
+      anchors = Collections.unmodifiableList(localAnchors);
     } else {
       anchors = List.of();
     }

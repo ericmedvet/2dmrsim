@@ -79,7 +79,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
       Consumer<Snapshot> snapshotConsumer
   ) {
     //build world
-    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
     //place agents
     List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);
     while (agents.size() < nOfAgents) {

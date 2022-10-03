@@ -69,7 +69,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
     //create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     //build world
-    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(embodiedAgent));
     //place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();

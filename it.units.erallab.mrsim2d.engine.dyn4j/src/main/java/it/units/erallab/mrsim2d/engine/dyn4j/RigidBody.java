@@ -19,14 +19,12 @@ package it.units.erallab.mrsim2d.engine.dyn4j;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
+import it.units.erallab.mrsim2d.core.geometry.Segment;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
@@ -41,7 +39,7 @@ public class RigidBody implements it.units.erallab.mrsim2d.core.bodies.RigidBody
   public RigidBody(
       Poly convexPoly,
       double mass,
-      boolean useAnchors,
+      double anchorsDensity,
       double friction,
       double restitution,
       double linearDamping,
@@ -61,11 +59,25 @@ public class RigidBody implements it.units.erallab.mrsim2d.core.bodies.RigidBody
     body.setAngularDamping(angularDamping);
     body.setUserData(this);
     initialFirstSideDirection = getFirstSideDirection();
-    if (useAnchors) {
-      anchors = Arrays.stream(convexPoly.vertexes())
-          .map(v -> v.diff(convexPoly.center()).scale(1 - anchorVertexToCenterRatio))
-          .map(v -> new BodyAnchor(body, v, this))
-          .collect(Collectors.toList());
+    if (Double.isFinite(anchorsDensity)) {
+      List<Anchor> localAnchors = new ArrayList<>();
+      for (Segment segment : convexPoly.sides()) {
+        Point p1 = segment.p1();
+        Point p2 = segment.p2();
+        double l = p1.distance(p2);
+        double nOfAnchors = Math.floor(l * anchorsDensity);
+        double anchorInterval = l / nOfAnchors;
+        Point dir = new Point(p2.diff(p1).direction());
+        for (int i = 0; i < nOfAnchors; i = i + 1) {
+          Point aP = p1.sum(dir.scale(anchorInterval * (double) i));
+          localAnchors.add(new BodyAnchor(
+              body,
+              aP.diff(convexPoly.center()).scale(1 - anchorVertexToCenterRatio),
+              this
+          ));
+        }
+      }
+      anchors = Collections.unmodifiableList(localAnchors);
     } else {
       anchors = List.of();
     }

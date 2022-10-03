@@ -25,6 +25,9 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
  */
 public record CreateUnmovableBody(
     Poly poly,
-    boolean useAnchors
+    double anchorsDensity
 ) implements Action<UnmovableBody> {
+  public CreateUnmovableBody(Poly poly) {
+    this(poly, Double.POSITIVE_INFINITY);
+  }
 }

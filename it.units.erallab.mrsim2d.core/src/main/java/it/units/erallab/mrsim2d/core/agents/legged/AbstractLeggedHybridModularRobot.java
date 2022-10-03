@@ -88,7 +88,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       RigidBody trunk = performer.perform(new CreateRigidBody(
               Poly.rectangle(module.trunkLength(), module.trunkWidth()),
               rigidTrunkMass,
-              true
+              1d / module.trunkWidth
           ), this)
           .outcome()
           .orElseThrow(() -> new ActionException("Cannot create trunk"));
@@ -123,7 +123,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
           RigidBody connector = performer.perform(new CreateRigidBody(
                   Poly.square(legChunk.width()),
                   legChunk.mass() - rotationalJointMass,
-                  true
+                  1d / legChunk.width
               ), this)
               .outcome()
               .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
@@ -168,7 +168,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         RigidBody connector = performer.perform(new CreateRigidBody(
                 Poly.square(upperBody.poly().boundingBox().width()),
                 module.trunkMass() - rigidTrunkMass,
-                true
+                1d / upperBody.poly().boundingBox().width()
             ), this)
             .outcome()
             .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
@@ -197,7 +197,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         RigidBody connector = performer.perform(new CreateRigidBody(
                 Poly.square(module.trunkWidth()),
                 module.trunkMass() - rigidTrunkMass,
-                true
+                1d / module.trunkWidth
             ), this)
             .outcome()
             .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));

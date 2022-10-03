@@ -55,10 +55,16 @@ import java.util.stream.IntStream;
  */
 public class Main {
   private static void ball(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
-    Body ball = engine.perform(new CreateAndTranslateRigidBody(Poly.regular(1, 8), 1, true, new Point(2, 2)))
+    engine.perform(new CreateUnmovableBody(terrain.poly(), 1));
+    Body ball = engine.perform(new CreateAndTranslateRigidBody(
+            Poly.regular(0.5, 32),
+            1,
+            Double.POSITIVE_INFINITY,
+            new Point(2, 2)
+        ))
         .outcome()
         .orElseThrow();
+    engine.perform(new CreateAndTranslateRigidBody(Poly.rectangle(2, 5.05), 1, 1, new Point(5, 2)));
     Voxel voxel = engine.perform(new CreateAndTranslateVoxel(1, 1, new Point(10, 1))).outcome().orElseThrow();
     while (engine.t() < 10) {
       Snapshot snapshot = engine.tick();
@@ -74,7 +80,7 @@ public class Main {
     double interval = 5d;
     double lastT = Double.NEGATIVE_INFINITY;
     double sideInterval = 2d;
-    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
     RandomGenerator rg = new Random();
     List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of(
         v -> new SenseRotatedVelocity(0, v),
@@ -153,13 +159,13 @@ public class Main {
     //do thing
     //rotationalJoint(engine, terrain, viewer);
     //vsrLocomotion(engine, terrain, viewer);
-    leggedLocomotion(engine, terrain, viewer);
-    //ball(engine, terrain, viewer);
+    //leggedLocomotion(engine, terrain, viewer);
+    ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
 
   private static void rotationalJoint(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    engine.perform(new CreateUnmovableBody(terrain.poly(), false));
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
     //engine.perform(new CreateAndTranslateRotationalJoint(3d,1d,1d, new Point(4,0))).outcome().orElseThrow();
     RotationalJoint rj = engine.perform(new CreateAndTranslateRotationalJoint(
         3d,

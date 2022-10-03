@@ -30,14 +30,14 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
 public record CreateAndTranslateRigidBody(
     Poly poly,
     double mass,
-    boolean useAnchors,
+    double anchorsDensity,
     Point translation
 ) implements SelfDescribedAction<RigidBody> {
 
   @Override
   public RigidBody perform(ActionPerformer performer, Agent agent) throws ActionException {
     RigidBody rigidBody = performer.perform(
-        new CreateRigidBody(poly, mass, useAnchors),
+        new CreateRigidBody(poly, mass, anchorsDensity),
         agent
     ).outcome().orElseThrow(() -> new ActionException(this, "Undoable creation"));
     performer.perform(new TranslateBody(rigidBody, translation), agent);

@@ -26,6 +26,9 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
 public record CreateRigidBody(
     Poly poly,
     double mass,
-    boolean useAnchors
+    double anchorsDensity
 ) implements Action<RigidBody> {
+  public CreateRigidBody(Poly poly, double mass) {
+    this(poly, mass, Double.POSITIVE_INFINITY);
+  }
 }
