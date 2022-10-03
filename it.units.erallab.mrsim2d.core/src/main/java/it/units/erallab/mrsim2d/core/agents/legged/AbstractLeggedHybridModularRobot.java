@@ -31,12 +31,13 @@ import java.util.List;
 
 public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent {
 
+  private final static double RIGID_DENSITY = 0.25d;
   private final static double LEG_CHUNK_LENGTH = 1.5d;
   private final static double LEG_CHUNK_WIDTH = 1d;
-  private final static double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH;
+  private final static double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH * RIGID_DENSITY;
   private final static double TRUNK_LENGTH = 4d;
   private final static double TRUNK_WIDTH = 1d;
-  private final static double TRUNK_MASS = 5d;
+  private final static double TRUNK_MASS = TRUNK_LENGTH * TRUNK_WIDTH * RIGID_DENSITY;
   protected final List<RotationalJoint> rotationalJoints;
   protected final List<Module> modules;
   private final List<Body> bodies;

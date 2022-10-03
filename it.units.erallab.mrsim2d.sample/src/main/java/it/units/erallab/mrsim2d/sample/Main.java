@@ -37,6 +37,8 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 import it.units.erallab.mrsim2d.viewer.*;
 
 import java.io.File;
@@ -117,24 +119,17 @@ public class Main {
   private static void leggedLocomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
-        s.a.numLeggedHybridModularRobot(modules=[
-          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
-          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
-          s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=soft); s.a.l.legChunk(upConnector=soft)];downConnector=soft)
-        ])
+        s.a.numLeggedHybridModularRobot(
+          modules=[
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft);
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft)
+          ];
+          function=s.f.sinP(a=0.5)
+        )
         """;
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
-    double a = Math.toRadians(45);
-    double f = 1d;
-    double maxP = Math.PI;
-    lhmr.setTimedRealFunction(TimedRealFunction.from(
-        (t, in) -> IntStream.range(0, lhmr.getTimedRealFunction().nOfOutputs())
-            .mapToDouble(i -> a * Math.sin(2d * Math.PI * f * t + maxP * (double) i / (double) lhmr.getTimedRealFunction()
-                .nOfOutputs()))
-            .toArray(),
-        lhmr.getTimedRealFunction().nOfInputs(),
-        lhmr.getTimedRealFunction().nOfOutputs()
-    ));
+    ((Parametrized) lhmr.getTimedRealFunction()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     Locomotion locomotion = new Locomotion(30, terrain);
     Outcome outcome = locomotion.run(() -> lhmr, engine, consumer);
     System.out.println(outcome);
@@ -153,7 +148,7 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 5d);
+    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 1d);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);

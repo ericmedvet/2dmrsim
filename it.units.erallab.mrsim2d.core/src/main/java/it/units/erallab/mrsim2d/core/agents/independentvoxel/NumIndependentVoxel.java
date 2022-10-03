@@ -31,6 +31,7 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -58,12 +59,15 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Wit
   }
 
   @BuilderMethod
-  public NumIndependentVoxel(@Param("sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors) {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors);
+  public NumIndependentVoxel(
+      @Param("sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors,
+      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+  ) {
+    this(sensors, timedRealFunctionBuilder.apply(nOfInputs(sensors), nOfOutputs()));
   }
 
   public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction timedRealFunction) {
-    this(sensors);
+    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors);
     setTimedRealFunction(timedRealFunction);
   }
 

@@ -45,12 +45,15 @@ public class CentralizedNumGridVSR extends NumGridVSR implements WithTimedRealFu
   }
 
   @BuilderMethod
-  public CentralizedNumGridVSR(@Param("body") Body body) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
+  public CentralizedNumGridVSR(
+      @Param("body") Body body,
+      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+  ) {
+    this(body, timedRealFunctionBuilder.apply(nOfInputs(body), nOfOutputs(body)));
   }
 
   public CentralizedNumGridVSR(Body body, TimedRealFunction timedRealFunction) {
-    this(body);
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
     setTimedRealFunction(timedRealFunction);
   }
 

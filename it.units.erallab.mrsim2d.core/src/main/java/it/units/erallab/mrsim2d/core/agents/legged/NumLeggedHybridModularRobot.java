@@ -9,6 +9,7 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 /**
@@ -20,9 +21,12 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
 
   private TimedRealFunction timedRealFunction;
 
-  public NumLeggedHybridModularRobot(@Param("modules") List<Module> modules) {
+  public NumLeggedHybridModularRobot(
+      @Param("modules") List<Module> modules,
+      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+  ) {
     super(modules);
-    setTimedRealFunction(TimedRealFunction.zeros(nOfInputs(modules), nOfOutputs(modules)));
+    setTimedRealFunction(timedRealFunctionBuilder.apply(nOfInputs(modules), nOfOutputs(modules)));
   }
 
   public static int nOfInputs(List<Module> modules) {

@@ -22,10 +22,7 @@ import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
-import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
-import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
-import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
-import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctionBuilder;
+import it.units.erallab.mrsim2d.core.builders.*;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
@@ -53,6 +50,7 @@ public class PreparedNamedBuilder {
               )
           )
           .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(SensorBuilder.class))
+          .and(List.of("function", "f"), NamedBuilder.fromUtilityClass(TimedRealFunctionBuilder.class))
           .and(List.of("vsr"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
               .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
