@@ -33,36 +33,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>18</jdk.version>
-        <revision>0.6.0</revision>
+        <revision>0.6.1</revision>
     </properties>
     <dependencies>
-        <!--
-                <dependency>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-api</artifactId>
-                    <version>5.9.0</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-params</artifactId>
-                    <version>5.9.0</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-engine</artifactId>
-                    <version>5.9.0</version>
-                    <scope>test</scope>
-                </dependency>
-        -->
-        <!--
-                <dependency>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.3.0</version>
-                </dependency>
-        -->
     </dependencies>
 
     <build>
