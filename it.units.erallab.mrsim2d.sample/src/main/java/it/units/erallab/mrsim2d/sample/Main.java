@@ -131,7 +131,7 @@ public class Main {
             s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
             s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft)
           ];
-          function=s.f.sinP(a=0.5)
+          function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
         )
         """;
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
@@ -159,8 +159,8 @@ public class Main {
     //do thing
     //rotationalJoint(engine, terrain, viewer);
     //vsrLocomotion(engine, terrain, viewer);
-    //leggedLocomotion(engine, terrain, viewer);
-    ball(engine, terrain, viewer);
+    leggedLocomotion(engine, terrain, viewer);
+    //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
 

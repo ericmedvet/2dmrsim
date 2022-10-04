@@ -1,5 +1,6 @@
 package it.units.erallab.mrsim2d.core.functions;
 
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
 
 import java.util.Arrays;
@@ -17,11 +18,17 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   private final double[] frequencies;
   private final double[] amplitudes;
   private final Set<Type> types;
+  private final DoubleRange phaseRange;
+  private final DoubleRange frequencyRange;
+  private final DoubleRange amplitudeRange;
 
-  public Sinusoidal(int nOfInputs, int nOfOutputs, Set<Type> types) {
+  public Sinusoidal(int nOfInputs, int nOfOutputs, Set<Type> types, DoubleRange phaseRange, DoubleRange frequencyRange, DoubleRange amplitudeRange) {
     this.nOfInputs = nOfInputs;
     this.nOfOutputs = nOfOutputs;
     this.types = types;
+    this.phaseRange = phaseRange;
+    this.frequencyRange = frequencyRange;
+    this.amplitudeRange = amplitudeRange;
     phases = new double[nOfOutputs];
     frequencies = new double[nOfOutputs];
     amplitudes = new double[nOfOutputs];
@@ -38,7 +45,12 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   @Override
   public double[] apply(double t, double[] input) {
     return IntStream.range(0, nOfOutputs)
-        .mapToDouble(i -> amplitudes[i] * Math.sin(2d * Math.PI * frequencies[i] * t + phases[i]))
+        .mapToDouble(i -> {
+          double a = amplitudeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(amplitudes[i]));
+          double p = phaseRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(phases[i]));
+          double f = frequencyRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(frequencies[i]));
+          return a * Math.sin(2d * Math.PI * f * t + p);
+        })
         .toArray();
   }
 

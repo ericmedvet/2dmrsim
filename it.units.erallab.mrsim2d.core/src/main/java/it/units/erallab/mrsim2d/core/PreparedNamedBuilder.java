@@ -26,6 +26,7 @@ import it.units.erallab.mrsim2d.core.builders.*;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class PreparedNamedBuilder {
 
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
       .and(List.of("sim", "s"), NamedBuilder.empty()
+          .and(NamedBuilder.fromUtilityClass(DoubleRange.class))
           .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
           .and(List.of("task"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(Locomotion.class))

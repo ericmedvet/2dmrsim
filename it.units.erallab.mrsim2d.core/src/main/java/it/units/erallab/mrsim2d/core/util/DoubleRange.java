@@ -16,6 +16,8 @@
 
 package it.units.erallab.mrsim2d.core.util;
 
+import it.units.erallab.mrsim2d.builder.Param;
+
 import java.io.Serializable;
 
 /**
@@ -26,7 +28,6 @@ public record DoubleRange(double min, double max) implements Serializable {
   public static DoubleRange UNIT = new DoubleRange(0, 1);
   public static DoubleRange SYMMETRIC_UNIT = new DoubleRange(-1, 1);
   public static DoubleRange UNBOUNDED = new DoubleRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-
   public DoubleRange {
     if (max < min) {
       throw new IllegalArgumentException(String.format(
@@ -37,8 +38,16 @@ public record DoubleRange(double min, double max) implements Serializable {
     }
   }
 
+  public static DoubleRange range(@Param("min") double min, @Param("max") double max) {
+    return new DoubleRange(min, max);
+  }
+
   public double clip(double value) {
     return Math.min(Math.max(value, min), max);
+  }
+
+  public DoubleRange delta(double v) {
+    return new DoubleRange(min + v, max + v);
   }
 
   public double denormalize(double value) {
@@ -51,10 +60,6 @@ public record DoubleRange(double min, double max) implements Serializable {
 
   public double normalize(double value) {
     return (clip(value) - min) / (max - min);
-  }
-
-  public DoubleRange delta(double v) {
-    return new DoubleRange(min + v, max + v);
   }
 
   public boolean overlaps(DoubleRange other) {

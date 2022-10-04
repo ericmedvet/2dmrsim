@@ -5,6 +5,7 @@ import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.functions.Sinusoidal;
 import it.units.erallab.mrsim2d.core.functions.SteppedTimedRealFunction;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
 import java.util.EnumSet;
 import java.util.function.BiFunction;
@@ -46,33 +47,63 @@ public class TimedRealFunctionBuilder {
   }
 
   public static BiFunction<Integer, Integer, Sinusoidal> sinP(
-      @Param(value = "f", dD = 1f) double frequency,
-      @Param(value = "a", dD = 1f) double amplitude
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
   ) {
-    return (nOfInputs, nOfOutputs) -> {
-      Sinusoidal sinusoidal = new Sinusoidal(nOfInputs, nOfOutputs, EnumSet.of(Sinusoidal.Type.PHASE));
-      sinusoidal.setFrequencies(frequency);
-      sinusoidal.setAmplitudes(amplitude);
-      return sinusoidal;
-    };
-  }
-
-  public static BiFunction<Integer, Integer, Sinusoidal> sinPF(
-      @Param(value = "a", dD = 1f) double amplitude
-  ) {
-    return (nOfInputs, nOfOutputs) -> {
-      Sinusoidal sinusoidal = new Sinusoidal(nOfInputs, nOfOutputs, EnumSet.of(Sinusoidal.Type.PHASE));
-      sinusoidal.setAmplitudes(amplitude);
-      return sinusoidal;
-    };
-  }
-
-  public static BiFunction<Integer, Integer, Sinusoidal> sinPFA() {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
         nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE)
+        EnumSet.of(Sinusoidal.Type.PHASE),
+        phaseRange,
+        frequencyRange,
+        amplitudeRange
     );
+  }
+
+  public static BiFunction<Integer, Integer, Sinusoidal> sinPA(
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+  ) {
+    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
+        nOfInputs,
+        nOfOutputs,
+        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.AMPLITUDE),
+        phaseRange,
+        frequencyRange,
+        amplitudeRange
+    );
+  }
+
+  public static BiFunction<Integer, Integer, Sinusoidal> sinPF(
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+  ) {
+    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
+        nOfInputs,
+        nOfOutputs,
+        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY),
+        phaseRange,
+        frequencyRange,
+        amplitudeRange
+    );
+  }
+
+  public static BiFunction<Integer, Integer, Sinusoidal> sinPFA(
+    @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+    @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+    @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+  ) {
+      return (nOfInputs, nOfOutputs) -> new Sinusoidal(
+          nOfInputs,
+          nOfOutputs,
+          EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE),
+          phaseRange,
+          frequencyRange,
+          amplitudeRange
+      );
   }
 
   public static BiFunction<Integer, Integer, SteppedTimedRealFunction> stepped(
