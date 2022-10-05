@@ -30,7 +30,6 @@ import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
 import it.units.erallab.mrsim2d.core.engine.Engine;
-import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
@@ -38,7 +37,6 @@ import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.erallab.mrsim2d.core.util.Parametrized;
 import it.units.erallab.mrsim2d.viewer.*;
 
 import java.io.File;
@@ -47,8 +45,8 @@ import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
-import java.util.stream.IntStream;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -135,7 +133,7 @@ public class Main {
         )
         """;
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
-    ((Parametrized) lhmr.getTimedRealFunction()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    lhmr.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     Locomotion locomotion = new Locomotion(30, terrain);
     Outcome outcome = locomotion.run(() -> lhmr, engine, consumer);
     System.out.println(outcome);
@@ -155,11 +153,11 @@ public class Main {
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 1d);
-    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
-    //vsrLocomotion(engine, terrain, viewer);
-    leggedLocomotion(engine, terrain, viewer);
+    vsrLocomotion(engine, terrain, viewer);
+    //leggedLocomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
@@ -188,30 +186,27 @@ public class Main {
     }
   }
 
-  private static void vsrLocomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+  private static void vsrLocomotion(Supplier<Engine> engine, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
-        s.a.centralizedNumGridVSR(body=s.vsr.body(
+        s.a.centralizedNumGridVSR(body=s.vsr.gridBody(
           shape=s.vsr.s.biped(w=4;h=3);
           sensorizingFunction=s.vsr.sf.directional(
             sSensors=[s.s.d(a=-90)];
-            headSensors=[s.s.sin();s.s.d(a=-15;r=5)];
+            headSensors=[s.s.sin();s.s.d(a=-30;r=8)];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
-          )
-        ))
+          ));
+          function=s.f.mlp(nOfInnerLayers=4)
+        )
         """;
-    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
-        MultiLayerPerceptron.ActivationFunction.TANH,
-        vsr.getTimedRealFunction().nOfInputs(),
-        new int[]{10},
-        vsr.getTimedRealFunction().nOfOutputs()
-    );
-    RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    vsr.setTimedRealFunction(mlp);
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+      vsr.randomize(new Random(33), new DoubleRange(-5, 5));
+      return vsr;
+    };
     Locomotion locomotion = new Locomotion(30, terrain);
-    Outcome outcome = locomotion.run(() -> vsr, engine, consumer);
-    System.out.println(outcome);
+    //locomotion.run(agentSupplier, engine.get(), consumer);
+    System.out.println(locomotion.run(agentSupplier, engine.get()));
+    System.out.println(locomotion.run(agentSupplier, engine.get()));
   }
 }

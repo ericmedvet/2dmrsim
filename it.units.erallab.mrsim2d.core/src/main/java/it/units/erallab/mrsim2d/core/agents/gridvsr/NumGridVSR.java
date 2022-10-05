@@ -17,8 +17,6 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
@@ -26,7 +24,6 @@ import it.units.erallab.mrsim2d.core.actions.Sense;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.erallab.mrsim2d.core.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,55 +39,25 @@ public class NumGridVSR extends AbstractGridVSR {
   private final Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
-  private final Body body;
-  private BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
+  private final GridBody body;
+  private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
 
   public NumGridVSR(
-      Body body,
+      GridBody body,
       double voxelSideLength,
-      double voxelMass
+      double voxelMass,
+      BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
   ) {
     super(body.materialGrid(), voxelSideLength, voxelMass);
     this.sensorsGrid = body.sensorsGrid();
     this.body = body;
     inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
+    this.timedFunction = timedFunction;
   }
 
-  @BuilderMethod
-  public NumGridVSR(@Param("body") Body body) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
-  }
-
-  public NumGridVSR(Body body, BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
-    this(body);
-    setTimedFunction(timedFunction);
-  }
-
-  public record Body(Grid<Pair<Voxel.Material, List<Function<? super Voxel, Sense<? super Voxel>>>>> grid) {
-    @BuilderMethod()
-    public Body(
-        @Param("shape") Grid<Boolean> shape,
-        @Param("sensorizingFunction") Function<Grid<Boolean>,
-            Grid<List<Function<? super Voxel, Sense<? super Voxel>>>>> sensorizingFunction
-    ) {
-      this(Grid.create(
-          shape.w(),
-          shape.h(),
-          (x, y) -> new Pair<>(
-              shape.get(x, y) ? new Voxel.Material() : null,
-              shape.get(x, y) ? sensorizingFunction.apply(shape).get(x, y) : null
-          )
-      ));
-    }
-
-    public Grid<Voxel.Material> materialGrid() {
-      return Grid.create(grid, Pair::first);
-    }
-
-    public Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid() {
-      return Grid.create(grid, Pair::second);
-    }
+  public NumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
   }
 
   @SuppressWarnings("unchecked")
@@ -134,15 +101,11 @@ public class NumGridVSR extends AbstractGridVSR {
     return actions;
   }
 
-  public Body getBody() {
+  public GridBody getBody() {
     return body;
   }
 
   public BiFunction<Double, Grid<double[]>, Grid<Double>> getTimedFunction() {
     return timedFunction;
-  }
-
-  public void setTimedFunction(BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
-    this.timedFunction = timedFunction;
   }
 }

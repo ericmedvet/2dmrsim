@@ -19,107 +19,60 @@ package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 import it.units.erallab.mrsim2d.builder.BuilderMethod;
 import it.units.erallab.mrsim2d.builder.Param;
-import it.units.erallab.mrsim2d.core.agents.WithTimedRealFunction;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
-import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.erallab.mrsim2d.core.util.Utils;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.function.BiFunction;
 
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class CentralizedNumGridVSR extends NumGridVSR implements WithTimedRealFunction {
+public class CentralizedNumGridVSR extends NumGridVSR implements Parametrized {
 
-  private TimedRealFunction timedRealFunction;
+  private final TimedRealFunction timedRealFunction;
 
   public CentralizedNumGridVSR(
-      Body body,
+      GridBody body,
       double voxelSideLength,
-      double voxelMass
+      double voxelMass,
+      TimedRealFunction timedRealFunction
   ) {
-    super(body, voxelSideLength, voxelMass);
-    setTimedRealFunction(TimedRealFunction.zeros(nOfInputs(body), nOfOutputs(body)));
+    super(body, voxelSideLength, voxelMass, new GridTimedRealFunction(body, timedRealFunction));
+    this.timedRealFunction = timedRealFunction;
   }
 
   @BuilderMethod
   public CentralizedNumGridVSR(
-      @Param("body") Body body,
+      @Param("body") GridBody body,
       @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
   ) {
-    this(body, timedRealFunctionBuilder.apply(nOfInputs(body), nOfOutputs(body)));
+    this(body, timedRealFunctionBuilder.apply(
+        GridTimedRealFunction.nOfInputs(body),
+        GridTimedRealFunction.nOfOutputs(body)
+    ));
   }
 
-  public CentralizedNumGridVSR(Body body, TimedRealFunction timedRealFunction) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
-    setTimedRealFunction(timedRealFunction);
-  }
-
-  private static BiFunction<Double, Grid<double[]>, Grid<Double>> buildGridFunction(
-      TimedRealFunction timedRealFunction,
-      Body body
-  ) {
-    int nOfInputs = nOfInputs(body);
-    return (t, inputsGrid) -> {
-      //build inputs
-      double[] inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
-      if (inputs.length != nOfInputs) {
-        throw new IllegalArgumentException(String.format(
-            "Wrong number of inputs: %d expected, %d found",
-            nOfInputs,
-            inputs.length
-        ));
-      }
-      //compute outputs
-      double[] outputs = timedRealFunction.apply(t, inputs);
-      //split outputs
-      Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
-      int c = 0;
-      for (Grid.Entry<double[]> e : inputsGrid) {
-        if (e.value() != null) {
-          outputsGrid.set(e.key(), outputs[c]);
-          c = c + 1;
-        }
-      }
-      return outputsGrid;
-    };
-
-  }
-
-  public static int nOfInputs(Body body) {
-    return body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-  }
-
-  public static int nOfOutputs(Body body) {
-    return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+  public CentralizedNumGridVSR(GridBody body, TimedRealFunction timedRealFunction) {
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedRealFunction);
   }
 
   @Override
-  public TimedRealFunction getTimedRealFunction() {
-    return timedRealFunction;
+  public double[] getParams() {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      return parametrized.getParams();
+    }
+    return new double[0];
   }
 
   @Override
-  public void setTimedRealFunction(TimedRealFunction timedRealFunction) {
-    int nOfInputs = nOfInputs(getBody());
-    int nOfOutputs = nOfOutputs(getBody());
-    if (timedRealFunction.nOfInputs() != nOfInputs) {
-      throw new IllegalArgumentException(String.format(
-          "Function expects %d inputs; %d found",
-          timedRealFunction.nOfInputs(),
-          nOfInputs
-      ));
+  public void setParams(double[] params) {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      parametrized.setParams(params);
+    } else if (params.length > 0) {
+      throw new IllegalArgumentException(
+          "Cannot set params because the function %s has no params".formatted(
+              timedRealFunction
+          ));
     }
-    if (timedRealFunction.nOfOutputs() != nOfOutputs) {
-      throw new IllegalArgumentException(String.format(
-          "Function produces %d outputs; %d found",
-          timedRealFunction.nOfOutputs(),
-          nOfOutputs
-      ));
-    }
-    this.timedRealFunction = timedRealFunction;
-    setTimedFunction(buildGridFunction(timedRealFunction, getBody()));
   }
 }

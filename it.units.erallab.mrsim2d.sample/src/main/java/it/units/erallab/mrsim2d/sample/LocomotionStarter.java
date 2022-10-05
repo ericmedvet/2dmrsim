@@ -19,7 +19,7 @@ package it.units.erallab.mrsim2d.sample;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -48,7 +48,7 @@ public class LocomotionStarter {
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     NamedBuilder<Object> nb = NamedBuilder.empty()
-        .and(NamedBuilder.fromClass(NumGridVSR.Body.class))
+        .and(NamedBuilder.fromClass(GridBody.class))
         .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
@@ -63,7 +63,7 @@ public class LocomotionStarter {
           )
         )
         """;
-    NumGridVSR.Body body = (NumGridVSR.Body) nb.build(bodyS);
+    GridBody body = (GridBody) nb.build(bodyS);
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
     int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(

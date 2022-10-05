@@ -1,12 +1,13 @@
 package it.units.erallab.mrsim2d.core.agents.legged;
 
+import it.units.erallab.mrsim2d.builder.BuilderMethod;
 import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.actions.ActuateRotationalJoint;
-import it.units.erallab.mrsim2d.core.agents.WithTimedRealFunction;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -15,18 +16,23 @@ import java.util.stream.IntStream;
 /**
  * @author "Eric Medvet" on 2022/09/24 for 2dmrsim
  */
-public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobot implements WithTimedRealFunction {
+public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobot implements Parametrized {
 
   private final static DoubleRange ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
 
-  private TimedRealFunction timedRealFunction;
+  private final TimedRealFunction timedRealFunction;
 
+  public NumLeggedHybridModularRobot(List<Module> modules, TimedRealFunction timedRealFunction) {
+    super(modules);
+    this.timedRealFunction = timedRealFunction;
+  }
+
+  @BuilderMethod
   public NumLeggedHybridModularRobot(
       @Param("modules") List<Module> modules,
       @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
   ) {
-    super(modules);
-    setTimedRealFunction(timedRealFunctionBuilder.apply(nOfInputs(modules), nOfOutputs(modules)));
+    this(modules, timedRealFunctionBuilder.apply(nOfInputs(modules), nOfOutputs(modules)));
   }
 
   public static int nOfInputs(List<Module> modules) {
@@ -54,27 +60,23 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
         .toList();
   }
 
-  @Override
-  public TimedRealFunction getTimedRealFunction() {
-    return timedRealFunction;
+  public double[] getParams() {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      return parametrized.getParams();
+    }
+    return new double[0];
   }
 
   @Override
-  public void setTimedRealFunction(TimedRealFunction timedRealFunction) {
-    if (timedRealFunction.nOfInputs() != nOfInputs(modules)) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function input size: %d found vs. %d expected",
-          timedRealFunction.nOfInputs(),
-          nOfInputs(modules)
-      ));
+  public void setParams(double[] params) {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      parametrized.setParams(params);
+    } else {
+      if (params.length > 0) {
+        throw new IllegalArgumentException("Cannot set params because the function %s has no params".formatted(
+            timedRealFunction));
+      }
     }
-    if (timedRealFunction.nOfOutputs() != nOfOutputs(modules)) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function output size: %d found vs. %d expected",
-          timedRealFunction.nOfInputs(),
-          nOfOutputs(modules)
-      ));
-    }
-    this.timedRealFunction = timedRealFunction;
   }
+
 }

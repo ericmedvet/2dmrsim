@@ -24,10 +24,10 @@ import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
 import it.units.erallab.mrsim2d.core.actions.DetachAnchors;
 import it.units.erallab.mrsim2d.core.actions.Sense;
-import it.units.erallab.mrsim2d.core.agents.WithTimedRealFunction;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,25 +37,26 @@ import java.util.function.Function;
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
  */
-public class NumIndependentVoxel extends AbstractIndependentVoxel implements WithTimedRealFunction {
+public class NumIndependentVoxel extends AbstractIndependentVoxel implements Parametrized {
 
   private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
   private final static int N_OF_OUTPUTS = 8;
 
   private final List<Function<Voxel, Sense<? super Voxel>>> sensors;
   private final double[] inputs;
-  private TimedRealFunction timedRealFunction;
+  private final TimedRealFunction timedRealFunction;
 
   public NumIndependentVoxel(
       Voxel.Material material,
       double voxelSideLength,
       double voxelMass,
-      List<Function<Voxel, Sense<? super Voxel>>> sensors
+      List<Function<Voxel, Sense<? super Voxel>>> sensors,
+      TimedRealFunction timedRealFunction
   ) {
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
     inputs = new double[sensors.size()];
-    setTimedRealFunction(TimedRealFunction.zeros(nOfInputs(sensors), nOfOutputs()));
+    this.timedRealFunction = timedRealFunction;
   }
 
   @BuilderMethod
@@ -67,8 +68,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Wit
   }
 
   public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction timedRealFunction) {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors);
-    setTimedRealFunction(timedRealFunction);
+    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors, timedRealFunction);
   }
 
   public static int nOfInputs(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
@@ -114,26 +114,20 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Wit
   }
 
   @Override
-  public TimedRealFunction getTimedRealFunction() {
-    return timedRealFunction;
+  public double[] getParams() {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      return parametrized.getParams();
+    }
+    return new double[0];
   }
 
   @Override
-  public void setTimedRealFunction(TimedRealFunction timedRealFunction) {
-    if (timedRealFunction.nOfInputs() != nOfInputs(sensors)) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function input size: %d found vs. %d expected",
-          timedRealFunction.nOfInputs(),
-          nOfInputs(sensors)
-      ));
+  public void setParams(double[] params) {
+    if (timedRealFunction instanceof Parametrized parametrized) {
+      parametrized.setParams(params);
+    } else if (params.length > 0) {
+      throw new IllegalArgumentException("Cannot set params because the function %s has no params".formatted(
+          timedRealFunction));
     }
-    if (timedRealFunction.nOfOutputs() != N_OF_OUTPUTS) {
-      throw new IllegalArgumentException(String.format(
-          "Invalid function output size: %d found vs. %d expected",
-          timedRealFunction.nOfInputs(),
-          N_OF_OUTPUTS
-      ));
-    }
-    this.timedRealFunction = timedRealFunction;
   }
 }
