@@ -106,7 +106,7 @@ public interface Drawer {
     };
   }
 
-  static Drawer transform(Framer framer, Drawer drawer) {
+  static Drawer transform(Framer<Snapshot> framer, Drawer drawer) {
     return (snapshots, g) -> {
       BoundingBox graphicsFrame = new BoundingBox(
           new Point(
@@ -118,8 +118,10 @@ public interface Drawer {
               g.getClip().getBounds2D().getMaxY()
           )
       );
+      Snapshot lastSnapshot = snapshots.get(snapshots.size() - 1);
       BoundingBox worldFrame = framer.getFrame(
-          snapshots.get(snapshots.size() - 1),
+          lastSnapshot.t(),
+          lastSnapshot,
           graphicsFrame.width() / graphicsFrame.height()
       );
       //save original transform and stroke

@@ -15,7 +15,6 @@
  */
 package it.units.erallab.mrsim2d.viewer;
 
-import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 
@@ -27,18 +26,18 @@ import java.util.Map;
  * @author Eric Medvet <eric.medvet@gmail.com>
  */
 @FunctionalInterface
-public interface Framer {
+public interface Framer<K> {
 
-  BoundingBox getFrame(Snapshot snapshot, double ratio);
+  BoundingBox getFrame(double t, K k, double ratio);
 
-  default Framer averaged(double windowT) {
-    Framer thisFramer = this;
+  default Framer<K> averaged(double windowT) {
+    Framer<K> thisFramer = this;
     Map<Double, BoundingBox> memory = new HashMap<>();
-    return (snapshot, ratio) -> {
-      BoundingBox currentBB = thisFramer.getFrame(snapshot, ratio);
+    return (t, k, ratio) -> {
+      BoundingBox currentBB = thisFramer.getFrame(t, k, ratio);
       //update memory
-      memory.put(snapshot.t(), currentBB);
-      List<Double> toRemoveKeys = memory.keySet().stream().filter(t -> t < snapshot.t() - windowT).toList();
+      memory.put(t, currentBB);
+      List<Double> toRemoveKeys = memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
       toRemoveKeys.forEach(memory::remove);
       //average bounding box
       double x = memory.values().stream().mapToDouble(bb -> bb.center().x()).average().orElse(currentBB.center().x());
@@ -49,14 +48,14 @@ public interface Framer {
     };
   }
 
-  default Framer largest(double windowT) {
-    Framer thisFramer = this;
+  default Framer<K> largest(double windowT) {
+    Framer<K> thisFramer = this;
     Map<Double, BoundingBox> memory = new HashMap<>();
-    return (snapshot, ratio) -> {
-      BoundingBox currentBB = thisFramer.getFrame(snapshot, ratio);
+    return (t, k, ratio) -> {
+      BoundingBox currentBB = thisFramer.getFrame(t, k, ratio);
       //update memory
-      memory.put(snapshot.t(), currentBB);
-      List<Double> toRemoveKeys = memory.keySet().stream().filter(t -> t < snapshot.t() - windowT).toList();
+      memory.put(t, currentBB);
+      List<Double> toRemoveKeys = memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
       toRemoveKeys.forEach(memory::remove);
       //take largest bounding box
       return memory.values().stream().reduce(BoundingBox::enclosing).orElse(currentBB);

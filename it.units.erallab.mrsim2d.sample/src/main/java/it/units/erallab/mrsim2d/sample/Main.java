@@ -140,7 +140,7 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Drawer drawer = Drawers.basic().profiled();
+    Drawer drawer = Drawers.basicWithAgentMignature("").profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
         400,
         300,
@@ -196,7 +196,7 @@ public class Main {
             headSensors=[s.s.sin();s.s.d(a=-30;r=8)];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           ));
-          function=s.f.mlp(nOfInnerLayers=4)
+          function=s.f.mlp(nOfInnerLayers=2)
         )
         """;
     Supplier<EmbodiedAgent> agentSupplier = () -> {
@@ -205,8 +205,6 @@ public class Main {
       return vsr;
     };
     Locomotion locomotion = new Locomotion(30, terrain);
-    //locomotion.run(agentSupplier, engine.get(), consumer);
-    System.out.println(locomotion.run(agentSupplier, engine.get()));
-    System.out.println(locomotion.run(agentSupplier, engine.get()));
+    locomotion.run(agentSupplier, engine.get(), consumer);
   }
 }

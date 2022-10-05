@@ -16,7 +16,6 @@
 
 package it.units.erallab.mrsim2d.viewer.framers;
 
-import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.viewer.Framer;
@@ -24,7 +23,7 @@ import it.units.erallab.mrsim2d.viewer.Framer;
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public abstract class AbstractFramer implements Framer {
+public abstract class AbstractFramer<K> implements Framer<K> {
   public static final BoundingBox DEFAULT_BOUNDING_BOX = new BoundingBox(Point.ORIGIN, new Point(10, 5));
   private final double sizeRelativeMargin;
 
@@ -32,11 +31,11 @@ public abstract class AbstractFramer implements Framer {
     this.sizeRelativeMargin = sizeRelativeMargin;
   }
 
-  protected abstract BoundingBox getCurrentBoundingBox(Snapshot snapshot);
+  protected abstract BoundingBox getCurrentBoundingBox(K k);
 
   @Override
-  public BoundingBox getFrame(Snapshot snapshot, double ratio) {
-    BoundingBox currentBB = getCurrentBoundingBox(snapshot);
+  public BoundingBox getFrame(double t, K k, double ratio) {
+    BoundingBox currentBB = getCurrentBoundingBox(k);
     //enlarge
     double cx = currentBB.center().x();
     double cy = currentBB.center().y();
