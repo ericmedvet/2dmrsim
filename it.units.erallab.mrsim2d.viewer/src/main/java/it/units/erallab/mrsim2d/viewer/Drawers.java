@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.viewer.drawers.ComponentsDrawer;
 import it.units.erallab.mrsim2d.viewer.drawers.EngineProfilingDrawer;
 import it.units.erallab.mrsim2d.viewer.drawers.InfoDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.StackedComponentsDrawer;
+import it.units.erallab.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
@@ -48,15 +48,19 @@ public class Drawers {
     );
   }
 
+  public static Drawer basic() {
+    return basic("");
+  }
+
   public static Drawer basicWithAgentMignature(String string) {
     return Drawer.of(
         Drawer.clear(),
         world(),
-        new StackedComponentsDrawer<>(
+        new StackedMultipliedDrawer<>(
             Drawers::simpleAgent,
             s -> List.of(s, s),
             new BoundingBox(new Point(0.9d, 0.01d), new Point(0.99d, 0.1d)),
-            StackedComponentsDrawer.Direction.VERTICAL
+            StackedMultipliedDrawer.Direction.VERTICAL
         ),
         new InfoDrawer(string)
     );
@@ -72,35 +76,6 @@ public class Drawers {
         ),
         new InfoDrawer(string),
         new EngineProfilingDrawer()
-    );
-  }
-
-  public static Drawer basic() {
-    return basic("");
-  }
-
-  public static Drawer world() {
-    return Drawer.transform(
-        new AllAgentsFramer(2.5d).largest(2d),
-        Drawer.of(
-            new ComponentsDrawer(
-                List.of(
-                    new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                    new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                    new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
-                ), Snapshot::bodies
-            ).onLastSnapshot(),
-            new ComponentsDrawer(
-                List.of(
-                    //new CreateLink(), // both slow, because they add continuously drawers...
-                    //new RemoveLink(),
-                    new AttractAnchor(),
-                    new SenseDistanceToBody(),
-                    new SenseRotatedVelocity()
-                ), Snapshot::actionOutcomes
-            )
-        )
     );
   }
 
@@ -131,6 +106,31 @@ public class Drawers {
                     new RigidBodyDrawer()
                 ), Snapshot::bodies
             ).onLastSnapshot()
+        )
+    );
+  }
+
+  public static Drawer world() {
+    return Drawer.transform(
+        new AllAgentsFramer(2.5d).largest(2d),
+        Drawer.of(
+            new ComponentsDrawer(
+                List.of(
+                    new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                    new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
+                    new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                    new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
+                ), Snapshot::bodies
+            ).onLastSnapshot(),
+            new ComponentsDrawer(
+                List.of(
+                    //new CreateLink(), // both slow, because they add continuously drawers...
+                    //new RemoveLink(),
+                    new AttractAnchor(),
+                    new SenseDistanceToBody(),
+                    new SenseRotatedVelocity()
+                ), Snapshot::actionOutcomes
+            )
         )
     );
   }
