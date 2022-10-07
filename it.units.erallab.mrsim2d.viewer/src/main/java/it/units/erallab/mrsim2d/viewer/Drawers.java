@@ -57,9 +57,10 @@ public class Drawers {
         Drawer.clear(),
         world(),
         new StackedMultipliedDrawer<>(
-            Drawers::simpleAgent,
-            s -> List.of(s, s),
-            new BoundingBox(new Point(0.9d, 0.01d), new Point(0.99d, 0.1d)),
+            Drawers::simpleAgentWithVelocities,
+            new EmbodiedAgentsExtractor(),
+            0.2,
+            0.05,
             StackedMultipliedDrawer.Direction.VERTICAL,
             Drawer.VerticalPosition.TOP,
             Drawer.HorizontalPosition.RIGHT
@@ -100,7 +101,7 @@ public class Drawers {
 
   public static Drawer simpleAgent() {
     return Drawer.transform(
-        new AllAgentsFramer(1d).largest(2d),
+        new AllAgentsFramer(1.1d).largest(2d),
         Drawer.of(
             new ComponentsDrawer(
                 List.of(
@@ -113,9 +114,27 @@ public class Drawers {
     );
   }
 
+  public static Drawer simpleAgentWithVelocities() {
+    FirstAgentVelocityExtractor velocityExtractor = new FirstAgentVelocityExtractor(2d);
+    return Drawer.of(
+        Drawer.clip(
+            new BoundingBox(new Point(0, 0), new Point(0.33, 1)),
+            simpleAgent()
+        ),
+        Drawer.clip(
+            new BoundingBox(new Point(0.34, 0), new Point(0.66, 1)),
+            new LinePlotter(velocityExtractor.andThen(p -> p.map(Point::x).orElse(0d)), 10, "vx=%+4.1f")
+        ),
+        Drawer.clip(
+            new BoundingBox(new Point(0.67, 0), new Point(1, 1)),
+            new LinePlotter(velocityExtractor.andThen(p -> p.map(Point::y).orElse(0d)), 10, "vy=%+4.1f")
+        )
+    );
+  }
+
   public static Drawer world() {
     return Drawer.transform(
-        new AllAgentsFramer(2.5d).largest(2d),
+        new AllAgentsFramer(2.0d).largest(2d),
         Drawer.of(
             new ComponentsDrawer(
                 List.of(

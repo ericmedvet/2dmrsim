@@ -69,4 +69,8 @@ public abstract class AbstractMemoryDrawer<T> implements Drawer {
     //call inner drawer
     return innerDraw(memory, g);
   }
+
+  protected double getWindowT() {
+    return windowT;
+  }
 }

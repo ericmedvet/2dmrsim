@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.viewer;
 
+import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
@@ -82,7 +83,7 @@ public class DrawingUtils {
       g.drawString(
           s,
           Math.round(x + g.getFontMetrics().charWidth('x') + w),
-          Math.round(y + g.getFontMetrics().getMaxAscent())
+          Math.round(y + h)
       );
     }
   }
@@ -100,15 +101,15 @@ public class DrawingUtils {
     drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
   }
 
-  public static Stroke getScaleIndependentStroke(float thickness, float scale) {
-    return new BasicStroke(thickness / scale);
+  public static BoundingBox getBoundingBox(Graphics2D g) {
+    return new BoundingBox(
+        new Point(g.getClipBounds().getMinX(), g.getClipBounds().getMinY()),
+        new Point(g.getClipBounds().getMaxX(), g.getClipBounds().getMaxY())
+    );
   }
 
-  public static Color linear(final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
-    if (x < x2) {
-      return linear(c1, c2, x1, x2, x);
-    }
-    return linear(c2, c3, x2, x3, x);
+  public static Stroke getScaleIndependentStroke(float thickness, float scale) {
+    return new BasicStroke(thickness / scale);
   }
 
   public static Color linear(final Color c1, final Color c2, float min, float max, float x) {
@@ -129,12 +130,11 @@ public class DrawingUtils {
     return new Color(r, g, b, a);
   }
 
-  public static Path2D toPath(Poly poly, boolean close) {
-    Path2D path = toPath(poly.vertexes());
-    if (close) {
-      path.closePath();
+  public static Color linear(final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
+    if (x < x2) {
+      return linear(c1, c2, x1, x2, x);
     }
-    return path;
+    return linear(c2, c3, x2, x3, x);
   }
 
   public static Path2D toPath(Point... points) {
@@ -142,6 +142,14 @@ public class DrawingUtils {
     path.moveTo(points[0].x(), points[0].y());
     for (int i = 1; i < points.length; i++) {
       path.lineTo(points[i].x(), points[i].y());
+    }
+    return path;
+  }
+
+  public static Path2D toPath(Poly poly, boolean close) {
+    Path2D path = toPath(poly.vertexes());
+    if (close) {
+      path.closePath();
     }
     return path;
   }

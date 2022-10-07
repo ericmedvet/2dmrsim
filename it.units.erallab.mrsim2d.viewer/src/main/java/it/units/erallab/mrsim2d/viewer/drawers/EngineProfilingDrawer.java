@@ -40,7 +40,7 @@ public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineS
   private final static double WINDOW_T = 1;
   private final static double BAR_W = 50;
   private final static double BAR_H = 10;
-  private final static double MARGIN = 10;
+  private final static double MARGIN = 1;
   private final VerticalPosition verticalPosition;
   private final HorizontalPosition horizontalPosition;
 
@@ -111,7 +111,7 @@ public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineS
         .stringWidth(ACTION_COUNT_FORMAT.formatted(
             (float) relCounters.get(EngineSnapshot.CounterType.ACTION)
         )));
-    double bbH = 3 * g.getFontMetrics().getMaxAscent();
+    double bbH = 3 * g.getFontMetrics().getHeight();
     //draw
     double x = switch (horizontalPosition) {
       case LEFT -> MARGIN;
@@ -132,7 +132,7 @@ public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineS
         TICK_PS_FORMAT,
         g
     );
-    y = y + g.getFontMetrics().getMaxAscent();
+    y = y + g.getFontMetrics().getHeight();
     DrawingUtils.drawFilledBar(
         x,
         y,
@@ -143,7 +143,7 @@ public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineS
         INNER_TICK_RATE_FORMAT,
         g
     );
-    y = y + g.getFontMetrics().getMaxAscent();
+    y = y + g.getFontMetrics().getHeight();
     DrawingUtils.drawFilledBar(
         x,
         y,

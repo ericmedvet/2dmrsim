@@ -28,26 +28,30 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class StackedMultipliedDrawer<T> implements Drawer {
-  private final static double MARGIN = 10;
+  private final static double MARGIN_RATIO = 0.01;
   private final Supplier<Drawer> innerDrawerSupplier;
   private final Function<Snapshot, List<Snapshot>> multiplier;
-  private final BoundingBox boundingBox;
+
+  private final double widthRatio;
+  private final double heightRatio;
   private final Direction direction;
-  private final List<Drawer> drawers;
   private final VerticalPosition verticalPosition;
   private final HorizontalPosition horizontalPosition;
+  private final List<Drawer> drawers;
 
   public StackedMultipliedDrawer(
       Supplier<Drawer> innerDrawerSupplier,
       Function<Snapshot, List<Snapshot>> multiplier,
-      BoundingBox boundingBox,
+      double widthRatio,
+      double heightRatio,
       Direction direction,
       VerticalPosition verticalPosition,
       HorizontalPosition horizontalPosition
   ) {
     this.innerDrawerSupplier = innerDrawerSupplier;
     this.multiplier = multiplier;
-    this.boundingBox = boundingBox;
+    this.widthRatio = widthRatio;
+    this.heightRatio = heightRatio;
     this.direction = direction;
     this.drawers = new ArrayList<>();
     this.verticalPosition = verticalPosition;
@@ -70,18 +74,38 @@ public class StackedMultipliedDrawer<T> implements Drawer {
         lists.get(i).add(multiplied.get(i));
       }
     }
-    boolean drawn = false;
-    // TODO change x and y like in EngineProfilingDrawer
+    //prepare bounding boxes
+    double nOfChildren = lists.size();
+    double bbW = switch (direction) {
+      case VERTICAL -> widthRatio;
+      case HORIZONTAL -> widthRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
+    };
+    double bbH = switch (direction) {
+      case VERTICAL -> heightRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
+      case HORIZONTAL -> heightRatio;
+    };
+    double x = switch (horizontalPosition) {
+      case LEFT -> MARGIN_RATIO;
+      case RIGHT -> 1d - bbW - MARGIN_RATIO;
+    };
+    double y = switch (verticalPosition) {
+      case TOP -> MARGIN_RATIO;
+      case BOTTOM -> 1d - bbH - MARGIN_RATIO;
+    };
     //iterate
-    BoundingBox bb = boundingBox;
+    boolean drawn = false;
     for (int i = 0; i < lists.size(); i++) {
+      BoundingBox bb = new BoundingBox(
+          new Point(x, y),
+          new Point(x + widthRatio, y + heightRatio)
+      );
       List<Snapshot> localSnapshots = lists.get(i);
       boolean localDrawn = Drawer.clip(bb, drawers.get(i)).draw(localSnapshots, g);
       drawn = drawn || localDrawn;
       if (direction.equals(Direction.VERTICAL)) {
-        bb = new BoundingBox(bb.min().sum(new Point(0, bb.height())), bb.max().sum(new Point(0, bb.height())));
+        y = bb.max().y() + MARGIN_RATIO;
       } else {
-        bb = new BoundingBox(bb.min().sum(new Point(bb.width(), 0)), bb.max().sum(new Point(bb.height(), 0)));
+        x = bb.max().x() + MARGIN_RATIO;
       }
     }
     return drawn;

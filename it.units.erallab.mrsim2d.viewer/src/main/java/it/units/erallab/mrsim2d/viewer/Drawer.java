@@ -24,6 +24,7 @@ import it.units.erallab.mrsim2d.core.util.Profiled;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.time.Duration;
 import java.time.Instant;
@@ -75,6 +76,17 @@ public interface Drawer {
       //restore clip and transform
       g.setClip(shape);
       return drawn;
+    };
+  }
+
+  static Drawer diagonals() {
+    return (snapshots, g) -> {
+      BoundingBox gBB = DrawingUtils.getBoundingBox(g);
+      g.setColor(DrawingUtils.Colors.AXES);
+      g.draw(new Rectangle2D.Double(gBB.min().x(), gBB.min().y(), gBB.width(), gBB.height()));
+      g.draw(new Line2D.Double(gBB.min().x(), gBB.min().y(), gBB.max().x(), gBB.max().y()));
+      g.draw(new Line2D.Double(gBB.min().x(), gBB.max().y(), gBB.max().x(), gBB.min().y()));
+      return true;
     };
   }
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class InfoDrawer implements Drawer {
-  private final static double MARGIN = 10;
+  private final static double MARGIN = 1;
   private final String string;
   private final Set<EngineInfo> engineInfos;
   private final VerticalPosition verticalPosition;
@@ -104,7 +104,7 @@ public class InfoDrawer implements Drawer {
         .mapToDouble(s -> g.getFontMetrics().stringWidth(s))
         .max()
         .orElse(0d);
-    double bbH = lines.length * g.getFontMetrics().getMaxAscent();
+    double bbH = lines.length * g.getFontMetrics().getHeight();
     double x = switch (horizontalPosition) {
       case LEFT -> MARGIN;
       case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
@@ -115,8 +115,8 @@ public class InfoDrawer implements Drawer {
     };
     g.setColor(DrawingUtils.Colors.TEXT);
     for (String line : lines) {
-      g.drawString(line, (float)x, (float)(y + g.getFontMetrics().getMaxAscent()));
-      y = y + g.getFontMetrics().getMaxAscent();
+      g.drawString(line, (float)x, (float)(y + g.getFontMetrics().getHeight()));
+      y = y + g.getFontMetrics().getHeight();
     }
     return true;
   }
