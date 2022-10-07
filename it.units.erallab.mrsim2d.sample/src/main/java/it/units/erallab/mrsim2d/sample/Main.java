@@ -120,7 +120,7 @@ public class Main {
     }
   }
 
-  private static void leggedLocomotion(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
+  private static void leggedLocomotion(Supplier<Engine> engineSupplier, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
         s.a.numLeggedHybridModularRobot(
@@ -135,7 +135,7 @@ public class Main {
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
     lhmr.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     Locomotion locomotion = new Locomotion(30, terrain);
-    Outcome outcome = locomotion.run(() -> lhmr, engine, consumer);
+    Outcome outcome = locomotion.run(() -> lhmr, engineSupplier.get(), consumer);
     System.out.println(outcome);
   }
 
@@ -156,8 +156,8 @@ public class Main {
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
-    vsrLocomotion(engine, terrain, viewer);
-    //leggedLocomotion(engine, terrain, viewer);
+    //vsrLocomotion(engine, terrain, viewer);
+    leggedLocomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }

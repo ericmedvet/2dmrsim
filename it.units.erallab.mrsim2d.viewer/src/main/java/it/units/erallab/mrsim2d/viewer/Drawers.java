@@ -134,7 +134,7 @@ public class Drawers {
 
   public static Drawer world() {
     return Drawer.transform(
-        new AllAgentsFramer(2.0d).largest(2d),
+        new AllAgentsFramer(1.5d).largest(2d),
         Drawer.of(
             new ComponentsDrawer(
                 List.of(
