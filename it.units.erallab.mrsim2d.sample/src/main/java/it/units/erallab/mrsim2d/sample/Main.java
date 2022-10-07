@@ -156,8 +156,8 @@ public class Main {
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
-    //vsrLocomotion(engine, terrain, viewer);
-    leggedLocomotion(engine, terrain, viewer);
+    vsrLocomotion(engine, terrain, viewer);
+    //leggedLocomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
   }
@@ -196,7 +196,10 @@ public class Main {
             headSensors=[s.s.sin();s.s.d(a=-30;r=8)];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           ));
-          function=s.f.mlp(nOfInnerLayers=2)
+          function=s.f.inputDifferer(
+            windowT=1;
+            innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh)
+          )
         )
         """;
     Supplier<EmbodiedAgent> agentSupplier = () -> {

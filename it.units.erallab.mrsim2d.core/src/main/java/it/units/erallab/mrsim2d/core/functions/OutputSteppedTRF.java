@@ -19,22 +19,20 @@ package it.units.erallab.mrsim2d.core.functions;
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class SteppedTimedRealFunction implements TimedRealFunction {
-
-  private final TimedRealFunction innerF;
-  private final double step;
+public class OutputSteppedTRF extends CompositeTRF {
+  private final double stepT;
   private double lastT;
   private double[] lastOutputs;
 
-  public SteppedTimedRealFunction(TimedRealFunction innerF, double step) {
-    this.innerF = innerF;
+  public OutputSteppedTRF(TimedRealFunction innerF, double stepT) {
+    super(innerF);
     lastT = Double.NEGATIVE_INFINITY;
-    this.step = step;
+    this.stepT = stepT;
   }
 
   @Override
   public double[] apply(double t, double[] input) {
-    if (t - lastT > step) {
+    if (t - lastT > stepT) {
       lastOutputs = innerF.apply(t, input);
       lastT = t;
     }
@@ -49,5 +47,13 @@ public class SteppedTimedRealFunction implements TimedRealFunction {
   @Override
   public int nOfOutputs() {
     return innerF.nOfOutputs();
+  }
+
+  @Override
+  public String toString() {
+    return "OutputSteppedTRF{" +
+        "innerF=" + innerF +
+        ", stepT=" + stepT +
+        '}';
   }
 }

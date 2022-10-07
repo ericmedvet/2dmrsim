@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.core.functions;
 
+import java.util.Collection;
 import java.util.function.BiFunction;
 
 /**
@@ -66,8 +67,12 @@ public interface TimedRealFunction {
     return from((t, in) -> new double[nOfOutputs], nOfInputs, nOfOutputs);
   }
 
-  default TimedRealFunction stepped(double step) {
-    return new SteppedTimedRealFunction(this, step);
+  default TimedRealFunction inputDiffed(double windowT, Collection<InputDiffTRF.Type> types) {
+    return new InputDiffTRF(this, windowT, types);
+  }
+
+  default TimedRealFunction outputStepped(double stepT) {
+    return new OutputSteppedTRF(this, stepT);
   }
 
 }
