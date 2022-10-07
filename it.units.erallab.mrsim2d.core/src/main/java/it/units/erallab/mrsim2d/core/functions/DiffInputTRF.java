@@ -8,12 +8,12 @@ import java.util.TreeMap;
 /**
  * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
  */
-public class InputDiffTRF extends CompositeTRF {
+public class DiffInputTRF extends CompositeTRF {
   private final double windowT;
   private final EnumSet<Type> types;
   private final SortedMap<Double, double[]> memory;
 
-  public InputDiffTRF(TimedRealFunction innerF, double windowT, Collection<Type> types) {
+  public DiffInputTRF(TimedRealFunction innerF, double windowT, Collection<Type> types) {
     super(innerF);
     if (innerF.nOfInputs() % types.size() != 0) {
       throw new IllegalArgumentException(
@@ -43,7 +43,6 @@ public class InputDiffTRF extends CompositeTRF {
     double[] iInput = new double[innerF.nOfInputs()];
     double[] firstInput = memory.get(memory.firstKey());
     double firstT = memory.firstKey();
-    ;
     int c = 0;
     for (Type type : types) {
       if (type.equals(Type.CURRENT)) {
@@ -79,4 +78,11 @@ public class InputDiffTRF extends CompositeTRF {
     return innerF.nOfOutputs();
   }
 
+  @Override
+  public String toString() {
+    return "InputDiffTRF{" +
+        "windowT=" + windowT +
+        ", types=" + types +
+        '}';
+  }
 }

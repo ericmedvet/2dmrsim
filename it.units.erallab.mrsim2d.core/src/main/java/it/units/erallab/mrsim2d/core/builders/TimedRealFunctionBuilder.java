@@ -15,13 +15,13 @@ public class TimedRealFunctionBuilder {
   private TimedRealFunctionBuilder() {
   }
 
-  public static BiFunction<Integer, Integer, InputDiffTRF> inputDifferer(
+  public static BiFunction<Integer, Integer, DiffInputTRF> diffIn(
       @Param("windowT") double windowT,
       @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction,
-      @Param(value = "types", dSs = {"current", "trend", "avg"}) List<InputDiffTRF.Type> types
+      @Param(value = "types", dSs = {"current", "trend", "avg"}) List<DiffInputTRF.Type> types
   ) {
-    return (nOfInputs, nOfOutputs) -> new InputDiffTRF(
-        innerFunction.apply(nOfInputs * 3, nOfOutputs),
+    return (nOfInputs, nOfOutputs) -> new DiffInputTRF(
+        innerFunction.apply(nOfInputs * types.size(), nOfOutputs),
         windowT,
         types
     );
@@ -53,16 +53,6 @@ public class TimedRealFunctionBuilder {
           nOfOutputs
       );
     };
-  }
-
-  public static BiFunction<Integer, Integer, OutputSteppedTRF> outputStepped(
-      @Param("stepT") double stepT,
-      @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction
-  ) {
-    return (nOfInputs, nOfOutputs) -> new OutputSteppedTRF(
-        innerFunction.apply(nOfInputs, nOfOutputs),
-        stepT
-    );
   }
 
   public static BiFunction<Integer, Integer, Sinusoidal> sinP(
@@ -122,6 +112,16 @@ public class TimedRealFunctionBuilder {
         phaseRange,
         frequencyRange,
         amplitudeRange
+    );
+  }
+
+  public static BiFunction<Integer, Integer, SteppedOutputTRF> stepOut(
+      @Param("stepT") double stepT,
+      @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction
+  ) {
+    return (nOfInputs, nOfOutputs) -> new SteppedOutputTRF(
+        innerFunction.apply(nOfInputs, nOfOutputs),
+        stepT
     );
   }
 }

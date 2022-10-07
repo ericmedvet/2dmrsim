@@ -67,12 +67,12 @@ public interface TimedRealFunction {
     return from((t, in) -> new double[nOfOutputs], nOfInputs, nOfOutputs);
   }
 
-  default TimedRealFunction inputDiffed(double windowT, Collection<InputDiffTRF.Type> types) {
-    return new InputDiffTRF(this, windowT, types);
+  default TimedRealFunction inputDiffed(double windowT, Collection<DiffInputTRF.Type> types) {
+    return new DiffInputTRF(this, windowT, types);
   }
 
   default TimedRealFunction outputStepped(double stepT) {
-    return new OutputSteppedTRF(this, stepT);
+    return new SteppedOutputTRF(this, stepT);
   }
 
 }

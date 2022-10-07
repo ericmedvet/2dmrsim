@@ -196,9 +196,13 @@ public class Main {
             headSensors=[s.s.sin();s.s.d(a=-30;r=8)];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           ));
-          function=s.f.inputDifferer(
-            windowT=1;
-            innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh)
+          function=s.f.outputStepped(
+            stepT=0.2;
+            innerFunction=s.f.inputDifferer(
+              windowT=0.2;
+              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
+              types=[avg;current]
+            )
           )
         )
         """;

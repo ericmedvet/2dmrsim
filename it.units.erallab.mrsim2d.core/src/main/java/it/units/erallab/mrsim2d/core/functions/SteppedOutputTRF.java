@@ -19,12 +19,12 @@ package it.units.erallab.mrsim2d.core.functions;
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class OutputSteppedTRF extends CompositeTRF {
+public class SteppedOutputTRF extends CompositeTRF {
   private final double stepT;
   private double lastT;
   private double[] lastOutputs;
 
-  public OutputSteppedTRF(TimedRealFunction innerF, double stepT) {
+  public SteppedOutputTRF(TimedRealFunction innerF, double stepT) {
     super(innerF);
     lastT = Double.NEGATIVE_INFINITY;
     this.stepT = stepT;
