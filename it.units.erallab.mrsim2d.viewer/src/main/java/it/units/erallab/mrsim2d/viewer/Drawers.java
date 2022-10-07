@@ -52,7 +52,7 @@ public class Drawers {
     return basic("");
   }
 
-  public static Drawer basicWithAgentMignature(String string) {
+  public static Drawer basicWithAgentMiniature(String string) {
     return Drawer.of(
         Drawer.clear(),
         world(),
@@ -60,9 +60,12 @@ public class Drawers {
             Drawers::simpleAgent,
             s -> List.of(s, s),
             new BoundingBox(new Point(0.9d, 0.01d), new Point(0.99d, 0.1d)),
-            StackedMultipliedDrawer.Direction.VERTICAL
+            StackedMultipliedDrawer.Direction.VERTICAL,
+            Drawer.VerticalPosition.TOP,
+            Drawer.HorizontalPosition.RIGHT
         ),
-        new InfoDrawer(string)
+        new InfoDrawer(string),
+        new EngineProfilingDrawer()
     );
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,12 @@ import java.util.Map;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Drawer {
+
+  enum Direction {HORIZONTAL, VERTICAL}
+
+  enum HorizontalPosition {LEFT, RIGHT}
+
+  enum VerticalPosition {TOP, BOTTOM}
 
   interface ProfiledDrawer extends Drawer, Profiled {}
 

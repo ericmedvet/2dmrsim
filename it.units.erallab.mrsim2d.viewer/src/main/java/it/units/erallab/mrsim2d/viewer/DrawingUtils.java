@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public class DrawingUtils {
     public final static Color DATA_POSITIVE = Color.BLUE;
     public final static Color DATA_NEGATIVE = Color.YELLOW;
     public final static Color DATA_ZERO = Color.BLACK;
+    public final static Color DATA_BACKGROUND = Color.WHITE;
   }
 
   public static Color alphaed(Color color, float alpha) {
@@ -64,19 +65,23 @@ public class DrawingUtils {
       String format,
       Graphics2D g,
       Color lineColor,
-      Color fillColor
+      Color fillColor,
+      Color bgColor
   ) {
+    if (bgColor != null) {
+      g.setColor(bgColor);
+      g.fill(new Rectangle2D.Double(x, y, w, h));
+    }
     g.setColor(fillColor);
     g.fill(new Rectangle2D.Double(x, y, w * range.normalize(value), h));
     g.setColor(lineColor);
     g.draw(new Rectangle2D.Double(x, y, w, h));
     if (format != null) {
       String s = String.format(format, value);
-      double nW = g.getFontMetrics().stringWidth(s);
       g.setColor(Colors.TEXT);
       g.drawString(
           s,
-          Math.round(x - nW - g.getFontMetrics().charWidth('x')),
+          Math.round(x + g.getFontMetrics().charWidth('x') + w),
           Math.round(y + g.getFontMetrics().getMaxAscent())
       );
     }
@@ -92,7 +97,7 @@ public class DrawingUtils {
       String format,
       Graphics2D g
   ) {
-    drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA);
+    drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
   }
 
   public static Stroke getScaleIndependentStroke(float thickness, float scale) {

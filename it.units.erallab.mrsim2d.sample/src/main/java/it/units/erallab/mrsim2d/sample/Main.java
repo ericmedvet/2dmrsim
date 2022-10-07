@@ -140,7 +140,7 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Drawer drawer = Drawers.basicWithAgentMignature("").profiled();
+    Drawer drawer = Drawers.basicWithAgentMiniature("").profiled();
     VideoBuilder videoBuilder = new VideoBuilder(
         400,
         300,

@@ -28,26 +28,31 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class StackedMultipliedDrawer<T> implements Drawer {
+  private final static double MARGIN = 10;
   private final Supplier<Drawer> innerDrawerSupplier;
   private final Function<Snapshot, List<Snapshot>> multiplier;
   private final BoundingBox boundingBox;
   private final Direction direction;
   private final List<Drawer> drawers;
+  private final VerticalPosition verticalPosition;
+  private final HorizontalPosition horizontalPosition;
 
   public StackedMultipliedDrawer(
       Supplier<Drawer> innerDrawerSupplier,
       Function<Snapshot, List<Snapshot>> multiplier,
       BoundingBox boundingBox,
-      Direction direction
+      Direction direction,
+      VerticalPosition verticalPosition,
+      HorizontalPosition horizontalPosition
   ) {
     this.innerDrawerSupplier = innerDrawerSupplier;
     this.multiplier = multiplier;
     this.boundingBox = boundingBox;
     this.direction = direction;
     this.drawers = new ArrayList<>();
+    this.verticalPosition = verticalPosition;
+    this.horizontalPosition = horizontalPosition;
   }
-
-  public enum Direction {HORIZONTAL, VERTICAL}
 
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
@@ -66,6 +71,7 @@ public class StackedMultipliedDrawer<T> implements Drawer {
       }
     }
     boolean drawn = false;
+    // TODO change x and y like in EngineProfilingDrawer
     //iterate
     BoundingBox bb = boundingBox;
     for (int i = 0; i < lists.size(); i++) {

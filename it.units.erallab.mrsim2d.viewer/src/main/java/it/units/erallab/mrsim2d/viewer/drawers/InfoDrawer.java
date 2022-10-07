@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -32,16 +33,32 @@ import java.util.stream.Collectors;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public class InfoDrawer implements Drawer {
+  private final static double MARGIN = 10;
   private final String string;
   private final Set<EngineInfo> engineInfos;
-  public InfoDrawer(String string, Set<EngineInfo> engineInfos) {
+  private final VerticalPosition verticalPosition;
+  private final HorizontalPosition horizontalPosition;
+
+  public InfoDrawer(
+      String string,
+      Set<EngineInfo> engineInfos,
+      VerticalPosition verticalPosition,
+      HorizontalPosition horizontalPosition
+  ) {
     this.string = string;
     this.engineInfos = EnumSet.noneOf(EngineInfo.class);
     this.engineInfos.addAll(engineInfos);
+    this.verticalPosition = verticalPosition;
+    this.horizontalPosition = horizontalPosition;
   }
 
   public InfoDrawer(String string) {
-    this(string, EnumSet.of(EngineInfo.N_OF_BODIES, EngineInfo.N_OF_AGENTS));
+    this(
+        string,
+        EnumSet.of(EngineInfo.N_OF_BODIES, EngineInfo.N_OF_AGENTS),
+        VerticalPosition.TOP,
+        HorizontalPosition.LEFT
+    );
   }
 
   public InfoDrawer() {
@@ -82,11 +99,24 @@ public class InfoDrawer implements Drawer {
     }
     //write
     g.setFont(DrawingUtils.FONT);
+    String[] lines = sb.toString().split(String.format("%n"));
+    double bbW = Arrays.stream(lines)
+        .mapToDouble(s -> g.getFontMetrics().stringWidth(s))
+        .max()
+        .orElse(0d);
+    double bbH = lines.length * g.getFontMetrics().getMaxAscent();
+    double x = switch (horizontalPosition) {
+      case LEFT -> MARGIN;
+      case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
+    };
+    double y = switch (verticalPosition) {
+      case TOP -> MARGIN;
+      case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
+    };
     g.setColor(DrawingUtils.Colors.TEXT);
-    int relY = g.getClipBounds().y + 1;
-    for (String line : sb.toString().split(String.format("%n"))) {
-      g.drawString(line, g.getClipBounds().x + 1, relY + g.getFontMetrics().getMaxAscent());
-      relY = relY + g.getFontMetrics().getMaxAscent() + 1;
+    for (String line : lines) {
+      g.drawString(line, (float)x, (float)(y + g.getFontMetrics().getMaxAscent()));
+      y = y + g.getFontMetrics().getMaxAscent();
     }
     return true;
   }
