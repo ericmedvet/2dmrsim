@@ -572,7 +572,7 @@ public class StringNamedParamMap implements NamedParamMap {
     }
     sb.append("\n").append(indent(w + indent));
   }
-  
+
   private static void mapContentToMultilineString(
       StringBuilder sb,
       int maxW,
