@@ -32,8 +32,8 @@ public class StringNamedParamMap implements NamedParamMap {
   // <e> ::= <n>(<nps>)
   // <nps> ::= ∅ | <np> | <nps>;<np>
   // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=<le> | <n>=<ld> | <n>=<ls>
-  // <le> ::= (<np>)*<le> | (<i>)*[<es>] | [<es>]
-  // <ld> ::= [<ds>]
+  // <le> ::= (<np>)*<le> | <i>*[<es>] | [<es>]
+  // <ld> ::= [<d>:<d>:<d>] | [<ds>]
   // <ls> ::= [<ss>]
   // <es> ::= ∅ | <e> | <es>;<e>
   // <ds> ::= ∅ | <d> | <ds>;<d>
@@ -108,6 +108,7 @@ public class StringNamedParamMap implements NamedParamMap {
     CLOSED_CONTENT("\\s*\\)\\s*", ")"),
     ASSIGN_SEPARATOR("\\s*=\\s*", "="),
     LIST_SEPARATOR("\\s*;\\s*", ";"),
+    INTERVAL_SEPARATOR("\\s*:\\s*", ":"),
     OPEN_LIST("\\s*\\[\\s*", "["),
     CLOSED_LIST("\\s*\\]\\s*", "]"),
     JOIN("\\s*\\*\\s*", "*");
@@ -209,14 +210,68 @@ public class StringNamedParamMap implements NamedParamMap {
 
   private record LDNode(Token token, DSNode child) implements Node {
     static LDNode parse(String s, int i) {
-      Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-      DSNode sNode = DSNode.parse(s, openT.end());
-      Token closedT = TokenType.CLOSED_LIST.next(s, sNode.token().end()).orElseThrow(error(
-          TokenType.CLOSED_LIST,
-          s,
-          sNode.token().end()
+      try {
+        Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+        DNode minDNode = DNode.parse(s, openT.end());
+        Token sep1 = TokenType.INTERVAL_SEPARATOR.next(s, minDNode.token().end()).orElseThrow(error(
+            TokenType.INTERVAL_SEPARATOR,
+            s,
+            minDNode.token().end()
+        ));
+        DNode stepDNode = DNode.parse(s, sep1.end());
+        Token sep2 = TokenType.INTERVAL_SEPARATOR.next(s, stepDNode.token().end()).orElseThrow(error(
+            TokenType.INTERVAL_SEPARATOR,
+            s,
+            stepDNode.token().end()
+        ));
+        DNode maxDNode = DNode.parse(s, sep2.end());
+        Token closedT = TokenType.CLOSED_LIST.next(s, maxDNode.token().end()).orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            maxDNode.token().end()
+        ));
+        double min = minDNode.value().doubleValue();
+        double step = stepDNode.value().doubleValue();
+        double max = maxDNode.value().doubleValue();
+        if (min > max || step <= 0) {
+          throw new IllegalArgumentException(
+              "Cannot build list of numbers because min>max or step<=0: min=%f, max=%f, step=%f".formatted(
+                  min,
+                  max,
+                  step
+              ));
+        }
+        List<DNode> dNodes = new ArrayList<>();
+        for (double v = min; v <= max; v = v + step) {
+          dNodes.add(new DNode(new Token(minDNode.token().start(), maxDNode.token().start()), v));
+        }
+        return new LDNode(
+            new Token(openT.start(), closedT.end()),
+            new DSNode(
+                new Token(minDNode.token().start(), maxDNode.token().start()),
+                dNodes
+            )
+        );
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      try {
+        Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+        DSNode dsNode = DSNode.parse(s, openT.end());
+        Token closedT = TokenType.CLOSED_LIST.next(s, dsNode.token().end()).orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            dsNode.token().end()
+        ));
+        return new LDNode(new Token(openT.start(), closedT.end()), dsNode);
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      throw new IllegalArgumentException(String.format(
+          "Cannot find valid token at `%s`",
+          s.substring(i)
       ));
-      return new LDNode(new Token(openT.start(), closedT.end()), sNode);
+
     }
   }
 
@@ -290,19 +345,13 @@ public class StringNamedParamMap implements NamedParamMap {
       }
       //list with mult
       try {
-        Token openT = TokenType.OPEN_CONTENT.next(s, i).orElseThrow(error(TokenType.OPEN_CONTENT, s, i));
-        Token multToken = TokenType.I_NUM.next(s, openT.end()).orElseThrow(error(TokenType.I_NUM, s, openT.end()));
-        Token closedT = TokenType.CLOSED_CONTENT.next(s, multToken.end()).orElseThrow(error(
-            TokenType.CLOSED_CONTENT,
-            s,
-            multToken.end()
-        ));
+        Token multToken = TokenType.I_NUM.next(s, i).orElseThrow(error(TokenType.I_NUM, s, i));
         int mult = Integer.parseInt(multToken.trimmedContent(s));
-        Token jointT = TokenType.JOIN.next(s, closedT.end()).orElseThrow(error(TokenType.JOIN, s, multToken.end()));
+        Token jointT = TokenType.JOIN.next(s, multToken.end()).orElseThrow(error(TokenType.JOIN, s, multToken.end()));
         LENode originalLENode = LENode.parse(s, jointT.end());
         //multiply
         List<ENode> eNodes = new ArrayList<>();
-        for (int j = 0; j<mult; j++) {
+        for (int j = 0; j < mult; j++) {
           eNodes.addAll(originalLENode.child().children());
         }
         return new LENode(new Token(multToken.start(), originalLENode.token().end()), new ESNode(
@@ -353,6 +402,13 @@ public class StringNamedParamMap implements NamedParamMap {
       }
       if (value == null) {
         try {
+          value = LENode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        try {
           value = DNode.parse(s, tAssign.end());
         } catch (IllegalArgumentException e) {
           //ignore
@@ -361,13 +417,6 @@ public class StringNamedParamMap implements NamedParamMap {
       if (value == null) {
         try {
           value = SNode.parse(s, tAssign.end());
-        } catch (IllegalArgumentException e) {
-          //ignore
-        }
-      }
-      if (value == null) {
-        try {
-          value = LENode.parse(s, tAssign.end());
         } catch (IllegalArgumentException e) {
           //ignore
         }
@@ -523,22 +572,7 @@ public class StringNamedParamMap implements NamedParamMap {
     }
     sb.append("\n").append(indent(w + indent));
   }
-
-  public static void main(String[] args) {
-    StringNamedParamMap m = StringNamedParamMap.parse(
-        """
-            m1(
-              vs1=[1;2];
-              v2=ciao;
-              le1=[a();a()];
-              le2=(c=1)*[a();a()];
-              le3=(3)*[a();a(c=1)]
-            )
-            """
-    );
-    System.out.println(prettyToString(m));
-  }
-
+  
   private static void mapContentToMultilineString(
       StringBuilder sb,
       int maxW,
