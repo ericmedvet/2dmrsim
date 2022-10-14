@@ -37,7 +37,7 @@ public class StringNamedParamMap implements NamedParamMap {
   // <ls> ::= [<ss>]
   // <es> ::= ∅ | <e> | <es>;<e>
   // <ds> ::= ∅ | <d> | <ds>;<d>
-  // <ns> ::= ∅ |<n> | <ns>;<s>
+  // <ns> ::= ∅ | <n> | <ns>;<s>
 
 
   private final String name;
@@ -348,7 +348,6 @@ public class StringNamedParamMap implements NamedParamMap {
         }
       }
       if (value == null) {
-
         try {
           value = LDNode.parse(s, tAssign.end());
         } catch (IllegalArgumentException e) {
@@ -500,34 +499,11 @@ public class StringNamedParamMap implements NamedParamMap {
     sb.append("\n").append(indent(w + indent));
   }
 
-  private static String mapContentToInlineString(ParamMap m, String space) {
-    StringBuilder sb = new StringBuilder();
-    List<String> names = new ArrayList<>(m.names());
-    for (int i = 0; i < names.size(); i++) {
-      sb.append(names.get(i))
-          .append(space)
-          .append(TokenType.ASSIGN_SEPARATOR.rendered())
-          .append(space);
-      Object value = m.value(names.get(i));
-      if (value instanceof List<?> l) {
-        sb.append(listContentToInlineString(l, space));
-      } else if (value instanceof ParamMap innerMap) {
-        if (innerMap instanceof NamedParamMap namedParamMap) {
-          sb.append(namedParamMap.getName())
-              .append(TokenType.OPEN_CONTENT.rendered());
-        }
-        sb.append(mapContentToInlineString(innerMap, space));
-        if (innerMap instanceof NamedParamMap) {
-          sb.append(TokenType.CLOSED_CONTENT.rendered());
-        }
-      } else {
-        sb.append(value.toString());
-      }
-      if (i < names.size() - 1) {
-        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
-      }
-    }
-    return sb.toString();
+  public static void main(String[] args) {
+    StringNamedParamMap m = StringNamedParamMap.parse("m1(vs1=[1;2];v2=ciao)");
+    System.out.println(prettyToString(m));
+    System.out.println(m.s("v2"));
+    System.out.println(m.ds("vs1"));
   }
 
   private static void mapContentToMultilineString(
@@ -729,5 +705,37 @@ public class StringNamedParamMap implements NamedParamMap {
       return sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString());
     }
     return null;
+  }
+
+  private static String mapContentToInlineString(ParamMap m, String space) {
+    StringBuilder sb = new StringBuilder();
+    List<String> names = new ArrayList<>(m.names());
+    for (int i = 0; i < names.size(); i++) {
+      sb.append(names.get(i))
+          .append(space)
+          .append(TokenType.ASSIGN_SEPARATOR.rendered())
+          .append(space);
+      Object value = m.value(names.get(i));
+      if (value instanceof List<?> l) {
+        sb.append(TokenType.OPEN_LIST.rendered())
+            .append(listContentToInlineString(l, space))
+            .append(TokenType.CLOSED_LIST.rendered());
+      } else if (value instanceof ParamMap innerMap) {
+        if (innerMap instanceof NamedParamMap namedParamMap) {
+          sb.append(namedParamMap.getName())
+              .append(TokenType.OPEN_CONTENT.rendered());
+        }
+        sb.append(mapContentToInlineString(innerMap, space));
+        if (innerMap instanceof NamedParamMap) {
+          sb.append(TokenType.CLOSED_CONTENT.rendered());
+        }
+      } else {
+        sb.append(value.toString());
+      }
+      if (i < names.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
+      }
+    }
+    return sb.toString();
   }
 }
