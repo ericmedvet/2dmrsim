@@ -32,12 +32,12 @@ public class StringNamedParamMap implements NamedParamMap {
   // <e> ::= <n>(<nps>)
   // <nps> ::= ∅ | <np> | <nps>;<np>
   // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=<le> | <n>=<ld> | <n>=<ls>
-  // <le> ::= (<np>)*<le> | [<es>]
+  // <le> ::= (<np>)*<le> | (<i>)*[<es>] | [<es>]
   // <ld> ::= [<ds>]
   // <ls> ::= [<ss>]
   // <es> ::= ∅ | <e> | <es>;<e>
   // <ds> ::= ∅ | <d> | <ds>;<d>
-  // <ns> ::= ∅ | <n> | <ns>;<s>
+  // <ss> ::= ∅ | <s> | <ss>;<s>
 
 
   private final String name;
@@ -101,6 +101,7 @@ public class StringNamedParamMap implements NamedParamMap {
 
   private enum TokenType {
     NUM("\\s*-?[0-9]+(\\.[0-9]+)?\\s*", ""),
+    I_NUM("\\s*[0-9]+?\\s*", ""),
     STRING("\\s*([A-Za-z][A-Za-z0-9_]*)|(\"[./:\\-\\w]+\")\\s*", ""),
     NAME("\\s*[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*\\s*", ""),
     OPEN_CONTENT("\\s*\\(\\s*", "("),
@@ -282,6 +283,30 @@ public class StringNamedParamMap implements NamedParamMap {
         }
         return new LENode(new Token(openT.start(), outerLENode.token().end()), new ESNode(
             new Token(npNode.token().start(), outerLENode.token.end()),
+            eNodes
+        ));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      //list with mult
+      try {
+        Token openT = TokenType.OPEN_CONTENT.next(s, i).orElseThrow(error(TokenType.OPEN_CONTENT, s, i));
+        Token multToken = TokenType.I_NUM.next(s, openT.end()).orElseThrow(error(TokenType.I_NUM, s, openT.end()));
+        Token closedT = TokenType.CLOSED_CONTENT.next(s, multToken.end()).orElseThrow(error(
+            TokenType.CLOSED_CONTENT,
+            s,
+            multToken.end()
+        ));
+        int mult = Integer.parseInt(multToken.trimmedContent(s));
+        Token jointT = TokenType.JOIN.next(s, closedT.end()).orElseThrow(error(TokenType.JOIN, s, multToken.end()));
+        LENode originalLENode = LENode.parse(s, jointT.end());
+        //multiply
+        List<ENode> eNodes = new ArrayList<>();
+        for (int j = 0; j<mult; j++) {
+          eNodes.addAll(originalLENode.child().children());
+        }
+        return new LENode(new Token(multToken.start(), originalLENode.token().end()), new ESNode(
+            new Token(originalLENode.token().start(), originalLENode.token.end()),
             eNodes
         ));
       } catch (IllegalArgumentException e) {
@@ -500,10 +525,18 @@ public class StringNamedParamMap implements NamedParamMap {
   }
 
   public static void main(String[] args) {
-    StringNamedParamMap m = StringNamedParamMap.parse("m1(vs1=[1;2];v2=ciao)");
+    StringNamedParamMap m = StringNamedParamMap.parse(
+        """
+            m1(
+              vs1=[1;2];
+              v2=ciao;
+              le1=[a();a()];
+              le2=(c=1)*[a();a()];
+              le3=(3)*[a();a(c=1)]
+            )
+            """
+    );
     System.out.println(prettyToString(m));
-    System.out.println(m.s("v2"));
-    System.out.println(m.ds("vs1"));
   }
 
   private static void mapContentToMultilineString(
