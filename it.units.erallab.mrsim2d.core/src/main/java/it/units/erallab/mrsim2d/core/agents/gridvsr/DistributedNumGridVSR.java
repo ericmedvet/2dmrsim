@@ -1,5 +1,6 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
+import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 
 import java.util.Arrays;
@@ -15,25 +16,31 @@ public class DistributedNumGridVSR extends NumGridVSR {
   Grid<double[]> fullInputsGrid;
   Grid<double[]> fullOutputsGrid;
 
-  // TODO add grid of functions -> two constructors for homo and hetero (maybe build methods)
+  public DistributedNumGridVSR(GridBody body, Grid<TimedRealFunction> timedRealFunctionsGrid, int nSignals, boolean directional) {
+    this(body, new HeteroGridTimedRealFunction(body, nSignals, directional, timedRealFunctionsGrid), nSignals, directional);
+  }
 
-  // from grid of timedrealfunction to function of grids
-  // from single timedrealfunction to grid and then call the one above
+  public DistributedNumGridVSR(GridBody body, TimedRealFunction timedRealFunction, int nSignals, boolean directional) {
+    this(body, new HomoGridTimedRealFunction(body, nSignals, directional, timedRealFunction), nSignals, directional);
+  }
 
-  public DistributedNumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction, int nSignals, boolean directional) {
-    super(body, timedFunction);
+  private DistributedNumGridVSR(GridBody body, HeteroGridTimedRealFunction gridTimedRealFunction, int nSignals, boolean directional) {
+    super(body, gridTimedRealFunction);
     this.nSignals = nSignals;
     this.directional = directional;
     int outputSize = directional ? nSignals * 4 : nSignals;
     signalsGrid = voxelGrid.map(v -> v != null ? new double[outputSize] : null);
-    fullInputsGrid = Grid.create(inputsGrid, d -> new double[d.length + 4 * nSignals]);
-    fullOutputsGrid = Grid.create(outputGrid, d -> new double[1 + outputSize]);
+    fullInputsGrid = Grid.create(inputsGrid, d -> d != null ? new double[d.length + 4 * nSignals] : null);
+    fullOutputsGrid = Grid.create(outputGrid, d -> d != null ? new double[1 + outputSize] : null);
   }
 
   @Override
   protected void computeActuationValues(double t) {
     // create actual input grid (concat sensed values and communication signals)
     for (Grid.Key key : inputsGrid.keys()) {
+      if (inputsGrid.get(key) == null) {
+        continue;
+      }
       double[] sensoryInputs = inputsGrid.get(key);
       double[] signals0 = getLastSignals(key.x(), key.y() + 1, 0);
       double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
@@ -57,7 +64,7 @@ public class DistributedNumGridVSR extends NumGridVSR {
   }
 
   private double[] getLastSignals(int x, int y, int c) {
-    if (x < 0 || y < 0 || x >= signalsGrid.w() || y >= signalsGrid.h()) {
+    if (x < 0 || y < 0 || x >= signalsGrid.w() || y >= signalsGrid.h() || signalsGrid.get(x, y) == null) {
       return new double[nSignals];
     }
     double[] allSignals = signalsGrid.get(x, y);
