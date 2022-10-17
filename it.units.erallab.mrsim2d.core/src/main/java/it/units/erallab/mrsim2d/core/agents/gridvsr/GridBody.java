@@ -1,8 +1,24 @@
+/*
+ * Copyright 2022 eric
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 import it.units.erallab.mrsim2d.builder.BuilderMethod;
 import it.units.erallab.mrsim2d.builder.Param;
-import it.units.erallab.mrsim2d.core.actions.Sense;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Pair;
@@ -10,12 +26,12 @@ import it.units.erallab.mrsim2d.core.util.Pair;
 import java.util.List;
 import java.util.function.Function;
 
-public record GridBody(Grid<Pair<Voxel.Material, List<Function<? super Voxel, Sense<? super Voxel>>>>> grid) {
+public record GridBody(Grid<Pair<Voxel.Material, List<Sensor<? super Voxel>>>> grid) {
   @BuilderMethod()
   public GridBody(
       @Param("shape") Grid<Boolean> shape,
       @Param("sensorizingFunction") Function<Grid<Boolean>,
-          Grid<List<Function<? super Voxel, Sense<? super Voxel>>>>> sensorizingFunction
+          Grid<List<Sensor<? super Voxel>>>> sensorizingFunction
   ) {
     this(Grid.create(
         shape.w(),
@@ -31,7 +47,7 @@ public record GridBody(Grid<Pair<Voxel.Material, List<Function<? super Voxel, Se
     return Grid.create(grid, Pair::first);
   }
 
-  public Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid() {
+  public Grid<List<Sensor<? super Voxel>>> sensorsGrid() {
     return Grid.create(grid, Pair::second);
   }
 }

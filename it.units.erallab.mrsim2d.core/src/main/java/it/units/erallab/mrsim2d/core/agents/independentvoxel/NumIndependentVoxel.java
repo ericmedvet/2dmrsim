@@ -20,6 +20,7 @@ import it.units.erallab.mrsim2d.builder.BuilderMethod;
 import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
 import it.units.erallab.mrsim2d.core.actions.DetachAnchors;
@@ -32,7 +33,6 @@ import it.units.erallab.mrsim2d.core.util.Parametrized;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
@@ -42,7 +42,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
   private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
   private final static int N_OF_OUTPUTS = 8;
 
-  private final List<Function<Voxel, Sense<? super Voxel>>> sensors;
+  private final List<Sensor<? super Voxel>> sensors;
   private final double[] inputs;
   private final TimedRealFunction timedRealFunction;
 
@@ -50,7 +50,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
       Voxel.Material material,
       double voxelSideLength,
       double voxelMass,
-      List<Function<Voxel, Sense<? super Voxel>>> sensors,
+      List<Sensor<? super Voxel>> sensors,
       TimedRealFunction timedRealFunction
   ) {
     super(material, voxelSideLength, voxelMass);
@@ -61,17 +61,17 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
 
   @BuilderMethod
   public NumIndependentVoxel(
-      @Param("sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors,
+      @Param("sensors") List<Sensor<? super Voxel>> sensors,
       @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
   ) {
     this(sensors, timedRealFunctionBuilder.apply(nOfInputs(sensors), nOfOutputs()));
   }
 
-  public NumIndependentVoxel(List<Function<Voxel, Sense<? super Voxel>>> sensors, TimedRealFunction timedRealFunction) {
+  public NumIndependentVoxel(List<Sensor<? super Voxel>> sensors, TimedRealFunction timedRealFunction) {
     this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors, timedRealFunction);
   }
 
-  public static int nOfInputs(List<Function<Voxel, Sense<? super Voxel>>> sensors) {
+  public static int nOfInputs(List<Sensor<? super Voxel>> sensors) {
     return sensors.size();
   }
 
@@ -109,10 +109,6 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
     return actions;
   }
 
-  public List<Function<Voxel, Sense<? super Voxel>>> getSensors() {
-    return sensors;
-  }
-
   @Override
   public double[] getParams() {
     if (timedRealFunction instanceof Parametrized parametrized) {
@@ -129,5 +125,9 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
       throw new IllegalArgumentException("Cannot set params because the function %s has no params".formatted(
           timedRealFunction));
     }
+  }
+
+  public List<Sensor<? super Voxel>> getSensors() {
+    return sensors;
   }
 }

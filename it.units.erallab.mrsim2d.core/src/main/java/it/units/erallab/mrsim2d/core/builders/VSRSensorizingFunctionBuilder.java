@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package it.units.erallab.mrsim2d.core.builders;
 
 import it.units.erallab.mrsim2d.builder.Param;
-import it.units.erallab.mrsim2d.core.actions.Sense;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
 
@@ -31,12 +31,12 @@ import java.util.function.Function;
  */
 public class VSRSensorizingFunctionBuilder {
 
-  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> directional(
-      @Param(value = "nSensors") List<Function<Voxel, Sense<? super Voxel>>> nSensors,
-      @Param(value = "eSensors") List<Function<Voxel, Sense<? super Voxel>>> eSensors,
-      @Param(value = "sSensors") List<Function<Voxel, Sense<? super Voxel>>> sSensors,
-      @Param(value = "wSensors") List<Function<Voxel, Sense<? super Voxel>>> wSensors,
-      @Param(value = "headSensors") List<Function<Voxel, Sense<? super Voxel>>> headSensors
+  public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> directional(
+      @Param(value = "nSensors") List<Sensor<? super Voxel>> nSensors,
+      @Param(value = "eSensors") List<Sensor<? super Voxel>> eSensors,
+      @Param(value = "sSensors") List<Sensor<? super Voxel>> sSensors,
+      @Param(value = "wSensors") List<Sensor<? super Voxel>> wSensors,
+      @Param(value = "headSensors") List<Sensor<? super Voxel>> headSensors
   ) {
     return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
       if (!shape.get(x, y)) {
@@ -61,7 +61,7 @@ public class VSRSensorizingFunctionBuilder {
           .toList()
           .get(0)
           .key();
-      List<Function<Voxel, Sense<? super Voxel>>> localSensors = new ArrayList<>();
+      List<Sensor<? super Voxel>> localSensors = new ArrayList<>();
       if (x == maxX) {
         localSensors.addAll(eSensors);
       }
@@ -81,12 +81,12 @@ public class VSRSensorizingFunctionBuilder {
     });
   }
 
-  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> empty() {
+  public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> empty() {
     return shape -> Grid.create(shape, b -> List.of());
   }
 
-  public static Function<Grid<Boolean>, Grid<List<Function<Voxel, Sense<? super Voxel>>>>> uniform(
-      @Param(value = "sensors") List<Function<Voxel, Sense<? super Voxel>>> sensors
+  public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> uniform(
+      @Param(value = "sensors") List<Sensor<? super Voxel>> sensors
   ) {
     return shape -> Grid.create(
         shape,

@@ -18,12 +18,11 @@ package it.units.erallab.mrsim2d.core.builders;
 
 
 import it.units.erallab.mrsim2d.builder.Param;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.SoftBody;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-
-import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
@@ -33,42 +32,42 @@ public class SensorBuilder {
   public SensorBuilder() {
   }
 
-  public static Function<Body, Sense<Body>> a() {
+  public static Sensor<Body> a() {
     return SenseAngle::new;
   }
 
-  public static Function<SoftBody, Sense<SoftBody>> ar() {
+  public static Sensor<SoftBody> ar() {
     return SenseAreaRatio::new;
   }
 
-  public static Function<Body, Sense<Body>> c() {
+  public static Sensor<Body> c() {
     return SenseContact::new;
   }
 
-  public static Function<Body, Sense<Body>> d(
+  public static Sensor<Body> d(
       @Param(value = "a", dD = 0) Double a,
       @Param(value = "r", dD = 1) Double r
   ) {
-    return v -> new SenseDistanceToBody(Math.toRadians(a), r, v);
+    return b -> new SenseDistanceToBody(Math.toRadians(a), r, b);
   }
 
-  public static Function<Body, Sense<Body>> rv(@Param(value = "a", dD = 0) Double a) {
-    return v -> new SenseRotatedVelocity(Math.toRadians(a), v);
+  public static Sensor<Body> rv(@Param(value = "a", dD = 0) Double a) {
+    return b -> new SenseRotatedVelocity(Math.toRadians(a), b);
   }
 
-  public static Function<Voxel, Sense<Voxel>> sa(@Param("s") String s) {
-    return v -> new SenseSideAttachment(Voxel.Side.valueOf(s.toUpperCase()), v);
+  public static Sensor<Voxel> sa(@Param("s") Voxel.Side s) {
+    return v -> new SenseSideAttachment(s, v);
   }
 
-  public static Function<Voxel, Sense<Voxel>> sc(@Param("s") String s) {
-    return v -> new SenseSideCompression(Voxel.Side.valueOf(s.toUpperCase()), v);
+  public static Sensor<Voxel> sc(@Param("s") Voxel.Side s) {
+    return v -> new SenseSideCompression(s, v);
   }
 
-  public static Function<Body, Sense<Body>> sin(
+  public static Sensor<Body> sin(
       @Param(value = "f", dD = 1) Double f,
       @Param(value = "p", dD = 0) Double p
   ) {
-    return v -> new SenseSinusoidal(f, p, v);
+    return b -> new SenseSinusoidal(f, p, b);
   }
 
 }
