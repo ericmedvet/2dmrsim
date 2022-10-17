@@ -37,16 +37,16 @@ import java.util.function.Function;
 public class NumGridVSR extends AbstractGridVSR {
 
   private final Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid;
-  private final Grid<double[]> inputsGrid;
-  private final Grid<Double> outputGrid;
+  protected final Grid<double[]> inputsGrid;
+  protected final Grid<Double> outputGrid;
   private final GridBody body;
-  private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
+  protected final BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction;
 
   public NumGridVSR(
       GridBody body,
       double voxelSideLength,
       double voxelMass,
-      BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
+      BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction
   ) {
     super(body.materialGrid(), voxelSideLength, voxelMass);
     this.sensorsGrid = body.sensorsGrid();
@@ -56,7 +56,7 @@ public class NumGridVSR extends AbstractGridVSR {
     this.timedFunction = timedFunction;
   }
 
-  public NumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
+  public NumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
   }
 
@@ -82,8 +82,7 @@ public class NumGridVSR extends AbstractGridVSR {
         }
       }
     }
-    //compute actuation
-    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
+    computeActuationValues(t);
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     actions.addAll(voxelGrid.entries().stream()
@@ -101,11 +100,15 @@ public class NumGridVSR extends AbstractGridVSR {
     return actions;
   }
 
+  protected void computeActuationValues(double t) {
+    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()[0]));
+  }
+
   public GridBody getBody() {
     return body;
   }
 
-  public BiFunction<Double, Grid<double[]>, Grid<Double>> getTimedFunction() {
+  public BiFunction<Double, Grid<double[]>, Grid<double[]>> getTimedFunction() {
     return timedFunction;
   }
 }

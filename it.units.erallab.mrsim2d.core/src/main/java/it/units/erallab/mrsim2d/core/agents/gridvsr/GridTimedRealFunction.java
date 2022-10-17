@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-public class GridTimedRealFunction implements BiFunction<Double, Grid<double[]>, Grid<Double>>, Parametrized {
+public class GridTimedRealFunction implements BiFunction<Double, Grid<double[]>, Grid<double[]>>, Parametrized {
 
   private final TimedRealFunction timedRealFunction;
   private final int nOfInputs;
@@ -40,7 +40,7 @@ public class GridTimedRealFunction implements BiFunction<Double, Grid<double[]>,
   }
 
   @Override
-  public Grid<Double> apply(Double t, Grid<double[]> inputsGrid) {
+  public Grid<double[]> apply(Double t, Grid<double[]> inputsGrid) {
     //build inputs
     double[] inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
     if (inputs.length != nOfInputs) {
@@ -53,11 +53,11 @@ public class GridTimedRealFunction implements BiFunction<Double, Grid<double[]>,
     //compute outputs
     double[] outputs = timedRealFunction.apply(t, inputs);
     //split outputs
-    Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
+    Grid<double[]> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), new double[]{0d});
     int c = 0;
     for (Grid.Entry<double[]> e : inputsGrid) {
       if (e.value() != null) {
-        outputsGrid.set(e.key(), outputs[c]);
+        outputsGrid.set(e.key(), new double[]{outputs[c]});
         c = c + 1;
       }
     }
