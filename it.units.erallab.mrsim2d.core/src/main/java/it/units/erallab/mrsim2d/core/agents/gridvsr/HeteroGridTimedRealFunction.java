@@ -3,15 +3,11 @@ package it.units.erallab.mrsim2d.core.agents.gridvsr;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
-import it.units.erallab.mrsim2d.core.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class HeteroGridTimedRealFunction implements BiFunction<Double, Grid<double[]>, Grid<double[]>>, Parametrized {
 
