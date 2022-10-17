@@ -19,6 +19,7 @@ package it.units.erallab.mrsim2d.sample;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
@@ -53,7 +54,7 @@ public class LocomotionStarter {
         .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(SensorBuilder.class));
-    String bodyS = """
+    /*String bodyS = """
         gridBody(
           shape=s.biped(w=4;h=3);
           sensorizingFunction=sf.directional(
@@ -64,10 +65,20 @@ public class LocomotionStarter {
             ];
             nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
         ))
+        """;*/
+    String bodyS = """
+        gridBody(
+          shape=s.biped(w=4;h=3);
+          sensorizingFunction=sf.uniform(
+            sensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
+        ))
         """;
     GridBody body = (GridBody) nb.build(bodyS);
-    int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+    int nSignals = 2;
+    boolean directional = true;
+
+    int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).findFirst().get().size() + 4 * nSignals;
+    int nOfOutputs = 1 + (directional ? 4 * nSignals : nSignals);
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
         nOfInputs,
@@ -76,9 +87,11 @@ public class LocomotionStarter {
     );
     RandomGenerator rg = new Random();
     mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    AbstractGridVSR vsr = new CentralizedNumGridVSR(
+    AbstractGridVSR vsr = new DistributedNumGridVSR(
         body,
-        mlp
+        mlp,
+        nSignals,
+        directional
     );
     Locomotion locomotion = new Locomotion(30, (Terrain) nb.build("t.hilly()"));
     Outcome outcome = locomotion.run(() -> vsr, engine, viewer);
