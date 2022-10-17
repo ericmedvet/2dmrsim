@@ -19,6 +19,7 @@ package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim2d.core.actions.Sense;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
@@ -36,7 +37,7 @@ import java.util.function.Function;
  */
 public class NumGridVSR extends AbstractGridVSR {
 
-  private final Grid<List<Function<? super Voxel, Sense<? super Voxel>>>> sensorsGrid;
+  private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   protected final Grid<double[]> inputsGrid;
   protected final Grid<Double> outputGrid;
   private final GridBody body;

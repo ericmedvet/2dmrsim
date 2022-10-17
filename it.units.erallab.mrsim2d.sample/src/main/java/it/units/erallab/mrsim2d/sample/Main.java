@@ -19,6 +19,7 @@ package it.units.erallab.mrsim2d.sample;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.PreparedNamedBuilder;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
@@ -28,6 +29,7 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
+import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
@@ -80,21 +82,23 @@ public class Main {
     double sideInterval = 2d;
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     RandomGenerator rg = new Random();
-    List<Function<Voxel, Sense<? super Voxel>>> sensors = List.of(
-        v -> new SenseRotatedVelocity(0, v),
-        v -> new SenseRotatedVelocity(Math.PI / 2d, v),
-        SenseAreaRatio::new,
-        SenseAngle::new,
-        v -> new SenseSideCompression(Voxel.Side.N, v),
-        v -> new SenseSideCompression(Voxel.Side.E, v),
-        v -> new SenseSideCompression(Voxel.Side.S, v),
-        v -> new SenseSideCompression(Voxel.Side.W, v),
-        v -> new SenseSideAttachment(Voxel.Side.N, v),
-        v -> new SenseSideAttachment(Voxel.Side.E, v),
-        v -> new SenseSideAttachment(Voxel.Side.S, v),
-        v -> new SenseSideAttachment(Voxel.Side.W, v),
-        v -> new SenseDistanceToBody(0, 2, v),
-        v -> new SenseDistanceToBody(Math.PI, 2, v)
+    List<Sensor<? super Voxel>> sensors = List.of(
+        SensorBuilder.rv(0d),
+        SensorBuilder.rv(Math.PI / 2d),
+        SensorBuilder.ar(),
+        SensorBuilder.a(),
+        SensorBuilder.sc(Voxel.Side.N),
+        SensorBuilder.sc(Voxel.Side.E),
+        SensorBuilder.sc(Voxel.Side.S),
+        SensorBuilder.sc(Voxel.Side.W),
+        SensorBuilder.sa(Voxel.Side.N),
+        SensorBuilder.sa(Voxel.Side.E),
+        SensorBuilder.sa(Voxel.Side.S),
+        SensorBuilder.sa(Voxel.Side.W),
+        SensorBuilder.d(Math.PI / 2d * 0d, 0.75),
+        SensorBuilder.d(Math.PI / 2d * 1d, 0.75),
+        SensorBuilder.d(Math.PI / 2d * 2d, 0.75),
+        SensorBuilder.d(Math.PI / 2d * 3d, 0.75)
     );
     Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
         (oT, in) -> {
@@ -193,12 +197,16 @@ public class Main {
           shape=s.vsr.s.biped(w=4;h=3);
           sensorizingFunction=s.vsr.sf.directional(
             sSensors=[s.s.d(a=-90)];
-            headSensors=[s.s.sin();s.s.d(a=-30;r=8)];
+            headSensors=[
+              s.s.sin();
+              s.s.d(a=-30;r=8);
+              s.s.d(a=-40;r=8)
+            ];
             nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
           ));
-          function=s.f.outputStepped(
+          function=s.f.stepOut(
             stepT=0.2;
-            innerFunction=s.f.inputDifferer(
+            innerFunction=s.f.diffIn(
               windowT=0.2;
               innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
               types=[avg;current]

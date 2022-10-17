@@ -32,12 +32,12 @@ public class StringNamedParamMap implements NamedParamMap {
   // <e> ::= <n>(<nps>)
   // <nps> ::= ∅ | <np> | <nps>;<np>
   // <np> ::= <n>=<e> | <n>=<d> | <n>=<s> | <n>=<le> | <n>=<ld> | <n>=<ls>
-  // <le> ::= (<np>)*<le> | [<es>]
-  // <ld> ::= [<ds>]
+  // <le> ::= (<np>)*<le> | <i>*[<es>] | [<es>]
+  // <ld> ::= [<d>:<d>:<d>] | [<ds>]
   // <ls> ::= [<ss>]
   // <es> ::= ∅ | <e> | <es>;<e>
   // <ds> ::= ∅ | <d> | <ds>;<d>
-  // <ns> ::= ∅ |<n> | <ns>;<s>
+  // <ss> ::= ∅ | <s> | <ss>;<s>
 
 
   private final String name;
@@ -101,12 +101,14 @@ public class StringNamedParamMap implements NamedParamMap {
 
   private enum TokenType {
     NUM("\\s*-?[0-9]+(\\.[0-9]+)?\\s*", ""),
+    I_NUM("\\s*[0-9]+?\\s*", ""),
     STRING("\\s*([A-Za-z][A-Za-z0-9_]*)|(\"[./:\\-\\w]+\")\\s*", ""),
     NAME("\\s*[A-Za-z][" + NamedBuilder.NAME_SEPARATOR + "A-Za-z0-9_]*\\s*", ""),
     OPEN_CONTENT("\\s*\\(\\s*", "("),
     CLOSED_CONTENT("\\s*\\)\\s*", ")"),
     ASSIGN_SEPARATOR("\\s*=\\s*", "="),
     LIST_SEPARATOR("\\s*;\\s*", ";"),
+    INTERVAL_SEPARATOR("\\s*:\\s*", ":"),
     OPEN_LIST("\\s*\\[\\s*", "["),
     CLOSED_LIST("\\s*\\]\\s*", "]"),
     JOIN("\\s*\\*\\s*", "*");
@@ -208,14 +210,68 @@ public class StringNamedParamMap implements NamedParamMap {
 
   private record LDNode(Token token, DSNode child) implements Node {
     static LDNode parse(String s, int i) {
-      Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
-      DSNode sNode = DSNode.parse(s, openT.end());
-      Token closedT = TokenType.CLOSED_LIST.next(s, sNode.token().end()).orElseThrow(error(
-          TokenType.CLOSED_LIST,
-          s,
-          sNode.token().end()
+      try {
+        Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+        DNode minDNode = DNode.parse(s, openT.end());
+        Token sep1 = TokenType.INTERVAL_SEPARATOR.next(s, minDNode.token().end()).orElseThrow(error(
+            TokenType.INTERVAL_SEPARATOR,
+            s,
+            minDNode.token().end()
+        ));
+        DNode stepDNode = DNode.parse(s, sep1.end());
+        Token sep2 = TokenType.INTERVAL_SEPARATOR.next(s, stepDNode.token().end()).orElseThrow(error(
+            TokenType.INTERVAL_SEPARATOR,
+            s,
+            stepDNode.token().end()
+        ));
+        DNode maxDNode = DNode.parse(s, sep2.end());
+        Token closedT = TokenType.CLOSED_LIST.next(s, maxDNode.token().end()).orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            maxDNode.token().end()
+        ));
+        double min = minDNode.value().doubleValue();
+        double step = stepDNode.value().doubleValue();
+        double max = maxDNode.value().doubleValue();
+        if (min > max || step <= 0) {
+          throw new IllegalArgumentException(
+              "Cannot build list of numbers because min>max or step<=0: min=%f, max=%f, step=%f".formatted(
+                  min,
+                  max,
+                  step
+              ));
+        }
+        List<DNode> dNodes = new ArrayList<>();
+        for (double v = min; v <= max; v = v + step) {
+          dNodes.add(new DNode(new Token(minDNode.token().start(), maxDNode.token().start()), v));
+        }
+        return new LDNode(
+            new Token(openT.start(), closedT.end()),
+            new DSNode(
+                new Token(minDNode.token().start(), maxDNode.token().start()),
+                dNodes
+            )
+        );
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      try {
+        Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
+        DSNode dsNode = DSNode.parse(s, openT.end());
+        Token closedT = TokenType.CLOSED_LIST.next(s, dsNode.token().end()).orElseThrow(error(
+            TokenType.CLOSED_LIST,
+            s,
+            dsNode.token().end()
+        ));
+        return new LDNode(new Token(openT.start(), closedT.end()), dsNode);
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
+      throw new IllegalArgumentException(String.format(
+          "Cannot find valid token at `%s`",
+          s.substring(i)
       ));
-      return new LDNode(new Token(openT.start(), closedT.end()), sNode);
+
     }
   }
 
@@ -287,6 +343,24 @@ public class StringNamedParamMap implements NamedParamMap {
       } catch (IllegalArgumentException e) {
         //ignore
       }
+      //list with mult
+      try {
+        Token multToken = TokenType.I_NUM.next(s, i).orElseThrow(error(TokenType.I_NUM, s, i));
+        int mult = Integer.parseInt(multToken.trimmedContent(s));
+        Token jointT = TokenType.JOIN.next(s, multToken.end()).orElseThrow(error(TokenType.JOIN, s, multToken.end()));
+        LENode originalLENode = LENode.parse(s, jointT.end());
+        //multiply
+        List<ENode> eNodes = new ArrayList<>();
+        for (int j = 0; j < mult; j++) {
+          eNodes.addAll(originalLENode.child().children());
+        }
+        return new LENode(new Token(multToken.start(), originalLENode.token().end()), new ESNode(
+            new Token(originalLENode.token().start(), originalLENode.token.end()),
+            eNodes
+        ));
+      } catch (IllegalArgumentException e) {
+        //ignore
+      }
       //just list
       Token openT = TokenType.OPEN_LIST.next(s, i).orElseThrow(error(TokenType.OPEN_LIST, s, i));
       ESNode sNode = ESNode.parse(s, openT.end());
@@ -328,6 +402,13 @@ public class StringNamedParamMap implements NamedParamMap {
       }
       if (value == null) {
         try {
+          value = LENode.parse(s, tAssign.end());
+        } catch (IllegalArgumentException e) {
+          //ignore
+        }
+      }
+      if (value == null) {
+        try {
           value = DNode.parse(s, tAssign.end());
         } catch (IllegalArgumentException e) {
           //ignore
@@ -341,14 +422,6 @@ public class StringNamedParamMap implements NamedParamMap {
         }
       }
       if (value == null) {
-        try {
-          value = LENode.parse(s, tAssign.end());
-        } catch (IllegalArgumentException e) {
-          //ignore
-        }
-      }
-      if (value == null) {
-
         try {
           value = LDNode.parse(s, tAssign.end());
         } catch (IllegalArgumentException e) {
@@ -498,36 +571,6 @@ public class StringNamedParamMap implements NamedParamMap {
       }
     }
     sb.append("\n").append(indent(w + indent));
-  }
-
-  private static String mapContentToInlineString(ParamMap m, String space) {
-    StringBuilder sb = new StringBuilder();
-    List<String> names = new ArrayList<>(m.names());
-    for (int i = 0; i < names.size(); i++) {
-      sb.append(names.get(i))
-          .append(space)
-          .append(TokenType.ASSIGN_SEPARATOR.rendered())
-          .append(space);
-      Object value = m.value(names.get(i));
-      if (value instanceof List<?> l) {
-        sb.append(listContentToInlineString(l, space));
-      } else if (value instanceof ParamMap innerMap) {
-        if (innerMap instanceof NamedParamMap namedParamMap) {
-          sb.append(namedParamMap.getName())
-              .append(TokenType.OPEN_CONTENT.rendered());
-        }
-        sb.append(mapContentToInlineString(innerMap, space));
-        if (innerMap instanceof NamedParamMap) {
-          sb.append(TokenType.CLOSED_CONTENT.rendered());
-        }
-      } else {
-        sb.append(value.toString());
-      }
-      if (i < names.size() - 1) {
-        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
-      }
-    }
-    return sb.toString();
   }
 
   private static void mapContentToMultilineString(
@@ -729,5 +772,37 @@ public class StringNamedParamMap implements NamedParamMap {
       return sMap.get(n).equalsIgnoreCase(Boolean.TRUE.toString());
     }
     return null;
+  }
+
+  private static String mapContentToInlineString(ParamMap m, String space) {
+    StringBuilder sb = new StringBuilder();
+    List<String> names = new ArrayList<>(m.names());
+    for (int i = 0; i < names.size(); i++) {
+      sb.append(names.get(i))
+          .append(space)
+          .append(TokenType.ASSIGN_SEPARATOR.rendered())
+          .append(space);
+      Object value = m.value(names.get(i));
+      if (value instanceof List<?> l) {
+        sb.append(TokenType.OPEN_LIST.rendered())
+            .append(listContentToInlineString(l, space))
+            .append(TokenType.CLOSED_LIST.rendered());
+      } else if (value instanceof ParamMap innerMap) {
+        if (innerMap instanceof NamedParamMap namedParamMap) {
+          sb.append(namedParamMap.getName())
+              .append(TokenType.OPEN_CONTENT.rendered());
+        }
+        sb.append(mapContentToInlineString(innerMap, space));
+        if (innerMap instanceof NamedParamMap) {
+          sb.append(TokenType.CLOSED_CONTENT.rendered());
+        }
+      } else {
+        sb.append(value.toString());
+      }
+      if (i < names.size() - 1) {
+        sb.append(TokenType.LIST_SEPARATOR.rendered()).append(space);
+      }
+    }
+    return sb.toString();
   }
 }
