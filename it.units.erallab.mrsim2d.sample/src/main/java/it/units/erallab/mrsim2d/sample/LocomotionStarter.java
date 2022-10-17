@@ -17,28 +17,21 @@
 package it.units.erallab.mrsim2d.sample;
 
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
+import it.units.erallab.mrsim2d.core.EmbodiedAgent;
+import it.units.erallab.mrsim2d.core.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
-import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
-import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
-import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
-import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctionBuilder;
 import it.units.erallab.mrsim2d.core.engine.Engine;
-import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.ServiceLoader;
-import java.util.random.RandomGenerator;
-import java.util.stream.IntStream;
+import java.util.function.Supplier;
 
 public class LocomotionStarter {
 
@@ -47,39 +40,36 @@ public class LocomotionStarter {
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
-    NamedBuilder<Object> nb = NamedBuilder.empty()
-        .and(NamedBuilder.fromClass(GridBody.class))
-        .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
-        .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
-        .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
-        .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(SensorBuilder.class));
-    String bodyS = """
-        body(
-          shape=s.biped(w=4;h=3);
-          sensorizingFunction=sf.directional(
-            sSensors=[vs.d(a=-90)];
-            headSensors=[vs.sin();vs.d(a=-15;r=5)];
-            nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.centralizedNumGridVSR(body=s.vsr.gridBody(
+          shape=s.vsr.s.biped(w=4;h=3);
+          sensorizingFunction=s.vsr.sf.directional(
+            sSensors=[s.s.d(a=-90)];
+            headSensors=[
+              s.s.sin();
+              s.s.d(a=-30;r=8);
+              s.s.d(a=-40;r=8)
+            ];
+            nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+          ));
+          function=s.f.stepOut(
+            stepT=0.2;
+            innerFunction=s.f.diffIn(
+              windowT=0.2;
+              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
+              types=[avg;current]
+            )
           )
         )
         """;
-    GridBody body = (GridBody) nb.build(bodyS);
-    int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
-    int nOfOutputs = (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
-    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
-        MultiLayerPerceptron.ActivationFunction.TANH,
-        nOfInputs,
-        new int[]{10},
-        nOfOutputs
-    );
-    RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    AbstractGridVSR vsr = new CentralizedNumGridVSR(
-        body,
-        mlp
-    );
-    Locomotion locomotion = new Locomotion(30, (Terrain) nb.build("t.hilly()"));
-    Outcome outcome = locomotion.run(() -> vsr, engine, viewer);
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+      vsr.randomize(new Random(33), new DoubleRange(-5, 5));
+      return vsr;
+    };
+    Locomotion locomotion = new Locomotion(30, (Terrain) nb.build("s.t.hilly()"));
+    Outcome outcome = locomotion.run(agentSupplier, engine, viewer);
     System.out.println(outcome);
   }
 }
