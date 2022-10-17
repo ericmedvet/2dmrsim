@@ -54,14 +54,16 @@ public class LocomotionStarter {
         .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
         .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(SensorBuilder.class));
     String bodyS = """
-        body(
+        gridBody(
           shape=s.biped(w=4;h=3);
           sensorizingFunction=sf.directional(
-            sSensors=[vs.d(a=-90)];
-            headSensors=[vs.sin();vs.d(a=-15;r=5)];
+            sSensors=[vs.rv(a=-90)];
+            headSensors=[
+              vs.d(a=-30;r=8);
+              vs.d(a=-40;r=8)
+            ];
             nSensors=[vs.ar();vs.rv(a=0);vs.rv(a=90)]
-          )
-        )
+        ))
         """;
     GridBody body = (GridBody) nb.build(bodyS);
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
