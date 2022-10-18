@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class CentralizedNumGridVSR extends AbstractNumGridVSR implements Parametrized {
+public class CentralizedNumGridVSR extends NumGridVSR implements Parametrized {
 
   private final TimedRealFunction timedRealFunction;
 
@@ -91,11 +91,6 @@ public class CentralizedNumGridVSR extends AbstractNumGridVSR implements Paramet
       }
     }
     return outputsGrid;
-  }
-
-  @Override
-  protected void computeActuationValues(double t) {
-    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()[0]));
   }
 
   @Override
