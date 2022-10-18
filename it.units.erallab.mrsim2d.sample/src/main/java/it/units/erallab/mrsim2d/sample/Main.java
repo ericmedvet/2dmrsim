@@ -23,6 +23,7 @@ import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
@@ -160,7 +161,8 @@ public class Main {
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
-    vsrLocomotion(engine, terrain, viewer);
+    //vsrLocomotion(engine, terrain, viewer);
+    vsrDistributedLocomotion(engine, terrain, viewer);
     //leggedLocomotion(engine, terrain, viewer);
     //ball(engine, terrain, viewer);
     //videoBuilder.get();
@@ -216,6 +218,42 @@ public class Main {
         """;
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+      vsr.randomize(new Random(33), new DoubleRange(-5, 5));
+      return vsr;
+    };
+    Locomotion locomotion = new Locomotion(30, terrain);
+    locomotion.run(agentSupplier, engine.get(), consumer);
+  }
+
+  private static void vsrDistributedLocomotion(Supplier<Engine> engine, Terrain terrain, Consumer<Snapshot> consumer) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.heteroDistributedNumGridVSR(
+          body=s.vsr.gridBody(
+            shape=s.vsr.s.biped(w=4;h=3);
+            sensorizingFunction=s.vsr.sf.directional(
+              sSensors=[s.s.d(a=-90)];
+              headSensors=[
+                s.s.sin();
+                s.s.d(a=-30;r=8);
+                s.s.d(a=-40;r=8)
+              ];
+              nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+          ));
+          function=s.f.stepOut(
+            stepT=0.2;
+            innerFunction=s.f.diffIn(
+              windowT=0.2;
+              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
+              types=[avg;current]
+            )
+          );
+          signals=1;
+          directional=t
+        )
+        """;
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      HeteroDistributedNumGridVSR vsr = (HeteroDistributedNumGridVSR) nb.build(agentS);
       vsr.randomize(new Random(33), new DoubleRange(-5, 5));
       return vsr;
     };
