@@ -30,12 +30,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public class NumGridVSR extends AbstractGridVSR {
+public abstract class AbstractNumGridVSR extends AbstractGridVSR {
 
   private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   protected final Grid<double[]> inputsGrid;
@@ -43,7 +42,7 @@ public class NumGridVSR extends AbstractGridVSR {
   private final GridBody body;
   protected final BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction;
 
-  public NumGridVSR(
+  public AbstractNumGridVSR(
       GridBody body,
       double voxelSideLength,
       double voxelMass,
@@ -57,7 +56,7 @@ public class NumGridVSR extends AbstractGridVSR {
     this.timedFunction = timedFunction;
   }
 
-  public NumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction) {
+  public AbstractNumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<double[]>> timedFunction) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
   }
 
@@ -101,9 +100,7 @@ public class NumGridVSR extends AbstractGridVSR {
     return actions;
   }
 
-  protected void computeActuationValues(double t) {
-    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()[0]));
-  }
+  protected abstract void computeActuationValues(double t);
 
   public GridBody getBody() {
     return body;

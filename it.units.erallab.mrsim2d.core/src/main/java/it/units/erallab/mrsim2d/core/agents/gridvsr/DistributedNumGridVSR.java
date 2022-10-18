@@ -4,10 +4,9 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class DistributedNumGridVSR extends NumGridVSR {
+public class DistributedNumGridVSR extends AbstractNumGridVSR {
 
   int nSignals;
   boolean directional;
