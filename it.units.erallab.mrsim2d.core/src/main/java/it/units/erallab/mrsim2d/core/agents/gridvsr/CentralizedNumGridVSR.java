@@ -20,8 +20,12 @@ package it.units.erallab.mrsim2d.core.agents.gridvsr;
 import it.units.erallab.mrsim2d.builder.BuilderMethod;
 import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
+import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
+import it.units.erallab.mrsim2d.core.util.Utils;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 /**
@@ -37,7 +41,7 @@ public class CentralizedNumGridVSR extends AbstractNumGridVSR implements Paramet
       double voxelMass,
       TimedRealFunction timedRealFunction
   ) {
-    super(body, voxelSideLength, voxelMass, new GridTimedRealFunction(body, timedRealFunction));
+    super(body, voxelSideLength, voxelMass);
     this.timedRealFunction = timedRealFunction;
   }
 
@@ -47,13 +51,46 @@ public class CentralizedNumGridVSR extends AbstractNumGridVSR implements Paramet
       @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
   ) {
     this(body, timedRealFunctionBuilder.apply(
-        GridTimedRealFunction.nOfInputs(body),
-        GridTimedRealFunction.nOfOutputs(body)
+        nOfInputs(body),
+        nOfOutputs(body)
     ));
   }
 
   public CentralizedNumGridVSR(GridBody body, TimedRealFunction timedRealFunction) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedRealFunction);
+  }
+
+  public static int nOfInputs(GridBody body) {
+    return body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+  }
+
+  public static int nOfOutputs(GridBody body) {
+    return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+  }
+
+  @Override
+  protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
+    //build inputs
+    double[] inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
+    if (inputs.length != timedRealFunction.nOfInputs()) {
+      throw new IllegalArgumentException(String.format(
+          "Wrong number of inputs: %d expected, %d found",
+          timedRealFunction.nOfInputs(),
+          inputs.length
+      ));
+    }
+    //compute outputs
+    double[] outputs = timedRealFunction.apply(t, inputs);
+    //split outputs
+    Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
+    int c = 0;
+    for (Grid.Entry<double[]> e : inputsGrid) {
+      if (e.value() != null) {
+        outputsGrid.set(e.key(), outputs[c]);
+        c = c + 1;
+      }
+    }
+    return outputsGrid;
   }
 
   @Override
