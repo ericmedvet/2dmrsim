@@ -82,7 +82,7 @@ public class LocomotionStarter {
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
         nOfInputs,
-        new int[]{8},
+        new int[]{10},
         nOfOutputs
     );
     RandomGenerator rg = new Random();
