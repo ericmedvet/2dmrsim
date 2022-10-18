@@ -4,12 +4,14 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 
 import java.util.Arrays;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class DistributedNumGridVSR extends AbstractNumGridVSR {
+public class DistributedNumGridVSR extends NumGridVSR {
 
   int nSignals;
   boolean directional;
+  private final BiFunction<Double, Grid<double[]>, Grid<double[]>> function;
   Grid<double[]> signalsGrid;
 
   Grid<double[]> fullInputsGrid;
@@ -24,17 +26,18 @@ public class DistributedNumGridVSR extends AbstractNumGridVSR {
   }
 
   private DistributedNumGridVSR(GridBody body, HeteroGridTimedRealFunction gridTimedRealFunction, int nSignals, boolean directional) {
-    super(body, gridTimedRealFunction);
+    super(body);
     this.nSignals = nSignals;
     this.directional = directional;
+    this.function = gridTimedRealFunction;
     int outputSize = directional ? nSignals * 4 : nSignals;
     signalsGrid = voxelGrid.map(v -> v != null ? new double[outputSize] : null);
-    fullInputsGrid = Grid.create(inputsGrid, d -> d != null ? new double[d.length + 4 * nSignals] : null);
-    fullOutputsGrid = Grid.create(outputGrid, d -> d != null ? new double[1 + outputSize] : null);
+    fullInputsGrid = body.sensorsGrid().map(d -> d != null ? new double[d.size() + 4 * nSignals] : null);
+    fullOutputsGrid = voxelGrid.map(d -> d != null ? new double[1 + outputSize] : null);
   }
 
   @Override
-  protected void computeActuationValues(double t) {
+  protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     // create actual input grid (concat sensed values and communication signals)
     for (Grid.Key key : inputsGrid.keys()) {
       if (inputsGrid.get(key) == null) {
@@ -51,15 +54,17 @@ public class DistributedNumGridVSR extends AbstractNumGridVSR {
       fullInputsGrid.set(key, fullInputs);
     }
     // process values
-    timedFunction.apply(t, fullInputsGrid).entries().forEach(e -> fullOutputsGrid.set(e.key(), e.value()));
+    function.apply(t, fullInputsGrid).entries().forEach(e -> fullOutputsGrid.set(e.key(), e.value()));
     // split actuation and communication for next step
+    Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
     for (Grid.Key key : fullOutputsGrid.keys()) {
       double[] fullOutputs = fullOutputsGrid.get(key);
       double actuationValue = fullOutputs[0];
       double[] signals = Arrays.stream(fullOutputs, 1, fullOutputs.length).toArray();
-      outputGrid.set(key, actuationValue);
+      outputsGrid.set(key, actuationValue);
       signalsGrid.set(key, signals);
     }
+    return outputsGrid;
   }
 
   private double[] getLastSignals(int x, int y, int c) {
