@@ -17,7 +17,9 @@
 package it.units.erallab.mrsim2d.sample;
 
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.*;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.HomoDistributedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -37,7 +39,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.random.RandomGenerator;
-import java.util.stream.IntStream;
 
 public class LocomotionStarter {
 
@@ -77,12 +78,6 @@ public class LocomotionStarter {
 
     int nOfInputs = body.sensorsGrid().values().stream().filter(Objects::nonNull).findFirst().get().size() + 4 * nSignals;
     int nOfOutputs = 1 + (directional ? 4 * nSignals : nSignals);
-    MultiLayerPerceptron mlp = new MultiLayerPerceptron(
-        MultiLayerPerceptron.ActivationFunction.TANH,
-        nOfInputs,
-        new int[]{10},
-        nOfOutputs
-    );
     RandomGenerator rg = new Random();
     // mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
     NumGridVSR vsr = new HomoDistributedNumGridVSR(

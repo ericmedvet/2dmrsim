@@ -1,15 +1,37 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
+import it.units.erallab.mrsim2d.builder.BuilderMethod;
+import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class HomoDistributedNumGridVSR extends HeteroDistributedNumGridVSR {
 
   public HomoDistributedNumGridVSR(GridBody body, Supplier<TimedRealFunction> timedRealFunctionsSupplier, int nSignals, boolean directional) {
     super(body, body.grid().map(i -> timedRealFunctionsSupplier.get()), nSignals, directional);
+  }
+
+  @BuilderMethod
+  public HomoDistributedNumGridVSR(
+      @Param("body") GridBody body,
+      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder,
+      @Param("signals") int nSignals,
+      @Param("directional") boolean directional
+  ) {
+    this(body,
+        () -> timedRealFunctionBuilder.apply(
+            body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).findFirst().orElseThrow(),
+            1 + (directional ? 4 * nSignals : nSignals)
+        ),
+        nSignals,
+        directional
+    );
   }
 
   @Override

@@ -1,5 +1,7 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
+import it.units.erallab.mrsim2d.builder.BuilderMethod;
+import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
@@ -7,6 +9,7 @@ import it.units.erallab.mrsim2d.core.util.Parametrized;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public class HeteroDistributedNumGridVSR extends NumGridVSR {
@@ -51,6 +54,21 @@ public class HeteroDistributedNumGridVSR extends NumGridVSR {
     signalsGrid = voxelGrid.map(v -> v != null ? new double[communicationSize] : null);
     fullInputsGrid = body.sensorsGrid().map(d -> d != null ? new double[d.size() + 4 * nSignals] : null);
     fullOutputsGrid = voxelGrid.map(d -> d != null ? new double[1 + communicationSize] : null);
+  }
+
+  @BuilderMethod
+  public HeteroDistributedNumGridVSR(
+      @Param("body") GridBody body,
+      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder,
+      @Param("signals") int nSignals,
+      @Param("directional") boolean directional
+  ) {
+    this(body,
+        body.sensorsGrid().map(v -> v != null ?
+            timedRealFunctionBuilder.apply(v.size(), 1 + (directional ? 4 * nSignals : nSignals)) : null),
+        nSignals,
+        directional
+    );
   }
 
   @Override
