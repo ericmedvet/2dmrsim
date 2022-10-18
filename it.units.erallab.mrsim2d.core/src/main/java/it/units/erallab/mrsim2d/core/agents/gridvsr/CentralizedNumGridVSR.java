@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class CentralizedNumGridVSR extends NumGridVSR implements Parametrized {
+public class CentralizedNumGridVSR extends NumGridVSR {
 
   private final TimedRealFunction timedRealFunction;
 
