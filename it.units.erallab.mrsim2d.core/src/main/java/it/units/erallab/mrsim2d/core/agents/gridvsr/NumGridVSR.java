@@ -29,36 +29,34 @@ import it.units.erallab.mrsim2d.core.util.Grid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public class NumGridVSR extends AbstractGridVSR {
+public abstract class NumGridVSR extends AbstractGridVSR {
 
   private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
   private final GridBody body;
-  private final BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction;
 
   public NumGridVSR(
       GridBody body,
       double voxelSideLength,
-      double voxelMass,
-      BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction
+      double voxelMass
   ) {
     super(body.materialGrid(), voxelSideLength, voxelMass);
     this.sensorsGrid = body.sensorsGrid();
     this.body = body;
     inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
     outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
-    this.timedFunction = timedFunction;
   }
 
-  public NumGridVSR(GridBody body, BiFunction<Double, Grid<double[]>, Grid<Double>> timedFunction) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedFunction);
+  public NumGridVSR(GridBody body) {
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
   }
+
+  protected abstract Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid);
 
   @SuppressWarnings("unchecked")
   @Override
@@ -83,7 +81,7 @@ public class NumGridVSR extends AbstractGridVSR {
       }
     }
     //compute actuation
-    timedFunction.apply(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
+    computeActuationValues(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     actions.addAll(voxelGrid.entries().stream()
@@ -103,9 +101,5 @@ public class NumGridVSR extends AbstractGridVSR {
 
   public GridBody getBody() {
     return body;
-  }
-
-  public BiFunction<Double, Grid<double[]>, Grid<Double>> getTimedFunction() {
-    return timedFunction;
   }
 }
