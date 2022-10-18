@@ -17,10 +17,7 @@
 package it.units.erallab.mrsim2d.sample;
 
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.*;
 import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
 import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
 import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
@@ -30,6 +27,7 @@ import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
@@ -86,13 +84,20 @@ public class LocomotionStarter {
         nOfOutputs
     );
     RandomGenerator rg = new Random();
-    mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
-    AbstractGridVSR vsr = new DistributedNumGridVSR(
+    // mlp.setParams(IntStream.range(0, mlp.getParams().length).mapToDouble(i -> rg.nextDouble(-1, 1)).toArray());
+    NumGridVSR vsr = new HomoDistributedNumGridVSR(
         body,
-        mlp,
+        () -> new MultiLayerPerceptron(
+            MultiLayerPerceptron.ActivationFunction.TANH,
+            nOfInputs,
+            new int[]{10},
+            nOfOutputs
+        ),
         nSignals,
         directional
     );
+    vsr.randomize(rg, DoubleRange.range(-1, 1));
+
     Locomotion locomotion = new Locomotion(30, (Terrain) nb.build("t.hilly()"));
     Outcome outcome = locomotion.run(() -> vsr, engine, viewer);
     System.out.println(outcome);

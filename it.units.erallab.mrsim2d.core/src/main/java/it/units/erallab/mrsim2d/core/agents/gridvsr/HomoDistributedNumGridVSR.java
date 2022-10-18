@@ -4,11 +4,12 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
 
-public class HomoGridTimedRealFunction extends HeteroGridTimedRealFunction {
+import java.util.function.Supplier;
 
-  // TODO create a copy of the function
-  public HomoGridTimedRealFunction(GridBody body, int nSignals, boolean directional, TimedRealFunction timedRealFunction) {
-    super(body, nSignals, directional, Grid.create(body.grid().w(), body.grid().h(), timedRealFunction));
+public class HomoDistributedNumGridVSR extends HeteroDistributedNumGridVSR {
+
+  public HomoDistributedNumGridVSR(GridBody body, Supplier<TimedRealFunction> timedRealFunctionsSupplier, int nSignals, boolean directional) {
+    super(body, body.grid().map(i -> timedRealFunctionsSupplier.get()), nSignals, directional);
   }
 
   @Override
@@ -29,4 +30,5 @@ public class HomoGridTimedRealFunction extends HeteroGridTimedRealFunction {
       }
     }
   }
+
 }
