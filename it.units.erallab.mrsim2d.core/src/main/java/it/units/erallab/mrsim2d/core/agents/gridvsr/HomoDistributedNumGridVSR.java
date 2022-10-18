@@ -26,7 +26,7 @@ public class HomoDistributedNumGridVSR extends HeteroDistributedNumGridVSR {
   ) {
     this(body,
         () -> timedRealFunctionBuilder.apply(
-            body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).findFirst().orElseThrow(),
+            4 * nSignals + body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).findFirst().orElseThrow(),
             1 + (directional ? 4 * nSignals : nSignals)
         ),
         nSignals,

@@ -19,6 +19,8 @@ package it.units.erallab.mrsim2d.core;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.HomoDistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
@@ -43,6 +45,8 @@ public class PreparedNamedBuilder {
           )
           .and(List.of("agent", "a"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(CentralizedNumGridVSR.class))
+              .and(NamedBuilder.fromClass(HeteroDistributedNumGridVSR.class))
+              .and(NamedBuilder.fromClass(HomoDistributedNumGridVSR.class))
               .and(NamedBuilder.fromClass(NumIndependentVoxel.class))
               .and(NamedBuilder.fromClass(NumLeggedHybridModularRobot.class))
               .and(List.of("legged", "l"), NamedBuilder.empty()

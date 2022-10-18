@@ -65,7 +65,7 @@ public class HeteroDistributedNumGridVSR extends NumGridVSR {
   ) {
     this(body,
         body.sensorsGrid().map(v -> v != null ?
-            timedRealFunctionBuilder.apply(v.size(), 1 + (directional ? 4 * nSignals : nSignals)) : null),
+            timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals)) : null),
         nSignals,
         directional
     );
