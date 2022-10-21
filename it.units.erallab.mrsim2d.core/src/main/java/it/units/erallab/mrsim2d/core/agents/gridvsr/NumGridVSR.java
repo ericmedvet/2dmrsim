@@ -25,6 +25,7 @@ import it.units.erallab.mrsim2d.core.actions.Sense;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.Grid;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public abstract class NumGridVSR extends AbstractGridVSR {
+public abstract class NumGridVSR extends AbstractGridVSR implements Parametrized {
 
   private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;

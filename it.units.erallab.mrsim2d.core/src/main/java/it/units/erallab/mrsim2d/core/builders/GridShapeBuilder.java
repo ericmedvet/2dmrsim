@@ -44,9 +44,9 @@ public class GridShapeBuilder {
 
   public static Grid<Boolean> free(@Param("s") String s) {
     return Grid.create(
-        s.split("-").length,
         s.split("-")[0].length(),
-        (x, y) -> s.split("-")[x].charAt(y) == '1'
+        s.split("-").length,
+        (x, y) -> s.split("-")[s.split("-").length - y - 1].charAt(x) == '1'
     );
   }
 
