@@ -220,7 +220,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           Integer.class,
           name,
           buildDefaultValue(Type.INT, Integer.class, paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     if (parameter.getType().equals(Double.class) || parameter.getType().equals(Double.TYPE)) {
@@ -229,7 +230,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           Double.class,
           name,
           buildDefaultValue(Type.DOUBLE, Double.class, paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     if (parameter.getType().equals(String.class)) {
@@ -238,7 +240,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           String.class,
           name,
           buildDefaultValue(Type.STRING, String.class, paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     if (parameter.getType().equals(Boolean.class) || parameter.getType().equals(Boolean.TYPE)) {
@@ -247,7 +250,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           Boolean.class,
           name,
           buildDefaultValue(Type.BOOLEAN, Boolean.class, paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     if (parameter.getType().isEnum()) {
@@ -256,7 +260,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           parameter.getType(),
           name,
           buildDefaultValue(Type.ENUM, parameter.getType(), paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     if (parameter.getType()
@@ -267,7 +272,8 @@ public record AutoBuiltDocumentedBuilder<T>(
             Integer.class,
             name,
             buildDefaultValue(Type.INTS, Integer.class, paramAnnotation),
-            paramAnnotation.self()
+            paramAnnotation.self(),
+            parameter
         );
       }
     }
@@ -279,7 +285,8 @@ public record AutoBuiltDocumentedBuilder<T>(
             Double.class,
             name,
             buildDefaultValue(Type.DOUBLES, Double.class, paramAnnotation),
-            paramAnnotation.self()
+            paramAnnotation.self(),
+            parameter
         );
       }
     }
@@ -291,7 +298,8 @@ public record AutoBuiltDocumentedBuilder<T>(
             String.class,
             name,
             buildDefaultValue(Type.STRINGS, String.class, paramAnnotation),
-            paramAnnotation.self()
+            paramAnnotation.self(),
+            parameter
         );
       }
     }
@@ -309,7 +317,8 @@ public record AutoBuiltDocumentedBuilder<T>(
             clazz,
             name,
             buildDefaultValue(Type.ENUMS, clazz, paramAnnotation),
-            paramAnnotation.self()
+            paramAnnotation.self(),
+            parameter
         );
       }
     }
@@ -321,7 +330,8 @@ public record AutoBuiltDocumentedBuilder<T>(
             NamedParamMap.class,
             name,
             buildDefaultValue(Type.NAMED_PARAM_MAPS, NamedParamMap.class, paramAnnotation),
-            paramAnnotation.self()
+            paramAnnotation.self(),
+            parameter
         );
       }
     }
@@ -338,7 +348,8 @@ public record AutoBuiltDocumentedBuilder<T>(
           clazz,
           name,
           buildDefaultValue(Type.NAMED_PARAM_MAPS, Object.class, paramAnnotation),
-          paramAnnotation.self()
+          paramAnnotation.self(),
+          parameter
       );
     }
     return new ParamInfo(
@@ -346,7 +357,8 @@ public record AutoBuiltDocumentedBuilder<T>(
         List.class,
         name,
         buildDefaultValue(Type.NAMED_PARAM_MAP, Object.class, paramAnnotation),
-        paramAnnotation.self()
+        paramAnnotation.self(),
+        parameter
     );
   }
 

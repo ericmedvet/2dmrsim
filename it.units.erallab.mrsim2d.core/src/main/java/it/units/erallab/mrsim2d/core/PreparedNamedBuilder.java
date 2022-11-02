@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.core;
 
+import it.units.erallab.mrsim2d.builder.InfoPrinter;
 import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
@@ -67,5 +68,11 @@ public class PreparedNamedBuilder {
 
   public static NamedBuilder<Object> get() {
     return NB;
+  }
+
+  public static void main(String[] args) {
+    NamedBuilder<?> nb = get();
+    InfoPrinter infoPrinter = new InfoPrinter();
+    infoPrinter.print(nb, System.out);
   }
 }

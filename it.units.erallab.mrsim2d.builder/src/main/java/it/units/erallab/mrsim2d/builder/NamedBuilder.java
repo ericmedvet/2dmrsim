@@ -161,6 +161,10 @@ public class NamedBuilder<X> {
     return (double) cost[len0 - 1];
   }
 
+  public Map<String, Builder<? extends X>> getBuilders() {
+    return Collections.unmodifiableMap(builders);
+  }
+
   @Override
   public String toString() {
     return prettyToString(this, false);
