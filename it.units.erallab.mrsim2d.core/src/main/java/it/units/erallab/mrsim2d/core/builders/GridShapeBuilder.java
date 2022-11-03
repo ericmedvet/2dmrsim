@@ -42,7 +42,7 @@ public class GridShapeBuilder {
     return Grid.create(w, h, (x, y) -> (y >= h / 2 || x % 2 == 0));
   }
 
-  public static Grid<Boolean> free(@Param("s") String s) {
+  public static Grid<Boolean> free(@Param(value = "s", dS = "111-101") String s) {
     return Grid.create(
         s.split("-")[0].length(),
         s.split("-").length,

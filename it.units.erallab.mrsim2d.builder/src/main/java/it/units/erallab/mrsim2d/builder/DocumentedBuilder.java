@@ -16,7 +16,6 @@
 
 package it.units.erallab.mrsim2d.builder;
 
-import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
@@ -47,7 +46,7 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     }
   }
 
-  record ParamInfo(Type type, Class<?> clazz, String name, Object defaultValue, boolean self, Parameter parameter) {
+  record ParamInfo(Type type, Class<?> clazz, String name, Object defaultValue, boolean self, java.lang.reflect.Type javaType) {
     @Override
     public String toString() {
       return String.format(
@@ -59,7 +58,7 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     }
   }
 
-  String builtType();
+  java.lang.reflect.Type builtType();
 
   String name();
 
