@@ -49,7 +49,7 @@ public class InfoPrinter {
   ) {
     public Name longestName() {
       return names().stream()
-          .min(Comparator.comparingInt(n -> n.fullName().length()))
+          .max(Comparator.comparingInt(n -> n.fullName().length()))
           .orElseThrow();
     }
 
@@ -309,7 +309,7 @@ public class InfoPrinter {
       packageInfo.builderInfos().stream()
           .sorted(Comparator.comparing(builderInfo -> builderInfo.shortestName().simpleName()))
           .forEach(builderInfo -> {
-            ps.printf("%s Builder `%s()`%n", heading(builderHeadingLevel), builderInfo.names().first().simpleName());
+            ps.printf("%s Builder `%s()`%n", heading(builderHeadingLevel), builderInfo.longestName().fullName());
             ps.println();
             if (builderInfo.builder() instanceof DocumentedBuilder<?> documentedBuilder) {
               if (documentedBuilder.params().isEmpty()) {
