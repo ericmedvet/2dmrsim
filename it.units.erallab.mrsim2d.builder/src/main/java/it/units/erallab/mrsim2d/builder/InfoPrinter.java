@@ -22,19 +22,25 @@ public class InfoPrinter {
 
   private static final int PACKAGE_HEADING_LEVEL = 2;
   private static final int BUILDER_HEADING_LEVEL = PACKAGE_HEADING_LEVEL + 1;
-  private static final boolean SHORTEN_FQNS = true;
   private final int packageHeadingLevel;
   private final int builderHeadingLevel;
   private final boolean shortenFQNs;
+  private final boolean computeCompatibilities;
 
-  public InfoPrinter(int packageHeadingLevel, int builderHeadingLevel, boolean shortenFQNs) {
+  public InfoPrinter(
+      int packageHeadingLevel,
+      int builderHeadingLevel,
+      boolean shortenFQNs,
+      boolean computeCompatibilities
+  ) {
     this.packageHeadingLevel = packageHeadingLevel;
     this.builderHeadingLevel = builderHeadingLevel;
     this.shortenFQNs = shortenFQNs;
+    this.computeCompatibilities = computeCompatibilities;
   }
 
   public InfoPrinter() {
-    this(PACKAGE_HEADING_LEVEL, BUILDER_HEADING_LEVEL, SHORTEN_FQNS);
+    this(PACKAGE_HEADING_LEVEL, BUILDER_HEADING_LEVEL, true, false);
   }
 
   record BuilderInfo(
@@ -186,75 +192,86 @@ public class InfoPrinter {
       }
       aliasesMap.get(mainName).names.add(new Name(fullName));
     });
-    //find usages
-    List<BuilderInfo> buildableBuilders = new ArrayList<>();
-    int nOfAttempts = 0;
-    while (aliasesMap.values().stream().anyMatch(bi -> bi.workingUsages()
-        .isEmpty()) && nOfAttempts < N_OF_COMPATIBILITY_ATTEMPTS) {
-      nOfAttempts = nOfAttempts + 1;
-      System.out.printf(
-          "Usages attempt %d on %d: %d known%n",
-          nOfAttempts,
-          N_OF_COMPATIBILITY_ATTEMPTS,
-          buildableBuilders.size()
-      );
-      aliasesMap.values().stream().filter(bi -> bi.workingUsages().isEmpty()).forEach(builderInfo -> {
+    if (computeCompatibilities) {
+      //find usages
+      List<BuilderInfo> buildableBuilders = new ArrayList<>();
+      int nOfAttempts = 0;
+      while (aliasesMap.values().stream().anyMatch(bi -> bi.workingUsages()
+          .isEmpty()) && nOfAttempts < N_OF_COMPATIBILITY_ATTEMPTS) {
+        nOfAttempts = nOfAttempts + 1;
+        System.out.printf(
+            "Usages attempt %d on %d: %d known, %d unknown%n",
+            nOfAttempts,
+            N_OF_COMPATIBILITY_ATTEMPTS,
+            buildableBuilders.size(),
+            aliasesMap.values().size() - buildableBuilders.size()
+        );
+        for (BuilderInfo bi : aliasesMap.values()) {
+          if (bi.workingUsages().isEmpty()) {
+            if (bi.builder() instanceof DocumentedBuilder<?> builder) {
+              List<List<ParamTriplet>> triplets = paramTriplets(builder, buildableBuilders);
+              System.out.printf(
+                  "Usages for %s with %d cases%n",
+                  bi.shortestName().fullName(),
+                  triplets.size()
+              );
+              for (List<ParamTriplet> paramTriplets : triplets) {
+                try {
+                  String usage = "%s(%s)".formatted(
+                      bi.shortestName().fullName(),
+                      paramTriplets.stream()
+                          .map(pp -> "%s=%s".formatted(pp.name(), pp.value()))
+                          .collect(Collectors.joining(";"))
+                  );
+                  nb.build(usage);
+                  bi.workingUsages().add(usage);
+                  buildableBuilders.add(bi);
+                  break;
+                } catch (BuilderException | IllegalArgumentException e) {
+                  //ignore
+                }
+              }
+            }
+          }
+        }
+      }
+      //update compatibilities
+      for (BuilderInfo builderInfo : buildableBuilders) {
         if (builderInfo.builder() instanceof DocumentedBuilder<?> builder) {
-          for (List<ParamTriplet> paramTriplets : paramTriplets(builder, buildableBuilders)) {
+          if (builder.params().stream().noneMatch(pi -> pi.type().equals(DocumentedBuilder.Type.NAMED_PARAM_MAP))) {
+            continue;
+          }
+          List<List<ParamTriplet>> triplets = paramTriplets(builder, buildableBuilders);
+          System.out.printf(
+              "Compatibility for %s with %d cases%n",
+              builderInfo.shortestName().fullName(),
+              triplets.size()
+          );
+          for (List<ParamTriplet> paramTriplets : triplets) {
             try {
               String usage = "%s(%s)".formatted(
                   builderInfo.shortestName().fullName(),
                   paramTriplets.stream()
-                      .map(pp -> "%s=%s".formatted(pp.name(), pp.value()))
+                      .map(pt -> "%s=%s".formatted(pt.name(), pt.value()))
                       .collect(Collectors.joining(";"))
               );
               nb.build(usage);
-              builderInfo.workingUsages().add(usage);
-              buildableBuilders.add(builderInfo);
-              break;
+              builderInfo.compatibilities().stream()
+                  .filter(c -> c.paramInfo().type().equals(DocumentedBuilder.Type.NAMED_PARAM_MAP))
+                  .filter(c -> c.paramInfo().defaultValue() == null)
+                  .forEach(c -> {
+                    BuilderInfo cbi = paramTriplets.stream()
+                        .filter(t -> t.name().equals(c.paramInfo().name()))
+                        .findFirst()
+                        .orElseThrow()
+                        .builderInfo();
+                    if (c.builderInfos.stream().noneMatch(bi -> bi.shortestName().equals(cbi.shortestName()))) {
+                      c.builderInfos().add(cbi);
+                    }
+                  });
             } catch (BuilderException | IllegalArgumentException e) {
               //ignore
             }
-          }
-        }
-      });
-    }
-    //update compatibilities
-    for (BuilderInfo builderInfo : buildableBuilders) {
-      if (builderInfo.builder() instanceof DocumentedBuilder<?> builder) {
-        if (builder.params().stream().noneMatch(pi -> pi.type().equals(DocumentedBuilder.Type.NAMED_PARAM_MAP))) {
-          continue;
-        }
-        List<List<ParamTriplet>> triplets = paramTriplets(builder, buildableBuilders);
-        System.out.printf(
-            "Compatibility for %s with %d case%n",
-            builderInfo.shortestName().fullName(),
-            triplets.size()
-        );
-        for (List<ParamTriplet> paramTriplets : triplets) {
-          try {
-            String usage = "%s(%s)".formatted(
-                builderInfo.shortestName().fullName(),
-                paramTriplets.stream()
-                    .map(pt -> "%s=%s".formatted(pt.name(), pt.value()))
-                    .collect(Collectors.joining(";"))
-            );
-            nb.build(usage);
-            builderInfo.compatibilities().stream()
-                .filter(c -> c.paramInfo().type().equals(DocumentedBuilder.Type.NAMED_PARAM_MAP))
-                .filter(c -> c.paramInfo().defaultValue() == null)
-                .forEach(c -> {
-                  BuilderInfo cbi = paramTriplets.stream()
-                      .filter(t -> t.name().equals(c.paramInfo().name()))
-                      .findFirst()
-                      .orElseThrow()
-                      .builderInfo();
-                  if (c.builderInfos.stream().noneMatch(bi -> bi.shortestName().equals(cbi.shortestName()))) {
-                    c.builderInfos().add(cbi);
-                  }
-                });
-          } catch (BuilderException | IllegalArgumentException e) {
-            //ignore
           }
         }
       }
@@ -278,55 +295,69 @@ public class InfoPrinter {
     SortedSet<String> packageNames = new TreeSet<>(packagesMap.keySet());
     for (String packageName : packageNames) {
       PackageInfo packageInfo = packagesMap.get(packageName);
-      ps.printf("%s Package `%s`%n", heading(packageHeadingLevel), packageName);
+      if (packageName.isEmpty()) {
+        ps.printf("%s Unnamed package%n", heading(packageHeadingLevel));
+      } else {
+        ps.printf("%s Package `%s`%n", heading(packageHeadingLevel), packageName);
+      }
       ps.println();
-      ps.print("Aliases: ");
-      ps.println(packageInfo.names().stream().map("`%s`"::formatted).collect(Collectors.joining(", ")));
-      ps.println();
-      for (BuilderInfo builderInfo : packageInfo.builderInfos()) {
-        ps.printf("%s Builder `%s()`%n", heading(builderHeadingLevel), builderInfo.names().first().simpleName());
-        ps.println();
-        if (builderInfo.builder() instanceof DocumentedBuilder<?> documentedBuilder) {
-          if (documentedBuilder.params().isEmpty()) {
-            //signature
-            ps.printf("`%s()`%n", builderInfo.shortestName().fullName());
-          } else {
-            //signature
-            ps.printf(
-                "`%s(%s)`%n",
-                builderInfo.shortestName().fullName(),
-                documentedBuilder.params().stream()
-                    .map(DocumentedBuilder.ParamInfo::name)
-                    .collect(Collectors.joining("; "))
-            );
-            ps.println();
-            //table with args
-            ps.println("| Param | Type | Default | Java type | Compatible builders |");
-            ps.println("| --- | --- | --- | --- | --- |");
-            for (ParamCompatibility compatibility : builderInfo.compatibilities()) {
-              if (!compatibility.paramInfo().self()) {
-                ps.printf(
-                    "| `%s` | %s | %s | %s | %s |%n",
-                    compatibility.paramInfo().name(),
-                    compatibility.paramInfo().type().rendered(),
-                    Objects.isNull(compatibility.paramInfo()
-                        .defaultValue()) ? "" : "`%s`".formatted(compatibility.paramInfo().defaultValue()),
-                    shortenJavaTypeName(compatibility.paramInfo().javaType()),
-                    compatibility.builderInfos().stream()
-                        .sorted(Comparator.comparing(bi -> bi.shortestName().fullName()))
-                        .map(bi -> "`%s()`".formatted(bi.shortestName().fullName()))
-                        .collect(Collectors.joining("<br>"))
-                );
-              }
-            }
-          }
-          ps.printf("Produces %s%n", shortenJavaTypeName(documentedBuilder.builtType()));
-        } else {
-          //signature
-          ps.printf("`%s()` (no more info available)%n", builderInfo.shortestName().fullName());
-        }
+      if (packageInfo.names().size() > 1) {
+        ps.print("Aliases: ");
+        ps.println(packageInfo.names().stream().map("`%s`"::formatted).collect(Collectors.joining(", ")));
         ps.println();
       }
+      packageInfo.builderInfos().stream()
+          .sorted(Comparator.comparing(builderInfo -> builderInfo.shortestName().simpleName()))
+          .forEach(builderInfo -> {
+            ps.printf("%s Builder `%s()`%n", heading(builderHeadingLevel), builderInfo.names().first().simpleName());
+            ps.println();
+            if (builderInfo.builder() instanceof DocumentedBuilder<?> documentedBuilder) {
+              if (documentedBuilder.params().isEmpty()) {
+                //signature
+                ps.printf("`%s()`%n", builderInfo.shortestName().fullName());
+              } else {
+                //signature
+                ps.printf(
+                    "`%s(%s)`%n",
+                    builderInfo.shortestName().fullName(),
+                    documentedBuilder.params().stream()
+                        .map(DocumentedBuilder.ParamInfo::name)
+                        .collect(Collectors.joining("; "))
+                );
+                ps.println();
+                //table with args
+                if (computeCompatibilities) {
+                  ps.println("| Param | Type | Default | Java type | Compatible builders |");
+                  ps.println("| --- | --- | --- | --- | --- |");
+                } else {
+                  ps.println("| Param | Type | Default | Java type |");
+                  ps.println("| --- | --- | --- | --- |");
+                }
+                for (ParamCompatibility compatibility : builderInfo.compatibilities()) {
+                  if (!compatibility.paramInfo().self()) {
+                    ps.printf(
+                        "| `%s` | %s | %s | %s |" + (computeCompatibilities ? " %s|" : "") + "%n",
+                        compatibility.paramInfo().name(),
+                        compatibility.paramInfo().type().rendered(),
+                        Objects.isNull(compatibility.paramInfo()
+                            .defaultValue()) ? "" : "`%s`".formatted(compatibility.paramInfo().defaultValue()),
+                        shortenJavaTypeName(compatibility.paramInfo().javaType()),
+                        compatibility.builderInfos().stream()
+                            .sorted(Comparator.comparing(bi -> bi.shortestName().fullName()))
+                            .map(bi -> "`%s()`".formatted(bi.shortestName().fullName()))
+                            .collect(Collectors.joining("<br>"))
+                    );
+                  }
+                }
+              }
+              ps.println();
+              ps.printf("Produces %s%n", shortenJavaTypeName(documentedBuilder.builtType()));
+            } else {
+              //signature
+              ps.printf("`%s()` (no more info available)%n", builderInfo.shortestName().fullName());
+            }
+            ps.println();
+          });
     }
   }
 
