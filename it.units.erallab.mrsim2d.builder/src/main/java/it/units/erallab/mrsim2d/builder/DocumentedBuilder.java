@@ -46,7 +46,7 @@ public interface DocumentedBuilder<T> extends Builder<T> {
     }
   }
 
-  record ParamInfo(Type type, Class<?> clazz, String name, Object defaultValue, boolean self, java.lang.reflect.Type javaType) {
+  record ParamInfo(Type type, Class<?> enumClass, String name, Object defaultValue, boolean self, java.lang.reflect.Type javaType) {
     @Override
     public String toString() {
       return String.format(

@@ -80,9 +80,9 @@ public record AutoBuiltDocumentedBuilder<T>(
       case STRING -> pi.defaultValue() == null ? m.s(pi.name()) : m.s(pi.name(), (String) pi.defaultValue());
       case BOOLEAN -> pi.defaultValue() == null ? m.b(pi.name()) : m.b(pi.name(), (Boolean) pi.defaultValue());
       case ENUM -> //noinspection rawtypes
-          pi.defaultValue() == null ? m.e(pi.name(), (Class) pi.clazz()) : m.e(
+          pi.defaultValue() == null ? m.e(pi.name(), (Class) pi.enumClass()) : m.e(
               pi.name(),
-              (Class) pi.clazz(),
+              (Class) pi.enumClass(),
               (Enum) pi.defaultValue()
           );
       case NAMED_PARAM_MAP -> processNPM(pi.defaultValue() == null ? m.npm(pi.name()) : m.npm(
@@ -94,9 +94,9 @@ public record AutoBuiltDocumentedBuilder<T>(
       case STRINGS -> pi.defaultValue() == null ? m.ss(pi.name()) : m.ss(pi.name(), (List<String>) pi.defaultValue());
       case BOOLEANS -> pi.defaultValue() == null ? m.bs(pi.name()) : m.bs(pi.name(), (List<Boolean>) pi.defaultValue());
       case ENUMS -> //noinspection rawtypes
-          pi.defaultValue() == null ? m.es(pi.name(), (Class) pi.clazz()) : m.es(
+          pi.defaultValue() == null ? m.es(pi.name(), (Class) pi.enumClass()) : m.es(
               pi.name(),
-              (Class) pi.clazz(),
+              (Class) pi.enumClass(),
               (List) pi.defaultValue()
           );
       case NAMED_PARAM_MAPS -> pi.defaultValue() == null ? m.npms(pi.name()) : m.npms(
@@ -217,7 +217,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (parameter.getType().equals(Integer.class) || parameter.getType().equals(Integer.TYPE)) {
       return new ParamInfo(
           Type.INT,
-          Integer.class,
+          null,
           name,
           buildDefaultValue(Type.INT, Integer.class, paramAnnotation),
           paramAnnotation.self(),
@@ -227,7 +227,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (parameter.getType().equals(Double.class) || parameter.getType().equals(Double.TYPE)) {
       return new ParamInfo(
           Type.DOUBLE,
-          Double.class,
+          null,
           name,
           buildDefaultValue(Type.DOUBLE, Double.class, paramAnnotation),
           paramAnnotation.self(),
@@ -237,7 +237,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (parameter.getType().equals(String.class)) {
       return new ParamInfo(
           Type.STRING,
-          String.class,
+          null,
           name,
           buildDefaultValue(Type.STRING, String.class, paramAnnotation),
           paramAnnotation.self(),
@@ -247,7 +247,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (parameter.getType().equals(Boolean.class) || parameter.getType().equals(Boolean.TYPE)) {
       return new ParamInfo(
           Type.BOOLEAN,
-          Boolean.class,
+          null,
           name,
           buildDefaultValue(Type.BOOLEAN, Boolean.class, paramAnnotation),
           paramAnnotation.self(),
@@ -269,7 +269,7 @@ public record AutoBuiltDocumentedBuilder<T>(
       if (parameterizedType.getActualTypeArguments()[0].equals(Integer.class)) {
         return new ParamInfo(
             Type.INTS,
-            Integer.class,
+            null,
             name,
             buildDefaultValue(Type.INTS, Integer.class, paramAnnotation),
             paramAnnotation.self(),
@@ -282,7 +282,7 @@ public record AutoBuiltDocumentedBuilder<T>(
       if (parameterizedType.getActualTypeArguments()[0].equals(Double.class)) {
         return new ParamInfo(
             Type.DOUBLES,
-            Double.class,
+            null,
             name,
             buildDefaultValue(Type.DOUBLES, Double.class, paramAnnotation),
             paramAnnotation.self(),
@@ -295,7 +295,7 @@ public record AutoBuiltDocumentedBuilder<T>(
       if (parameterizedType.getActualTypeArguments()[0].equals(String.class)) {
         return new ParamInfo(
             Type.STRINGS,
-            String.class,
+            null,
             name,
             buildDefaultValue(Type.STRINGS, String.class, paramAnnotation),
             paramAnnotation.self(),
@@ -306,10 +306,12 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (parameter.getType()
         .equals(List.class) && parameter.getParameterizedType() instanceof ParameterizedType parameterizedType) {
       Class<?> clazz = Objects.class;
-      try {
-        clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
-      } catch (ClassNotFoundException e) {
-        //ignore
+      if (!parameterizedType.getActualTypeArguments()[0].getTypeName().contains("<")) {
+        try {
+          clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
+        } catch (ClassNotFoundException e) {
+          //ignore
+        }
       }
       if (clazz.isEnum()) {
         return new ParamInfo(
@@ -327,7 +329,7 @@ public record AutoBuiltDocumentedBuilder<T>(
       if (parameterizedType.getActualTypeArguments()[0].equals(NamedParamMap.class)) {
         return new ParamInfo(
             Type.NAMED_PARAM_MAPS,
-            NamedParamMap.class,
+            null,
             name,
             buildDefaultValue(Type.NAMED_PARAM_MAPS, NamedParamMap.class, paramAnnotation),
             paramAnnotation.self(),
@@ -337,15 +339,9 @@ public record AutoBuiltDocumentedBuilder<T>(
     }
     if (parameter.getType()
         .equals(List.class) && parameter.getParameterizedType() instanceof ParameterizedType parameterizedType) {
-      Class<?> clazz = Objects.class;
-      try {
-        clazz = Class.forName(parameterizedType.getActualTypeArguments()[0].getTypeName());
-      } catch (ClassNotFoundException e) {
-        //ignore
-      }
       return new ParamInfo(
           Type.NAMED_PARAM_MAPS,
-          clazz,
+          null,
           name,
           buildDefaultValue(Type.NAMED_PARAM_MAPS, Object.class, paramAnnotation),
           paramAnnotation.self(),
@@ -354,7 +350,7 @@ public record AutoBuiltDocumentedBuilder<T>(
     }
     return new ParamInfo(
         Type.NAMED_PARAM_MAP,
-        List.class,
+        null,
         name,
         buildDefaultValue(Type.NAMED_PARAM_MAP, Object.class, paramAnnotation),
         paramAnnotation.self(),
