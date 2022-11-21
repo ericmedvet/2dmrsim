@@ -28,6 +28,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface Param {
+
+  enum Injection {NONE, MAP, BUILDER}
+
   boolean dB() default false;
 
   boolean[] dBs() default {};
@@ -48,7 +51,7 @@ public @interface Param {
 
   String[] dSs() default {};
 
-  boolean self() default false;
+  Injection injection() default Injection.NONE;
 
   String value();
 }

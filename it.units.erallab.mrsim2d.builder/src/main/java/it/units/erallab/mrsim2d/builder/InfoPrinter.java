@@ -179,7 +179,7 @@ public class InfoPrinter {
         List<ParamCompatibility> compatibilities = new ArrayList<>();
         if (builder instanceof DocumentedBuilder<?> documentedBuilder) {
           documentedBuilder.params().stream()
-              .filter(pi -> !pi.self())
+              .filter(pi -> pi.injection().equals(Param.Injection.NONE))
               .forEach(pi -> compatibilities.add(new ParamCompatibility(pi, new ArrayList<>())));
         }
         aliasesMap.put(new Name(fullName), new BuilderInfo(
@@ -334,7 +334,7 @@ public class InfoPrinter {
                   ps.println("| --- | --- | --- | --- |");
                 }
                 for (ParamCompatibility compatibility : builderInfo.compatibilities()) {
-                  if (!compatibility.paramInfo().self()) {
+                  if (compatibility.paramInfo().injection().equals(Param.Injection.NONE)) {
                     ps.printf(
                         "| `%s` | %s | %s | %s |" + (computeCompatibilities ? " %s|" : "") + "%n",
                         compatibility.paramInfo().name(),

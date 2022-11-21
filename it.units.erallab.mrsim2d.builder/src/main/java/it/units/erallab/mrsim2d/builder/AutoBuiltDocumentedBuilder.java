@@ -162,8 +162,10 @@ public record AutoBuiltDocumentedBuilder<T>(
           }
           for (int j = 0; j < paramInfos.size(); j++) {
             int k = j + (hasNamedBuilder ? 1 : 0);
-            if (paramInfos.get(j).self()) {
+            if (paramInfos.get(j).injection().equals(Param.Injection.MAP)) {
               params[k] = map;
+            } else if (paramInfos.get(j).injection().equals(Param.Injection.BUILDER)) {
+              params[k] = namedBuilder;
             } else {
               try {
                 //noinspection unchecked
@@ -186,7 +188,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           // check exceeding params
           Set<String> exceedingParamNames = new TreeSet<>(map.names());
           paramInfos.stream()
-              .filter(pi -> !pi.self())
+              .filter(pi -> pi.injection().equals(Param.Injection.NONE))
               .map(ParamInfo::name)
               .toList()
               .forEach(exceedingParamNames::remove);
@@ -210,7 +212,11 @@ public record AutoBuiltDocumentedBuilder<T>(
     if (paramAnnotation == null) {
       return null;
     }
-    if (paramAnnotation.self() && !parameter.getType().equals(ParamMap.class)) {
+    if (paramAnnotation.injection().equals(Param.Injection.MAP) && !parameter.getType().equals(ParamMap.class)) {
+      return null;
+    }
+    if (paramAnnotation.injection().equals(Param.Injection.BUILDER) && !parameter.getType()
+        .equals(NamedBuilder.class)) {
       return null;
     }
     String name = paramAnnotation.value();
@@ -220,7 +226,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           null,
           name,
           buildDefaultValue(Type.INT, Integer.class, paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -230,7 +236,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           null,
           name,
           buildDefaultValue(Type.DOUBLE, Double.class, paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -240,7 +246,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           null,
           name,
           buildDefaultValue(Type.STRING, String.class, paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -250,7 +256,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           null,
           name,
           buildDefaultValue(Type.BOOLEAN, Boolean.class, paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -260,7 +266,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           parameter.getType(),
           name,
           buildDefaultValue(Type.ENUM, parameter.getType(), paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -272,7 +278,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             null,
             name,
             buildDefaultValue(Type.INTS, Integer.class, paramAnnotation),
-            paramAnnotation.self(),
+            paramAnnotation.injection(),
             parameter.getParameterizedType()
         );
       }
@@ -285,7 +291,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             null,
             name,
             buildDefaultValue(Type.DOUBLES, Double.class, paramAnnotation),
-            paramAnnotation.self(),
+            paramAnnotation.injection(),
             parameter.getParameterizedType()
         );
       }
@@ -298,7 +304,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             null,
             name,
             buildDefaultValue(Type.STRINGS, String.class, paramAnnotation),
-            paramAnnotation.self(),
+            paramAnnotation.injection(),
             parameter.getParameterizedType()
         );
       }
@@ -319,7 +325,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             clazz,
             name,
             buildDefaultValue(Type.ENUMS, clazz, paramAnnotation),
-            paramAnnotation.self(),
+            paramAnnotation.injection(),
             parameter.getParameterizedType()
         );
       }
@@ -332,7 +338,7 @@ public record AutoBuiltDocumentedBuilder<T>(
             null,
             name,
             buildDefaultValue(Type.NAMED_PARAM_MAPS, NamedParamMap.class, paramAnnotation),
-            paramAnnotation.self(),
+            paramAnnotation.injection(),
             parameter.getParameterizedType()
         );
       }
@@ -344,7 +350,7 @@ public record AutoBuiltDocumentedBuilder<T>(
           null,
           name,
           buildDefaultValue(Type.NAMED_PARAM_MAPS, Object.class, paramAnnotation),
-          paramAnnotation.self(),
+          paramAnnotation.injection(),
           parameter.getParameterizedType()
       );
     }
@@ -353,7 +359,7 @@ public record AutoBuiltDocumentedBuilder<T>(
         null,
         name,
         buildDefaultValue(Type.NAMED_PARAM_MAP, Object.class, paramAnnotation),
-        paramAnnotation.self(),
+        paramAnnotation.injection(),
         parameter.getParameterizedType()
     );
   }
@@ -382,5 +388,4 @@ public record AutoBuiltDocumentedBuilder<T>(
   public String toString() {
     return "(" + params.stream().map(ParamInfo::toString).collect(Collectors.joining("; ")) + ") -> " + builtType;
   }
-
 }
