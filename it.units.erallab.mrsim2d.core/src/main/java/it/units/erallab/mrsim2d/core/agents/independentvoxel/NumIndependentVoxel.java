@@ -16,8 +16,6 @@
 
 package it.units.erallab.mrsim2d.core.agents.independentvoxel;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.Sensor;
@@ -29,6 +27,8 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,10 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 
 public class HeteroDistributedNumGridVSR extends NumGridVSR {
 
+  protected final Grid<TimedRealFunction> timedRealFunctionsGrid;
   int nSignals;
   boolean directional;
-  protected final Grid<TimedRealFunction> timedRealFunctionsGrid;
   Grid<double[]> signalsGrid;
 
   Grid<double[]> fullInputsGrid;

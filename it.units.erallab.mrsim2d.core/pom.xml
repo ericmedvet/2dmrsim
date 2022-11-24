@@ -29,11 +29,6 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>it.units.erallab</groupId>
-            <artifactId>mrsim2d.builder</artifactId>
-            <version>${revision}</version>
-        </dependency>
     </dependencies>
 
 </project>

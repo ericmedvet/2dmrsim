@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim2d.core.util;
 
-import it.units.erallab.mrsim2d.builder.Param;
+import it.units.malelab.jnb.core.Param;
 
 import java.io.Serializable;
 

@@ -16,10 +16,10 @@
 
 package it.units.erallab.mrsim2d.core.builders;
 
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.Comparator;

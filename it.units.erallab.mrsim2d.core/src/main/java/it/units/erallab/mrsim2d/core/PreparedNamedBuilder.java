@@ -16,7 +16,6 @@
 
 package it.units.erallab.mrsim2d.core;
 
-import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
@@ -29,6 +28,7 @@ import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.util.List;
 

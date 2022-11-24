@@ -16,7 +16,6 @@
 
 package it.units.erallab.mrsim2d.sample;
 
-import it.units.erallab.mrsim2d.builder.NamedBuilder;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.HomoDistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
@@ -33,6 +32,7 @@ import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
+import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.util.List;
 import java.util.Objects;

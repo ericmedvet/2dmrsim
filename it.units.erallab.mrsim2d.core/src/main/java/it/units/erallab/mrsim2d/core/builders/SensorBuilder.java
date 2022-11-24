@@ -17,12 +17,12 @@
 package it.units.erallab.mrsim2d.core.builders;
 
 
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.SoftBody;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
+import it.units.malelab.jnb.core.Param;
 
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim

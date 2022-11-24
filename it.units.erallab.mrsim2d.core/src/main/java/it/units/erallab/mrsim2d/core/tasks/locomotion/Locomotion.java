@@ -16,8 +16,6 @@
 
 package it.units.erallab.mrsim2d.core.tasks.locomotion;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.AddAgent;
@@ -30,6 +28,8 @@ import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,8 +1,8 @@
 package it.units.erallab.mrsim2d.core.builders;
 
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.functions.*;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.EnumSet;
 import java.util.List;

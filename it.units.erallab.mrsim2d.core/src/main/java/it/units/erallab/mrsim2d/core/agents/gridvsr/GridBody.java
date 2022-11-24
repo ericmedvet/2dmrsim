@@ -16,12 +16,12 @@
 
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Pair;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.function.Function;

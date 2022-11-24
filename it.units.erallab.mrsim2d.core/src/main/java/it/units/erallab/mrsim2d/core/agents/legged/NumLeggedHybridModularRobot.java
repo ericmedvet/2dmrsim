@@ -1,13 +1,13 @@
 package it.units.erallab.mrsim2d.core.agents.legged;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
 import it.units.erallab.mrsim2d.core.actions.ActuateRotationalJoint;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.function.BiFunction;

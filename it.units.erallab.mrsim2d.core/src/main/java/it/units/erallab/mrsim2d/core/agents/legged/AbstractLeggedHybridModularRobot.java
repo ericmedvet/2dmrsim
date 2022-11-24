@@ -16,8 +16,6 @@
 
 package it.units.erallab.mrsim2d.core.agents.legged;
 
-import it.units.erallab.mrsim2d.builder.BuilderMethod;
-import it.units.erallab.mrsim2d.builder.Param;
 import it.units.erallab.mrsim2d.core.ActionPerformer;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.actions.*;
@@ -25,6 +23,8 @@ import it.units.erallab.mrsim2d.core.bodies.*;
 import it.units.erallab.mrsim2d.core.engine.ActionException;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
+import it.units.malelab.jnb.core.BuilderMethod;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +57,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       RotationalJoint.Motor motor,
       Connector upConnector
   ) {
+    @SuppressWarnings("unused")
     @BuilderMethod
     public LegChunk(
         @Param(value = "trunkLength", dD = LEG_CHUNK_LENGTH) double length,
