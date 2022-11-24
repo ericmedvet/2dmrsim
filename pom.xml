@@ -32,7 +32,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>18</jdk.version>
-        <revision>0.6.11</revision>
+        <revision>0.6.12-dev</revision>
     </properties>
     <dependencies>
         <dependency>
