@@ -25,7 +25,6 @@
     <modules>
         <module>it.units.erallab.mrsim2d.core</module>
         <module>it.units.erallab.mrsim2d.engine.dyn4j</module>
-        <module>it.units.erallab.mrsim2d.builder</module>
         <module>it.units.erallab.mrsim2d.viewer</module>
         <module>it.units.erallab.mrsim2d.sample</module>
     </modules>
@@ -36,6 +35,11 @@
         <revision>0.6.11-dev</revision>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>it.units.malelab</groupId>
+            <artifactId>jnb.core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
