@@ -37,7 +37,7 @@ public class PreparedNamedBuilder {
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
       .and(List.of("sim", "s"), NamedBuilder.empty()
           .and(NamedBuilder.fromUtilityClass(DoubleRange.class))
-          .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
+          .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(Terrains.class))
           .and(List.of("task"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(Locomotion.class))
               .and(NamedBuilder.fromClass(FallPiling.class))
@@ -54,14 +54,14 @@ public class PreparedNamedBuilder {
                   .and(NamedBuilder.fromClass(AbstractLeggedHybridModularRobot.LegChunk.class))
               )
           )
-          .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(SensorBuilder.class))
-          .and(List.of("function", "f"), NamedBuilder.fromUtilityClass(TimedRealFunctionBuilder.class))
+          .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(Sensors.class))
+          .and(List.of("function", "f"), NamedBuilder.fromUtilityClass(TimedRealFunctions.class))
           .and(List.of("vsr"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(GridBody.class))
-              .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
+              .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapes.class))
               .and(
                   List.of("sensorizingFunction", "sf"),
-                  NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class)
+                  NamedBuilder.fromUtilityClass(VSRSensorizingFunctions.class)
               )
           ));
 

@@ -29,7 +29,7 @@ import java.util.random.RandomGenerator;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class TerrainBuilder {
+public class Terrains {
   public final static double BORDER_H = 100d;
   public static final double W = 2000d;
   public static final double H = 25d;
@@ -38,6 +38,7 @@ public class TerrainBuilder {
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
 
+  @SuppressWarnings("unused")
   public static Terrain downhill(
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
@@ -51,6 +52,7 @@ public class TerrainBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static Terrain flat(
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
@@ -65,6 +67,7 @@ public class TerrainBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   private static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
     Path path = new Path(Point.ORIGIN)
         .moveBy(0, borderH)
@@ -82,6 +85,7 @@ public class TerrainBuilder {
     return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
+  @SuppressWarnings("unused")
   public static Terrain hilly(
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
@@ -103,6 +107,7 @@ public class TerrainBuilder {
     return fromPath(path, h, borderW, borderH);
   }
 
+  @SuppressWarnings("unused")
   public static Terrain steppy(
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
@@ -126,6 +131,7 @@ public class TerrainBuilder {
     return fromPath(path, h, borderW, borderH);
   }
 
+  @SuppressWarnings("unused")
   public static Terrain uphill(
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
@@ -137,7 +143,6 @@ public class TerrainBuilder {
         new Path(new Point(w, w * Math.toRadians(a))),
         h, borderW, borderH
     );
-
   }
 
 }

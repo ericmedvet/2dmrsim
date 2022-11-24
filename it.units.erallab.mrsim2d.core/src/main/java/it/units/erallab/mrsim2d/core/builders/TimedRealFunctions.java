@@ -11,10 +11,11 @@ import java.util.function.BiFunction;
 /**
  * @author "Eric Medvet" on 2022/10/03 for 2dmrsim
  */
-public class TimedRealFunctionBuilder {
-  private TimedRealFunctionBuilder() {
+public class TimedRealFunctions {
+  private TimedRealFunctions() {
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, DiffInputTRF> diffIn(
       @Param("windowT") double windowT,
       @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction,
@@ -27,6 +28,7 @@ public class TimedRealFunctionBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, MultiLayerPerceptron> mlp(
       @Param(value = "innerLayerRatio", dD = 0.65) double innerLayerRatio,
       @Param(value = "nOfInnerLayers", dI = 1) int nOfInnerLayers,
@@ -55,6 +57,7 @@ public class TimedRealFunctionBuilder {
     };
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, Sinusoidal> sinP(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
@@ -70,6 +73,7 @@ public class TimedRealFunctionBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, Sinusoidal> sinPA(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
@@ -85,6 +89,7 @@ public class TimedRealFunctionBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, Sinusoidal> sinPF(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
@@ -100,6 +105,7 @@ public class TimedRealFunctionBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, Sinusoidal> sinPFA(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
@@ -115,6 +121,7 @@ public class TimedRealFunctionBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static BiFunction<Integer, Integer, SteppedOutputTRF> stepOut(
       @Param("stepT") double stepT,
       @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction

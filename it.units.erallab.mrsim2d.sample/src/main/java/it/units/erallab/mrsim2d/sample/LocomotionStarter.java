@@ -19,10 +19,10 @@ package it.units.erallab.mrsim2d.sample;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.HomoDistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.NumGridVSR;
-import it.units.erallab.mrsim2d.core.builders.GridShapeBuilder;
-import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
-import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
-import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctionBuilder;
+import it.units.erallab.mrsim2d.core.builders.GridShapes;
+import it.units.erallab.mrsim2d.core.builders.Sensors;
+import it.units.erallab.mrsim2d.core.builders.Terrains;
+import it.units.erallab.mrsim2d.core.builders.VSRSensorizingFunctions;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.functions.MultiLayerPerceptron;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
@@ -49,10 +49,10 @@ public class LocomotionStarter {
     //do thing
     NamedBuilder<Object> nb = NamedBuilder.empty()
         .and(NamedBuilder.fromClass(GridBody.class))
-        .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(TerrainBuilder.class))
-        .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapeBuilder.class))
-        .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctionBuilder.class))
-        .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(SensorBuilder.class));
+        .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(Terrains.class))
+        .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapes.class))
+        .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctions.class))
+        .and(List.of("voxelSensor", "vs"), NamedBuilder.fromUtilityClass(Sensors.class));
     /*String bodyS = """
         gridBody(
           shape=s.biped(w=4;h=3);
@@ -91,7 +91,7 @@ public class LocomotionStarter {
         nSignals,
         directional
     );
-    vsr.randomize(rg, DoubleRange.range(-1, 1));
+    vsr.randomize(rg, new DoubleRange(-1, 1));
 
     Locomotion locomotion = new Locomotion(30, (Terrain) nb.build("t.hilly()"));
     Outcome outcome = locomotion.run(() -> vsr, engine, viewer);

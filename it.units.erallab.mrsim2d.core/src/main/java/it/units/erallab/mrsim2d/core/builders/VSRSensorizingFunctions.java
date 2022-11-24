@@ -29,8 +29,9 @@ import java.util.function.Function;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class VSRSensorizingFunctionBuilder {
+public class VSRSensorizingFunctions {
 
+  @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> directional(
       @Param(value = "nSensors") List<Sensor<? super Voxel>> nSensors,
       @Param(value = "eSensors") List<Sensor<? super Voxel>> eSensors,
@@ -81,10 +82,12 @@ public class VSRSensorizingFunctionBuilder {
     });
   }
 
+  @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> empty() {
     return shape -> Grid.create(shape, b -> List.of());
   }
 
+  @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> uniform(
       @Param(value = "sensors") List<Sensor<? super Voxel>> sensors
   ) {

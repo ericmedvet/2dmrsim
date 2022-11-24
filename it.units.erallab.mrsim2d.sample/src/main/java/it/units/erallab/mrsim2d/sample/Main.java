@@ -29,8 +29,8 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-import it.units.erallab.mrsim2d.core.builders.SensorBuilder;
-import it.units.erallab.mrsim2d.core.builders.TerrainBuilder;
+import it.units.erallab.mrsim2d.core.builders.Sensors;
+import it.units.erallab.mrsim2d.core.builders.Terrains;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.geometry.Point;
@@ -84,22 +84,22 @@ public class Main {
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     RandomGenerator rg = new Random();
     List<Sensor<? super Voxel>> sensors = List.of(
-        SensorBuilder.rv(0d),
-        SensorBuilder.rv(Math.PI / 2d),
-        SensorBuilder.ar(),
-        SensorBuilder.a(),
-        SensorBuilder.sc(Voxel.Side.N),
-        SensorBuilder.sc(Voxel.Side.E),
-        SensorBuilder.sc(Voxel.Side.S),
-        SensorBuilder.sc(Voxel.Side.W),
-        SensorBuilder.sa(Voxel.Side.N),
-        SensorBuilder.sa(Voxel.Side.E),
-        SensorBuilder.sa(Voxel.Side.S),
-        SensorBuilder.sa(Voxel.Side.W),
-        SensorBuilder.d(Math.PI / 2d * 0d, 0.75),
-        SensorBuilder.d(Math.PI / 2d * 1d, 0.75),
-        SensorBuilder.d(Math.PI / 2d * 2d, 0.75),
-        SensorBuilder.d(Math.PI / 2d * 3d, 0.75)
+        Sensors.rv(0d),
+        Sensors.rv(Math.PI / 2d),
+        Sensors.ar(),
+        Sensors.a(),
+        Sensors.sc(Voxel.Side.N),
+        Sensors.sc(Voxel.Side.E),
+        Sensors.sc(Voxel.Side.S),
+        Sensors.sc(Voxel.Side.W),
+        Sensors.sa(Voxel.Side.N),
+        Sensors.sa(Voxel.Side.E),
+        Sensors.sa(Voxel.Side.S),
+        Sensors.sa(Voxel.Side.W),
+        Sensors.d(Math.PI / 2d * 0d, 0.75),
+        Sensors.d(Math.PI / 2d * 1d, 0.75),
+        Sensors.d(Math.PI / 2d * 2d, 0.75),
+        Sensors.d(Math.PI / 2d * 3d, 0.75)
     );
     Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
         (oT, in) -> {
@@ -157,7 +157,7 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = TerrainBuilder.downhill(2000d, 10d, 1d, 10d, 1d);
+    Terrain terrain = Terrains.downhill(2000d, 10d, 1d, 10d, 1d);
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);

@@ -27,23 +27,27 @@ import it.units.malelab.jnb.core.Param;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class SensorBuilder {
+public class Sensors {
 
-  public SensorBuilder() {
+  public Sensors() {
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Body> a() {
     return SenseAngle::new;
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<SoftBody> ar() {
     return SenseAreaRatio::new;
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Body> c() {
     return SenseContact::new;
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Body> d(
       @Param(value = "a", dD = 0) Double a,
       @Param(value = "r", dD = 1) Double r
@@ -51,18 +55,22 @@ public class SensorBuilder {
     return b -> new SenseDistanceToBody(Math.toRadians(a), r, b);
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Body> rv(@Param(value = "a", dD = 0) Double a) {
     return b -> new SenseRotatedVelocity(Math.toRadians(a), b);
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Voxel> sa(@Param("s") Voxel.Side s) {
     return v -> new SenseSideAttachment(s, v);
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Voxel> sc(@Param("s") Voxel.Side s) {
     return v -> new SenseSideCompression(s, v);
   }
 
+  @SuppressWarnings("unused")
   public static Sensor<Body> sin(
       @Param(value = "f", dD = 1) Double f,
       @Param(value = "p", dD = 0) Double p

@@ -23,8 +23,9 @@ import it.units.malelab.jnb.core.Param;
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim
  */
-public class GridShapeBuilder {
+public class GridShapes {
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> ball(@Param("d") Integer d) {
     return Grid.create(
         d,
@@ -34,14 +35,17 @@ public class GridShapeBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> biped(@Param("w") Integer w, @Param("h") Integer h) {
     return Grid.create(w, h, (x, y) -> !(y < h / 2 && x >= w / 4 && x < w * 3 / 4));
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> comb(@Param("w") Integer w, @Param("h") Integer h) {
     return Grid.create(w, h, (x, y) -> (y >= h / 2 || x % 2 == 0));
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> free(@Param(value = "s", dS = "111-101") String s) {
     return Grid.create(
         s.split("-")[0].length(),
@@ -50,19 +54,23 @@ public class GridShapeBuilder {
     );
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> t(@Param("w") Integer w, @Param("h") Integer h) {
     int pad = (int) Math.floor((Math.floor((double) w / 2) / 2));
     return Grid.create(w, h, (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)));
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> triangle(@Param("l") Integer l) {
     return Grid.create(l, l, (x, y) -> (y >= x));
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> tripod(@Param("w") Integer w, @Param("h") Integer h) {
     return Grid.create(w, h, (x, y) -> !(y < h / 2 && x != 0 && x != w - 1 && x != w / 2));
   }
 
+  @SuppressWarnings("unused")
   public static Grid<Boolean> worm(@Param("w") Integer w, @Param("h") Integer h) {
     return Grid.create(w, h, true);
   }
