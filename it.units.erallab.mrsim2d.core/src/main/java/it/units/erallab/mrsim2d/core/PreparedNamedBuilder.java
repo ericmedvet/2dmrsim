@@ -36,7 +36,7 @@ public class PreparedNamedBuilder {
 
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
       .and(List.of("sim", "s"), NamedBuilder.empty()
-          .and(NamedBuilder.fromUtilityClass(DoubleRange.class))
+          .and(NamedBuilder.fromClass(DoubleRange.class))
           .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(Terrains.class))
           .and(List.of("task"), NamedBuilder.empty()
               .and(NamedBuilder.fromClass(Locomotion.class))

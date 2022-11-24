@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public record DoubleRange(double min, double max) implements Serializable {
+public record DoubleRange(@Param("min") double min, @Param("max") double max) implements Serializable {
 
   public static DoubleRange UNIT = new DoubleRange(0, 1);
   public static DoubleRange SYMMETRIC_UNIT = new DoubleRange(-1, 1);
@@ -36,10 +36,6 @@ public record DoubleRange(double min, double max) implements Serializable {
           min
       ));
     }
-  }
-
-  public static DoubleRange range(@Param("min") double min, @Param("max") double max) {
-    return new DoubleRange(min, max);
   }
 
   public double clip(double value) {
@@ -68,5 +64,4 @@ public record DoubleRange(double min, double max) implements Serializable {
     }
     return !(min > other.max);
   }
-
 }
