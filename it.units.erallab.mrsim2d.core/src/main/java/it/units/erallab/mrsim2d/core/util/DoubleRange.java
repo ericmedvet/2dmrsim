@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package it.units.erallab.mrsim2d.core.util;
 
-import it.units.malelab.jnb.core.Param;
-
 import java.io.Serializable;
 
 /**
  * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
  */
-public record DoubleRange(@Param("min") double min, @Param("max") double max) implements Serializable {
+public record DoubleRange(double min, double max) implements Serializable {
 
   public static DoubleRange UNIT = new DoubleRange(0, 1);
   public static DoubleRange SYMMETRIC_UNIT = new DoubleRange(-1, 1);

@@ -3,7 +3,6 @@
  */
 
 module it.units.erallab.mrsim2d.core {
-  requires it.units.malelab.jnb.core;
   requires java.logging;
   exports it.units.erallab.mrsim2d.core;
   exports it.units.erallab.mrsim2d.core.actions;
