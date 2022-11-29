@@ -35,7 +35,7 @@ public class Tasks {
       @Param("nOfAgents") int nOfAgents,
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
       @Param(value = "randomGenerator") RandomGenerator randomGenerator,
-      @Param(value = "terrain") Terrain terrain,
+      @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "yGapRatio", dD = 1d) double yGapRatio,
       @Param(value = "xGap", dD = 10d) double xGap
 
@@ -46,7 +46,7 @@ public class Tasks {
   @SuppressWarnings("unused")
   public static Locomotion locomotion(
       @Param(value = "duration", dD = 30) double duration,
-      @Param(value = "terrain", dNPM = "terrain.flat()") Terrain terrain,
+      @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 1) double initialYGap
   ) {
@@ -58,7 +58,7 @@ public class Tasks {
       @Param(value = "duration", dD = 45) double duration,
       @Param(value = "nOfAgents") int nOfAgents,
       @Param(value = "xGapRatio", dD = 1) double xGapRatio,
-      @Param(value = "terrain") Terrain terrain,
+      @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "firstXGap", dD = 10) double firstXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
