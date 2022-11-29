@@ -16,23 +16,18 @@
 
 package it.units.erallab.mrsim2d.sample;
 
+import it.units.erallab.mrsim2d.buildable.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
-import it.units.erallab.mrsim2d.core.PreparedNamedBuilder;
-import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-import it.units.erallab.mrsim2d.core.builders.Sensors;
-import it.units.erallab.mrsim2d.core.builders.Terrains;
 import it.units.erallab.mrsim2d.core.engine.Engine;
-import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
@@ -43,13 +38,10 @@ import it.units.erallab.mrsim2d.viewer.*;
 import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.io.File;
-import java.util.List;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.random.RandomGenerator;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -77,53 +69,6 @@ public class Main {
     }
   }
 
-  private static void iVsrs(Engine engine, Terrain terrain, Consumer<Snapshot> consumer) {
-    double interval = 5d;
-    double lastT = Double.NEGATIVE_INFINITY;
-    double sideInterval = 2d;
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
-    RandomGenerator rg = new Random();
-    List<Sensor<? super Voxel>> sensors = List.of(
-        Sensors.rv(0d),
-        Sensors.rv(Math.PI / 2d),
-        Sensors.ar(),
-        Sensors.a(),
-        Sensors.sc(Voxel.Side.N),
-        Sensors.sc(Voxel.Side.E),
-        Sensors.sc(Voxel.Side.S),
-        Sensors.sc(Voxel.Side.W),
-        Sensors.sa(Voxel.Side.N),
-        Sensors.sa(Voxel.Side.E),
-        Sensors.sa(Voxel.Side.S),
-        Sensors.sa(Voxel.Side.W),
-        Sensors.d(Math.PI / 2d * 0d, 0.75),
-        Sensors.d(Math.PI / 2d * 1d, 0.75),
-        Sensors.d(Math.PI / 2d * 2d, 0.75),
-        Sensors.d(Math.PI / 2d * 3d, 0.75)
-    );
-    Function<Integer, TimedRealFunction> functionProvider = index -> TimedRealFunction.from(
-        (oT, in) -> {
-          double t = oT + index;
-          int sideIndex = (int) Math.round(t / sideInterval) % 4;
-          double[] out = new double[8];
-          for (int i = 0; i < 4; i++) {
-            out[i] = (sideIndex == i) ? Math.sin(2d * Math.PI * t) : 0d;
-            out[i + 4] = (sideIndex == i) ? ((Math.round(t / sideInterval / 4d) % 2 == 1) ? 1d : -1d) : 0d;
-          }
-          return out;
-        },
-        sensors.size(), 8
-    );
-    while (engine.t() < 100) {
-      Snapshot snapshot = engine.tick();
-      consumer.accept(snapshot);
-      if (engine.t() > lastT + interval) {
-        lastT = engine.t();
-        EmbodiedAgent agent = new NumIndependentVoxel(sensors, functionProvider.apply(snapshot.agents().size()));
-        engine.perform(new AddAndTranslateAgent(agent, new Point(rg.nextDouble() * 5 + 15, 5)));
-      }
-    }
-  }
 
   private static void leggedLocomotion(Supplier<Engine> engineSupplier, Terrain terrain, Consumer<Snapshot> consumer) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
@@ -157,14 +102,12 @@ public class Main {
         drawer
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Terrain terrain = Terrains.downhill(2000d, 10d, 1d, 10d, 1d);
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do thing
     //rotationalJoint(engine, terrain, viewer);
     //vsrLocomotion(engine, terrain, viewer);
-    vsrDistributedLocomotion(engine, terrain, viewer);
     //leggedLocomotion(engine, terrain, viewer);
-    //ball(engine, terrain, viewer);
+    ball(engine.get(), null, viewer);
     //videoBuilder.get();
   }
 

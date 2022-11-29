@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim2d.buildable;
 
-import it.units.erallab.mrsim2d.buildable.builders.Misc;
+import it.units.erallab.mrsim2d.buildable.builders.*;
 import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.util.List;
@@ -24,7 +24,20 @@ import java.util.List;
 public class PreparedNamedBuilder {
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
       .and(List.of("sim", "s"), NamedBuilder.empty()
-          .and(List.of("misc", "m"), NamedBuilder.fromUtilityClass(Misc.class))
+          .and(NamedBuilder.fromUtilityClass(Misc.class))
+          .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(Sensors.class))
+          .and(List.of("function", "f"), NamedBuilder.fromUtilityClass(TimedRealFunctions.class))
+          .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(Terrains.class))
+          .and(List.of("agent", "a"), NamedBuilder.fromUtilityClass(Agents.class))
+          .and(List.of("task"), NamedBuilder.fromUtilityClass(Tasks.class))
+          .and(List.of("vsr"), NamedBuilder.empty()
+              .and(NamedBuilder.fromUtilityClass(VSRMisc.class))
+              .and(List.of("shape", "s"), NamedBuilder.fromUtilityClass(GridShapes.class))
+              .and(List.of("sensorizingFunction", "sf"), NamedBuilder.fromUtilityClass(VSRSensorizingFunctions.class))
+          )
+          .and(List.of("legged"), NamedBuilder.empty()
+              .and(NamedBuilder.fromUtilityClass(LeggedMisc.class))
+          )
       );
 
   private PreparedNamedBuilder() {

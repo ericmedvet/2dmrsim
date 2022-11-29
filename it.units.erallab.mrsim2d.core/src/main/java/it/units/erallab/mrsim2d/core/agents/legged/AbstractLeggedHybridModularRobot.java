@@ -23,21 +23,12 @@ import it.units.erallab.mrsim2d.core.bodies.*;
 import it.units.erallab.mrsim2d.core.engine.ActionException;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
-import it.units.malelab.jnb.core.BuilderMethod;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent {
 
-  private final static double RIGID_DENSITY = 0.25d;
-  private final static double LEG_CHUNK_LENGTH = 1.5d;
-  private final static double LEG_CHUNK_WIDTH = 1d;
-  private final static double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH * RIGID_DENSITY;
-  private final static double TRUNK_LENGTH = 4d;
-  private final static double TRUNK_WIDTH = 1d;
-  private final static double TRUNK_MASS = TRUNK_LENGTH * TRUNK_WIDTH * RIGID_DENSITY;
   protected final List<RotationalJoint> rotationalJoints;
   protected final List<Module> modules;
   private final List<Body> bodies;
@@ -56,26 +47,15 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       double mass,
       RotationalJoint.Motor motor,
       Connector upConnector
-  ) {
-    @SuppressWarnings("unused")
-    @BuilderMethod
-    public LegChunk(
-        @Param(value = "trunkLength", dD = LEG_CHUNK_LENGTH) double length,
-        @Param(value = "width", dD = LEG_CHUNK_WIDTH) double width,
-        @Param(value = "mass", dD = LEG_CHUNK_MASS) double mass,
-        @Param(value = "upConnector", dS = "rigid") Connector upConnector
-    ) {
-      this(length, width, mass, new RotationalJoint.Motor(), upConnector);
-    }
-  }
+  ) {}
 
   public record Module(
-      @Param(value = "trunkLength", dD = TRUNK_LENGTH) double trunkLength,
-      @Param(value = "trunkWidth", dD = TRUNK_WIDTH) double trunkWidth,
-      @Param(value = "trunkMass", dD = TRUNK_MASS) double trunkMass,
-      @Param("legChunks") List<LegChunk> legChunks,
-      @Param(value = "downConnector", dS = "rigid") Connector downConnector,
-      @Param(value = "rightConnector", dS = "rigid") Connector rightConnector
+      double trunkLength,
+      double trunkWidth,
+      double trunkMass,
+      List<LegChunk> legChunks,
+      Connector downConnector,
+      Connector rightConnector
   ) {}
 
   @Override

@@ -21,12 +21,9 @@ import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
 import it.units.erallab.mrsim2d.core.util.Utils;
-import it.units.malelab.jnb.core.BuilderMethod;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
@@ -43,17 +40,6 @@ public class CentralizedNumGridVSR extends NumGridVSR {
   ) {
     super(body, voxelSideLength, voxelMass);
     this.timedRealFunction = timedRealFunction;
-  }
-
-  @BuilderMethod
-  public CentralizedNumGridVSR(
-      @Param("body") GridBody body,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
-  ) {
-    this(body, timedRealFunctionBuilder.apply(
-        nOfInputs(body),
-        nOfOutputs(body)
-    ));
   }
 
   public CentralizedNumGridVSR(GridBody body, TimedRealFunction timedRealFunction) {

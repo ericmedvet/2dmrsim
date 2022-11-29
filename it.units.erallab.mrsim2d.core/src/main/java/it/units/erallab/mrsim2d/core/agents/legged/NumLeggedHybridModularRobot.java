@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 eric
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package it.units.erallab.mrsim2d.core.agents.legged;
 
 import it.units.erallab.mrsim2d.core.Action;
@@ -6,11 +22,8 @@ import it.units.erallab.mrsim2d.core.actions.ActuateRotationalJoint;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
-import it.units.malelab.jnb.core.BuilderMethod;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 /**
@@ -25,14 +38,6 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
   public NumLeggedHybridModularRobot(List<Module> modules, TimedRealFunction timedRealFunction) {
     super(modules);
     this.timedRealFunction = timedRealFunction;
-  }
-
-  @BuilderMethod
-  public NumLeggedHybridModularRobot(
-      @Param("modules") List<Module> modules,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
-  ) {
-    this(modules, timedRealFunctionBuilder.apply(nOfInputs(modules), nOfOutputs(modules)));
   }
 
   public static int nOfInputs(List<Module> modules) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim2d.core.builders;
+package it.units.erallab.mrsim2d.buildable.builders;
 
 import it.units.erallab.mrsim2d.core.geometry.Path;
 import it.units.erallab.mrsim2d.core.geometry.Point;

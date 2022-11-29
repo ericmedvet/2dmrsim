@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
-import it.units.malelab.jnb.core.BuilderMethod;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,10 +50,9 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
     this.initialYGap = initialYGap;
   }
 
-  @BuilderMethod
   public Locomotion(
-      @Param(value = "duration", dD = 30) double duration,
-      @Param(value = "terrain", dNPM = "terrain.flat()") Terrain terrain
+      double duration,
+      Terrain terrain
   ) {
     this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
   }

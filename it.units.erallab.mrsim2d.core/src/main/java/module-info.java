@@ -10,7 +10,6 @@ module it.units.erallab.mrsim2d.core {
   exports it.units.erallab.mrsim2d.core.agents.independentvoxel;
   exports it.units.erallab.mrsim2d.core.agents.legged;
   exports it.units.erallab.mrsim2d.core.bodies;
-  exports it.units.erallab.mrsim2d.core.builders;
   exports it.units.erallab.mrsim2d.core.engine;
   exports it.units.erallab.mrsim2d.core.functions;
   exports it.units.erallab.mrsim2d.core.geometry;

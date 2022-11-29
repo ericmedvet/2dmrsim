@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim2d.core.builders;
+package it.units.erallab.mrsim2d.buildable.builders;
 
 
 import it.units.erallab.mrsim2d.core.Sensor;

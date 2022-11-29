@@ -27,12 +27,9 @@ import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Parametrized;
-import it.units.malelab.jnb.core.BuilderMethod;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
@@ -57,14 +54,6 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
     this.sensors = sensors;
     inputs = new double[sensors.size()];
     this.timedRealFunction = timedRealFunction;
-  }
-
-  @BuilderMethod
-  public NumIndependentVoxel(
-      @Param("sensors") List<Sensor<? super Voxel>> sensors,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
-  ) {
-    this(sensors, timedRealFunctionBuilder.apply(nOfInputs(sensors), nOfOutputs()));
   }
 
   public NumIndependentVoxel(List<Sensor<? super Voxel>> sensors, TimedRealFunction timedRealFunction) {

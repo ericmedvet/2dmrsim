@@ -6,5 +6,6 @@ module it.units.erallab.mrsim2d.sample {
   requires it.units.erallab.mrsim2d.core;
   requires it.units.erallab.mrsim2d.viewer;
   requires it.units.malelab.jnb.core;
+  requires it.units.erallab.mrsim2d.buildable;
   exports it.units.erallab.mrsim2d.sample;
 }

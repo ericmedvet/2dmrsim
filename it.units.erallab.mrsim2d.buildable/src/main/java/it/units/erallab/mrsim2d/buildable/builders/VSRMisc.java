@@ -14,36 +14,26 @@
  * limitations under the License.
  */
 
-package it.units.erallab.mrsim2d.core.agents.gridvsr;
+package it.units.erallab.mrsim2d.buildable.builders;
 
 import it.units.erallab.mrsim2d.core.Sensor;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.erallab.mrsim2d.core.util.Pair;
+import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.function.Function;
 
-public record GridBody(Grid<Pair<Voxel.Material, List<Sensor<? super Voxel>>>> grid) {
-  public GridBody(
-      Grid<Boolean> shape,
-      Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> sensorizingFunction
+public class VSRMisc {
+  private VSRMisc() {
+  }
+
+  @SuppressWarnings("unused")
+  public static GridBody gridBody(
+      @Param("shape") Grid<Boolean> shape,
+      @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> sensorizingFunction
   ) {
-    this(Grid.create(
-        shape.w(),
-        shape.h(),
-        (x, y) -> new Pair<>(
-            shape.get(x, y) ? new Voxel.Material() : null,
-            shape.get(x, y) ? sensorizingFunction.apply(shape).get(x, y) : null
-        )
-    ));
-  }
-
-  public Grid<Voxel.Material> materialGrid() {
-    return Grid.create(grid, Pair::first);
-  }
-
-  public Grid<List<Sensor<? super Voxel>>> sensorsGrid() {
-    return Grid.create(grid, Pair::second);
+    return new GridBody(shape, sensorizingFunction);
   }
 }
