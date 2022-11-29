@@ -25,12 +25,10 @@ import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 public class Agents {
 
@@ -40,7 +38,7 @@ public class Agents {
   @SuppressWarnings("unused")
   public static CentralizedNumGridVSR centralizedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
   ) {
     return new CentralizedNumGridVSR(body, timedRealFunctionBuilder.apply(
         CentralizedNumGridVSR.nOfInputs(body),
@@ -51,7 +49,7 @@ public class Agents {
   @SuppressWarnings("unused")
   public static HeteroDistributedNumGridVSR heteroDistributedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder,
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder,
       @Param("signals") int nSignals,
       @Param("directional") boolean directional
   ) {
@@ -70,7 +68,7 @@ public class Agents {
   @SuppressWarnings("unused")
   public static HomoDistributedNumGridVSR homoDistributedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder,
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder,
       @Param("signals") int nSignals,
       @Param("directional") boolean directional
   ) {
@@ -88,7 +86,7 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumIndependentVoxel numIndependentVoxel(
       @Param("sensors") List<Sensor<? super Voxel>> sensors,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
   ) {
     return new NumIndependentVoxel(
         sensors,
@@ -102,7 +100,7 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumLeggedHybridModularRobot numLeggedHybridModularRobot(
       @Param("modules") List<AbstractLeggedHybridModularRobot.Module> modules,
-      @Param("function") BiFunction<Integer, Integer, ? extends TimedRealFunction> timedRealFunctionBuilder
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
   ) {
     return new NumLeggedHybridModularRobot(
         modules,
