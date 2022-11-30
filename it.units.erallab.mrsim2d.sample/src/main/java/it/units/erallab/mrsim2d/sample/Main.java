@@ -137,7 +137,7 @@ public class Main {
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(miniWorld=true)")).apply("test");
+    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply("test");
     VideoBuilder videoBuilder = new VideoBuilder(
         400,
         300,
