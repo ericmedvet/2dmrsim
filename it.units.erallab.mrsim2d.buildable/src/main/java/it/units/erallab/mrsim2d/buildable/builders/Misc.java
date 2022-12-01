@@ -20,6 +20,7 @@ import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
+import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.Drawers;
@@ -150,6 +151,14 @@ public class Misc {
   ) {
     //noinspection unchecked
     return () -> (T) builder.build(map.npm("of"));
+  }
+
+  @SuppressWarnings("unused")
+  public static <A, O> Function<A, O> taskRunner(
+      @Param("task") Task<A, O> task,
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
+  ) {
+    return a -> task.run(a, engineSupplier.get());
   }
 
 }
