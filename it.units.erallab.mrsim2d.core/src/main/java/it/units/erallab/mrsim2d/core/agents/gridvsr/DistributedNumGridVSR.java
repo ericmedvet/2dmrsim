@@ -70,6 +70,14 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   }
 
   @Override
+  public List<BrainIO> brainIOs() {
+    return voxelGrid.entries().stream()
+        .filter(e -> e.value()!=null)
+        .map(e -> new BrainIO(fullInputsGrid.get(e.key()), fullOutputsGrid.get(e.key())))
+        .toList();
+  }
+
+  @Override
   public List<TimedRealFunction> brains() {
     return timedRealFunctionsGrid.values().stream().filter(Objects::nonNull).toList();
   }

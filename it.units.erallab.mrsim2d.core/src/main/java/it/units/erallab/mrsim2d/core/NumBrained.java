@@ -24,6 +24,13 @@ public interface NumBrained extends NumMultiBrained {
 
   TimedRealFunction brain();
 
+  BrainIO brainIO();
+
+  @Override
+  default List<BrainIO> brainIOs() {
+    return List.of(brainIO());
+  }
+
   @Override
   default List<TimedRealFunction> brains() {
     return List.of(brain());

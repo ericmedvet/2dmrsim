@@ -32,6 +32,9 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
 
   private final TimedRealFunction timedRealFunction;
 
+  private double[] inputs;
+  private double[] outputs;
+
   public CentralizedNumGridVSR(
       GridBody body,
       double voxelSideLength,
@@ -60,9 +63,14 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   @Override
+  public BrainIO brainIO() {
+    return new BrainIO(inputs, outputs);
+  }
+
+  @Override
   protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     //build inputs
-    double[] inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
+    inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
     if (inputs.length != timedRealFunction.nOfInputs()) {
       throw new IllegalArgumentException(String.format(
           "Wrong number of inputs: %d expected, %d found",
@@ -71,7 +79,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
       ));
     }
     //compute outputs
-    double[] outputs = timedRealFunction.apply(t, inputs);
+    outputs = timedRealFunction.apply(t, inputs);
     //split outputs
     Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
     int c = 0;
@@ -83,5 +91,4 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
     }
     return outputsGrid;
   }
-
 }

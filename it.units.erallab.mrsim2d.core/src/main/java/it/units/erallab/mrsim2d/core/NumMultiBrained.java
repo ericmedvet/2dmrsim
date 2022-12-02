@@ -22,7 +22,14 @@ import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import java.util.List;
 
 public interface NumMultiBrained {
+
+  record BrainIO(double[] inputs, double[] outputs) {}
+
+  List<BrainIO> brainIOs();
+
   List<TimedRealFunction> brains();
+
   DoubleRange inputsRange();
   DoubleRange outputsRange();
+
 }
