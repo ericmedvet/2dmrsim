@@ -53,8 +53,8 @@ public class Main {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
         s.a.centralizedNumGridVSR(body=s.vsr.gridBody(
-          shape=s.vsr.s.biped(w=4;h=3);
-          sensorizingFunction=s.vsr.sf.directional(
+          shape=s.a.vsr.s.biped(w=4;h=3);
+          sensorizingFunction=s.a.vsr.sf.directional(
             sSensors=[s.s.d(a=-90)];
             headSensors=[
               s.s.sin();
@@ -86,9 +86,9 @@ public class Main {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
         s.a.distributedNumGridVSR(
-          body=s.vsr.gridBody(
-            shape=s.vsr.s.biped(w=4;h=3);
-            sensorizingFunction=s.vsr.sf.directional(
+          body=s.a.vsr.gridBody(
+            shape=s.a.vsr.s.biped(w=4;h=3);
+            sensorizingFunction=s.a.vsr.sf.directional(
               sSensors=[s.s.d(a=-90)];
               headSensors=[
                 s.s.sin();
@@ -153,6 +153,6 @@ public class Main {
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion()");
     //do thing
-    distributedVsr(engine, locomotion, viewer);
+    legged(engine, locomotion, viewer);
   }
 }
