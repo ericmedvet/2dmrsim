@@ -17,9 +17,12 @@
 package it.units.erallab.mrsim2d.core;
 
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
 
 public interface NumMultiBrained {
   List<TimedRealFunction> brains();
+  DoubleRange inputsRange();
+  DoubleRange outputsRange();
 }

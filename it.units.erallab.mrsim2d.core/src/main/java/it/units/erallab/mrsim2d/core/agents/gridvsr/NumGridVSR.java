@@ -35,6 +35,9 @@ import java.util.List;
  */
 public abstract class NumGridVSR extends AbstractGridVSR {
 
+  private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+
   private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
@@ -71,7 +74,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
             ActionOutcome<?, ?> outcome = previousActionOutcomes.get(c);
             if (outcome.action() instanceof Sense<?>) {
               ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
-              inputs[i] = DoubleRange.SYMMETRIC_UNIT.denormalize(
+              inputs[i] = INPUT_RANGE.denormalize(
                   o.action().range().normalize(o.outcome().orElse(0d))
               );
               c = c + 1;
@@ -81,7 +84,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
       }
     }
     //compute actuation
-    computeActuationValues(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), e.value()));
+    computeActuationValues(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), OUTPUT_RANGE.clip(e.value())));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     actions.addAll(voxelGrid.entries().stream()
@@ -101,5 +104,12 @@ public abstract class NumGridVSR extends AbstractGridVSR {
 
   public GridBody getBody() {
     return body;
+  }
+
+  public DoubleRange inputsRange() {
+    return INPUT_RANGE;
+  }
+  public DoubleRange outputsRange() {
+    return OUTPUT_RANGE;
   }
 }
