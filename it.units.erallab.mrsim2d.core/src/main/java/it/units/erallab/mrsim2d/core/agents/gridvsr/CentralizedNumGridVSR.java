@@ -42,6 +42,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
       TimedRealFunction timedRealFunction
   ) {
     super(body, voxelSideLength, voxelMass);
+    timedRealFunction.checkDimension(nOfInputs(body), nOfOutputs(body));
     this.timedRealFunction = timedRealFunction;
   }
 
@@ -64,7 +65,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
 
   @Override
   public BrainIO brainIO() {
-    return new BrainIO(inputs, outputs);
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
   }
 
   @Override

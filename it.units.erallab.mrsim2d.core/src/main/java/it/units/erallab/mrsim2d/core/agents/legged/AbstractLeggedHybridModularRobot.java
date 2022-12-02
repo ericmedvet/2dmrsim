@@ -18,6 +18,7 @@ package it.units.erallab.mrsim2d.core.agents.legged;
 
 import it.units.erallab.mrsim2d.core.ActionPerformer;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.bodies.*;
 import it.units.erallab.mrsim2d.core.engine.ActionException;
@@ -31,22 +32,25 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
 
   protected final List<RotationalJoint> rotationalJoints;
   protected final List<Module> modules;
+  protected final List<ModuleBody> moduleBodies;
   private final List<Body> bodies;
-
   public AbstractLeggedHybridModularRobot(List<Module> modules) {
     this.modules = modules;
     bodies = new ArrayList<>();
+    moduleBodies = new ArrayList<>();
     rotationalJoints = new ArrayList<>();
   }
-
   public enum Connector {NONE, SOFT, RIGID}
+
+  protected record ChunkBody(Body upConnector, RotationalJoint joint) {}
 
   public record LegChunk(
       double length,
       double width,
       double mass,
       RotationalJoint.Motor motor,
-      Connector upConnector
+      Connector upConnector,
+      List<Sensor<?>> jointSensors
   ) {}
 
   public record Module(
@@ -55,8 +59,13 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       double trunkMass,
       List<LegChunk> legChunks,
       Connector downConnector,
-      Connector rightConnector
+      Connector rightConnector,
+      List<Sensor<?>> trunkSensors,
+      List<Sensor<?>> rightConnectorSensors,
+      List<Sensor<?>> downConnectorSensors
   ) {}
+
+  protected record ModuleBody(Body trunk, Body rightConnector, Body downConnector, List<ChunkBody> chunks) {}
 
   @Override
   public void assemble(ActionPerformer performer) throws ActionException {
@@ -82,11 +91,13 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       double cX = trunk.poly().boundingBox().center().x();
       //create leg
       Anchorable upperBody = trunk;
+      List<ChunkBody> chunkBodies = new ArrayList<>(module.legChunks().size());
       for (LegChunk legChunk : module.legChunks()) {
         double rotationalJointMass = legChunk.upConnector()
             .equals(Connector.NONE) ? legChunk.mass() :
             (legChunk.mass() * legChunk.length() / (legChunk.length() + legChunk.width()));
         //create up connector
+        Body upConnector = null;
         if (legChunk.upConnector().equals(Connector.SOFT)) {
           Voxel voxel = performer.perform(new CreateVoxel(
                   legChunk.width(), legChunk.mass() - rotationalJointMass
@@ -100,6 +111,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
           ), this);
           performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
           upperBody = voxel;
+          upConnector = voxel;
         } else if (legChunk.upConnector().equals(Connector.RIGID)) {
           RigidBody connector = performer.perform(new CreateRigidBody(
                   Poly.square(legChunk.width()),
@@ -115,6 +127,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
           ), this);
           performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
           upperBody = connector;
+          upConnector = connector;
         }
         //create joint
         RotationalJoint joint = performer.perform(new CreateRotationalJoint(
@@ -131,8 +144,10 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         ), this);
         performer.perform(new AttachClosestAnchors(2, joint, upperBody, Anchor.Link.Type.RIGID));
         upperBody = joint;
+        chunkBodies.add(new ChunkBody(upConnector, joint));
       }
       //create down connector (foot)
+      Body downConnector = null;
       if (module.downConnector().equals(Connector.SOFT)) {
         Voxel voxel = performer.perform(new CreateVoxel(
                 upperBody.poly().boundingBox().width(), module.trunkMass() - rigidTrunkMass
@@ -145,6 +160,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
             upperBody.poly().boundingBox().min()
         ), this);
         performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
+        downConnector = voxel;
       } else if (module.downConnector().equals(Connector.RIGID)) {
         RigidBody connector = performer.perform(new CreateRigidBody(
                 Poly.square(upperBody.poly().boundingBox().width()),
@@ -159,8 +175,10 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
             upperBody.poly().boundingBox().min()
         ), this);
         performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
+        downConnector = connector;
       }
       //create right connector
+      Body rightConnector = null;
       if (module.rightConnector().equals(Connector.SOFT)) {
         Voxel voxel = performer.perform(new CreateVoxel(
                 module.trunkWidth(), module.trunkMass() - rigidTrunkMass
@@ -174,6 +192,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         ), this);
         performer.perform(new AttachClosestAnchors(2, voxel, trunk, Anchor.Link.Type.RIGID));
         rightBody = voxel;
+        rightConnector = voxel;
       } else if (module.rightConnector().equals(Connector.RIGID)) {
         RigidBody connector = performer.perform(new CreateRigidBody(
                 Poly.square(module.trunkWidth()),
@@ -189,7 +208,9 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         ), this);
         performer.perform(new AttachClosestAnchors(2, connector, trunk, Anchor.Link.Type.RIGID));
         rightBody = connector;
+        rightConnector = connector;
       }
+      moduleBodies.add(new ModuleBody(trunk, rightConnector, downConnector, chunkBodies));
     }
   }
 

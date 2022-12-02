@@ -58,6 +58,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
     inputs = new double[sensors.size()];
+    timedRealFunction.checkDimension(nOfInputs(sensors), nOfOutputs());
     this.timedRealFunction = timedRealFunction;
   }
 
@@ -73,14 +74,14 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     return N_OF_OUTPUTS;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
     double[] readInputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
-          ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
+          @SuppressWarnings("unchecked") ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<?
+              super Voxel>, Double>) ao;
           return INPUT_RANGE.denormalize(so.action().range().normalize(so.outcome().orElse(0d)));
         })
         .toArray();
@@ -110,20 +111,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
 
   @Override
   public BrainIO brainIO() {
-    return new BrainIO(inputs, outputs);
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
   }
 
-  public List<Sensor<? super Voxel>> getSensors() {
-    return sensors;
-  }
-
-  @Override
-  public DoubleRange inputsRange() {
-    return INPUT_RANGE;
-  }
-
-  @Override
-  public DoubleRange outputsRange() {
-    return OUTPUT_RANGE;
-  }
 }

@@ -131,7 +131,7 @@ public class Main {
         )
         """;
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
-    lhmr.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     task.run(() -> lhmr, engineSupplier.get(), consumer);
   }
 

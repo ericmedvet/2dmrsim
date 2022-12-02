@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.malelab.jnb.core.Param;
@@ -39,14 +40,16 @@ public class LeggedMisc {
       @Param(value = "trunkLength", dD = LEG_CHUNK_LENGTH) double length,
       @Param(value = "width", dD = LEG_CHUNK_WIDTH) double width,
       @Param(value = "mass", dD = LEG_CHUNK_MASS) double mass,
-      @Param(value = "upConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector upConnector
+      @Param(value = "upConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector upConnector,
+      @Param("jointSensors") List<Sensor<?>> jointSensors
   ) {
     return new AbstractLeggedHybridModularRobot.LegChunk(
         length,
         width,
         mass,
         new RotationalJoint.Motor(),
-        upConnector
+        upConnector,
+        jointSensors
     );
   }
 
@@ -58,7 +61,10 @@ public class LeggedMisc {
       @Param(value = "trunkMass", dD = TRUNK_MASS) double trunkMass,
       @Param("legChunks") List<AbstractLeggedHybridModularRobot.LegChunk> legChunks,
       @Param(value = "downConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector downConnector,
-      @Param(value = "rightConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector rightConnector
+      @Param(value = "rightConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector rightConnector,
+      @Param("trunkSensors") List<Sensor<?>> trunkSensors,
+      @Param("rightConnectorSensors") List<Sensor<?>> rightConnectorSensors,
+      @Param("downConnectorSensors") List<Sensor<?>> downConnectorSensors
   ) {
     return new AbstractLeggedHybridModularRobot.Module(
         trunkLength,
@@ -66,7 +72,10 @@ public class LeggedMisc {
         trunkMass,
         legChunks,
         downConnector,
-        rightConnector
+        rightConnector,
+        trunkSensors,
+        rightConnectorSensors,
+        downConnectorSensors
     );
   }
 

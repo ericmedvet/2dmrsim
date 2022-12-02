@@ -18,70 +18,98 @@ package it.units.erallab.mrsim2d.core.agents.legged;
 
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
+import it.units.erallab.mrsim2d.core.NumBrained;
+import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.ActuateRotationalJoint;
+import it.units.erallab.mrsim2d.core.actions.Sense;
+import it.units.erallab.mrsim2d.core.bodies.Body;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.erallab.mrsim2d.core.util.Parametrized;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
+
 
 /**
  * @author "Eric Medvet" on 2022/09/24 for 2dmrsim
  */
-public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobot implements Parametrized {
+public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobot implements NumBrained {
 
   private final static DoubleRange ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
+  private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final TimedRealFunction timedRealFunction;
 
+  private double[] inputs;
+  private double[] outputs;
+
   public NumLeggedHybridModularRobot(List<Module> modules, TimedRealFunction timedRealFunction) {
     super(modules);
+    timedRealFunction.checkDimension(nOfInputs(modules), nOfOutputs(modules));
     this.timedRealFunction = timedRealFunction;
   }
 
   public static int nOfInputs(List<Module> modules) {
-    return 0;
+    return modules.stream()
+        .mapToInt(m -> m.trunkSensors().size() + m.downConnectorSensors().size() + m.rightConnectorSensors()
+            .size() + m.legChunks().stream()
+            .mapToInt(c -> c.jointSensors().size())
+            .sum()
+        )
+        .sum();
   }
 
   public static int nOfOutputs(List<Module> modules) {
     return modules.stream().mapToInt(m -> m.legChunks().size()).sum();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
-    double[] values = timedRealFunction.apply(t, new double[0]);
-    if (values.length != rotationalJoints.size()) {
-      throw new IllegalArgumentException("Unexpected function ouptut size: %d found vs. %d expected".formatted(
-          values.length,
-          rotationalJoints.size()
-      ));
+    //read inputs from last request
+    inputs = previousActionOutcomes.stream()
+        .filter(ao -> ao.action() instanceof Sense)
+        .mapToDouble(ao -> {
+          @SuppressWarnings("unchecked") ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
+          return INPUT_RANGE.denormalize(so.action().range().normalize(so.outcome().orElse(0d)));
+        })
+        .toArray();
+    //compute actuation
+    outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
+    //generate next sense actions
+    List<Action<?>> actions = new ArrayList<>();
+    for (int im = 0; im < modules.size(); im = im + 1) {
+      Module module = modules.get(im);
+      ModuleBody moduleBody = moduleBodies.get(im);
+      module.trunkSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.trunk())));
+      module.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.downConnector())));
+      for (int ic = 0; ic < module.legChunks().size(); ic = ic + 1) {
+        LegChunk legChunk = module.legChunks().get(ic);
+        ChunkBody chunkBody = moduleBody.chunks().get(ic);
+        legChunk.jointSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(chunkBody.joint())));
+      }
     }
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> (Action<?>) new ActuateRotationalJoint(
-            rotationalJoints.get(i),
-            ANGLE_RANGE.clip(values[i])
-        ))
-        .toList();
-  }
-
-  public double[] getParams() {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      return parametrized.getParams();
-    }
-    return new double[0];
+    //generate actuation actions
+    IntStream.range(0, outputs.length)
+        .forEach(i -> actions.add(new ActuateRotationalJoint(
+                rotationalJoints.get(i),
+                ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i]))
+            )
+        ));
+    return actions;
   }
 
   @Override
-  public void setParams(double[] params) {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      parametrized.setParams(params);
-    } else {
-      if (params.length > 0) {
-        throw new IllegalArgumentException("Cannot set params because the function %s has no params".formatted(
-            timedRealFunction));
-      }
-    }
+  public TimedRealFunction brain() {
+    return timedRealFunction;
+  }
+
+  @Override
+  public BrainIO brainIO() {
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
   }
 
 }

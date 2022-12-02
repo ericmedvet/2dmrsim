@@ -23,13 +23,12 @@ import java.util.List;
 
 public interface NumMultiBrained {
 
-  record BrainIO(double[] inputs, double[] outputs) {}
+  record BrainIO(RangedValues input, RangedValues output) {}
+
+  record RangedValues(double[] values, DoubleRange range) {}
 
   List<BrainIO> brainIOs();
 
   List<TimedRealFunction> brains();
-
-  DoubleRange inputsRange();
-  DoubleRange outputsRange();
 
 }

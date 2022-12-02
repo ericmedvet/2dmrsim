@@ -35,8 +35,8 @@ import java.util.List;
  */
 public abstract class NumGridVSR extends AbstractGridVSR {
 
-  private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
-  private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  protected final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  protected final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
@@ -106,10 +106,4 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     return body;
   }
 
-  public DoubleRange inputsRange() {
-    return INPUT_RANGE;
-  }
-  public DoubleRange outputsRange() {
-    return OUTPUT_RANGE;
-  }
 }

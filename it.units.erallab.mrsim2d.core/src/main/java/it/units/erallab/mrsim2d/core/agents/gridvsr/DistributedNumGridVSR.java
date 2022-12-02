@@ -44,22 +44,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
         continue;
       }
       int nOfInputs = body.sensorsGrid().get(key).size() + 4 * nSignals;
-      if (timedRealFunctionsGrid.get(key).nOfInputs() != nOfInputs) {
-        throw new IllegalArgumentException("Wrong number of inputs in position (%d,%d): body requires %d, function takes %d".formatted(
-            key.x(),
-            key.y(),
-            nOfInputs,
-            timedRealFunctionsGrid.get(key).nOfInputs()
-        ));
-      }
-      if (timedRealFunctionsGrid.get(key).nOfOutputs() != nOfOutputs) {
-        throw new IllegalArgumentException("Wrong number of outputs in position (%d,%d): body requires %d, function takes %d".formatted(
-            key.x(),
-            key.y(),
-            nOfOutputs,
-            timedRealFunctionsGrid.get(key).nOfOutputs()
-        ));
-      }
+      timedRealFunctionsGrid.get(key).checkDimension(nOfInputs, nOfOutputs);
     }
     this.nSignals = nSignals;
     this.directional = directional;
@@ -73,7 +58,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   public List<BrainIO> brainIOs() {
     return voxelGrid.entries().stream()
         .filter(e -> e.value()!=null)
-        .map(e -> new BrainIO(fullInputsGrid.get(e.key()), fullOutputsGrid.get(e.key())))
+        .map(e -> new BrainIO(new RangedValues(fullInputsGrid.get(e.key()), INPUT_RANGE), new RangedValues(fullOutputsGrid.get(e.key()), OUTPUT_RANGE)))
         .toList();
   }
 
