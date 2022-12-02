@@ -16,26 +16,26 @@
 
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
+import it.units.erallab.mrsim2d.core.NumMultiBrained;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.erallab.mrsim2d.core.util.Parametrized;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-public class HeteroDistributedNumGridVSR extends NumGridVSR {
+public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
 
-  protected final Grid<TimedRealFunction> timedRealFunctionsGrid;
-  int nSignals;
-  boolean directional;
-  Grid<double[]> signalsGrid;
+  private final Grid<TimedRealFunction> timedRealFunctionsGrid;
+  private final int nSignals;
+  private final boolean directional;
+  private final Grid<double[]> signalsGrid;
 
-  Grid<double[]> fullInputsGrid;
-  Grid<double[]> fullOutputsGrid;
+  private final Grid<double[]> fullInputsGrid;
+  private final Grid<double[]> fullOutputsGrid;
 
-  public HeteroDistributedNumGridVSR(GridBody body, Grid<TimedRealFunction> timedRealFunctionsGrid, int nSignals, boolean directional) {
+  public DistributedNumGridVSR(GridBody body, Grid<TimedRealFunction> timedRealFunctionsGrid, int nSignals, boolean directional) {
     super(body);
     int communicationSize = directional ? nSignals * 4 : nSignals;
     int nOfOutputs = communicationSize + 1;
@@ -67,6 +67,11 @@ public class HeteroDistributedNumGridVSR extends NumGridVSR {
     signalsGrid = voxelGrid.map(v -> v != null ? new double[communicationSize] : null);
     fullInputsGrid = body.sensorsGrid().map(d -> d != null ? new double[d.size() + 4 * nSignals] : null);
     fullOutputsGrid = voxelGrid.map(d -> d != null ? new double[1 + communicationSize] : null);
+  }
+
+  @Override
+  public List<TimedRealFunction> brains() {
+    return timedRealFunctionsGrid.values().stream().filter(Objects::nonNull).toList();
   }
 
   @Override
@@ -125,29 +130,4 @@ public class HeteroDistributedNumGridVSR extends NumGridVSR {
     double[] allSignals = signalsGrid.get(x, y);
     return directional ? Arrays.stream(allSignals, c * nSignals, (c + 1) * nSignals).toArray() : allSignals;
   }
-
-  @Override
-  public double[] getParams() {
-    List<double[]> parametersList = new ArrayList<>();
-    for (Grid.Entry<TimedRealFunction> functionEntry : timedRealFunctionsGrid) {
-      if (functionEntry.value() instanceof Parametrized parametrized) {
-        parametersList.add(parametrized.getParams());
-      }
-    }
-    return parametersList.stream().flatMapToDouble(Arrays::stream).toArray();
-  }
-
-  @Override
-  public void setParams(double[] params) {
-    int startIndex = 0;
-    for (Grid.Entry<TimedRealFunction> functionEntry : timedRealFunctionsGrid) {
-      if (functionEntry.value() instanceof Parametrized parametrized) {
-        int tempParamsSize = parametrized.getParams().length;
-        double[] tempParams = Arrays.stream(params, startIndex, startIndex + tempParamsSize).toArray();
-        parametrized.setParams(tempParams);
-        startIndex = startIndex + tempParamsSize;
-      }
-    }
-  }
-
 }

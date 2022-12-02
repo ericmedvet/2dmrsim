@@ -18,9 +18,8 @@ package it.units.erallab.mrsim2d.buildable.builders;
 
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.HomoDistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
@@ -28,7 +27,6 @@ import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Agents {
 
@@ -47,36 +45,18 @@ public class Agents {
   }
 
   @SuppressWarnings("unused")
-  public static HeteroDistributedNumGridVSR heteroDistributedNumGridVSR(
+  public static DistributedNumGridVSR distributedNumGridVSR(
       @Param("body") GridBody body,
       @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder,
       @Param("signals") int nSignals,
       @Param("directional") boolean directional
   ) {
-    return new HeteroDistributedNumGridVSR(
+    return new DistributedNumGridVSR(
         body,
         body.sensorsGrid().map(
             v -> v != null ?
             timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals))
             : null
-        ),
-        nSignals,
-        directional
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static HomoDistributedNumGridVSR homoDistributedNumGridVSR(
-      @Param("body") GridBody body,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder,
-      @Param("signals") int nSignals,
-      @Param("directional") boolean directional
-  ) {
-    return new HomoDistributedNumGridVSR(
-        body,
-        () -> timedRealFunctionBuilder.apply(
-            4 * nSignals + body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).findFirst().orElseThrow(),
-            1 + (directional ? 4 * nSignals : nSignals)
         ),
         nSignals,
         directional

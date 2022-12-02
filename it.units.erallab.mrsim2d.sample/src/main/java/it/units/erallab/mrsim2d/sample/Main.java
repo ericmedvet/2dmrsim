@@ -20,12 +20,13 @@ import it.units.erallab.mrsim2d.buildable.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.gridvsr.HeteroDistributedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.erallab.mrsim2d.core.util.Parametrized;
 import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
 import it.units.erallab.mrsim2d.viewer.VideoBuilder;
@@ -73,7 +74,7 @@ public class Main {
         )
         """;
     CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    vsr.randomize(new Random(33), new DoubleRange(-5, 5));
+    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
     task.run(() -> vsr, engineSupplier.get(), consumer);
   }
 
@@ -108,8 +109,8 @@ public class Main {
           directional=t
         )
         """;
-    HeteroDistributedNumGridVSR vsr = (HeteroDistributedNumGridVSR) nb.build(agentS);
-    vsr.randomize(new Random(33), new DoubleRange(-5, 5));
+    DistributedNumGridVSR vsr = (DistributedNumGridVSR) nb.build(agentS);
+    vsr.brains().forEach(b -> ((Parametrized)b).randomize(new Random(33), new DoubleRange(-5, 5)));
     task.run(() -> vsr, engineSupplier.get(), consumer);
   }
 

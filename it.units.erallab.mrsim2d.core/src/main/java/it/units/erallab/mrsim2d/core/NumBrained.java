@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import it.units.erallab.mrsim2d.core.NumMultiBrained;
+package it.units.erallab.mrsim2d.core;
+
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 
 import java.util.List;

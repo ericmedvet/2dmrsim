@@ -17,9 +17,9 @@
 package it.units.erallab.mrsim2d.core.agents.gridvsr;
 
 
+import it.units.erallab.mrsim2d.core.NumBrained;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
 import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.erallab.mrsim2d.core.util.Parametrized;
 import it.units.erallab.mrsim2d.core.util.Utils;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
  */
-public class CentralizedNumGridVSR extends NumGridVSR {
+public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
 
   private final TimedRealFunction timedRealFunction;
 
@@ -52,6 +52,11 @@ public class CentralizedNumGridVSR extends NumGridVSR {
 
   public static int nOfOutputs(GridBody body) {
     return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+  }
+
+  @Override
+  public TimedRealFunction brain() {
+    return timedRealFunction;
   }
 
   @Override
@@ -79,23 +84,4 @@ public class CentralizedNumGridVSR extends NumGridVSR {
     return outputsGrid;
   }
 
-  @Override
-  public double[] getParams() {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      return parametrized.getParams();
-    }
-    return new double[0];
-  }
-
-  @Override
-  public void setParams(double[] params) {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      parametrized.setParams(params);
-    } else if (params.length > 0) {
-      throw new IllegalArgumentException(
-          "Cannot set params because the function %s has no params".formatted(
-              timedRealFunction
-          ));
-    }
-  }
 }
