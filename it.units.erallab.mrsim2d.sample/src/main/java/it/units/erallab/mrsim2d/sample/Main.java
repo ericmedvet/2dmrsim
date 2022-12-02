@@ -45,37 +45,27 @@ import java.util.function.Supplier;
  */
 public class Main {
 
-  private static void centralizedVsr(
+  private static void activeLegged(
       Supplier<Engine> engineSupplier,
       Task<Supplier<EmbodiedAgent>, ?> task,
       Consumer<Snapshot> consumer
   ) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
-        s.a.centralizedNumGridVSR(body=s.vsr.gridBody(
-          shape=s.a.vsr.s.biped(w=4;h=3);
-          sensorizingFunction=s.a.vsr.sf.directional(
-            sSensors=[s.s.d(a=-90)];
-            headSensors=[
-              s.s.sin();
-              s.s.d(a=-30;r=8);
-              s.s.d(a=-40;r=8)
-            ];
-            nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
-          ));
-          function=s.f.stepOut(
-            stepT=0.2;
-            innerFunction=s.f.diffIn(
-              windowT=0.2;
-              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
-              types=[avg;current]
+        s.a.numLeggedHybridModularRobot(
+          modules=4 * [
+            s.a.l.module(
+              legChunks=2*[s.a.l.legChunk()];
+              trunkSensors=[s.s.rv(a=0);s.s.rv(a=90)];
+              downConnectorSensors=[s.s.d(a=-90;r=1)]
             )
-          )
+          ];
+          function=s.f.mlp()
         )
         """;
-    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
-    task.run(() -> vsr, engineSupplier.get(), consumer);
+    NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
+    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> lhmr, engineSupplier.get(), consumer);
   }
 
   private static void distributedVsr(
@@ -114,7 +104,63 @@ public class Main {
     task.run(() -> vsr, engineSupplier.get(), consumer);
   }
 
-  private static void legged(
+  private static void centralizedVsr(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.centralizedNumGridVSR(
+          body=s.a.vsr.gridBody(
+            shape=s.a.vsr.s.biped(w=4;h=3);
+            sensorizingFunction=s.a.vsr.sf.directional(
+              sSensors=[s.s.d(a=-90)];
+              headSensors=[
+                s.s.sin();
+                s.s.d(a=-30;r=8);
+                s.s.d(a=-40;r=8)
+              ];
+              nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+            )
+          );
+          function=s.f.stepOut(
+            stepT=0.2;
+            innerFunction=s.f.diffIn(
+              windowT=0.2;
+              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
+              types=[avg;current]
+            )
+          )
+        )
+        """;
+    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
+    task.run(() -> vsr, engineSupplier.get(), consumer);
+  }
+
+  public static void main(String[] args) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    @SuppressWarnings("unchecked")
+    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
+    VideoBuilder videoBuilder = new VideoBuilder(
+        400,
+        300,
+        0,
+        30,
+        30,
+        VideoUtils.EncoderFacility.FFMPEG_LARGE,
+        new File("/home/eric/experiments/2dmrsim/rot-joint-pid.mp4"),
+        drawer
+    );
+    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion()");
+    //do thing
+    activeLegged(engine, locomotion, viewer);
+  }
+
+  private static void passiveLegged(
       Supplier<Engine> engineSupplier,
       Task<Supplier<EmbodiedAgent>, ?> task,
       Consumer<Snapshot> consumer
@@ -133,26 +179,5 @@ public class Main {
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
     ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     task.run(() -> lhmr, engineSupplier.get(), consumer);
-  }
-
-  public static void main(String[] args) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply("test");
-    VideoBuilder videoBuilder = new VideoBuilder(
-        400,
-        300,
-        0,
-        30,
-        30,
-        VideoUtils.EncoderFacility.FFMPEG_LARGE,
-        new File("/home/eric/experiments/2dmrsim/rot-joint-pid.mp4"),
-        drawer
-    );
-    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion()");
-    //do thing
-    legged(engine, locomotion, viewer);
   }
 }

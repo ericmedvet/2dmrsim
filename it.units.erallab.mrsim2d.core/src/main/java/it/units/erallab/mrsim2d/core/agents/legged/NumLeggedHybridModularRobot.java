@@ -77,6 +77,9 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
           return INPUT_RANGE.denormalize(so.action().range().normalize(so.outcome().orElse(0d)));
         })
         .toArray();
+    if (inputs.length == 0) {
+      inputs = new double[timedRealFunction.nOfInputs()];
+    }
     //compute actuation
     outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
     //generate next sense actions
