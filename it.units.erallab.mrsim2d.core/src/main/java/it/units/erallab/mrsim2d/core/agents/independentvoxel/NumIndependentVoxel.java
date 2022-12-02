@@ -18,6 +18,7 @@ package it.units.erallab.mrsim2d.core.agents.independentvoxel;
 
 import it.units.erallab.mrsim2d.core.Action;
 import it.units.erallab.mrsim2d.core.ActionOutcome;
+import it.units.erallab.mrsim2d.core.NumBrained;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.ActuateVoxel;
 import it.units.erallab.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
@@ -26,22 +27,26 @@ import it.units.erallab.mrsim2d.core.actions.Sense;
 import it.units.erallab.mrsim2d.core.bodies.Anchor;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.functions.TimedRealFunction;
-import it.units.erallab.mrsim2d.core.util.Parametrized;
+import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author "Eric Medvet" on 2022/07/13 for 2dmrsim
  */
-public class NumIndependentVoxel extends AbstractIndependentVoxel implements Parametrized {
+public class NumIndependentVoxel extends AbstractIndependentVoxel implements NumBrained {
 
+  private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
   private final static int N_OF_OUTPUTS = 8;
 
   private final List<Sensor<? super Voxel>> sensors;
   private final double[] inputs;
   private final TimedRealFunction timedRealFunction;
+  private double[] outputs;
 
   public NumIndependentVoxel(
       Voxel.Material material,
@@ -76,12 +81,12 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
           ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
-          return so.action().range().normalize(so.outcome().orElse(0d));
+          return INPUT_RANGE.denormalize(so.action().range().normalize(so.outcome().orElse(0d)));
         })
         .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
-    double[] outputs = timedRealFunction.apply(t, inputs);
+    outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions
@@ -99,24 +104,26 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Par
   }
 
   @Override
-  public double[] getParams() {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      return parametrized.getParams();
-    }
-    return new double[0];
+  public TimedRealFunction brain() {
+    return timedRealFunction;
   }
 
   @Override
-  public void setParams(double[] params) {
-    if (timedRealFunction instanceof Parametrized parametrized) {
-      parametrized.setParams(params);
-    } else if (params.length > 0) {
-      throw new IllegalArgumentException("Cannot set params because the function %s has no params".formatted(
-          timedRealFunction));
-    }
+  public BrainIO brainIO() {
+    return new BrainIO(inputs, outputs);
   }
 
   public List<Sensor<? super Voxel>> getSensors() {
     return sensors;
+  }
+
+  @Override
+  public DoubleRange inputsRange() {
+    return INPUT_RANGE;
+  }
+
+  @Override
+  public DoubleRange outputsRange() {
+    return OUTPUT_RANGE;
   }
 }
