@@ -61,70 +61,70 @@ public class Misc {
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions
   ) {
-    Drawer baseDrawer = new ComponentsDrawer(
-        List.of(
-            new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
-            new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-            new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
-            new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
-        ), Snapshot::bodies
-    ).onLastSnapshot();
-    Drawer actionsDrawer = new ComponentsDrawer(
-        List.of(
-            new AttractAnchor(),
-            new SenseDistanceToBody(),
-            new SenseRotatedVelocity()
-        ), Snapshot::actionOutcomes
-    );
-    Drawer worldDrawer = Drawer.transform(
-        new AllAgentsFramer(enlargement).largest(followTime),
-        actions ? Drawer.of(baseDrawer, actionsDrawer) : baseDrawer
-    );
-    List<Drawer> drawers = new ArrayList<>(List.of(
-        Drawer.clear(),
-        worldDrawer
-    ));
-    if (miniAgents) {
-      drawers.add(new StackedMultipliedDrawer<>(
-          Drawers::simpleAgentWithVelocities,
-          new EmbodiedAgentsExtractor(),
-          0.2,
-          0.05,
-          StackedMultipliedDrawer.Direction.VERTICAL,
-          Drawer.VerticalPosition.TOP,
-          Drawer.HorizontalPosition.RIGHT
-      ));
-    }
-    if (miniWorld) {
-      drawers.add(Drawer.clip(
-              new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
-              Drawer.of(
-                  Drawer.clear(),
-                  Drawer.transform(
-                      new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
-                      Drawer.of(
-                          new ComponentsDrawer(
-                              List.of(
-                                  new UnmovableBodyDrawer(),
-                                  new RotationalJointDrawer(),
-                                  new SoftBodyDrawer(),
-                                  new RigidBodyDrawer()
-                              ), Snapshot::bodies
-                          ).onLastSnapshot()
-                      )
-                  )
-              )
-          )
-      );
-    }
-    if (engineProfiling) {
-      drawers.add(new EngineProfilingDrawer(
-          profilingTime,
-          Drawer.VerticalPosition.BOTTOM,
-          Drawer.HorizontalPosition.LEFT
-      ));
-    }
     return s -> {
+      Drawer baseDrawer = new ComponentsDrawer(
+          List.of(
+              new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
+              new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
+              new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
+              new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
+          ), Snapshot::bodies
+      ).onLastSnapshot();
+      Drawer actionsDrawer = new ComponentsDrawer(
+          List.of(
+              new AttractAnchor(),
+              new SenseDistanceToBody(),
+              new SenseRotatedVelocity()
+          ), Snapshot::actionOutcomes
+      );
+      Drawer worldDrawer = Drawer.transform(
+          new AllAgentsFramer(enlargement).largest(followTime),
+          actions ? Drawer.of(baseDrawer, actionsDrawer) : baseDrawer
+      );
+      List<Drawer> drawers = new ArrayList<>(List.of(
+          Drawer.clear(),
+          worldDrawer
+      ));
+      if (miniAgents) {
+        drawers.add(new StackedMultipliedDrawer<>(
+            Drawers::simpleAgentWithVelocities,
+            new EmbodiedAgentsExtractor(),
+            0.2,
+            0.05,
+            StackedMultipliedDrawer.Direction.VERTICAL,
+            Drawer.VerticalPosition.TOP,
+            Drawer.HorizontalPosition.RIGHT
+        ));
+      }
+      if (miniWorld) {
+        drawers.add(Drawer.clip(
+                new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
+                Drawer.of(
+                    Drawer.clear(),
+                    Drawer.transform(
+                        new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
+                        Drawer.of(
+                            new ComponentsDrawer(
+                                List.of(
+                                    new UnmovableBodyDrawer(),
+                                    new RotationalJointDrawer(),
+                                    new SoftBodyDrawer(),
+                                    new RigidBodyDrawer()
+                                ), Snapshot::bodies
+                            ).onLastSnapshot()
+                        )
+                    )
+                )
+            )
+        );
+      }
+      if (engineProfiling) {
+        drawers.add(new EngineProfilingDrawer(
+            profilingTime,
+            Drawer.VerticalPosition.BOTTOM,
+            Drawer.HorizontalPosition.LEFT
+        ));
+      }
       drawers.add(new InfoDrawer(s));
       return Drawer.of(Collections.unmodifiableList(drawers));
     };
