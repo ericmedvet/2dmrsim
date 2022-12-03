@@ -23,6 +23,7 @@ import it.units.malelab.jnb.core.Param;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.random.RandomGenerator;
 
 /**
  * @author "Eric Medvet" on 2022/10/03 for 2dmrsim
@@ -37,13 +38,28 @@ public class TimedRealFunctions {
   @SuppressWarnings("unused")
   public static Builder<DiffInputTRF> diffIn(
       @Param("windowT") double windowT,
-      @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction,
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction,
       @Param(value = "types", dSs = {"current", "trend", "avg"}) List<DiffInputTRF.Type> types
   ) {
     return (nOfInputs, nOfOutputs) -> new DiffInputTRF(
         innerFunction.apply(nOfInputs * types.size(), nOfOutputs),
         windowT,
         types
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static Builder<NoisedTRF> noised(
+      @Param(value = "inputSigma", dD = 0) double inputSigma,
+      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value="randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
+  ) {
+    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
+        innerFunction.apply(nOfInputs,nOfOutputs),
+        inputSigma,
+        outputSigma,
+        randomGenerator
     );
   }
 
@@ -143,7 +159,7 @@ public class TimedRealFunctions {
   @SuppressWarnings("unused")
   public static Builder<SteppedOutputTRF> stepOut(
       @Param("stepT") double stepT,
-      @Param("innerFunction") BiFunction<Integer, Integer, ? extends TimedRealFunction> innerFunction
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
   ) {
     return (nOfInputs, nOfOutputs) -> new SteppedOutputTRF(
         innerFunction.apply(nOfInputs, nOfOutputs),

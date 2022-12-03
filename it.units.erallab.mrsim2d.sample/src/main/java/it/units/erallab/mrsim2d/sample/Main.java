@@ -60,7 +60,7 @@ public class Main {
               downConnectorSensors=[s.s.d(a=-90;r=1)]
             )
           ];
-          function=s.f.mlp()
+          function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.1)
         )
         """;
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);

@@ -38,12 +38,10 @@ import it.units.malelab.jnb.core.NamedBuilder;
 import it.units.malelab.jnb.core.Param;
 import it.units.malelab.jnb.core.ParamMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.random.RandomGenerator;
 
 public class Misc {
 
@@ -160,5 +158,11 @@ public class Misc {
   ) {
     return a -> task.run(a, engineSupplier.get());
   }
+
+  @SuppressWarnings("unused")
+  public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
+    return new Random(seed);
+  }
+
 
 }
