@@ -38,11 +38,11 @@ public class NoisedTRF extends CompositeTRF {
   public double[] apply(double t, double[] input) {
     double[] noisedInput = input;
     if (inputSigma > 0) {
-      noisedInput = Arrays.stream(input).map(v -> randomGenerator.nextGaussian(0, inputSigma)).toArray();
+      noisedInput = Arrays.stream(input).map(v -> v + randomGenerator.nextGaussian(0, inputSigma)).toArray();
     }
     double[] noisedOutput = innerF.apply(t, noisedInput);
     if (inputSigma > 0) {
-      noisedOutput = Arrays.stream(noisedOutput).map(v -> randomGenerator.nextGaussian(0, ouputSigma)).toArray();
+      noisedOutput = Arrays.stream(noisedOutput).map(v -> v + randomGenerator.nextGaussian(0, ouputSigma)).toArray();
     }
     return noisedOutput;
   }
