@@ -28,61 +28,78 @@ import it.units.erallab.mrsim2d.core.geometry.Poly;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent {
+public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
+
+  protected final List<Leg> legs;
+  protected final double trunkLength;
+  protected final double trunkWidth;
+  protected final double trunkMass;
+  protected final double headMass;
+
 
   protected final List<RotationalJoint> rotationalJoints;
-  protected final List<Module> modules;
-  protected final List<ModuleBody> moduleBodies;
+  protected final List<LegBody> legBodies;
   private final List<Body> bodies;
-  public AbstractLeggedHybridModularRobot(List<Module> modules) {
-    this.modules = modules;
-    bodies = new ArrayList<>();
-    moduleBodies = new ArrayList<>();
-    rotationalJoints = new ArrayList<>();
-  }
+  protected Body head;
 
-  protected record LegChunkBody(Body upConnector, RotationalJoint joint) {}
-
-  public record Module(
+  public AbstractLeggedHybridRobot(
+      List<Leg> legs,
       double trunkLength,
       double trunkWidth,
       double trunkMass,
+      double headMass
+  ) {
+    this.legs = legs;
+    this.trunkLength = trunkLength;
+    this.trunkWidth = trunkWidth;
+    this.trunkMass = trunkMass;
+    this.headMass = headMass;
+    rotationalJoints = new ArrayList<>();
+    legBodies = new ArrayList<>();
+    bodies = new ArrayList<>();
+  }
+
+  public record Leg(
       List<LegChunk> legChunks,
       ConnectorType downConnector,
-      ConnectorType rightConnector,
-      List<Sensor<?>> trunkSensors,
-      List<Sensor<?>> rightConnectorSensors,
+      double downConnectorMass,
       List<Sensor<?>> downConnectorSensors
   ) {}
 
-  protected record ModuleBody(Body trunk, Body rightConnector, Body downConnector, List<LegChunkBody> legChunks) {}
+  protected record LegBody(List<LegChunkBody> legChunks, Body downConnector) {}
+
+  protected record LegChunkBody(Body upConnector, RotationalJoint joint) {}
 
   @Override
   public void assemble(ActionPerformer performer) throws ActionException {
-    Anchorable rightBody = null;
-    for (Module module : modules) {
-      //create trunk
-      double rigidTrunkMass = module.rightConnector()
-          .equals(ConnectorType.NONE) ? module.trunkMass() :
-          (module.trunkMass() * module.trunkLength() / (module.trunkLength() + module.trunkWidth()));
-      RigidBody trunk = performer.perform(new CreateRigidBody(
-              Poly.rectangle(module.trunkLength(), module.trunkWidth()),
-              rigidTrunkMass,
-              1d / module.trunkWidth
-          ), this)
-          .outcome()
-          .orElseThrow(() -> new ActionException("Cannot create trunk"));
-      bodies.add(trunk);
-      if (rightBody != null) {
-        performer.perform(new TranslateBodyAt(trunk, rightBody.poly().boundingBox().max()), this);
-        performer.perform(new AttachClosestAnchors(2, trunk, rightBody, Anchor.Link.Type.RIGID), this);
-      }
-      rightBody = trunk;
-      double cX = trunk.poly().boundingBox().center().x();
-      //create leg
+    //create trunk
+    RigidBody trunk = performer.perform(new CreateRigidBody(
+            Poly.rectangle(trunkLength, trunkWidth),
+            trunkMass,
+            1d / trunkWidth
+        ), this)
+        .outcome()
+        .orElseThrow(() -> new ActionException("Cannot create trunk"));
+    bodies.add(trunk);
+    //create and attach head
+    head = performer.perform(new CreateRigidBody(
+            Poly.square(trunkWidth),
+            trunkMass,
+            1d / trunkWidth
+        ), this)
+        .outcome()
+        .orElseThrow(() -> new ActionException("Cannot create trunk"));
+    bodies.add(head);
+    performer.perform(new TranslateBodyAt(head, trunk.poly().boundingBox().max()), this);
+    performer.perform(new AttachClosestAnchors(2, (Anchorable) head, trunk, Anchor.Link.Type.RIGID), this);
+    //iterate over legs
+    double dCX = trunk.poly().boundingBox().width() / ((double) legs.size() + 1d);
+    double cX = trunk.poly().boundingBox().min().x();
+    for (Leg leg : legs) {
+      cX = cX + dCX;
       Anchorable upperBody = trunk;
-      List<LegChunkBody> chunkBodies = new ArrayList<>(module.legChunks().size());
-      for (LegChunk legChunk : module.legChunks()) {
+      List<LegChunkBody> chunkBodies = new ArrayList<>(leg.legChunks().size());
+      for (LegChunk legChunk : leg.legChunks()) {
         double rotationalJointMass = legChunk.upConnector()
             .equals(ConnectorType.NONE) ? legChunk.mass() :
             (legChunk.mass() * legChunk.length() / (legChunk.length() + legChunk.width()));
@@ -138,9 +155,9 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
       }
       //create down connector (foot)
       Body downConnector = null;
-      if (module.downConnector().equals(ConnectorType.SOFT)) {
+      if (leg.downConnector().equals(ConnectorType.SOFT)) {
         Voxel voxel = performer.perform(new CreateVoxel(
-                upperBody.poly().boundingBox().width(), module.trunkMass() - rigidTrunkMass
+                upperBody.poly().boundingBox().width(), leg.downConnectorMass()
             ), this)
             .outcome()
             .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
@@ -151,10 +168,10 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         ), this);
         performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
         downConnector = voxel;
-      } else if (module.downConnector().equals(ConnectorType.RIGID)) {
+      } else if (leg.downConnector().equals(ConnectorType.RIGID)) {
         RigidBody connector = performer.perform(new CreateRigidBody(
                 Poly.square(upperBody.poly().boundingBox().width()),
-                module.trunkMass() - rigidTrunkMass,
+                leg.downConnectorMass(),
                 1d / upperBody.poly().boundingBox().width()
             ), this)
             .outcome()
@@ -167,40 +184,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
         downConnector = connector;
       }
-      //create right connector
-      Body rightConnector = null;
-      if (module.rightConnector().equals(ConnectorType.SOFT)) {
-        Voxel voxel = performer.perform(new CreateVoxel(
-                module.trunkWidth(), module.trunkMass() - rigidTrunkMass
-            ), this)
-            .outcome()
-            .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
-        bodies.add(voxel);
-        performer.perform(new TranslateBodyAt(
-            voxel,
-            trunk.poly().boundingBox().max()
-        ), this);
-        performer.perform(new AttachClosestAnchors(2, voxel, trunk, Anchor.Link.Type.RIGID));
-        rightBody = voxel;
-        rightConnector = voxel;
-      } else if (module.rightConnector().equals(ConnectorType.RIGID)) {
-        RigidBody connector = performer.perform(new CreateRigidBody(
-                Poly.square(module.trunkWidth()),
-                module.trunkMass() - rigidTrunkMass,
-                1d / module.trunkWidth
-            ), this)
-            .outcome()
-            .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
-        bodies.add(connector);
-        performer.perform(new TranslateBodyAt(
-            connector,
-            trunk.poly().boundingBox().max()
-        ), this);
-        performer.perform(new AttachClosestAnchors(2, connector, trunk, Anchor.Link.Type.RIGID));
-        rightBody = connector;
-        rightConnector = connector;
-      }
-      moduleBodies.add(new ModuleBody(trunk, rightConnector, downConnector, chunkBodies));
+      legBodies.add(new LegBody(chunkBodies, downConnector));
     }
   }
 

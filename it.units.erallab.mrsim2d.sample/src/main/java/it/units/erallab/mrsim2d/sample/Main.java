@@ -22,6 +22,7 @@ import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
+import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
@@ -52,6 +53,34 @@ public class Main {
   ) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
+        s.a.numLeggedHybridRobot(
+          legs=3 * [
+            s.a.l.leg(
+              legChunks=[s.a.l.legChunk(); s.a.l.legChunk()];
+              downConnector=soft;
+              downConnectorSensors=[s.s.d(a=-90;r=1)]
+            )
+          ];
+          headSensors=[
+            s.s.sin();
+            s.s.d(a=-30;r=8);
+            s.s.d(a=-40;r=8)
+          ];
+          function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.01)
+        )
+        """;
+    NumLeggedHybridRobot lhmr = (NumLeggedHybridRobot) nb.build(agentS);
+    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> lhmr, engineSupplier.get(), consumer);
+  }
+
+  private static void activeModularLegged(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
         s.a.numLeggedHybridModularRobot(
           modules=4 * [
             s.a.l.module(
@@ -66,6 +95,41 @@ public class Main {
     NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
     ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     task.run(() -> lhmr, engineSupplier.get(), consumer);
+  }
+
+  private static void centralizedVsr(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.centralizedNumGridVSR(
+          body=s.a.vsr.gridBody(
+            shape=s.a.vsr.s.biped(w=4;h=3);
+            sensorizingFunction=s.a.vsr.sf.directional(
+              sSensors=[s.s.d(a=-90)];
+              headSensors=[
+                s.s.sin();
+                s.s.d(a=-30;r=8);
+                s.s.d(a=-40;r=8)
+              ];
+              nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+            )
+          );
+          function=s.f.stepOut(
+            stepT=0.2;
+            innerFunction=s.f.diffIn(
+              windowT=0.2;
+              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
+              types=[avg;current]
+            )
+          )
+        )
+        """;
+    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
+    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
+    task.run(() -> vsr, engineSupplier.get(), consumer);
   }
 
   private static void distributedVsr(
@@ -104,41 +168,6 @@ public class Main {
     task.run(() -> vsr, engineSupplier.get(), consumer);
   }
 
-  private static void centralizedVsr(
-      Supplier<Engine> engineSupplier,
-      Task<Supplier<EmbodiedAgent>, ?> task,
-      Consumer<Snapshot> consumer
-  ) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    String agentS = """
-        s.a.centralizedNumGridVSR(
-          body=s.a.vsr.gridBody(
-            shape=s.a.vsr.s.biped(w=4;h=3);
-            sensorizingFunction=s.a.vsr.sf.directional(
-              sSensors=[s.s.d(a=-90)];
-              headSensors=[
-                s.s.sin();
-                s.s.d(a=-30;r=8);
-                s.s.d(a=-40;r=8)
-              ];
-              nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
-            )
-          );
-          function=s.f.stepOut(
-            stepT=0.2;
-            innerFunction=s.f.diffIn(
-              windowT=0.2;
-              innerFunction=s.f.mlp(nOfInnerLayers=2;activationFunction=tanh);
-              types=[avg;current]
-            )
-          )
-        )
-        """;
-    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
-    task.run(() -> vsr, engineSupplier.get(), consumer);
-  }
-
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     @SuppressWarnings("unchecked")
@@ -167,12 +196,31 @@ public class Main {
   ) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     String agentS = """
+        s.a.numLeggedHybridRobot(
+          legs=3 * [
+            s.a.l.leg(legChunks=[s.a.l.legChunk(); s.a.l.legChunk()];downConnector=soft)
+          ];
+          function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
+        )
+        """;
+    NumLeggedHybridRobot lhmr = (NumLeggedHybridRobot) nb.build(agentS);
+    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> lhmr, engineSupplier.get(), consumer);
+  }
+
+  private static void passiveModularLegged(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
         s.a.numLeggedHybridModularRobot(
           modules=[
             s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft);
             s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
             s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft)
-          ];
+          ];          
           function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
         )
         """;

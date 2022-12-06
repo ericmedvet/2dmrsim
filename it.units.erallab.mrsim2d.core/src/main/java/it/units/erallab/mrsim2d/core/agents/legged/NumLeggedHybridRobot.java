@@ -35,35 +35,42 @@ import java.util.stream.IntStream;
 /**
  * @author "Eric Medvet" on 2022/09/24 for 2dmrsim
  */
-public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobot implements NumBrained {
+public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements NumBrained {
 
   private final static DoubleRange ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
   private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final TimedRealFunction timedRealFunction;
+  private final List<Sensor<?>> headSensors;
 
   private double[] inputs;
   private double[] outputs;
 
-  public NumLeggedHybridModularRobot(List<Module> modules, TimedRealFunction timedRealFunction) {
-    super(modules);
-    timedRealFunction.checkDimension(nOfInputs(modules), nOfOutputs(modules));
+  public NumLeggedHybridRobot(
+      List<Leg> legs,
+      double trunkLength,
+      double trunkWidth,
+      double trunkMass,
+      double headMass,
+      List<Sensor<?>> headSensors,
+      TimedRealFunction timedRealFunction
+  ) {
+    super(legs, trunkLength, trunkWidth, trunkMass, headMass);
     this.timedRealFunction = timedRealFunction;
+    this.headSensors = headSensors;
   }
 
-  public static int nOfInputs(List<Module> modules) {
-    return modules.stream()
-        .mapToInt(m -> m.trunkSensors().size() + m.downConnectorSensors().size() + m.rightConnectorSensors()
-            .size() + m.legChunks().stream()
-            .mapToInt(c -> c.jointSensors().size())
-            .sum()
+  public static int nOfInputs(List<Leg> legs, List<Sensor<?>> headSensors) {
+    return headSensors.size() + legs.stream()
+        .mapToInt(l -> l.legChunks().stream().mapToInt(
+            lc -> lc.jointSensors().size()).sum() + l.downConnectorSensors().size()
         )
         .sum();
   }
 
-  public static int nOfOutputs(List<Module> modules) {
-    return modules.stream().mapToInt(m -> m.legChunks().size()).sum();
+  public static int nOfOutputs(List<Leg> legs) {
+    return legs.stream().mapToInt(m -> m.legChunks().size()).sum();
   }
 
   @SuppressWarnings("unchecked")
@@ -84,17 +91,17 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
     outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
-    for (int im = 0; im < modules.size(); im = im + 1) {
-      Module module = modules.get(im);
-      ModuleBody moduleBody = moduleBodies.get(im);
-      module.trunkSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.trunk())));
-      module.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.downConnector())));
-      for (int ic = 0; ic < module.legChunks().size(); ic = ic + 1) {
-        LegChunk legChunk = module.legChunks().get(ic);
-        LegChunkBody legChunkBody = moduleBody.legChunks().get(ic);
+    for (int il = 0; il < legs.size(); il = il + 1) {
+      Leg leg = legs.get(il);
+      LegBody legBody = legBodies.get(il);
+      leg.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legBody.downConnector())));
+      for (int ic = 0; ic < leg.legChunks().size(); ic = ic + 1) {
+        LegChunk legChunk = leg.legChunks().get(ic);
+        LegChunkBody legChunkBody = legBody.legChunks().get(ic);
         legChunk.jointSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legChunkBody.joint())));
       }
     }
+    headSensors.forEach(s -> actions.add(((Sensor<Body>) s).apply(head)));
     //generate actuation actions
     IntStream.range(0, outputs.length)
         .forEach(i -> actions.add(new ActuateRotationalJoint(

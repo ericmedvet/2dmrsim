@@ -22,7 +22,9 @@ import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
+import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
+import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.malelab.jnb.core.Param;
 
@@ -55,8 +57,8 @@ public class Agents {
         body,
         body.sensorsGrid().map(
             v -> v != null ?
-            timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals))
-            : null
+                timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals))
+                : null
         ),
         nSignals,
         directional
@@ -87,6 +89,30 @@ public class Agents {
         timedRealFunctionBuilder.apply(
             NumLeggedHybridModularRobot.nOfInputs(modules),
             NumLeggedHybridModularRobot.nOfOutputs(modules)
+        )
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static NumLeggedHybridRobot numLeggedHybridRobot(
+      @Param("legs") List<AbstractLeggedHybridRobot.Leg> legs,
+      @Param(value = "trunkLength", dD = 4*LeggedMisc.TRUNK_LENGTH) double trunkLength,
+      @Param(value = "trunkWidth", dD = LeggedMisc.TRUNK_WIDTH) double trunkWidth,
+      @Param(value = "trunkMass", dD = LeggedMisc.TRUNK_MASS) double trunkMass,
+      @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY) double headMass,
+      @Param("headSensors") List<Sensor<?>> headSensors,
+      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
+  ) {
+    return new NumLeggedHybridRobot(
+        legs,
+        trunkLength,
+        trunkWidth,
+        trunkMass,
+        headMass,
+        headSensors,
+        timedRealFunctionBuilder.apply(
+            NumLeggedHybridRobot.nOfInputs(legs,headSensors),
+            NumLeggedHybridRobot.nOfOutputs(legs)
         )
     );
   }
