@@ -41,13 +41,24 @@ public class LeggedMisc {
       @Param(value = "width", dD = LEG_CHUNK_WIDTH) double width,
       @Param(value = "mass", dD = LEG_CHUNK_MASS) double mass,
       @Param(value = "upConnector", dS = "rigid") AbstractLeggedHybridModularRobot.Connector upConnector,
-      @Param("jointSensors") List<Sensor<?>> jointSensors
+      @Param("jointSensors") List<Sensor<?>> jointSensors,
+      @Param(value = "motorMaxSpeed", dD = RotationalJoint.Motor.MAX_SPEED) double motorMaxSpeed,
+      @Param(value = "motorMaxTorque", dD = RotationalJoint.Motor.MAX_TORQUE) double motorMaxTorque,
+      @Param(value = "motorControlP", dD = RotationalJoint.Motor.CONTROL_P) double motorControlP,
+      @Param(value = "motorControlI", dD = RotationalJoint.Motor.CONTROL_I) double motorControlI,
+      @Param(value = "motorControlD", dD = RotationalJoint.Motor.CONTROL_D) double motorControlD,
+      @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE) double motorAngleTolerance
   ) {
     return new AbstractLeggedHybridModularRobot.LegChunk(
         length,
         width,
         mass,
-        new RotationalJoint.Motor(),
+        new RotationalJoint.Motor(motorMaxSpeed,
+            motorMaxTorque,
+            motorControlP,
+            motorControlI,
+            motorControlD,
+            motorAngleTolerance),
         upConnector,
         jointSensors
     );
