@@ -49,21 +49,6 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Builder<NoisedTRF> noised(
-      @Param(value = "inputSigma", dD = 0) double inputSigma,
-      @Param(value = "outputSigma", dD = 0) double outputSigma,
-      @Param(value="randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
-      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
-  ) {
-    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
-        innerFunction.apply(nOfInputs,nOfOutputs),
-        inputSigma,
-        outputSigma,
-        randomGenerator
-    );
-  }
-
-  @SuppressWarnings("unused")
   public static Builder<MultiLayerPerceptron> mlp(
       @Param(value = "innerLayerRatio", dD = 0.65) double innerLayerRatio,
       @Param(value = "nOfInnerLayers", dI = 1) int nOfInnerLayers,
@@ -93,10 +78,25 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static Builder<NoisedTRF> noised(
+      @Param(value = "inputSigma", dD = 0) double inputSigma,
+      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value="randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
+  ) {
+    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
+        innerFunction.apply(nOfInputs,nOfOutputs),
+        inputSigma,
+        outputSigma,
+        randomGenerator
+    );
+  }
+
+  @SuppressWarnings("unused")
   public static Builder<Sinusoidal> sinP(
-      @Param(value = "p", dNPM = "sim.doubleRange(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -110,9 +110,9 @@ public class TimedRealFunctions {
 
   @SuppressWarnings("unused")
   public static Builder<Sinusoidal> sinPA(
-      @Param(value = "p", dNPM = "sim.doubleRange(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -126,9 +126,9 @@ public class TimedRealFunctions {
 
   @SuppressWarnings("unused")
   public static Builder<Sinusoidal> sinPF(
-      @Param(value = "p", dNPM = "sim.doubleRange(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -142,9 +142,9 @@ public class TimedRealFunctions {
 
   @SuppressWarnings("unused")
   public static Builder<Sinusoidal> sinPFA(
-      @Param(value = "p", dNPM = "sim.doubleRange(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.doubleRange(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
