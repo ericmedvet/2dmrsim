@@ -89,6 +89,7 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
       ModuleBody moduleBody = moduleBodies.get(im);
       module.trunkSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.trunk())));
       module.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.downConnector())));
+      module.rightConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(moduleBody.rightConnector())));
       for (int ic = 0; ic < module.legChunks().size(); ic = ic + 1) {
         LegChunk legChunk = module.legChunks().get(ic);
         LegChunkBody legChunkBody = moduleBody.legChunks().get(ic);
