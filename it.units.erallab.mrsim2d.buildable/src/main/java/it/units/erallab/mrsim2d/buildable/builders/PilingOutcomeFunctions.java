@@ -38,7 +38,7 @@ public class PilingOutcomeFunctions {
   public static Function<Outcome, Double> maxH(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).averageMaxHeight();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).averagePileHeight();
   }
 
 

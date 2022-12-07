@@ -19,59 +19,112 @@ package it.units.erallab.mrsim2d.core.tasks.piling;
 import it.units.erallab.mrsim2d.core.geometry.Poly;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.SortedMap;
+import java.util.*;
 
-public record Outcome(SortedMap<Double, Observation> observations) {
+public final class Outcome {
+  private final SortedMap<Double, Observation> observations;
 
-  public record Observation(List<List<Poly>> bodies) {
+  private Double averageAverageHeight;
+  private Double averagePileHeight;
+
+
+  public Outcome(SortedMap<Double, Observation> observations) {
+    this.observations = Collections.unmodifiableSortedMap(observations);
+  }
+
+  public static final class Observation {
+    private final List<List<Poly>> bodies;
+    private Double avgCenterHeight;
+    private Double pileHeight;
+
+    public Observation(List<List<Poly>> bodies) {
+      this.bodies = bodies;
+    }
+
     public double avgCenterHeight() {
-      if (bodies.isEmpty()) {
-        return 0d;
+      if (avgCenterHeight == null) {
+        if (bodies.isEmpty()) {
+          avgCenterHeight = 0d;
+        }
+        double minY = bodies.stream()
+            .flatMap(Collection::stream)
+            .mapToDouble(p -> p.boundingBox().min().y())
+            .min()
+            .orElseThrow();
+        avgCenterHeight = bodies.stream()
+            .flatMap(Collection::stream)
+            .mapToDouble(p -> p.boundingBox().center().y() - minY)
+            .average()
+            .orElseThrow();
       }
-      double minY = bodies.stream()
-          .flatMap(Collection::stream)
-          .mapToDouble(p -> p.boundingBox().min().y())
-          .min()
-          .orElseThrow();
-      return bodies.stream()
-          .flatMap(Collection::stream)
-          .mapToDouble(p -> p.boundingBox().center().y() - minY)
-          .average()
-          .orElseThrow();
+      return avgCenterHeight;
+    }
+
+    public List<List<Poly>> bodies() {
+      return bodies;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(bodies);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this)
+        return true;
+      if (obj == null || obj.getClass() != this.getClass())
+        return false;
+      var that = (Observation) obj;
+      return Objects.equals(this.bodies, that.bodies);
+    }
+
+    @Override
+    public String toString() {
+      return "Observation[" +
+          "bodies=" + bodies + ']';
     }
 
     public double pileHeight() {
-      if (bodies.isEmpty()) {
-        return 0d;
+      if (pileHeight == null) {
+        if (bodies.isEmpty()) {
+          pileHeight = 0d;
+        }
+        double minY = bodies.stream()
+            .flatMap(Collection::stream)
+            .mapToDouble(p -> p.boundingBox().min().y())
+            .min()
+            .orElseThrow();
+        double maxY = bodies.stream()
+            .flatMap(Collection::stream)
+            .mapToDouble(p -> p.boundingBox().max().y())
+            .max()
+            .orElseThrow();
+        pileHeight = maxY - minY;
       }
-      double minY = bodies.stream()
-          .flatMap(Collection::stream)
-          .mapToDouble(p -> p.boundingBox().min().y())
-          .min()
-          .orElseThrow();
-      double maxY = bodies.stream()
-          .flatMap(Collection::stream)
-          .mapToDouble(p -> p.boundingBox().max().y())
-          .max()
-          .orElseThrow();
-      return maxY - minY;
+      return pileHeight;
     }
+
   }
 
   public double averageAverageHeight() {
-    return observations.values().stream()
-        .mapToDouble(Observation::avgCenterHeight)
-        .average()
-        .orElse(0d);
+    if (averageAverageHeight == null) {
+      averageAverageHeight = observations.values().stream()
+          .mapToDouble(Observation::avgCenterHeight)
+          .average()
+          .orElse(0d);
+    }
+    return averageAverageHeight;
   }
 
-  public double averageMaxHeight() {
-    return observations.values().stream()
-        .mapToDouble(Observation::pileHeight)
-        .average()
-        .orElse(0d);
+  public double averagePileHeight() {
+    if (averagePileHeight == null) {
+      averagePileHeight = observations.values().stream()
+          .mapToDouble(Observation::pileHeight)
+          .average()
+          .orElse(0d);
+    }
+    return averagePileHeight;
   }
 
   public double duration() {
@@ -98,4 +151,24 @@ public record Outcome(SortedMap<Double, Observation> observations) {
         "pileHeightDiff=" + pileHeightDiff() +
         '}';
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(observations);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this)
+      return true;
+    if (obj == null || obj.getClass() != this.getClass())
+      return false;
+    var that = (Outcome) obj;
+    return Objects.equals(this.observations, that.observations);
+  }
+
+  public SortedMap<Double, Observation> observations() {
+    return observations;
+  }
+
 }
