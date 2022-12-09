@@ -96,9 +96,9 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumLeggedHybridRobot numLeggedHybridRobot(
       @Param("legs") List<AbstractLeggedHybridRobot.Leg> legs,
-      @Param(value = "trunkLength", dD = 4*LeggedMisc.TRUNK_LENGTH) double trunkLength,
+      @Param(value = "trunkLength", dD = 4 * LeggedMisc.TRUNK_LENGTH) double trunkLength,
       @Param(value = "trunkWidth", dD = LeggedMisc.TRUNK_WIDTH) double trunkWidth,
-      @Param(value = "trunkMass", dD = LeggedMisc.TRUNK_MASS) double trunkMass,
+      @Param(value = "trunkMass", dD = 4 * LeggedMisc.TRUNK_MASS) double trunkMass,
       @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY) double headMass,
       @Param("headSensors") List<Sensor<?>> headSensors,
       @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
@@ -111,7 +111,7 @@ public class Agents {
         headMass,
         headSensors,
         timedRealFunctionBuilder.apply(
-            NumLeggedHybridRobot.nOfInputs(legs,headSensors),
+            NumLeggedHybridRobot.nOfInputs(legs, headSensors),
             NumLeggedHybridRobot.nOfOutputs(legs)
         )
     );
