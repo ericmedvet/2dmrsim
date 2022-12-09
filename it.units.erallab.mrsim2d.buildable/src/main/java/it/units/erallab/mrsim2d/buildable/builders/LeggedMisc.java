@@ -52,7 +52,7 @@ public class LeggedMisc {
 
   @SuppressWarnings("unused")
   public static LegChunk legChunk(
-      @Param(value = "trunkLength", dD = LEG_CHUNK_LENGTH) double length,
+      @Param(value = "length", dD = LEG_CHUNK_LENGTH) double length,
       @Param(value = "width", dD = LEG_CHUNK_WIDTH) double width,
       @Param(value = "mass", dD = LEG_CHUNK_MASS) double mass,
       @Param(value = "upConnector", dS = "rigid") ConnectorType upConnector,
