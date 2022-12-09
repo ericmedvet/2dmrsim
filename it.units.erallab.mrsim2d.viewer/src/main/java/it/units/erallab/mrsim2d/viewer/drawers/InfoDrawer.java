@@ -106,16 +106,16 @@ public class InfoDrawer implements Drawer {
         .orElse(0d);
     double bbH = lines.length * g.getFontMetrics().getHeight();
     double x = switch (horizontalPosition) {
-      case LEFT -> MARGIN;
+      case LEFT -> g.getClipBounds().getMinX() + MARGIN;
       case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
     };
     double y = switch (verticalPosition) {
-      case TOP -> MARGIN;
+      case TOP -> g.getClipBounds().getMinY() + MARGIN;
       case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
     };
     g.setColor(DrawingUtils.Colors.TEXT);
     for (String line : lines) {
-      g.drawString(line, (float)x, (float)(y + g.getFontMetrics().getHeight()));
+      g.drawString(line, (float) x, (float) (y + g.getFontMetrics().getHeight()));
       y = y + g.getFontMetrics().getHeight();
     }
     return true;
