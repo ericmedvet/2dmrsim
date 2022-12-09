@@ -48,7 +48,7 @@ public class Tasks {
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
-      @Param(value = "initialYGap", dD = 1) double initialYGap
+      @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
     return new Locomotion(duration, terrain, initialXGap, initialYGap);
   }
