@@ -184,7 +184,7 @@ public class Main {
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion()");
+    Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion(initialXGap = 100)");
     //do thing
     activeLegged(engine, locomotion, viewer);
   }

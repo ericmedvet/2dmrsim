@@ -28,7 +28,7 @@ import java.util.List;
 
 public class LeggedMisc {
   protected final static double RIGID_DENSITY = 1d;
-  protected final static double LEG_CHUNK_LENGTH = 1.25d;
+  protected final static double LEG_CHUNK_LENGTH = 1.05d;
   protected final static double LEG_CHUNK_WIDTH = 1d;
   protected final static double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH * RIGID_DENSITY;
   protected final static double TRUNK_LENGTH = 6d;
