@@ -20,6 +20,7 @@ package it.units.erallab.mrsim2d.buildable.builders;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.actions.*;
 import it.units.erallab.mrsim2d.core.bodies.Body;
+import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
 import it.units.erallab.mrsim2d.core.bodies.SoftBody;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.malelab.jnb.core.Param;
@@ -53,6 +54,11 @@ public class Sensors {
       @Param(value = "r", dD = 1) Double r
   ) {
     return b -> new SenseDistanceToBody(Math.toRadians(a), r, b);
+  }
+
+  @SuppressWarnings("unused")
+  public static Sensor<RotationalJoint> ja() {
+    return SenseJointAngle::new;
   }
 
   @SuppressWarnings("unused")
