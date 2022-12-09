@@ -93,10 +93,17 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
     performer.perform(new TranslateBodyAt(head, trunk.poly().boundingBox().max()), this);
     performer.perform(new AttachClosestAnchors(2, (Anchorable) head, trunk, Anchor.Link.Type.RIGID), this);
     //iterate over legs
-    double dCX = trunk.poly().boundingBox().width() / ((double) legs.size() + 1d);
-    double cX = trunk.poly().boundingBox().min().x();
+    double maxLegWidth = legs.stream()
+        .mapToDouble(l -> l.legChunks().stream()
+            .mapToDouble(LegChunk::width)
+            .max()
+            .orElse(0d)
+        )
+        .max()
+        .orElse(0d);
+    double dCX = (trunk.poly().boundingBox().width() - 2 * maxLegWidth) / ((double) legs.size() - 1);
+    double cX = trunk.poly().boundingBox().min().x() + maxLegWidth;
     for (Leg leg : legs) {
-      cX = cX + dCX;
       Anchorable upperBody = trunk;
       List<LegChunkBody> chunkBodies = new ArrayList<>(leg.legChunks().size());
       for (LegChunk legChunk : leg.legChunks()) {
@@ -153,6 +160,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
         upperBody = joint;
         chunkBodies.add(new LegChunkBody(upConnector, joint));
       }
+      cX = cX + dCX;
       //create down connector (foot)
       Body downConnector = null;
       if (leg.downConnector().equals(ConnectorType.SOFT)) {
