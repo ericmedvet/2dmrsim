@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,24 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
   private final Drawer drawer;
   private final BufferedImage image;
   private final List<Snapshot> snapshots;
+  private final boolean justLastSnapshot;
   private int frameCount;
   private double lastDrawnT;
 
-  public FramesImageBuilder(int frameW, int frameH, int nOfFrames, double deltaT, Direction direction, Drawer drawer) {
+  public FramesImageBuilder(
+      int frameW,
+      int frameH,
+      int nOfFrames,
+      double deltaT,
+      Direction direction,
+      boolean justLastSnapshot,
+      Drawer drawer
+  ) {
     this.nOfFrames = nOfFrames;
     this.deltaT = deltaT;
     this.direction = direction;
     this.drawer = drawer;
+    this.justLastSnapshot = justLastSnapshot;
     frameCount = 0;
     lastDrawnT = 0d;
     //prepare image
@@ -69,7 +79,6 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
     snapshots.add(snapshot);
     if (snapshot.t() >= lastDrawnT + deltaT) {
       lastDrawnT = snapshot.t();
-      frameCount = frameCount + 1;
       //frame
       BoundingBox imageFrame;
       if (direction.equals(Direction.HORIZONTAL)) {
@@ -83,10 +92,14 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
             new Point(1d, (double) (frameCount + 1) / (double) nOfFrames)
         );
       }
+      frameCount = frameCount + 1;
       //draw
       Graphics2D g = image.createGraphics();
       g.setClip(0, 0, image.getWidth(), image.getHeight());
-      Drawer.clip(imageFrame, drawer).draw(snapshots, g);
+      Drawer.clip(imageFrame, drawer).draw(
+          justLastSnapshot ? snapshots.subList(snapshots.size() - 1, snapshots.size()) : snapshots,
+          g
+      );
       g.dispose();
       snapshots.clear();
     }
