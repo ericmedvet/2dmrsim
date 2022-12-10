@@ -1,9 +1,11 @@
-package it.units.erallab.mrsim2d.viewer;
+package it.units.erallab.mrsim2d.viewer.drawers;
 
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.erallab.mrsim2d.viewer.AbstractMemoryDrawer;
+import it.units.erallab.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;
 import java.util.SortedMap;

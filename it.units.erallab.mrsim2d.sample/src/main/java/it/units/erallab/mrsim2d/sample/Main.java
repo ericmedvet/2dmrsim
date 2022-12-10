@@ -160,7 +160,7 @@ public class Main {
             )
           );
           signals=1;
-          directional=t
+          directional=true
         )
         """;
     DistributedNumGridVSR vsr = (DistributedNumGridVSR) nb.build(agentS);
@@ -186,7 +186,7 @@ public class Main {
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion(initialXGap = 100)");
     //do thing
-    activeLegged(engine, locomotion, viewer);
+    activeModularLegged(engine, locomotion, viewer);
   }
 
   private static void passiveLegged(
@@ -200,7 +200,7 @@ public class Main {
           legs=3 * [
             s.a.l.leg(legChunks=[s.a.l.legChunk(); s.a.l.legChunk()];downConnector=soft)
           ];
-          function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
+          function=s.f.sinP(a=s.range(min=0.0;max=1);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
         )
         """;
     NumLeggedHybridRobot lhmr = (NumLeggedHybridRobot) nb.build(agentS);

@@ -19,10 +19,7 @@ package it.units.erallab.mrsim2d.viewer;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
-import it.units.erallab.mrsim2d.viewer.drawers.ComponentsDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.EngineProfilingDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.InfoDrawer;
-import it.units.erallab.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
+import it.units.erallab.mrsim2d.viewer.drawers.*;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
@@ -114,15 +111,28 @@ public class Drawers {
     );
   }
 
+  public static Drawer simpleAgentWithBrainsIO() {
+    return Drawer.of(
+        Drawer.clip(
+            new BoundingBox(new Point(0, 0), new Point(0.30, 1)),
+            simpleAgent()
+        ),
+        Drawer.clip(
+            new BoundingBox(new Point(0.30, 0), new Point(1, 1)),
+            new NumMultiBrainedIODrawer()
+        )
+    );
+  }
+
   public static Drawer simpleAgentWithVelocities() {
     FirstAgentVelocityExtractor velocityExtractor = new FirstAgentVelocityExtractor(2d);
     return Drawer.of(
         Drawer.clip(
-            new BoundingBox(new Point(0, 0), new Point(0.33, 1)),
+            new BoundingBox(new Point(0, 0), new Point(0.30, 1)),
             simpleAgent()
         ),
         Drawer.clip(
-            new BoundingBox(new Point(0.34, 0), new Point(0.66, 1)),
+            new BoundingBox(new Point(0.34, 0), new Point(0.65, 1)),
             new LinePlotter(velocityExtractor.andThen(p -> p.map(Point::x).orElse(0d)), 10, "vx=%+4.1f")
         ),
         Drawer.clip(

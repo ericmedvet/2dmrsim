@@ -45,6 +45,8 @@ import java.util.random.RandomGenerator;
 
 public class Misc {
 
+  public enum MiniAgentInfo {NONE, VELOCITY, BRAINS}
+
   private Misc() {
   }
 
@@ -55,7 +57,7 @@ public class Misc {
       @Param(value = "profilingTime", dD = 1) double profilingTime,
       @Param(value = "miniWorldEnlargement", dD = 10) double miniWorldEnlargement,
       @Param(value = "miniWorld") boolean miniWorld,
-      @Param(value = "miniAgents", dB = true) boolean miniAgents,
+      @Param(value = "miniAgents", dS = "brains") MiniAgentInfo miniAgentInfo,
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions
   ) {
@@ -83,11 +85,15 @@ public class Misc {
           Drawer.clear(),
           worldDrawer
       ));
-      if (miniAgents) {
+      if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
         drawers.add(new StackedMultipliedDrawer<>(
-            Drawers::simpleAgentWithVelocities,
+            switch (miniAgentInfo) {
+              case BRAINS -> Drawers::simpleAgentWithBrainsIO;
+              case VELOCITY -> Drawers::simpleAgentWithVelocities;
+              default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
+            },
             new EmbodiedAgentsExtractor(),
-            0.2,
+            0.25,
             0.05,
             StackedMultipliedDrawer.Direction.VERTICAL,
             Drawer.VerticalPosition.TOP,
