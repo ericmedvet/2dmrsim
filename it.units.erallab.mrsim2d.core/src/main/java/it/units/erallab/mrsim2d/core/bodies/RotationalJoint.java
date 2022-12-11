@@ -29,12 +29,12 @@ public interface RotationalJoint extends RigidBody, Anchorable {
       double controlD,
       double angleTolerance
   ) {
-    public final static double MAX_SPEED = 10;
-    public final static double MAX_TORQUE = 250;
-    public final static double CONTROL_P = 100;
+    public final static double MAX_SPEED = 20;
+    public final static double MAX_TORQUE = 1000;
+    public final static double CONTROL_P = 10;
     public final static double CONTROL_I = 2;
     public final static double CONTROL_D = 2;
-    public final static double ANGLE_TOLERANCE = 0.001;
+    public final static double ANGLE_TOLERANCE = 0.000;
 
     public Motor() {
       this(MAX_SPEED, MAX_TORQUE, CONTROL_P, CONTROL_I, CONTROL_D, ANGLE_TOLERANCE);

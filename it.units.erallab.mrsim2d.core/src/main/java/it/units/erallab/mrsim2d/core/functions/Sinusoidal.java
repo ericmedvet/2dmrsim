@@ -12,6 +12,8 @@ import java.util.stream.IntStream;
  */
 public class Sinusoidal implements TimedRealFunction, Parametrized {
 
+  private final static DoubleRange PARAM_RANGE = DoubleRange.SYMMETRIC_UNIT;
+
   private final int nOfInputs;
   private final int nOfOutputs;
   private final double[] phases;
@@ -56,10 +58,10 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   public double[] apply(double t, double[] input) {
     return IntStream.range(0, nOfOutputs)
         .mapToDouble(i -> {
-          double a = amplitudeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(amplitudes[i]));
-          double p = phaseRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(phases[i]));
-          double f = frequencyRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(frequencies[i]));
-          double b = biasRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(biases[i]));
+          double a = amplitudeRange.denormalize(PARAM_RANGE.normalize(amplitudes[i]));
+          double p = phaseRange.denormalize(PARAM_RANGE.normalize(phases[i]));
+          double f = frequencyRange.denormalize(PARAM_RANGE.normalize(frequencies[i]));
+          double b = biasRange.denormalize(PARAM_RANGE.normalize(biases[i]));
           return a * Math.sin(2d * Math.PI * f * t + p) + b;
         })
         .toArray();
@@ -120,7 +122,6 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
     }
     if (types.contains(Type.BIAS)) {
       System.arraycopy(params, i, biases, 0, nOfOutputs);
-      i = i + nOfOutputs;
     }
   }
 

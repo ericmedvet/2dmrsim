@@ -21,9 +21,11 @@ import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
+import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
+import it.units.erallab.mrsim2d.core.functions.GroupedSinusoidal;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
@@ -35,6 +37,7 @@ import it.units.erallab.mrsim2d.viewer.VideoUtils;
 import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.io.File;
+import java.util.List;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -69,9 +72,9 @@ public class Main {
           function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.01)
         )
         """;
-    NumLeggedHybridRobot lhmr = (NumLeggedHybridRobot) nb.build(agentS);
-    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
-    task.run(() -> lhmr, engineSupplier.get(), consumer);
+    NumLeggedHybridRobot agent = (NumLeggedHybridRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
   private static void activeModularLegged(
@@ -92,9 +95,9 @@ public class Main {
           function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.1)
         )
         """;
-    NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
-    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
-    task.run(() -> lhmr, engineSupplier.get(), consumer);
+    NumLeggedHybridModularRobot agent = (NumLeggedHybridModularRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
   private static void centralizedVsr(
@@ -127,9 +130,9 @@ public class Main {
           )
         )
         """;
-    CentralizedNumGridVSR vsr = (CentralizedNumGridVSR) nb.build(agentS);
-    ((Parametrized)vsr.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
-    task.run(() -> vsr, engineSupplier.get(), consumer);
+    CentralizedNumGridVSR agent = (CentralizedNumGridVSR) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(33), new DoubleRange(-5, 5));
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
   private static void distributedVsr(
@@ -163,9 +166,9 @@ public class Main {
           directional=true
         )
         """;
-    DistributedNumGridVSR vsr = (DistributedNumGridVSR) nb.build(agentS);
-    vsr.brains().forEach(b -> ((Parametrized)b).randomize(new Random(33), new DoubleRange(-5, 5)));
-    task.run(() -> vsr, engineSupplier.get(), consumer);
+    DistributedNumGridVSR agent = (DistributedNumGridVSR) nb.build(agentS);
+    agent.brains().forEach(b -> ((Parametrized) b).randomize(new Random(33), new DoubleRange(-5, 5)));
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
   public static void main(String[] args) {
@@ -184,9 +187,15 @@ public class Main {
     );
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Locomotion locomotion = (Locomotion) nb.build("sim.task.locomotion(initialXGap = 100)");
+    Locomotion locomotion = (Locomotion) nb.build("""
+          sim.task.locomotion(
+            initialXGap = 0.1;
+            duration = 120;
+            terrain = s.t.flat(w = 2200)
+          )
+        """);
     //do thing
-    activeModularLegged(engine, locomotion, viewer);
+    walker(engine, locomotion, viewer);
   }
 
   private static void passiveLegged(
@@ -198,14 +207,20 @@ public class Main {
     String agentS = """
         s.a.numLeggedHybridRobot(
           legs=3 * [
-            s.a.l.leg(legChunks=[s.a.l.legChunk(); s.a.l.legChunk()];downConnector=soft)
+            s.a.l.leg(legChunks=2*[s.a.l.legChunk(length=1.5)];downConnector=rigid)
           ];
-          function=s.f.sinP(a=s.range(min=0.0;max=1);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
+          trunkLength = 20;
+          function=s.f.sinP(
+            a=s.range(min=1;max=1);
+            f=s.range(min=1;max=1);
+            p=s.range(min=-1.0;max=1.0);
+            b=s.range(min=0.9;max=0.9)
+          )
         )
         """;
-    NumLeggedHybridRobot lhmr = (NumLeggedHybridRobot) nb.build(agentS);
-    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
-    task.run(() -> lhmr, engineSupplier.get(), consumer);
+    NumLeggedHybridRobot agent = (NumLeggedHybridRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
   private static void passiveModularLegged(
@@ -224,8 +239,48 @@ public class Main {
           function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
         )
         """;
-    NumLeggedHybridModularRobot lhmr = (NumLeggedHybridModularRobot) nb.build(agentS);
-    ((Parametrized)lhmr.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
-    task.run(() -> lhmr, engineSupplier.get(), consumer);
+    NumLeggedHybridModularRobot agent = (NumLeggedHybridModularRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
+  }
+
+  private static void walker(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    Supplier<AbstractLeggedHybridRobot.Leg> leg = () -> (AbstractLeggedHybridRobot.Leg) nb.build(
+        "s.a.l.leg(legChunks=2*[s.a.l.legChunk(length=1.5)];downConnector=rigid)");
+    Supplier<GroupedSinusoidal.Group> group = () -> new GroupedSinusoidal.Group(
+        2,
+        new DoubleRange(0.5, 0.5),
+        new DoubleRange(1, 1),
+        new DoubleRange(-1.57, -1.57),
+        new DoubleRange(-0.5, -0.5)
+    );
+    NumLeggedHybridRobot agent = new NumLeggedHybridRobot(
+        List.of(
+            leg.get(),
+            leg.get(),
+            leg.get(),
+            leg.get(),
+            leg.get(),
+            leg.get()
+        ),
+        20, 1, 10, 1, List.of(),
+        new GroupedSinusoidal(
+            0,
+            List.of(
+                group.get(),
+                group.get(),
+                group.get(),
+                group.get(),
+                group.get(),
+                group.get()
+            )
+        )
+    );
+    task.run(() -> agent, engineSupplier.get(), consumer);
   }
 }
