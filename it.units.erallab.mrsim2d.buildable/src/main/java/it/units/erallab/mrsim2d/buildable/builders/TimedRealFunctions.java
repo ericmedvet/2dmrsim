@@ -96,7 +96,8 @@ public class TimedRealFunctions {
   public static Builder<Sinusoidal> sinP(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -104,7 +105,8 @@ public class TimedRealFunctions {
         EnumSet.of(Sinusoidal.Type.PHASE),
         phaseRange,
         frequencyRange,
-        amplitudeRange
+        amplitudeRange,
+        biasRange
     );
   }
 
@@ -112,7 +114,8 @@ public class TimedRealFunctions {
   public static Builder<Sinusoidal> sinPA(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -120,7 +123,8 @@ public class TimedRealFunctions {
         EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.AMPLITUDE),
         phaseRange,
         frequencyRange,
-        amplitudeRange
+        amplitudeRange,
+        biasRange
     );
   }
 
@@ -128,7 +132,8 @@ public class TimedRealFunctions {
   public static Builder<Sinusoidal> sinPF(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -136,7 +141,8 @@ public class TimedRealFunctions {
         EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY),
         phaseRange,
         frequencyRange,
-        amplitudeRange
+        amplitudeRange,
+        biasRange
     );
   }
 
@@ -144,7 +150,8 @@ public class TimedRealFunctions {
   public static Builder<Sinusoidal> sinPFA(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
   ) {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
@@ -152,7 +159,24 @@ public class TimedRealFunctions {
         EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE),
         phaseRange,
         frequencyRange,
-        amplitudeRange
+        amplitudeRange,
+        biasRange
+    );
+  }
+  public static Builder<Sinusoidal> sinPFAB(
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
+  ) {
+    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
+        nOfInputs,
+        nOfOutputs,
+        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE, Sinusoidal.Type.BIAS),
+        phaseRange,
+        frequencyRange,
+        amplitudeRange,
+        biasRange
     );
   }
 
