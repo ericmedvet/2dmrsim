@@ -59,7 +59,8 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
           double a = amplitudeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(amplitudes[i]));
           double p = phaseRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(phases[i]));
           double f = frequencyRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(frequencies[i]));
-          return a * Math.sin(2d * Math.PI * f * t + p);
+          double b = biasRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(biases[i]));
+          return a * Math.sin(2d * Math.PI * f * t + p) + b;
         })
         .toArray();
   }
@@ -164,6 +165,7 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   public void setPhases(double phase) {
     setPhases(nCopies(phase, nOfOutputs));
   }
+
   public void setBiases(double bias) {
     setBiases(nCopies(bias, nOfOutputs));
   }
