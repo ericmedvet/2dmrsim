@@ -21,11 +21,9 @@ import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
-import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
-import it.units.erallab.mrsim2d.core.functions.GroupedSinusoidal;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
@@ -37,7 +35,6 @@ import it.units.erallab.mrsim2d.viewer.VideoUtils;
 import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.io.File;
-import java.util.List;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -223,6 +220,30 @@ public class Main {
     task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
+  private static void walker(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.numLeggedHybridRobot(
+          legs=8 * [
+            s.a.l.leg(legChunks=2*[s.a.l.legChunk(length=1.5;motorMaxTorque=100000)];downConnector=rigid)
+          ];
+          trunkLength = 40;
+          trunkMass = 10;
+          function=s.f.groupedSin(
+            size = 2;
+            f = s.range(min=1;max=2)
+          )
+        )
+        """;
+    NumLeggedHybridRobot agent = (NumLeggedHybridRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
+  }
+
   private static void passiveModularLegged(
       Supplier<Engine> engineSupplier,
       Task<Supplier<EmbodiedAgent>, ?> task,
@@ -244,43 +265,4 @@ public class Main {
     task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
-  private static void walker(
-      Supplier<Engine> engineSupplier,
-      Task<Supplier<EmbodiedAgent>, ?> task,
-      Consumer<Snapshot> consumer
-  ) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    Supplier<AbstractLeggedHybridRobot.Leg> leg = () -> (AbstractLeggedHybridRobot.Leg) nb.build(
-        "s.a.l.leg(legChunks=2*[s.a.l.legChunk(length=1.5)];downConnector=rigid)");
-    Supplier<GroupedSinusoidal.Group> group = () -> new GroupedSinusoidal.Group(
-        2,
-        new DoubleRange(0.5, 0.5),
-        new DoubleRange(1, 1),
-        new DoubleRange(-1.57, -1.57),
-        new DoubleRange(-0.5, -0.5)
-    );
-    NumLeggedHybridRobot agent = new NumLeggedHybridRobot(
-        List.of(
-            leg.get(),
-            leg.get(),
-            leg.get(),
-            leg.get(),
-            leg.get(),
-            leg.get()
-        ),
-        20, 1, 10, 1, List.of(),
-        new GroupedSinusoidal(
-            0,
-            List.of(
-                group.get(),
-                group.get(),
-                group.get(),
-                group.get(),
-                group.get(),
-                group.get()
-            )
-        )
-    );
-    task.run(() -> agent, engineSupplier.get(), consumer);
-  }
 }

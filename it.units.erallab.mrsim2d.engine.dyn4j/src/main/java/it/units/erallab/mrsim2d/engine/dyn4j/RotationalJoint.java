@@ -16,6 +16,7 @@ import java.util.List;
 
 public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.RotationalJoint, MultipartBody, Actuable {
   private static final DoubleRange JOINT_ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
+  private static final boolean SET_LIMITS = false;
 
   private static final double ANCHOR_REL_GAP = 0.1;
   private final double mass;
@@ -72,9 +73,11 @@ public class RotationalJoint implements it.units.erallab.mrsim2d.core.bodies.Rot
     body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly2);
     //create joint
     joint = new RevoluteJoint<>(body1, body2, new Vector2(length / 2d, width / 2d));
-    joint.setReferenceAngle(0);
-    joint.setLimits(JOINT_ANGLE_RANGE.min(), JOINT_ANGLE_RANGE.max());
-    joint.setLimitEnabled(true);
+    //joint.setReferenceAngle(0);
+    if (SET_LIMITS) {
+      joint.setLimits(JOINT_ANGLE_RANGE.min(), JOINT_ANGLE_RANGE.max());
+      joint.setLimitEnabled(true);
+    }
     joint.setMotorEnabled(true);
     joint.setMaximumMotorTorque(motor.maxTorque());
     //create anchors

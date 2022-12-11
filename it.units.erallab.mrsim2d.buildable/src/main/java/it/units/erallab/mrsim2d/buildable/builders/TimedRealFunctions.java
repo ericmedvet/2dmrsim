@@ -24,6 +24,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
+import java.util.stream.IntStream;
 
 /**
  * @author "Eric Medvet" on 2022/10/03 for 2dmrsim
@@ -78,17 +79,26 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Builder<NoisedTRF> noised(
-      @Param(value = "inputSigma", dD = 0) double inputSigma,
-      @Param(value = "outputSigma", dD = 0) double outputSigma,
-      @Param(value="randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
-      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
+  public static Builder<GroupedSinusoidal> groupedSin(
+      @Param("size") int size,
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=0.5)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange,
+      @Param(value = "s", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange sumRange
   ) {
-    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
-        innerFunction.apply(nOfInputs,nOfOutputs),
-        inputSigma,
-        outputSigma,
-        randomGenerator
+    return (nOfInputs, nOfOutputs) -> new GroupedSinusoidal(
+        nOfInputs,
+        IntStream.range(0, nOfOutputs / size)
+            .mapToObj(i -> new GroupedSinusoidal.Group(
+                size,
+                amplitudeRange,
+                frequencyRange,
+                phaseRange,
+                biasRange,
+                sumRange
+            ))
+            .toList()
     );
   }
 
@@ -163,6 +173,23 @@ public class TimedRealFunctions {
         biasRange
     );
   }
+
+  @SuppressWarnings("unused")
+  public static Builder<NoisedTRF> noised(
+      @Param(value = "inputSigma", dD = 0) double inputSigma,
+      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value = "randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
+  ) {
+    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
+        innerFunction.apply(nOfInputs, nOfOutputs),
+        inputSigma,
+        outputSigma,
+        randomGenerator
+    );
+  }
+
+  @SuppressWarnings("unused")
   public static Builder<Sinusoidal> sinPFAB(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
