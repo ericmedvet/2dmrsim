@@ -33,7 +33,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>18</jdk.version>
-        <revision>0.7.1</revision>
+        <revision>0.7.2-dev</revision>
         <jnb.version>1.0.2</jnb.version>
     </properties>
     <dependencies>
