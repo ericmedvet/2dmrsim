@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Eric Medvet <eric.medvet@gmail.com> (as eric)
+ * Copyright 2022 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import java.util.random.RandomGenerator;
  */
 public class NoisedTRF extends CompositeTRF {
   private final double inputSigma;
-  private final double ouputSigma;
+  private final double outputSigma;
   private final RandomGenerator randomGenerator;
 
-  public NoisedTRF(TimedRealFunction innerF, double inputSigma, double ouputSigma, RandomGenerator randomGenerator) {
+  public NoisedTRF(TimedRealFunction innerF, double inputSigma, double outputSigma, RandomGenerator randomGenerator) {
     super(innerF);
     this.inputSigma = inputSigma;
-    this.ouputSigma = ouputSigma;
+    this.outputSigma = outputSigma;
     this.randomGenerator = randomGenerator;
   }
 
@@ -41,8 +41,8 @@ public class NoisedTRF extends CompositeTRF {
       noisedInput = Arrays.stream(input).map(v -> v + randomGenerator.nextGaussian(0, inputSigma)).toArray();
     }
     double[] noisedOutput = innerF.apply(t, noisedInput);
-    if (inputSigma > 0) {
-      noisedOutput = Arrays.stream(noisedOutput).map(v -> v + randomGenerator.nextGaussian(0, ouputSigma)).toArray();
+    if (outputSigma > 0) {
+      noisedOutput = Arrays.stream(noisedOutput).map(v -> v + randomGenerator.nextGaussian(0, outputSigma)).toArray();
     }
     return noisedOutput;
   }
@@ -61,7 +61,7 @@ public class NoisedTRF extends CompositeTRF {
   public String toString() {
     return "NoisedTRF{" +
         "inputSigma=" + inputSigma +
-        ", ouputSigma=" + ouputSigma +
+        ", ouputSigma=" + outputSigma +
         '}';
   }
 }
