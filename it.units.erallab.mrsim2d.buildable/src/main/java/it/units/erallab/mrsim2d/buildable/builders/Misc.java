@@ -167,7 +167,7 @@ public class Misc {
 
   @SuppressWarnings("unused")
   public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
-    return new Random(seed);
+    return seed >= 0 ? new Random(seed) : new Random();
   }
 
 
