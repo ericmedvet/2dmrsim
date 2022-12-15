@@ -61,18 +61,18 @@ public class StackedMultipliedDrawer<T> implements Drawer {
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     //build list of seqs of snapshots
-    List<List<Snapshot>> lists = new ArrayList<>();
-    for (Snapshot snapshot : snapshots) {
-      List<Snapshot> multiplied = multiplier.apply(snapshot);
-      if (drawers.isEmpty()) {
-        multiplied.forEach(s -> drawers.add(innerDrawerSupplier.get()));
-      }
-      if (lists.isEmpty()) {
-        multiplied.forEach(s -> lists.add(new ArrayList<>()));
-      }
-      for (int i = 0; i < multiplied.size(); i++) {
-        lists.get(i).add(multiplied.get(i));
-      }
+    List<List<Snapshot>> multiplied = snapshots.stream().map(multiplier::apply).toList();
+    int lastSize = multiplied.get(multiplied.size() - 1).size();
+    multiplied = multiplied.stream().filter(l -> l.size() == lastSize).toList();
+    List<List<Snapshot>> lists = new ArrayList<>(lastSize);
+    for (int i = 0; i < lastSize; i++) {
+      int finalI = i;
+      lists.add(multiplied.stream().map(l -> l.get(finalI)).toList());
+    }
+    //possibly rebuild drawers
+    if (drawers.size() != lists.size()) {
+      drawers.clear();
+      lists.forEach(l -> drawers.add(innerDrawerSupplier.get()));
     }
     //prepare bounding boxes
     double nOfChildren = lists.size();
