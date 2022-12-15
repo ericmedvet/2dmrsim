@@ -26,10 +26,13 @@ import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
+import it.units.erallab.mrsim2d.core.tasks.Observation;
+import it.units.erallab.mrsim2d.core.tasks.Outcome;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
@@ -81,15 +84,17 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
         maxY + initialYGap - agentBB.min().y()
     )));
     //run for defined time
-    Map<Double, Outcome.Observation> observations = new HashMap<>();
+    Map<Double, Observation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new Outcome.Observation(
-              embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
-              PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
+          new Observation(
+              List.of(new Observation.Agent(
+                  embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
+              ))
           )
       );
     }

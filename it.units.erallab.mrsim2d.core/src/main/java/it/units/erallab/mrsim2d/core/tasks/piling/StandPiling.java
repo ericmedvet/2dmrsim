@@ -26,8 +26,11 @@ import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
+import it.units.erallab.mrsim2d.core.tasks.Observation;
+import it.units.erallab.mrsim2d.core.tasks.Outcome;
 import it.units.erallab.mrsim2d.core.tasks.Task;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
+import it.units.erallab.mrsim2d.core.util.PolyUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -97,15 +100,18 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
       agents.add(agent);
     }
     //run for defined time
-    Map<Double, Outcome.Observation> observations = new HashMap<>();
+    Map<Double, Observation> observations = new HashMap<>();
     while (engine.t() < duration) {
       //tick
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new Outcome.Observation(agents.stream()
-              .map(a -> a.bodyParts().stream().map(Body::poly).toList())
+          new Observation(agents.stream()
+              .map(a -> new Observation.Agent(
+                  a.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())
+              ))
               .toList()
           )
       );

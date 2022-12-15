@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
-import it.units.erallab.mrsim2d.core.tasks.locomotion.Outcome;
+import it.units.erallab.mrsim2d.core.tasks.Outcome;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.malelab.jnb.core.Param;
 
@@ -31,14 +31,28 @@ public class LocomotionOutcomeFunctions {
   public static Function<Outcome, Double> xDistance(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).xDistance();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXDistance();
   }
 
   @SuppressWarnings("unused")
   public static Function<Outcome, Double> xVelocity(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).xVelocity();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXVelocity();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> avgArea(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageArea();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> avgTerrainHeight(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageTerrainHeight();
   }
 
 }

@@ -16,7 +16,7 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
-import it.units.erallab.mrsim2d.core.tasks.piling.Outcome;
+import it.units.erallab.mrsim2d.core.tasks.Outcome;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
 import it.units.malelab.jnb.core.Param;
 
@@ -31,14 +31,28 @@ public class PilingOutcomeFunctions {
   public static Function<Outcome, Double> avgH(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).averageAverageHeight();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageHeight();
   }
 
   @SuppressWarnings("unused")
   public static Function<Outcome, Double> maxH(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).averagePileHeight();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxHeight();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> avgW(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageWidth();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> maxW(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxWidth();
   }
 
 

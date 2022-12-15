@@ -12,7 +12,7 @@ public class Outcome {
 
   private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA}
 
-  private enum Aggregate {INITIAL, FINAL, AVERAGE}
+  private enum Aggregate {INITIAL, FINAL, AVERAGE, MIN, MAX}
 
   private enum Subject {FIRST, ALL}
 
@@ -41,6 +41,8 @@ public class Outcome {
         case FINAL -> get(metric, subject, observations.get(observations.lastKey()));
         case INITIAL -> get(metric, subject, observations.get(observations.firstKey()));
         case AVERAGE -> observations.values().stream().mapToDouble(o -> get(metric, subject, o)).average().orElse(0d);
+        case MIN -> observations.values().stream().mapToDouble(o -> get(metric, subject, o)).min().orElse(0d);
+        case MAX -> observations.values().stream().mapToDouble(o -> get(metric, subject, o)).max().orElse(0d);
       };
       metricMap.put(new Key(metric, aggregate, subject), value);
     }
@@ -93,6 +95,22 @@ public class Outcome {
 
   public double allAgentsFinalHeight() {
     return get(Aggregate.FINAL, Metric.BB_H, Subject.ALL);
+  }
+
+  public double allAgentsMaxHeight() {
+    return get(Aggregate.MAX, Metric.BB_H, Subject.ALL);
+  }
+
+  public double allAgentsFinalWidth() {
+    return get(Aggregate.FINAL, Metric.BB_W, Subject.ALL);
+  }
+
+  public double allAgentsMaxWidth() {
+    return get(Aggregate.MAX, Metric.BB_W, Subject.ALL);
+  }
+
+  public double allAgentsAverageWidth() {
+    return get(Aggregate.AVERAGE, Metric.BB_W, Subject.ALL);
   }
 
   public double allAgentsAverageHeight() {
