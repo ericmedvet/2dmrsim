@@ -115,9 +115,9 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
           Files.size(file.toPath()) / 1024f / 1024f,
           Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f
       ));
-
     } catch (IOException e) {
       L.severe(String.format("Cannot save file due to %s", e));
+      return null;
     }
     return file;
   }
