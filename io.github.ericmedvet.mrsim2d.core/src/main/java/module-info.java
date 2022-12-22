@@ -2,7 +2,7 @@
  * @author "Eric Medvet" on 2022/08/28 for 2dmrsim
  */
 
-module it.units.erallab.mrsim2d.core {
+module io.github.ericmedvet.mrsim2d.core {
   requires java.logging;
   exports io.github.ericmedvet.mrsim2d.core;
   exports io.github.ericmedvet.mrsim2d.core.actions;
