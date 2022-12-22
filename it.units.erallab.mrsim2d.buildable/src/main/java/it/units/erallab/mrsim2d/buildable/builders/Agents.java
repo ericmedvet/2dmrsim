@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
@@ -26,7 +27,6 @@ import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 

@@ -16,6 +16,9 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jnb.core.ParamMap;
 import it.units.erallab.mrsim2d.core.Snapshot;
 import it.units.erallab.mrsim2d.core.engine.Engine;
 import it.units.erallab.mrsim2d.core.geometry.BoundingBox;
@@ -34,9 +37,6 @@ import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import it.units.erallab.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
 import it.units.erallab.mrsim2d.viewer.drawers.bodies.*;
 import it.units.erallab.mrsim2d.viewer.framers.AllAgentsFramer;
-import it.units.malelab.jnb.core.NamedBuilder;
-import it.units.malelab.jnb.core.Param;
-import it.units.malelab.jnb.core.ParamMap;
 
 import java.util.*;
 import java.util.function.Function;
@@ -45,9 +45,14 @@ import java.util.random.RandomGenerator;
 
 public class Misc {
 
+  private Misc() {
+  }
+
   public enum MiniAgentInfo {NONE, VELOCITY, BRAINS}
 
-  private Misc() {
+  @SuppressWarnings("unused")
+  public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
+    return seed >= 0 ? new Random(seed) : new Random();
   }
 
   @SuppressWarnings("unused")
@@ -163,11 +168,6 @@ public class Misc {
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
   ) {
     return a -> task.run(a, engineSupplier.get());
-  }
-
-  @SuppressWarnings("unused")
-  public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
-    return seed >= 0 ? new Random(seed) : new Random();
   }
 
 

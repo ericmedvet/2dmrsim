@@ -16,9 +16,9 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.tasks.Outcome;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.function.Function;
 
@@ -35,17 +35,17 @@ public class PilingOutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome, Double> maxH(
-      @Param(value = "transientTime", dD = 0) double transientTime
-  ) {
-    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxHeight();
-  }
-
-  @SuppressWarnings("unused")
   public static Function<Outcome, Double> avgW(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageWidth();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> maxH(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxHeight();
   }
 
   @SuppressWarnings("unused")

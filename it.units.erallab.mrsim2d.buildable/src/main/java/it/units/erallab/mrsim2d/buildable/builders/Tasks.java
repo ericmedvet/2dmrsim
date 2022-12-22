@@ -16,11 +16,11 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.tasks.locomotion.Locomotion;
 import it.units.erallab.mrsim2d.core.tasks.piling.FallPiling;
 import it.units.erallab.mrsim2d.core.tasks.piling.StandPiling;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.random.RandomGenerator;
 

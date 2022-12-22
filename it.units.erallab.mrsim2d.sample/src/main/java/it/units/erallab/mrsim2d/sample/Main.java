@@ -16,6 +16,7 @@
 
 package it.units.erallab.mrsim2d.sample;
 
+import io.github.ericmedvet.jnb.core.NamedBuilder;
 import it.units.erallab.mrsim2d.buildable.PreparedNamedBuilder;
 import it.units.erallab.mrsim2d.core.EmbodiedAgent;
 import it.units.erallab.mrsim2d.core.Snapshot;
@@ -32,7 +33,6 @@ import it.units.erallab.mrsim2d.viewer.Drawer;
 import it.units.erallab.mrsim2d.viewer.RealtimeViewer;
 import it.units.erallab.mrsim2d.viewer.VideoBuilder;
 import it.units.erallab.mrsim2d.viewer.VideoUtils;
-import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.io.File;
 import java.util.Random;
@@ -220,6 +220,27 @@ public class Main {
     task.run(() -> agent, engineSupplier.get(), consumer);
   }
 
+  private static void passiveModularLegged(
+      Supplier<Engine> engineSupplier,
+      Task<Supplier<EmbodiedAgent>, ?> task,
+      Consumer<Snapshot> consumer
+  ) {
+    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    String agentS = """
+        s.a.numLeggedHybridModularRobot(
+          modules=[
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft);
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
+            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft)
+          ];          
+          function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
+        )
+        """;
+    NumLeggedHybridModularRobot agent = (NumLeggedHybridModularRobot) nb.build(agentS);
+    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    task.run(() -> agent, engineSupplier.get(), consumer);
+  }
+
   private static void walker(
       Supplier<Engine> engineSupplier,
       Task<Supplier<EmbodiedAgent>, ?> task,
@@ -240,27 +261,6 @@ public class Main {
         )
         """;
     NumLeggedHybridRobot agent = (NumLeggedHybridRobot) nb.build(agentS);
-    ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
-    task.run(() -> agent, engineSupplier.get(), consumer);
-  }
-
-  private static void passiveModularLegged(
-      Supplier<Engine> engineSupplier,
-      Task<Supplier<EmbodiedAgent>, ?> task,
-      Consumer<Snapshot> consumer
-  ) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    String agentS = """
-        s.a.numLeggedHybridModularRobot(
-          modules=[
-            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft);
-            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=soft)];downConnector=soft);
-            s.a.l.module(legChunks=[s.a.l.legChunk(upConnector=rigid); s.a.l.legChunk(upConnector=rigid)];downConnector=soft)
-          ];          
-          function=s.f.sinP(a=s.range(min=0.0;max=0.5);f=s.range(min=1.0;max=1.0);p=s.range(min=0.0;max=0.0))
-        )
-        """;
-    NumLeggedHybridModularRobot agent = (NumLeggedHybridModularRobot) nb.build(agentS);
     ((Parametrized) agent.brain()).randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     task.run(() -> agent, engineSupplier.get(), consumer);
   }

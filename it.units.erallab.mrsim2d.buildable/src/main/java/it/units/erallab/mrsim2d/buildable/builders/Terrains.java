@@ -16,11 +16,11 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.geometry.Path;
 import it.units.erallab.mrsim2d.core.geometry.Point;
 import it.units.erallab.mrsim2d.core.geometry.Terrain;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.Arrays;
 import java.util.Random;

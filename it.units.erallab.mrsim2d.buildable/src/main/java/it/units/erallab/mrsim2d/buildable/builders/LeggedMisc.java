@@ -16,13 +16,13 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
 import it.units.erallab.mrsim2d.core.agents.legged.ConnectorType;
 import it.units.erallab.mrsim2d.core.agents.legged.LegChunk;
 import it.units.erallab.mrsim2d.core.bodies.RotationalJoint;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 

@@ -16,8 +16,8 @@
 
 package it.units.erallab.mrsim2d.buildable;
 
+import io.github.ericmedvet.jnb.core.NamedBuilder;
 import it.units.erallab.mrsim2d.buildable.builders.*;
-import it.units.malelab.jnb.core.NamedBuilder;
 
 import java.util.List;
 

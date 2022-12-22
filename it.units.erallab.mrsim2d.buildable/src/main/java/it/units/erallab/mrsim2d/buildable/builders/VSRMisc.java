@@ -16,11 +16,11 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.Sensor;
 import it.units.erallab.mrsim2d.core.agents.gridvsr.GridBody;
 import it.units.erallab.mrsim2d.core.bodies.Voxel;
 import it.units.erallab.mrsim2d.core.util.Grid;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.List;
 import java.util.function.Function;

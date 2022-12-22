@@ -16,9 +16,9 @@
 
 package it.units.erallab.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Param;
 import it.units.erallab.mrsim2d.core.functions.*;
 import it.units.erallab.mrsim2d.core.util.DoubleRange;
-import it.units.malelab.jnb.core.Param;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -46,6 +46,30 @@ public class TimedRealFunctions {
         innerFunction.apply(nOfInputs * types.size(), nOfOutputs),
         windowT,
         types
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static Builder<GroupedSinusoidal> groupedSin(
+      @Param("size") int size,
+      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "sim.range(min=0;max=0.5)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange,
+      @Param(value = "s", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange sumRange
+  ) {
+    return (nOfInputs, nOfOutputs) -> new GroupedSinusoidal(
+        nOfInputs,
+        IntStream.range(0, nOfOutputs / size)
+            .mapToObj(i -> new GroupedSinusoidal.Group(
+                size,
+                amplitudeRange,
+                frequencyRange,
+                phaseRange,
+                biasRange,
+                sumRange
+            ))
+            .toList()
     );
   }
 
@@ -79,26 +103,17 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Builder<GroupedSinusoidal> groupedSin(
-      @Param("size") int size,
-      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=0.5)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange,
-      @Param(value = "s", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange sumRange
+  public static Builder<NoisedTRF> noised(
+      @Param(value = "inputSigma", dD = 0) double inputSigma,
+      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value = "randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
+      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
   ) {
-    return (nOfInputs, nOfOutputs) -> new GroupedSinusoidal(
-        nOfInputs,
-        IntStream.range(0, nOfOutputs / size)
-            .mapToObj(i -> new GroupedSinusoidal.Group(
-                size,
-                amplitudeRange,
-                frequencyRange,
-                phaseRange,
-                biasRange,
-                sumRange
-            ))
-            .toList()
+    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
+        innerFunction.apply(nOfInputs, nOfOutputs),
+        inputSigma,
+        outputSigma,
+        randomGenerator
     );
   }
 
@@ -171,21 +186,6 @@ public class TimedRealFunctions {
         frequencyRange,
         amplitudeRange,
         biasRange
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static Builder<NoisedTRF> noised(
-      @Param(value = "inputSigma", dD = 0) double inputSigma,
-      @Param(value = "outputSigma", dD = 0) double outputSigma,
-      @Param(value = "randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
-      @Param("innerFunction") Builder<? extends TimedRealFunction> innerFunction
-  ) {
-    return (nOfInputs, nOfOutputs) -> new NoisedTRF(
-        innerFunction.apply(nOfInputs, nOfOutputs),
-        inputSigma,
-        outputSigma,
-        randomGenerator
     );
   }
 
