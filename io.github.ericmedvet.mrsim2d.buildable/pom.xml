@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>mrsim2d</artifactId>
-        <groupId>it.units.erallab</groupId>
+        <groupId>io.github.ericmedvet</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -35,17 +35,17 @@
             <version>${jnb.version}</version>
         </dependency>
         <dependency>
-            <groupId>it.units.erallab</groupId>
+            <groupId>io.github.ericmedvet</groupId>
             <artifactId>mrsim2d.core</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>it.units.erallab</groupId>
+            <groupId>io.github.ericmedvet</groupId>
             <artifactId>mrsim2d.viewer</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>it.units.erallab</groupId>
+            <groupId>io.github.ericmedvet</groupId>
             <artifactId>mrsim2d.engine.dyn4j</artifactId>
             <version>${revision}</version>
         </dependency>
