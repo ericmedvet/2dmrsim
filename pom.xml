@@ -22,6 +22,33 @@
     <groupId>io.github.ericmedvet</groupId>
     <artifactId>mrsim2d</artifactId>
     <version>${revision}</version>
+
+    <name>mrsim2d</name>
+    <description>2-D Multi Robot Simulator (2D-MR-Sim), a 2D simulator of robotic agents (modular, soft, rigid).</description>
+    <url>https://github.com/ericmedvet/2dmrsim</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Eric Medvet</name>
+            <email>eric.medvet@gmail.com</email>
+            <organization>Eric Medvet</organization>
+            <organizationUrl>https://github.com/ericmedvet</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ericmedvet/2dmrsim.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ericmedvet/2dmrsim.git</developerConnection>
+        <url>http://github.com/ericmedvet/2dmrsim/tree/main</url>
+    </scm>
+
     <modules>
         <module>io.github.ericmedvet.mrsim2d.core</module>
         <module>io.github.ericmedvet.mrsim2d.engine.dyn4j</module>

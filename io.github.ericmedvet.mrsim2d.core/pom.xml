@@ -25,6 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mrsim2d-core</name>
+    <description>Core components of 2D-MR-Sim.</description>
     <artifactId>mrsim2d.core</artifactId>
     <packaging>jar</packaging>
 

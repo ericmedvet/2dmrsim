@@ -25,6 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mrsim2d-viewer</name>
+    <description>Visual components (video maker and GUI) for 2D-MR-Sim.</description>
     <artifactId>mrsim2d.viewer</artifactId>
     <packaging>jar</packaging>
 

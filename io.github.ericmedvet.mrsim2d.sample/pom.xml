@@ -25,6 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mrsim2d-sample</name>
+    <description>Examples of usage of 2D-MR-Sim.</description>
     <artifactId>mrsim2d.sample</artifactId>
     <packaging>jar</packaging>
 

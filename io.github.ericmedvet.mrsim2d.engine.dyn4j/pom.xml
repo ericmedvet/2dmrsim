@@ -25,6 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mrsim2d-engine-dyn4j</name>
+    <description>dyn4j-based physics engine implementation for 2D-MR-Sim.</description>
     <artifactId>mrsim2d.engine.dyn4j</artifactId>
     <packaging>jar</packaging>
 

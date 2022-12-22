@@ -25,6 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mrsim2d-buildable</name>
+    <description>Buildable (based on jnb) components of 2D-MR-Sim.</description>
     <artifactId>mrsim2d.buildable</artifactId>
     <packaging>jar</packaging>
 
