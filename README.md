@@ -1,12 +1,28 @@
 # 2-D Multi Robot Simulator (2D-MR-Sim)
-This project is a just-started extension of [2D-VSR-Sim](https://github.com/ericmedvet/2dhmsr) [1,2].
+This project is an extension of [2D-VSR-Sim](https://github.com/ericmedvet/2dhmsr) [1,2].
 
-2D-MR-Sim will:
-- allow to simulate more kinds of robots (not only Voxel-based Soft Robots);
-- better model the concept of modularity;
-- attempt to be more decoupled from the inner physics simulator.
+With respect to 2d-VSR-Sim, 2D-MR-Sim:
+- allows to simulate more kinds of robots (not only Voxel-based Soft Robots);
+- better models the concept of modularity;
+- is decoupled from the inner physics simulator.
 
-Most of the design goals of 2D-VSR-Sim will stay valid also for 2D-MR-Sim.
+## Usage
+
+Add (at least) this to your `pom.xml`:
+```xml
+<dependency>
+    <groupId>io.github.ericmedvet</groupId>
+    <artifactId>mrsim2d.core</artifactId>
+    <version>0.7.4-SNAPSHOT</version>
+</dependency>
+<dependency>
+    <groupId>io.github.ericmedvet</groupId>
+    <artifactId>mrsim2d.engine.dyn4j</artifactId>
+    <version>0.7.4-SNAPSHOT</version>
+</dependency>
+```
+
+See [2D-robot-evolution](https://github.com/ericmedvet/2d-robot-evolution), that uses 2d-MR-Sim, for a more detailed documentation.
 
 ## References
 1. Medvet, Bartoli, De Lorenzo, Seriani; [2D-VSR-Sim: a Simulation Tool for the Optimization of 2-D Voxel-based Soft Robots](https://medvet.inginf.units.it/publications/2020-j-mbds-vsr/); SoftwareX; 2020
