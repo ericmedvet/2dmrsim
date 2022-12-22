@@ -6,9 +6,9 @@ module it.units.erallab.mrsim2d.viewer {
   requires java.desktop;
   requires java.logging;
   requires it.units.erallab.mrsim2d.core;
-  exports it.units.erallab.mrsim2d.viewer;
-  exports it.units.erallab.mrsim2d.viewer.drawers;
-  exports it.units.erallab.mrsim2d.viewer.drawers.actions;
-  exports it.units.erallab.mrsim2d.viewer.drawers.bodies;
-  exports it.units.erallab.mrsim2d.viewer.framers;
+  exports io.github.ericmedvet.mrsim2d.viewer;
+  exports io.github.ericmedvet.mrsim2d.viewer.drawers;
+  exports io.github.ericmedvet.mrsim2d.viewer.drawers.actions;
+  exports io.github.ericmedvet.mrsim2d.viewer.drawers.bodies;
+  exports io.github.ericmedvet.mrsim2d.viewer.framers;
 }
