@@ -23,11 +23,11 @@
     <artifactId>mrsim2d</artifactId>
     <version>${revision}</version>
     <modules>
-        <module>it.units.erallab.mrsim2d.core</module>
-        <module>it.units.erallab.mrsim2d.engine.dyn4j</module>
-        <module>it.units.erallab.mrsim2d.viewer</module>
-        <module>it.units.erallab.mrsim2d.sample</module>
-        <module>it.units.erallab.mrsim2d.buildable</module>
+        <module>io.github.ericmedvet.mrsim2d.core</module>
+        <module>io.github.ericmedvet.mrsim2d.engine.dyn4j</module>
+        <module>io.github.ericmedvet.mrsim2d.viewer</module>
+        <module>io.github.ericmedvet.mrsim2d.sample</module>
+        <module>io.github.ericmedvet.mrsim2d.buildable</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
