@@ -18,7 +18,6 @@ package io.github.ericmedvet.mrsim2d.viewer.drawers.bodies;
 
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
-import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.AbstractComponentDrawer;
@@ -59,14 +58,13 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
           ANCHOR_DOT_RADIUS * 2d
       ));
       for (Anchor.Link link : anchor.links()) {
-        Point midPoint = Point.average(anchor.point(), link.destination().point());
         switch (link.type()) {
           case RIGID -> g.draw(new Line2D.Double(
               anchor.point().x(), anchor.point().y(),
-              midPoint.x(), midPoint.y()
+              link.destination().point().x(), link.destination().point().y()
           ));
           case SOFT -> g.draw(DrawingUtils.toPath(
-              PolyUtils.zigZag(anchor.point(), midPoint, SOFT_LINK_POINTS, SOFT_LINK_WIDTH).points()
+              PolyUtils.zigZag(anchor.point(), link.destination().point(), SOFT_LINK_POINTS, SOFT_LINK_WIDTH).points()
           ));
         }
       }
