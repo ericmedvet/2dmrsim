@@ -53,7 +53,7 @@ public class Dyn4JEngine extends AbstractEngine {
       1, 0.5,
       1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(Voxel.SpringScaffolding.class),
       8d, 0.3d, 0.5d,
-      10, 0.1
+      10, 0.25
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
