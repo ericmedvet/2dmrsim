@@ -49,9 +49,9 @@ public class UnmovableBodyDrawer extends AbstractComponentDrawer<UnmovableBody> 
   private static TexturePaint createTexturePaint(Color textureColor) {
     BufferedImage texture = new BufferedImage(2, 2, BufferedImage.TYPE_4BYTE_ABGR);
     Graphics2D g = texture.createGraphics();
-    g.setColor(DrawingUtils.alphaed(textureColor, 0.5f));
+    g.setColor(DrawingUtils.alphaed(textureColor, 0.25f));
     g.fillRect(0, 0, 2, 2);
-    g.setColor(DrawingUtils.alphaed(textureColor, 0.75f));
+    g.setColor(DrawingUtils.alphaed(textureColor, 0.5f));
     g.fillRect(1, 0, 1, 1);
     g.fillRect(0, 1, 1, 1);
     g.dispose();
