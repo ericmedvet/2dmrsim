@@ -22,7 +22,6 @@ import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
@@ -55,13 +54,14 @@ public class AgentTester {
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
-    Task<Supplier<EmbodiedAgent>, ?> task = (Locomotion) nb.build("""
-          sim.task.locomotion(
-            initialXGap = 0.1;
-            duration = 120;
-            terrain = s.t.flat(w = 2200)
-          )
-        """);
+    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
+        """
+              sim.task.locomotion(
+                initialXGap = 0.1;
+                duration = 120;
+                terrain = s.t.flat(w = 2200)
+              )
+            """);
     //read agent resource
     String agentName = args.length > 1 ? args[0] : "tripod-vsr-distributed-mlp";
     L.config("Loading agent description \"%s\"".formatted(agentName));
