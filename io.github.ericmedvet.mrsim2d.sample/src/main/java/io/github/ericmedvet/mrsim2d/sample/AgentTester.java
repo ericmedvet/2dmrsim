@@ -52,7 +52,7 @@ public class AgentTester {
     @SuppressWarnings("unchecked")
     Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Supplier<Engine> engine = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
         """
@@ -88,7 +88,7 @@ public class AgentTester {
       });
     }
     //do task
-    task.run(() -> agent, engine.get(), viewer);
+    task.run(() -> agent, engine, viewer);
   }
 
 
