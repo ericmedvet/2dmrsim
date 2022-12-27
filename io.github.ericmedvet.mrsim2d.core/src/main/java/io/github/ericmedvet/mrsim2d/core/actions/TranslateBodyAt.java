@@ -28,7 +28,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
  */
 public record TranslateBodyAt(
     Body body,
-    Point neDestination
+    Point nwDestination
 ) implements SelfDescribedAction<Body> {
   @Override
   public Body perform(ActionPerformer performer, Agent agent) throws ActionException {
@@ -36,7 +36,7 @@ public record TranslateBodyAt(
         body.poly().boundingBox().min().x(),
         body.poly().boundingBox().max().y()
     );
-    return performer.perform(new TranslateBody(body, neDestination.diff(nw)), agent).outcome().orElseThrow(
+    return performer.perform(new TranslateBody(body, nwDestination.diff(nw)), agent).outcome().orElseThrow(
         () -> new ActionException(this, "Cannot translate body")
     );
   }
