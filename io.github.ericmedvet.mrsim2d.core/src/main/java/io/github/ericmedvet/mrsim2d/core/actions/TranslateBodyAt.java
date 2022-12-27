@@ -32,11 +32,11 @@ public record TranslateBodyAt(
 ) implements SelfDescribedAction<Body> {
   @Override
   public Body perform(ActionPerformer performer, Agent agent) throws ActionException {
-    Point ne = new Point(
+    Point nw = new Point(
         body.poly().boundingBox().min().x(),
         body.poly().boundingBox().max().y()
     );
-    return performer.perform(new TranslateBody(body, neDestination.diff(ne)), agent).outcome().orElseThrow(
+    return performer.perform(new TranslateBody(body, neDestination.diff(nw)), agent).outcome().orElseThrow(
         () -> new ActionException(this, "Cannot translate body")
     );
   }
