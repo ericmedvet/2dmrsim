@@ -1,0 +1,11 @@
+s.a.numLeggedHybridRobot(
+  legs=8 * [
+    s.a.l.leg(legChunks=2*[s.a.l.legChunk(length=1.5;motorMaxTorque=100000)];downConnector=rigid)
+  ];
+  trunkLength = 40;
+  trunkMass = 10;
+  function=s.f.groupedSin(
+    size = 2;
+    f = s.range(min=1;max=2)
+  )
+)

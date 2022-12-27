@@ -1,0 +1,10 @@
+s.a.numLeggedHybridModularRobot(
+  modules=4 * [
+    s.a.l.module(
+      legChunks=2*[s.a.l.legChunk()];
+      trunkSensors=[s.s.rv(a=0);s.s.rv(a=90)];
+      downConnectorSensors=[s.s.d(a=-90;r=1)]
+    )
+  ];
+  function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.1)
+)
