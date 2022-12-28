@@ -33,6 +33,15 @@ public interface Anchorable extends Body {
     return anchors().stream().map(Anchor::attachedAnchors).flatMap(Collection::stream).distinct().toList();
   }
 
+  default Collection<Anchor> attachedTo(Anchor otherAnchor) {
+    return anchors().stream().filter(a -> a.isAnchoredTo(otherAnchor)).toList();
+  }
+
+
+  default Collection<Anchor> attachedTo(Anchorable otherAnchorable) {
+    return anchors().stream().filter(a -> a.isAnchoredTo(otherAnchorable)).toList();
+  }
+
   default boolean isAnchoredTo(Anchor otherAnchor) {
     return anchors().stream().anyMatch(a -> a.isAnchoredTo(otherAnchor));
   }
