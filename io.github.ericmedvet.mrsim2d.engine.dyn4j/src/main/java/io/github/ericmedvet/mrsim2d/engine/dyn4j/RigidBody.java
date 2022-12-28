@@ -44,12 +44,12 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
       double restitution,
       double linearDamping,
       double angularDamping,
-      double anchorVertexToCenterRatio
+      double anchorSideDistance
   ) {
     this.mass = mass;
     Convex convex = new Polygon(
         Arrays.stream(convexPoly.vertexes()).sequential()
-            .map(v -> new Vector2(v.x(), v.y()))
+            .map(Utils::point)
             .toArray(Vector2[]::new)
     );
     body = new Body();
@@ -62,19 +62,11 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
     if (Double.isFinite(anchorsDensity)) {
       List<Anchor> localAnchors = new ArrayList<>();
       for (Segment segment : convexPoly.sides()) {
-        Point p1 = segment.p1();
-        Point p2 = segment.p2();
-        double l = p1.distance(p2);
-        double nOfAnchors = Math.floor(l * anchorsDensity);
-        double anchorInterval = l / nOfAnchors;
-        Point dir = new Point(p2.diff(p1).direction());
-        for (int i = 0; i < nOfAnchors; i = i + 1) {
-          Point aP = p1.sum(dir.scale(anchorInterval * (double) i));
-          localAnchors.add(new BodyAnchor(
-              body,
-              aP.diff(convexPoly.center()).scale(1 - anchorVertexToCenterRatio),
-              this
-          ));
+        double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
+        for (double i = 0; i < nOfAnchors; i = i + 1) {
+          Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
+          Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+          localAnchors.add(new BodyAnchor(body, aP, this));
         }
       }
       anchors = Collections.unmodifiableList(localAnchors);
@@ -96,8 +88,7 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
 
   @Override
   public Point centerLinearVelocity() {
-    Vector2 v = body.getLinearVelocity();
-    return new Point(v.x, v.y);
+    return Utils.point(body.getLinearVelocity());
   }
 
   @Override
@@ -113,7 +104,7 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
             .map(v -> {
               Vector2 cv = v.copy();
               t.transform(cv);
-              return new Point(cv.x, cv.y);
+              return Utils.point(cv);
             })
             .toArray(Point[]::new)
     );

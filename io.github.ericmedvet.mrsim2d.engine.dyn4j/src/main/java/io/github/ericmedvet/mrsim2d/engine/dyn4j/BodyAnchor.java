@@ -39,9 +39,9 @@ public class BodyAnchor implements Anchor {
   private final Anchorable anchorable;
   private final Map<Link, Joint<Body>> jointMap;
 
-  public BodyAnchor(Body body, Point displacement, Anchorable anchorable) {
+  public BodyAnchor(Body body, Point point, Anchorable anchorable) {
     this.body = body;
-    this.displacement = displacement;
+    this.displacement = point.diff(Utils.point(body.getLocalCenter()));
     this.anchorable = anchorable;
     jointMap = new LinkedHashMap<>();
   }
@@ -63,9 +63,9 @@ public class BodyAnchor implements Anchor {
   @Override
   public Point point() {
     Transform t = body.getTransform();
-    Vector2 dV = new Vector2(displacement.x(), displacement.y()).add(body.getLocalCenter());
+    Vector2 dV = Utils.point(displacement).add(body.getLocalCenter());
     t.transform(dV);
-    return new Point(dV.x, dV.y);
+    return Utils.point(dV);
   }
 
   protected Body getBody() {

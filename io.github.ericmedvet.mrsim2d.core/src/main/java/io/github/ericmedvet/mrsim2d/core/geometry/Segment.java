@@ -35,7 +35,23 @@ public record Segment(Point p1, Point p2) implements Shape {
     return Point.average(p1, p2);
   }
 
+  public double direction() {
+    return p2.diff(p1).direction();
+  }
+
   public double length() {
     return p1.distance(p2);
   }
+
+  public Point pointAtDistance(double d) {
+    return p1.sum(new Point(direction()).scale(d));
+  }
+
+  public Point pointAtRate(double r) {
+    return new Point(
+        p1.x() + (p2.x() - p1.x()) * r,
+        p1.y() + (p2.y() - p1.y()) * r
+    );
+  }
+
 }

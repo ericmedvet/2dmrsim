@@ -172,10 +172,10 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
   @Override
   public Point vertex(Vertex vertex) {
-    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
+    List<Point> centers = vertexes.values().stream().map(b -> Utils.point(b.getWorldCenter())).toList();
     Point c = Point.average(centers.toArray(Point[]::new));
     double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
-    return enlongForm(c, toPoint(vertexes.get(vertex).getWorldCenter()), d);
+    return enlongForm(c, Utils.point(vertexes.get(vertex).getWorldCenter()), d);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -208,7 +208,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
   @Override
   public Poly poly() {
-    List<Point> centers = vertexes.values().stream().map(b -> toPoint(b.getWorldCenter())).toList();
+    List<Point> centers = vertexes.values().stream().map(b -> Utils.point(b.getWorldCenter())).toList();
     Point c = Point.average(centers.toArray(Point[]::new));
     double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
     return new Poly(centers.stream()
@@ -497,10 +497,6 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
   @Override
   public double restArea() {
     return sideLength * sideLength;
-  }
-
-  private Point toPoint(Vector2 v) {
-    return new Point(v.x, v.y);
   }
 
   @Override

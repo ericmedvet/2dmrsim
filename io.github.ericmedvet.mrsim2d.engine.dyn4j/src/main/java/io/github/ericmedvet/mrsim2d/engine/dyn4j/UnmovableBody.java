@@ -46,7 +46,8 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
       Poly poly,
       double anchorsDensity,
       double friction,
-      double restitution
+      double restitution,
+      double anchorSideDistance
   ) {
     this.poly = poly;
     List<Poly> parts = (poly.vertexes().length > 3) ? Utils.decompose(poly) : List.of(poly);
@@ -54,7 +55,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
         .map(c -> {
           Convex convex = new Polygon(
               Arrays.stream(c.vertexes()).sequential()
-                  .map(v -> new Vector2(v.x(), v.y()))
+                  .map(Utils::point)
                   .toArray(Vector2[]::new)
           );
           Body body = new Body();
@@ -69,24 +70,15 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
     if (Double.isFinite(anchorsDensity)) {
       List<Anchor> localAnchors = new ArrayList<>();
       for (Segment segment : poly.sides()) {
-        Point p1 = segment.p1();
-        Point p2 = segment.p2();
-        double l = p1.distance(p2);
-        double nOfAnchors = Math.floor(l * anchorsDensity);
-        double anchorInterval = l / nOfAnchors;
-        Point dir = new Point(p2.diff(p1).direction());
-        for (int i = 0; i < nOfAnchors; i = i + 1) {
-          Point aP = p1.sum(dir.scale(anchorInterval * (double) i));
-          Pair<Body, Poly> closest = bodyPairs.stream().min(Comparator.comparingDouble(pair -> pair.second()
-              .center()
-              .distance(aP))).orElseThrow();
-          localAnchors.add(new BodyAnchor(
-              closest.first(),
-              aP.diff(closest.second().center()),
-              this
-          ));
+        double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
+        for (double i = 0; i < nOfAnchors; i = i + 1) {
+          Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
+          Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+          Body closest = bodies.stream()
+              .min(Comparator.comparingDouble(b -> Utils.point(b.getLocalCenter()).distance(aP)))
+              .orElseThrow();
+          localAnchors.add(new BodyAnchor(closest, aP, this));
         }
-
       }
       anchors = Collections.unmodifiableList(localAnchors);
     } else {
@@ -97,7 +89,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
   private static Point center(List<Body> bodies) {
     return Point.average(bodies.stream()
         .map(AbstractPhysicsBody::getWorldCenter)
-        .map(v -> new Point(v.x, v.y))
+        .map(Utils::point)
         .toArray(Point[]::new));
   }
 

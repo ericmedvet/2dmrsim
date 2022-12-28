@@ -37,13 +37,21 @@ public class Utils {
   public static List<Poly> decompose(Poly poly) {
     Triangulator triangulator = new SweepLine();
     List<Triangle> triangles = triangulator.triangulate(
-        Arrays.stream(poly.vertexes()).map(p -> new Vector2(p.x(), p.y())).toArray(Vector2[]::new)
+        Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)
     );
     return triangles.stream()
         .map(c -> new Poly(
-            Arrays.stream(c.getVertices()).map(v -> new Point(v.x, v.y)).toArray(Point[]::new)
+            Arrays.stream(c.getVertices()).map(Utils::point).toArray(Point[]::new)
         ))
         .toList();
+  }
+
+  public static Point point(Vector2 v) {
+    return new Point(v.x, v.y);
+  }
+
+  public static Vector2 point(Point p) {
+    return new Vector2(p.x(), p.y());
   }
 
 }

@@ -53,7 +53,7 @@ public class Dyn4JEngine extends AbstractEngine {
       1, 0.5,
       1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(Voxel.SpringScaffolding.class),
       8d, 0.3d, 0.5d,
-      10, 0.25
+      10, 0.1
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
@@ -86,7 +86,7 @@ public class Dyn4JEngine extends AbstractEngine {
       double softLinkSpringD,
       double softLinkRestDistanceRatio,
       double attractionMaxMagnitude,
-      double anchorVertexToCenterRatio
+      double anchorSideDistance
   ) {}
 
   private RotationalJoint actuateRotationalJoint(
@@ -168,8 +168,8 @@ public class Dyn4JEngine extends AbstractEngine {
           DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
               src.getBody(),
               dst.getBody(),
-              new Vector2(src.point().x(), src.point().y()),
-              new Vector2(dst.point().x(), dst.point().y())
+              Utils.point(src.point()),
+              Utils.point(dst.point())
           );
           springJoint.setRestDistance(d);
           springJoint.setCollisionAllowed(true);
@@ -205,7 +205,7 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
         configuration.rigidBodyAngularDamping,
-        configuration.anchorVertexToCenterRatio
+        configuration.anchorSideDistance
     );
     rigidBody.getBodies().forEach(world::addBody);
     bodies.add(rigidBody);
@@ -222,7 +222,7 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
         configuration.rigidBodyAngularDamping,
-        configuration.anchorVertexToCenterRatio
+        configuration.anchorSideDistance
     );
     rotationalJoint.getBodies().forEach(world::addBody);
     rotationalJoint.getJoints().forEach(world::addJoint);
@@ -235,7 +235,8 @@ public class Dyn4JEngine extends AbstractEngine {
         action.poly(),
         action.anchorsDensity(),
         configuration.unmovableBodyFriction,
-        configuration.unmovableBodyRestitution
+        configuration.unmovableBodyRestitution,
+        configuration.anchorSideDistance
     );
     unmovableBody.getBodies().forEach(world::addBody);
     bodies.add(unmovableBody);
@@ -366,7 +367,7 @@ public class Dyn4JEngine extends AbstractEngine {
 
   private Double senseDistanceToBody(SenseDistanceToBody action, Agent agent) {
     Ray ray = new Ray(
-        new Vector2(action.body().poly().center().x(), action.body().poly().center().y()),
+        Utils.point(action.body().poly().center()),
         action.direction() + action.body().angle()
     );
     List<RaycastResult<org.dyn4j.dynamics.Body, BodyFixture>> results = world.raycast(

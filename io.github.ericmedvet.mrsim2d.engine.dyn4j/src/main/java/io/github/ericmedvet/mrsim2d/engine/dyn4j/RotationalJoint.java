@@ -4,17 +4,17 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
+import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint, MultipartBody, Actuable {
+public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint, MultipartBody,
+    Actuable {
   private static final DoubleRange JOINT_ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
   private static final boolean SET_LIMITS = false;
 
@@ -43,7 +43,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
       double restitution,
       double linearDamping,
       double angularDamping,
-      double anchorVertexToCenterRatio
+      double anchorSideDistance
   ) {
     //check length and with consistency
     if (length < width) {
@@ -81,28 +81,18 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     joint.setMotorEnabled(true);
     joint.setMaximumMotorTorque(motor.maxTorque());
     //create anchors
-    anchors = List.of(
-        new BodyAnchor(
-            body1,
-            poly1.vertexes()[0].diff(poly1.center()).scale(1 - anchorVertexToCenterRatio),
-            this
-        ),
-        new BodyAnchor(
-            body1,
-            poly1.vertexes()[4].diff(poly1.center()).scale(1 - anchorVertexToCenterRatio),
-            this
-        ),
-        new BodyAnchor(
-            body2,
-            poly2.vertexes()[2].diff(poly2.center()).scale(1 - anchorVertexToCenterRatio),
-            this
-        ),
-        new BodyAnchor(
-            body2,
-            poly2.vertexes()[3].diff(poly2.center()).scale(1 - anchorVertexToCenterRatio),
-            this
-        )
-    );
+    List<Anchor> localAnchors = new ArrayList<>();
+    List.of(0, 1, 3, 4).forEach(i -> localAnchors.add(new BodyAnchor(
+        body1,
+        new Segment(poly1.vertexes()[i], Utils.point(body1.getLocalCenter())).pointAtDistance(anchorSideDistance),
+        this
+    )));
+    List.of(1, 2, 3, 4).forEach(i -> localAnchors.add(new BodyAnchor(
+        body2,
+        new Segment(poly2.vertexes()[i], Utils.point(body2.getLocalCenter())).pointAtDistance(anchorSideDistance),
+        this
+    )));
+    anchors = Collections.unmodifiableList(localAnchors);
     //set initial first direction
     initialRefDirection = getRefDirection();
     //set control vars
@@ -121,7 +111,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
       Poly poly
   ) {
     Convex convex = new Polygon(Arrays.stream(poly.vertexes())
-        .map(p -> new Vector2(p.x(), p.y()))
+        .map(Utils::point)
         .toArray(Vector2[]::new));
     Body body = new Body();
     body.addFixture(convex, mass / poly.area(), friction, restitution);
@@ -137,7 +127,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     return new Poly(Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices()).map(v -> {
       Vector2 cv = v.copy();
       t.transform(cv);
-      return new Point(cv.x, cv.y);
+      return Utils.point(cv);
     }).toArray(Point[]::new));
   }
 
@@ -179,9 +169,10 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
 
   @Override
   public Point centerLinearVelocity() {
-    Vector2 v1 = body1.getLinearVelocity();
-    Vector2 v2 = body2.getLinearVelocity();
-    return new Point((v1.x + v2.x) / 2d, (v1.y + v2.y) / 2d);
+    return Point.average(
+        Utils.point(body1.getLinearVelocity()),
+        Utils.point(body2.getLinearVelocity())
+    );
   }
 
   @Override
