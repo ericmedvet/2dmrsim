@@ -32,18 +32,20 @@ import java.util.logging.Logger;
 public class JointTester {
   private final static Logger L = Logger.getLogger(JointTester.class.getName());
 
-  enum Type {SIN, SQUARE}
+  enum Type {SIN, SQUARE, ZERO, UP}
 
   public static class JointTask implements Task<DoubleUnaryOperator, JointTask.Outcome> {
 
     private final double jointLength;
     private final double loadMass;
     private final double duration;
+    private final boolean obstacle;
 
-    public JointTask(double jointLength, double loadMass, double duration) {
+    public JointTask(double jointLength, double loadMass, double duration, boolean obstacle) {
       this.jointLength = jointLength;
       this.loadMass = loadMass;
       this.duration = duration;
+      this.obstacle = obstacle;
     }
 
     public record Observation(double target, double actual) {}
@@ -64,8 +66,9 @@ public class JointTester {
           1,
           new Point(0, 2)
       ));
+      double nLength = obstacle ? (5 + jointLength) : (5 + jointLength / 2d - 1);
       UnmovableBody nBox = engine.perform(new CreateAndTranslateUnmovableBody(
-          Poly.rectangle(5 + jointLength / 2d - 1, 2),
+          Poly.rectangle(nLength, 1),
           1,
           new Point(0, 3)
       )).outcome().orElseThrow();
@@ -74,7 +77,7 @@ public class JointTester {
               jointLength,
               1,
               1,
-              new RotationalJoint.Motor()
+              new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0)
           )
       ).outcome().orElseThrow();
       engine.perform(new TranslateBodyAt(joint, new Point(5, 3)));
@@ -126,7 +129,7 @@ public class JointTester {
       //prepare engine
       Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
       List<Double> freqs = List.of(0.1, 0.25, 0.5, 0.75, 1d, 1.25);
-      List<Double> loads = List.of(0d, 1d, 2d, 3d, 4d, 5d);
+      List<Double> loads = List.of(0d, 1.5d, 3d, 4.5d, 6d, 7.5d, 9d, 10d);
       List<Type> types = List.of(Type.values());
       //iterate
       for (double freq : freqs) {
@@ -139,6 +142,7 @@ public class JointTester {
                 freq,
                 load,
                 type,
+                false,
                 null
             );
             //print results
@@ -163,7 +167,7 @@ public class JointTester {
     }
   }
 
-  private static void doSingle(double duration, double freq, double load, Type type) {
+  private static void doSingle(double duration, double freq, double load, Type type, boolean obstacle) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     //prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
@@ -176,6 +180,7 @@ public class JointTester {
         freq,
         load,
         type,
+        obstacle,
         viewer
     );
   }
@@ -186,15 +191,18 @@ public class JointTester {
       double freq,
       double load,
       Type type,
+      boolean obstacle,
       Consumer<Snapshot> consumer
   ) {
     //prepare function
     DoubleUnaryOperator targetF = switch (type) {
       case SIN -> t -> Math.PI / 2d * Math.sin(2d * Math.PI * freq * t);
       case SQUARE -> t -> Math.PI / 2d * (Math.sin(2d * Math.PI * freq * t) > 0 ? 1d : -1d);
+      case UP -> t -> -.5;
+      case ZERO -> t -> 0d;
     };
     //prepare task
-    JointTask task = new JointTask(5, load, duration);
+    JointTask task = new JointTask(6, load, duration, obstacle);
     //do task
     return task.run(
         targetF,
@@ -204,8 +212,8 @@ public class JointTester {
   }
 
   public static void main(String[] args) {
-    doAll(10, "/home/eric/experiments/2dmrsim/joint/test.csv");
-    //doSingle(30, .25, 5, Type.SIN);
+    //doAll(60, "/home/eric/experiments/2dmrsim/joint/test.csv");
+    doSingle(600, 1, 1, Type.UP, false);
   }
 
 

@@ -4,7 +4,6 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -20,14 +19,13 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   private final double[] frequencies;
   private final double[] amplitudes;
   private final double[] biases;
-  private final Set<Type> types;
   private final DoubleRange phaseRange;
   private final DoubleRange frequencyRange;
   private final DoubleRange amplitudeRange;
   private final DoubleRange biasRange;
 
   public Sinusoidal(
-      int nOfInputs, int nOfOutputs, Set<Type> types,
+      int nOfInputs, int nOfOutputs,
       DoubleRange phaseRange,
       DoubleRange frequencyRange,
       DoubleRange amplitudeRange,
@@ -35,7 +33,6 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
   ) {
     this.nOfInputs = nOfInputs;
     this.nOfOutputs = nOfOutputs;
-    this.types = types;
     this.phaseRange = phaseRange;
     this.frequencyRange = frequencyRange;
     this.amplitudeRange = amplitudeRange;
@@ -79,21 +76,21 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
 
   @Override
   public double[] getParams() {
-    double[] params = new double[nOfOutputs * types.size()];
+    double[] params = new double[nOfOutputs * nOfTypes()];
     int i = 0;
-    if (types.contains(Type.PHASE)) {
+    if (phaseRange.extent() > 0) {
       System.arraycopy(phases, 0, params, i, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.FREQUENCY)) {
+    if (frequencyRange.extent() > 0) {
       System.arraycopy(frequencies, 0, params, i, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.AMPLITUDE)) {
+    if (amplitudeRange.extent() > 0) {
       System.arraycopy(amplitudes, 0, params, i, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.BIAS)) {
+    if (biasRange.extent() > 0) {
       System.arraycopy(biases, 0, params, i, nOfOutputs);
     }
     return params;
@@ -101,28 +98,37 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
 
   @Override
   public void setParams(double[] params) {
-    if (params.length != (nOfOutputs * types.size())) {
+    if (params.length != (nOfOutputs * nOfTypes())) {
       throw new IllegalArgumentException("Params size is wrong: %d expected, %d found".formatted(
-          nOfOutputs * types.size(),
+          nOfOutputs * nOfTypes(),
           params.length
       ));
     }
     int i = 0;
-    if (types.contains(Type.PHASE)) {
+    if (phaseRange.extent() > 0) {
       System.arraycopy(params, i, phases, 0, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.FREQUENCY)) {
+    if (frequencyRange.extent() > 0) {
       System.arraycopy(params, i, frequencies, 0, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.AMPLITUDE)) {
+    if (amplitudeRange.extent() > 0) {
       System.arraycopy(params, i, amplitudes, 0, nOfOutputs);
       i = i + nOfOutputs;
     }
-    if (types.contains(Type.BIAS)) {
+    if (biasRange.extent() > 0) {
       System.arraycopy(params, i, biases, 0, nOfOutputs);
     }
+  }
+
+  private int nOfTypes() {
+    int n = 0;
+    n = n + ((phaseRange.extent() > 0) ? 1 : 0);
+    n = n + ((frequencyRange.extent() > 0) ? 1 : 0);
+    n = n + ((amplitudeRange.extent() > 0) ? 1 : 0);
+    n = n + ((biasRange.extent() > 0) ? 1 : 0);
+    return n;
   }
 
   public void setAmplitudes(double amplitude) {
@@ -149,6 +155,10 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
     System.arraycopy(biases, 0, this.biases, 0, nOfOutputs);
   }
 
+  public void setBiases(double bias) {
+    setBiases(nCopies(bias, nOfOutputs));
+  }
+
   public void setFrequencies(double frequency) {
     setFrequencies(nCopies(frequency, nOfOutputs));
   }
@@ -165,10 +175,6 @@ public class Sinusoidal implements TimedRealFunction, Parametrized {
 
   public void setPhases(double phase) {
     setPhases(nCopies(phase, nOfOutputs));
-  }
-
-  public void setBiases(double bias) {
-    setBiases(nCopies(bias, nOfOutputs));
   }
 
   public void setPhases(double[] phases) {

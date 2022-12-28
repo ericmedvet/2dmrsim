@@ -63,7 +63,7 @@ public class AgentTester {
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "tripod-vsr-distributed-mlp";
+    String agentName = args.length > 1 ? args[0] : "legged-groupedsin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
     String agentDescription = null;
@@ -83,6 +83,7 @@ public class AgentTester {
       RandomGenerator random = new Random();
       numMultiBrained.brains().forEach(b -> {
         if (b instanceof Parametrized parametrized) {
+          System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
           parametrized.randomize(random, DoubleRange.SYMMETRIC_UNIT);
         }
       });

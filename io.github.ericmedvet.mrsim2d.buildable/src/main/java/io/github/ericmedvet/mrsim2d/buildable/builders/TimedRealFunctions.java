@@ -20,7 +20,6 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.functions.*;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
@@ -118,7 +117,7 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Builder<Sinusoidal> sinP(
+  public static Builder<Sinusoidal> sin(
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
       @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
@@ -127,79 +126,6 @@ public class TimedRealFunctions {
     return (nOfInputs, nOfOutputs) -> new Sinusoidal(
         nOfInputs,
         nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE),
-        phaseRange,
-        frequencyRange,
-        amplitudeRange,
-        biasRange
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static Builder<Sinusoidal> sinPA(
-      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
-  ) {
-    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
-        nOfInputs,
-        nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.AMPLITUDE),
-        phaseRange,
-        frequencyRange,
-        amplitudeRange,
-        biasRange
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static Builder<Sinusoidal> sinPF(
-      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
-  ) {
-    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
-        nOfInputs,
-        nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY),
-        phaseRange,
-        frequencyRange,
-        amplitudeRange,
-        biasRange
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static Builder<Sinusoidal> sinPFA(
-      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
-  ) {
-    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
-        nOfInputs,
-        nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE),
-        phaseRange,
-        frequencyRange,
-        amplitudeRange,
-        biasRange
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static Builder<Sinusoidal> sinPFAB(
-      @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "sim.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "sim.range(min=0;max=1)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "sim.range(min=-0.5;max=0.5)") DoubleRange biasRange
-  ) {
-    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
-        nOfInputs,
-        nOfOutputs,
-        EnumSet.of(Sinusoidal.Type.PHASE, Sinusoidal.Type.FREQUENCY, Sinusoidal.Type.AMPLITUDE, Sinusoidal.Type.BIAS),
         phaseRange,
         frequencyRange,
         amplitudeRange,
