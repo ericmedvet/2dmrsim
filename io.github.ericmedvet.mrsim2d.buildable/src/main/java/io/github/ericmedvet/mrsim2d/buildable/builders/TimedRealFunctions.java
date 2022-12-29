@@ -49,6 +49,25 @@ public class TimedRealFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static Builder<DelayedRecurrentNetwork> drn(
+      @Param(value = "timeRange", dNPM = "sim.range(min=0;max=1)") DoubleRange timeRange,
+      @Param(value = "innerNeuronsRatio", dD = 1d) double innerNeuronsRatio,
+      @Param(value = "activationFunction", dS = "tanh") MultiLayerPerceptron.ActivationFunction activationFunction,
+      @Param(value = "threshold", dD = 0.1d) double threshold,
+      @Param(value = "timeResolution", dD = 0.16666d) double timeResolution
+  ) {
+    return (nOfInputs, nOfOutputs) -> new DelayedRecurrentNetwork(
+        activationFunction,
+        nOfInputs,
+        nOfOutputs,
+        (int) Math.round(innerNeuronsRatio * (nOfInputs + nOfOutputs)),
+        timeRange,
+        threshold,
+        timeResolution
+    );
+  }
+
+  @SuppressWarnings("unused")
   public static Builder<GroupedSinusoidal> groupedSin(
       @Param("size") int size,
       @Param(value = "p", dNPM = "sim.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
