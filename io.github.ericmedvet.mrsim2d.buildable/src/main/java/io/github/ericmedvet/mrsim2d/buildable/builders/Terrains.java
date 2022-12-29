@@ -113,8 +113,8 @@ public class Terrains {
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
-      @Param(value = "chunkW", dD = W) Double chunkW,
-      @Param(value = "chunkH", dD = H) Double chunkH,
+      @Param(value = "chunkW", dD = CHUNK_W) Double chunkW,
+      @Param(value = "chunkH", dD = CHUNK_H) Double chunkH,
       @Param(value = "seed", dI = 1) Integer seed
   ) {
     RandomGenerator random = new Random(seed);
