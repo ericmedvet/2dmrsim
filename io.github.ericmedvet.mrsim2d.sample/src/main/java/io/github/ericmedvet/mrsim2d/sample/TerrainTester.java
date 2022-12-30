@@ -62,9 +62,8 @@ public class TerrainTester {
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
         """
               sim.task.locomotion(
-                initialXGap = 0.1;
                 duration = 120;
-                terrain = s.t.flat()
+                terrain = s.t.steppy(chunkW = 0.5; chunkH = 0.1)
               )
             """);
     //read agent resource
