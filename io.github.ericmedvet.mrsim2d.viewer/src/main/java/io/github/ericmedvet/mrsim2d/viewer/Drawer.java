@@ -150,9 +150,15 @@ public interface Drawer {
       double yRatio = graphicsFrame.height() / worldFrame.height();
       double ratio = Math.min(xRatio, yRatio);
       AffineTransform at = new AffineTransform();
-      at.translate(graphicsFrame.min().x(), graphicsFrame.min().y());
+      at.translate(
+          graphicsFrame.center().x(),
+          graphicsFrame.center().y()
+      );
       at.scale(ratio, -ratio);
-      at.translate(-worldFrame.min().x(), -worldFrame.max().y());
+      at.translate(
+          -worldFrame.center().x(),
+          -worldFrame.center().y()
+      );
       //apply transform and stroke
       g.setTransform(at);
       g.setStroke(DrawingUtils.getScaleIndependentStroke(1, (float) ratio));
