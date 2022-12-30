@@ -19,32 +19,37 @@ package io.github.ericmedvet.mrsim2d.sample;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
-import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
+import io.github.ericmedvet.mrsim2d.core.NumBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Random;
+import java.io.*;
+import java.util.Base64;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
-public class AgentTester {
+public class TerrainTester {
 
-  private final static Logger L = Logger.getLogger(AgentTester.class.getName());
+  private final static Logger L = Logger.getLogger(TerrainTester.class.getName());
+
+  private static Object fromBase64(String content) throws IOException {
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getDecoder().decode(content));
+         ObjectInputStream ois = new ObjectInputStream(bais)) {
+      return ois.readObject();
+    } catch (Throwable t) {
+      throw new IOException(t);
+    }
+  }
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
@@ -63,34 +68,46 @@ public class AgentTester {
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-drn";
-    L.config("Loading agent description \"%s\"".formatted(agentName));
-    InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
     String agentDescription = null;
-    if (inputStream == null) {
-      L.severe("Cannot find agent description");
-    } else {
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-        agentDescription = br.lines().collect(Collectors.joining());
-      } catch (IOException e) {
-        L.severe("Cannot read agent description: %s%n".formatted(e));
-        System.exit(-1);
-      }
+    try {
+      agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read agent description: %s%n".formatted(e));
+      System.exit(-1);
     }
     EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-    //shuffle parameters
-    if (agent instanceof NumMultiBrained numMultiBrained) {
-      RandomGenerator random = new Random();
-      numMultiBrained.brains().forEach(b -> {
-        if (b instanceof Parametrized parametrized) {
-          System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
-          parametrized.randomize(random, DoubleRange.SYMMETRIC_UNIT);
+    //load weights
+    String serializedWeights = null;
+    try {
+      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read serialized params: %s%n".formatted(e));
+      System.exit(-1);
+    }
+    try {
+      @SuppressWarnings("unchecked") List<Double> params = (List<Double>)fromBase64(serializedWeights);
+      if (agent instanceof NumBrained numBrained) {
+        if (numBrained.brain() instanceof Parametrized parametrized) {
+          parametrized.setParams(params.stream().mapToDouble(d -> d).toArray());
         }
-      });
+      }
+    } catch (IOException e) {
+      L.severe("Cannot deserialize params: %s%n".formatted(e));
     }
     //do task
     task.run(() -> agent, engine, viewer);
   }
 
-
+  private static String readResource(String resourcePath) throws IOException {
+    InputStream inputStream = TerrainTester.class.getResourceAsStream(resourcePath);
+    String content;
+    if (inputStream == null) {
+      throw new IOException("Cannot find resource %s".formatted(resourcePath));
+    } else {
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+        content = br.lines().collect(Collectors.joining());
+      }
+    }
+    return content;
+  }
 }

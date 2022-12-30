@@ -1,0 +1,11 @@
+s.a.centralizedNumGridVSR(
+  body = s.a.vsr.gridBody(
+    sensorizingFunction = s.a.vsr.sf.directional(
+      headSensors = [s.s.sin(f = 0);s.s.d(a = -30; r = 10)];
+      nSensors = [s.s.ar(); s.s.rv(a = 0); s.s.rv(a = 90)];
+      sSensors = [s.s.d(a = -90)]
+    );
+    shape = s.a.vsr.s.biped(w = 4; h = 3)
+  );
+  function = s.f.mlp()
+)
