@@ -26,6 +26,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
+import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
 import java.io.*;
 import java.time.Duration;
@@ -58,11 +59,15 @@ public class TerrainTester {
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    //prepare drawer, viewer, engine
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
-    //RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    //prepare engine
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    //do single task
+    if (false) {
+      @SuppressWarnings("unchecked")
+      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.steppy(chunkW = 0.5; chunkH = 0.1)").run();
+      System.exit(0);
+    }
     //prepare terrains
     List<String> terrains = List.of(
         "s.t.flat()",

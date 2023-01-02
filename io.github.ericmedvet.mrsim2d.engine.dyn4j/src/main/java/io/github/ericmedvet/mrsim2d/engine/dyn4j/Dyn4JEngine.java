@@ -27,6 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.ContinuousDetectionMode;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 public class Dyn4JEngine extends AbstractEngine {
 
   private final static Configuration DEFAULT_CONFIGURATION = new Configuration(
-      new Settings(),
+      getDefaultSettings(),
       1, 0.5, 0.1, 0.1,
       1, 0.5,
       1, 0.5, 0.1, 0.1, 0.35, EnumSet.allOf(Voxel.SpringScaffolding.class),
@@ -57,7 +58,6 @@ public class Dyn4JEngine extends AbstractEngine {
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
-
   public Dyn4JEngine(Configuration configuration) {
     this.configuration = configuration;
     world = new World<>();
@@ -88,6 +88,14 @@ public class Dyn4JEngine extends AbstractEngine {
       double attractionMaxMagnitude,
       double anchorSideDistance
   ) {}
+
+  private static Settings getDefaultSettings() {
+    Settings settings = new Settings();
+    settings.setContinuousDetectionMode(ContinuousDetectionMode.ALL);
+    settings.setVelocityConstraintSolverIterations(20);
+    settings.setPositionConstraintSolverIterations(20);
+    return settings;
+  }
 
   private RotationalJoint actuateRotationalJoint(
       ActuateRotationalJoint action,

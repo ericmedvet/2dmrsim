@@ -31,7 +31,7 @@ import java.util.random.RandomGenerator;
  */
 public class Terrains {
   public final static double BORDER_H = 100d;
-  public static final double W = 2000d;
+  public static final double W = 500d;
   public static final double H = 25d;
   public static final double CHUNK_W = 5d;
   public static final double CHUNK_H = 1d;

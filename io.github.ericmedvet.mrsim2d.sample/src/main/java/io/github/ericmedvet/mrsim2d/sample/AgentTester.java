@@ -63,7 +63,7 @@ public class AgentTester {
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-drn";
+    String agentName = args.length > 1 ? args[0] : "legged-groupedsin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
     String agentDescription = null;
@@ -80,7 +80,7 @@ public class AgentTester {
     EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
     //shuffle parameters
     if (agent instanceof NumMultiBrained numMultiBrained) {
-      RandomGenerator random = new Random();
+      RandomGenerator random = new Random(1);
       numMultiBrained.brains().forEach(b -> {
         if (b instanceof Parametrized parametrized) {
           System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
