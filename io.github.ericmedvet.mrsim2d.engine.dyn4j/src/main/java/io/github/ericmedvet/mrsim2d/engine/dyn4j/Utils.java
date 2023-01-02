@@ -94,12 +94,14 @@ public class Utils {
         double x2 = xs.get(i);
         //find left intersections
         List<Double> ys1 = nonVerticalSides.stream()
+            .filter(s -> s.boundingBox().max().x() != x1)
             .map(s -> s.yAt(x1))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .toList();
         //find right intersections
         List<Double> ys2 = nonVerticalSides.stream()
+            .filter(s -> s.boundingBox().min().x() != x2)
             .map(s -> s.yAt(x2))
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -123,8 +125,8 @@ public class Utils {
         //build poly
         List<Point> points = Stream.of(
             new Point(x1, ys1.stream().min(Comparator.comparingDouble(v -> v)).orElseThrow()),
-            new Point(x2, ys1.stream().min(Comparator.comparingDouble(v -> v)).orElseThrow()),
-            new Point(x2, ys1.stream().max(Comparator.comparingDouble(v -> v)).orElseThrow()),
+            new Point(x2, ys2.stream().min(Comparator.comparingDouble(v -> v)).orElseThrow()),
+            new Point(x2, ys2.stream().max(Comparator.comparingDouble(v -> v)).orElseThrow()),
             new Point(x1, ys1.stream().max(Comparator.comparingDouble(v -> v)).orElseThrow())
         ).distinct().toList();
         polies.add(new Poly(points.toArray(Point[]::new)));
