@@ -59,7 +59,7 @@ public class AgentTester {
               sim.task.locomotion(
                 initialXGap = 0.1;
                 duration = 120;
-                terrain = s.t.flat()
+                terrain = s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)
               )
             """);
     //read agent resource

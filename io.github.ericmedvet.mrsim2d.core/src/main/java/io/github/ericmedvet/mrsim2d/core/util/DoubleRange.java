@@ -26,6 +26,7 @@ public record DoubleRange(double min, double max) implements Serializable {
   public static DoubleRange UNIT = new DoubleRange(0, 1);
   public static DoubleRange SYMMETRIC_UNIT = new DoubleRange(-1, 1);
   public static DoubleRange UNBOUNDED = new DoubleRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
   public DoubleRange {
     if (max < min) {
       throw new IllegalArgumentException(String.format(
@@ -38,6 +39,10 @@ public record DoubleRange(double min, double max) implements Serializable {
 
   public double clip(double value) {
     return Math.min(Math.max(value, min), max);
+  }
+
+  public boolean contains(double d) {
+    return min <= d && d <= max;
   }
 
   public DoubleRange delta(double v) {

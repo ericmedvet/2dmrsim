@@ -20,20 +20,25 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
+import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import io.github.ericmedvet.mrsim2d.core.tasks.Task;
+import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
+import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
@@ -56,45 +61,51 @@ public class TerrainTester {
     //prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
     Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
-    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    //prepare task
-    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
-        """
-              sim.task.locomotion(
-                duration = 120;
-                terrain = s.t.steppy(chunkW = 0.5; chunkH = 0.1)
-              )
-            """);
-    //read agent resource
-    String agentDescription = null;
-    try {
-      agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read agent description: %s%n".formatted(e));
-      System.exit(-1);
+    //RealtimeViewer viewer = new RealtimeViewer(30, drawer);
+    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    //prepare terrains
+    List<String> terrains = List.of(
+        "s.t.flat()",
+        "s.t.flat(w = 500)",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1)"
+    );
+    Consumer<Snapshot> nullConsumer = s -> {};
+    //warm up
+    int warmUpNOfTimes = 10;
+    L.info("Warming up");
+    System.out.printf(
+        "t=%5.3f with n=%d on %s%n",
+        profile(taskOn(nb, engineSupplier, nullConsumer, terrains.get(0)), warmUpNOfTimes),
+        warmUpNOfTimes,
+        terrains.get(0)
+    );
+    //profile
+    L.info("Testing");
+    int testNOfTimes = 5;
+    for (String terrain : terrains) {
+      System.out.printf(
+          "t=%5.3f with n=%d on %s%n",
+          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes),
+          testNOfTimes,
+          terrain
+      );
     }
-    EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-    //load weights
-    String serializedWeights = null;
-    try {
-      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read serialized params: %s%n".formatted(e));
-      System.exit(-1);
-    }
-    try {
-      @SuppressWarnings("unchecked") List<Double> params = (List<Double>)fromBase64(serializedWeights);
-      if (agent instanceof NumBrained numBrained) {
-        if (numBrained.brain() instanceof Parametrized parametrized) {
-          parametrized.setParams(params.stream().mapToDouble(d -> d).toArray());
-        }
-      }
-    } catch (IOException e) {
-      L.severe("Cannot deserialize params: %s%n".formatted(e));
-    }
-    //do task
-    task.run(() -> agent, engine, viewer);
+  }
+
+  private static double profile(Runnable runnable, int nOfTimes) {
+    return IntStream.range(0, nOfTimes)
+        .mapToDouble(i -> {
+          Instant startingInstant = Instant.now();
+          runnable.run();
+          return Duration.between(startingInstant, Instant.now()).toMillis();
+        })
+        .average().orElse(Double.NaN) / 1000d;
   }
 
   private static String readResource(String resourcePath) throws IOException {
@@ -108,5 +119,50 @@ public class TerrainTester {
       }
     }
     return content;
+  }
+
+  private static Runnable taskOn(
+      NamedBuilder<?> nb,
+      Supplier<Engine> engineSupplier,
+      Consumer<Snapshot> consumer,
+      String terrain
+  ) {
+    //prepare task
+    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
+    //read agent resource
+    String agentDescription;
+    try {
+      agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read agent description: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    //load weights
+    String serializedWeights;
+    try {
+      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read serialized params: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    List<Double> params;
+    try {
+      //noinspection unchecked
+      params = (List<Double>) fromBase64(serializedWeights);
+    } catch (IOException e) {
+      L.severe("Cannot deserialize params: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    //prepare supplier
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+      if (agent instanceof NumBrained numBrained) {
+        if (numBrained.brain() instanceof Parametrized parametrized) {
+          parametrized.setParams(params.stream().mapToDouble(d -> d).toArray());
+        }
+      }
+      return agent;
+    };
+    return () -> locomotion.run(agentSupplier, engineSupplier.get(), consumer);
   }
 }

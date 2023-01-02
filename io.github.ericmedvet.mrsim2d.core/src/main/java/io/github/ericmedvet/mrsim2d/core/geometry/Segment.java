@@ -16,6 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.geometry;
 
+import java.util.Optional;
+
 public record Segment(Point p1, Point p2) implements Shape {
   @Override
   public BoundingBox boundingBox() {
@@ -54,4 +56,19 @@ public record Segment(Point p1, Point p2) implements Shape {
     );
   }
 
+  public Optional<Double> xAt(double y) {
+    BoundingBox bb = boundingBox();
+    if (bb.yRange().contains(y)) {
+      return Optional.of(bb.xRange().denormalize(bb.yRange().normalize(y)));
+    }
+    return Optional.empty();
+  }
+
+  public Optional<Double> yAt(double x) {
+    BoundingBox bb = boundingBox();
+    if (bb.xRange().contains(x)) {
+      return Optional.of(bb.yRange().denormalize(bb.xRange().normalize(x)));
+    }
+    return Optional.empty();
+  }
 }
