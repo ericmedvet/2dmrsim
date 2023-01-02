@@ -15,7 +15,7 @@ import java.util.*;
 
 public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint, MultipartBody,
     Actuable {
-  private static final DoubleRange JOINT_ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
+  private static final DoubleRange JOINT_PASSIVE_ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
   private static final boolean SET_LIMITS = false;
 
   private static final double ANCHOR_REL_GAP = 0.1;
@@ -29,6 +29,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
 
   private final List<Anchor> anchors;
   private final Vector2 initialRefDirection;
+  private final DoubleRange jointActiveAngleRange;
 
   private double jointTargetAngle;
   private double angleErrorSummation;
@@ -39,6 +40,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
       double width,
       double mass,
       Motor motor,
+      DoubleRange jointActiveAngleRange,
       double friction,
       double restitution,
       double linearDamping,
@@ -55,6 +57,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     }
     this.mass = mass;
     this.motor = motor;
+    this.jointActiveAngleRange = jointActiveAngleRange;
     jointLength = Math.sqrt(2d) * width / 2d;
     //create bodies
     Poly poly1 = new Path(Point.ORIGIN).moveBy(length / 2d - width / 2d, 0)
@@ -75,7 +78,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     joint = new RevoluteJoint<>(body1, body2, new Vector2(length / 2d, width / 2d));
     //joint.setReferenceAngle(0);
     if (SET_LIMITS) {
-      joint.setLimits(JOINT_ANGLE_RANGE.min(), JOINT_ANGLE_RANGE.max());
+      joint.setLimits(JOINT_PASSIVE_ANGLE_RANGE.min(), JOINT_PASSIVE_ANGLE_RANGE.max());
       joint.setLimitEnabled(true);
     }
     joint.setMotorEnabled(true);
@@ -218,8 +221,13 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
   }
 
   @Override
-  public DoubleRange jointAngleRange() {
-    return JOINT_ANGLE_RANGE;
+  public DoubleRange jointActiveAngleRange() {
+    return jointActiveAngleRange;
+  }
+
+  @Override
+  public DoubleRange jointPassiveAngleRange() {
+    return JOINT_PASSIVE_ANGLE_RANGE;
   }
 
   @Override
@@ -238,7 +246,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
   }
 
   protected void setJointTargetAngle(double jointTargetAngle) {
-    this.jointTargetAngle = jointAngleRange().clip(jointTargetAngle);
+    this.jointTargetAngle = jointActiveAngleRange().clip(jointTargetAngle);
   }
 
   @Override

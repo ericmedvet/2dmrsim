@@ -12,6 +12,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
+import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
@@ -77,7 +78,8 @@ public class JointTester {
               jointLength,
               1,
               1,
-              new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0)
+              new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0),
+              new DoubleRange(-Math.PI / 3d, Math.PI / 3d)
           )
       ).outcome().orElseThrow();
       engine.perform(new TranslateBodyAt(joint, new Point(5, 3)));
@@ -207,7 +209,8 @@ public class JointTester {
     return task.run(
         targetF,
         engineSupplier.get(),
-        (consumer == null) ? (s -> {}) : consumer
+        (consumer == null) ? (s -> {
+        }) : consumer
     );
   }
 

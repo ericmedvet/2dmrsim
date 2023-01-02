@@ -59,6 +59,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
   private final DoubleRange areaRatioActiveRange;
   private final EnumSet<SpringScaffolding> springScaffoldings;
   private final Vector2 initialSidesAverageDirection;
+
   public Voxel(
       double sideLength,
       double mass,
@@ -93,7 +94,9 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     ));
     initialSidesAverageDirection = getSidesAverageDirection();
   }
+
   private enum BodyType {VERTEX, CENTRAL}
+
   protected enum SpringScaffolding {SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS}
 
   private record SpringRange(double min, double rest, double max) {
@@ -127,10 +130,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
   protected void actuate(EnumMap<Side, Double> sideValues) {
     //apply on sides
     for (Map.Entry<Side, Double> sideEntry : sideValues.entrySet()) {
-      double v = sideEntry.getValue();
-      if (Math.abs(v) > 1d) {
-        v = Math.signum(v);
-      }
+      double v = DoubleRange.SYMMETRIC_UNIT.clip(sideEntry.getValue());
       for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
         Voxel.SpringRange range = (SpringRange) joint.getUserData();
         if (v >= 0) { // shrink
@@ -141,10 +141,10 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     //apply on central
-    double v = sideValues.values().stream().mapToDouble(Double::doubleValue).average().orElse(0d);
-    if (Math.abs(v) > 1d) {
-      v = Math.signum(v);
-    }
+    double v = sideValues.values().stream()
+        .mapToDouble(d -> DoubleRange.SYMMETRIC_UNIT.clip(d))
+        .average()
+        .orElse(0d);
     for (DistanceJoint<Body> joint : centralJoints) {
       Voxel.SpringRange range = (SpringRange) joint.getUserData();
       if (v >= 0) { // shrink

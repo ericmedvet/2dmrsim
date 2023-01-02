@@ -16,8 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
-import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
+import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -25,7 +25,12 @@ import java.util.Map;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record ActuateVoxel(Voxel voxel, EnumMap<Voxel.Side, Double> values) implements Action<Voxel> {
+public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel> {
+  @Override
+  public DoubleRange range() {
+    return DoubleRange.SYMMETRIC_UNIT;
+  }
+
   public ActuateVoxel(Voxel voxel, double value) {
     this(voxel, value, value, value, value);
   }

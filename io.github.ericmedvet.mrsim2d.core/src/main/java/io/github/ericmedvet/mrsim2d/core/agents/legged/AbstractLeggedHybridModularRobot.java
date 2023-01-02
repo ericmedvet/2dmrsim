@@ -121,7 +121,7 @@ public abstract class AbstractLeggedHybridModularRobot implements EmbodiedAgent 
         }
         //create joint
         RotationalJoint joint = performer.perform(new CreateRotationalJoint(
-                legChunk.length(), legChunk.width(), rotationalJointMass, legChunk.motor()
+                legChunk.length(), legChunk.width(), rotationalJointMass, legChunk.motor(), legChunk.activeAngleRange()
             ), this)
             .outcome()
             .orElseThrow(() -> new ActionException("Cannot leg chunk rotational joint"));

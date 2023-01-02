@@ -18,6 +18,7 @@ package io.github.ericmedvet.mrsim2d.core.agents.legged;
 
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
+import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public record LegChunk(
     double width,
     double mass,
     RotationalJoint.Motor motor,
+    DoubleRange activeAngleRange,
     ConnectorType upConnector,
     List<Sensor<?>> jointSensors
 ) {}

@@ -23,6 +23,7 @@ import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot
 import io.github.ericmedvet.mrsim2d.core.agents.legged.ConnectorType;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.LegChunk;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
+import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
 
@@ -62,7 +63,8 @@ public class LeggedMisc {
       @Param(value = "motorControlP", dD = RotationalJoint.Motor.CONTROL_P) double motorControlP,
       @Param(value = "motorControlI", dD = RotationalJoint.Motor.CONTROL_I) double motorControlI,
       @Param(value = "motorControlD", dD = RotationalJoint.Motor.CONTROL_D) double motorControlD,
-      @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE) double motorAngleTolerance
+      @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE) double motorAngleTolerance,
+      @Param(value = "activeAngleRange", dNPM = "sim.range(min=-1.047;max=1.047)") DoubleRange activeAngleRange
   ) {
     return new LegChunk(
         length,
@@ -76,6 +78,7 @@ public class LeggedMisc {
             motorControlD,
             motorAngleTolerance
         ),
+        activeAngleRange,
         upConnector,
         jointSensors
     );

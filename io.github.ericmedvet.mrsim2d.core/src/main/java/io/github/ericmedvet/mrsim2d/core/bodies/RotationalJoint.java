@@ -43,7 +43,8 @@ public interface RotationalJoint extends RigidBody, Anchorable {
 
   double jointAngle();
 
-  DoubleRange jointAngleRange();
+  DoubleRange jointActiveAngleRange();
+  DoubleRange jointPassiveAngleRange();
 
   double jointLength();
 

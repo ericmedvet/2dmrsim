@@ -32,6 +32,6 @@ public record SenseJointAngle(RotationalJoint body) implements Sense<RotationalJ
 
   @Override
   public DoubleRange range() {
-    return body.jointAngleRange();
+    return body.jointPassiveAngleRange();
   }
 }

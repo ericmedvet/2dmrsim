@@ -16,11 +16,15 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
-import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
+import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record ActuateRotationalJoint(RotationalJoint rotationalJoint, double targetAngle) implements Action<RotationalJoint> {
+public record ActuateRotationalJoint(RotationalJoint body, double value) implements Actuate<RotationalJoint> {
+  @Override
+  public DoubleRange range() {
+    return DoubleRange.SYMMETRIC_UNIT;
+  }
 }

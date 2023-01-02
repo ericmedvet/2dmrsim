@@ -58,6 +58,7 @@ public class Dyn4JEngine extends AbstractEngine {
   );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
+
   public Dyn4JEngine(Configuration configuration) {
     this.configuration = configuration;
     world = new World<>();
@@ -101,24 +102,26 @@ public class Dyn4JEngine extends AbstractEngine {
       ActuateRotationalJoint action,
       Agent agent
   ) throws IllegalActionException {
-    if (action.rotationalJoint() instanceof RotationalJoint rotationalJoint) {
-      rotationalJoint.setJointTargetAngle(action.targetAngle());
+    if (action.body() instanceof RotationalJoint rotationalJoint) {
+      rotationalJoint.setJointTargetAngle(
+          rotationalJoint.jointActiveAngleRange().denormalize(action.range().normalize(action.value()))
+      );
       return rotationalJoint;
     }
     throw new IllegalActionException(
         action,
-        String.format("Unsupported rotationalJoint type %s", action.rotationalJoint().getClass().getSimpleName())
+        String.format("Unsupported body type %s", action.body().getClass().getSimpleName())
     );
   }
 
   private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
-    if (action.voxel() instanceof Voxel voxel) {
+    if (action.body() instanceof Voxel voxel) {
       voxel.actuate(action.values());
       return voxel;
     }
     throw new IllegalActionException(
         action,
-        String.format("Unsupported voxel type %s", action.voxel().getClass().getSimpleName())
+        String.format("Unsupported voxel type %s", action.body().getClass().getSimpleName())
     );
   }
 
@@ -226,6 +229,7 @@ public class Dyn4JEngine extends AbstractEngine {
         action.width(),
         action.mass(),
         action.motor(),
+        action.activeAngleRange(),
         configuration.rigidBodyFriction,
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
