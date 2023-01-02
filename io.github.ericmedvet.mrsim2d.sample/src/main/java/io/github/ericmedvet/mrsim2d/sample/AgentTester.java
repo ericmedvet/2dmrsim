@@ -59,11 +59,11 @@ public class AgentTester {
               sim.task.locomotion(
                 initialXGap = 0.1;
                 duration = 120;
-                terrain = s.t.steppy(chunkW = 0.5; chunkH = 0.5; w = 250)
+                terrain = s.t.steppy(chunkW = 8.5; chunkH = 0.1; w = 250)
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-drn";
+    String agentName = args.length > 1 ? args[0] : "legged-groupedsin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
     String agentDescription = null;

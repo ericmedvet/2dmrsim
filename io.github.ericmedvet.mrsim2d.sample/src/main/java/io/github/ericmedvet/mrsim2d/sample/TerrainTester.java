@@ -62,10 +62,10 @@ public class TerrainTester {
     //prepare engine
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //do single task
-    if (false) {
+    if (true) {
       @SuppressWarnings("unchecked")
       Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
-      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.steppy(chunkW = 0.5; chunkH = 0.1)").run();
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly(chunkW = 10.5; chunkH = 0.1)").run();
       System.exit(0);
     }
     //prepare terrains
