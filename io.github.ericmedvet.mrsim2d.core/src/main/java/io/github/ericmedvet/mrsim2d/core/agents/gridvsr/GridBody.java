@@ -40,10 +40,10 @@ public record GridBody(Grid<Pair<Voxel.Material, List<Sensor<? super Voxel>>>> g
   }
 
   public Grid<Voxel.Material> materialGrid() {
-    return Grid.create(grid, Pair::first);
+    return grid.map(Pair::first);
   }
 
   public Grid<List<Sensor<? super Voxel>>> sensorsGrid() {
-    return Grid.create(grid, Pair::second);
+    return grid.map(Pair::second);
   }
 }

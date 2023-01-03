@@ -84,17 +84,14 @@ public class VSRSensorizingFunctions {
 
   @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> empty() {
-    return shape -> Grid.create(shape, b -> List.of());
+    return shape -> shape.map(b -> List.of());
   }
 
   @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> uniform(
       @Param(value = "sensors") List<Sensor<? super Voxel>> sensors
   ) {
-    return shape -> Grid.create(
-        shape,
-        b -> sensors
-    );
+    return shape -> shape.map(b -> sensors);
   }
 
 }
