@@ -64,13 +64,17 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
     for (Grid.Key key : voxelGrid.keys()) {
       Voxel srcVoxel = voxelGrid.get(key);
       if (srcVoxel != null) {
-        Voxel onEast = voxelGrid.get(key.x() + 1, key.y());
-        Voxel onSouth = voxelGrid.get(key.x(), key.y() + 1);
-        if (onEast != null) {
-          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onEast, LINK_TYPE), this);
+        if (voxelGrid.isValid(key.at(1, 0))) {
+          Voxel other = voxelGrid.get(key.at(+1, 0));
+          if (other != null) {
+            actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, other, LINK_TYPE), this);
+          }
         }
-        if (onSouth != null) {
-          actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, onSouth, LINK_TYPE), this);
+        if (voxelGrid.isValid(key.at(0, 1))) {
+          Voxel other = voxelGrid.get(key.at(0, 1));
+          if (other != null) {
+            actionPerformer.perform(new AttachClosestAnchors(2, srcVoxel, other, LINK_TYPE), this);
+          }
         }
       }
     }

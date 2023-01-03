@@ -15,14 +15,20 @@ public abstract class AbstractGrid<T> implements Grid<T> {
     this.h = h;
   }
 
+  protected void checkValidity(Key key) {
+    if (!isValid(key)) {
+      throw new IllegalArgumentException("Invalid coords (%d,%d) on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
+    }
+  }
+
   @Override
   public int h() {
-    return 0;
+    return h;
   }
 
   @Override
   public int w() {
-    return 0;
+    return w;
   }
 
   @Override
@@ -42,6 +48,7 @@ public abstract class AbstractGrid<T> implements Grid<T> {
 
   @Override
   public String toString() {
-    return "%s(%dx%d)[%s]".formatted(getClass().getSimpleName(), w(), h(), entries());
+    return "%s(%dx%d)%s".formatted(getClass().getSimpleName(), w(), h(), entries());
   }
+
 }

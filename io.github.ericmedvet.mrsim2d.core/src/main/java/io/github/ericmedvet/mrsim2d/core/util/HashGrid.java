@@ -18,17 +18,13 @@ public class HashGrid<T> extends AbstractGrid<T> implements Serializable {
 
   @Override
   public T get(Key key) {
-    if (!isValid(key)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
-    }
+    checkValidity(key);
     return map.get(key);
   }
 
   @Override
   public void set(Key key, T t) {
-    if (!isValid(key)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
-    }
+    checkValidity(key);
     map.put(key, t);
   }
 

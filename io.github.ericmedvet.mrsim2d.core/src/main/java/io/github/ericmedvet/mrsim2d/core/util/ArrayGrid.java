@@ -11,24 +11,20 @@ public class ArrayGrid<T> extends AbstractGrid<T> implements Serializable {
   private final Object[] ts;
 
   public ArrayGrid(int w, int h) {
-    super(w,h);
+    super(w, h);
     this.ts = new Object[w * h];
   }
 
   @Override
   public T get(Key key) {
-    if (!isValid(key)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
-    }
+    checkValidity(key);
     //noinspection unchecked
     return (T) ts[(key.y() * w()) + key.x()];
   }
 
   @Override
   public void set(Key key, T t) {
-    if (!isValid(key)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
-    }
+    checkValidity(key);
     ts[(key.y() * w()) + key.x()] = t;
   }
 

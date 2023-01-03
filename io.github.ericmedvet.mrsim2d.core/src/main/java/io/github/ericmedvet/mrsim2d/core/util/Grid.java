@@ -17,9 +17,23 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   char FULL_CELL_CHAR = '█';
   char EMPTY_CELL_CHAR = '░';
 
-  record Entry<V>(Grid.Key key, V value) implements Serializable {}
+  record Entry<V>(Key key, V value) implements Serializable {
+    @Override
+    public String toString() {
+      return key.toString() + "->" + value.toString();
+    }
+  }
 
-  record Key(int x, int y) implements Serializable {}
+  record Key(int x, int y) implements Serializable {
+    public Key at(int dX, int dY) {
+      return new Key(x + dX, y + dY);
+    }
+
+    @Override
+    public String toString() {
+      return "(" + x + ',' + y + ')';
+    }
+  }
 
   T get(Key key);
 
@@ -29,11 +43,11 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
 
   int w();
 
-  static <T> Collector<Grid.Entry<T>, ?, Grid<T>> collector() {
+  static <T> Collector<Entry<T>, ?, Grid<T>> collector() {
     return Collectors.collectingAndThen(Collectors.toList(), list -> {
       int maxX = list.stream().map(e -> e.key().x()).max(Comparator.comparingInt(v -> v)).orElse(0);
       int maxY = list.stream().map(e -> e.key().y()).max(Comparator.comparingInt(v -> v)).orElse(0);
-      Grid<T> grid = Grid.create(maxX + 1, maxY + 1);
+      Grid<T> grid = create(maxX + 1, maxY + 1);
       list.forEach(e -> grid.set(e.key(), e.value()));
       return grid;
     });
@@ -49,11 +63,7 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
       BiFunction<Integer, Integer, K> fillerFunction
   ) {
     Grid<K> grid = new ArrayGrid<>(w, h);
-    for (int x = 0; x < grid.w(); x++) {
-      for (int y = 0; y < grid.h(); y++) {
-        grid.set(x, y, fillerFunction.apply(x, y));
-      }
-    }
+    grid.keys().forEach(k -> grid.set(k, fillerFunction.apply(k.x(), k.y())));
     return grid;
   }
 
@@ -70,18 +80,18 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   static <K> String toString(Grid<K> grid, Predicate<K> p, String separator) {
-    return toString(grid, (Grid.Entry<K> e) -> p.test(e.value()) ? FULL_CELL_CHAR : EMPTY_CELL_CHAR, separator);
+    return toString(grid, (Entry<K> e) -> p.test(e.value()) ? FULL_CELL_CHAR : EMPTY_CELL_CHAR, separator);
   }
 
   static <K> String toString(Grid<K> grid, Function<K, Character> function) {
-    return toString(grid, (Grid.Entry<K> e) -> function.apply(e.value()), "\n");
+    return toString(grid, (Entry<K> e) -> function.apply(e.value()), "\n");
   }
 
-  static <K> String toString(Grid<K> grid, Function<Grid.Entry<K>, Character> function, String separator) {
+  static <K> String toString(Grid<K> grid, Function<Entry<K>, Character> function, String separator) {
     StringBuilder sb = new StringBuilder();
     for (int y = 0; y < grid.h(); y++) {
       for (int x = 0; x < grid.w(); x++) {
-        sb.append(function.apply(new Grid.Entry<>(new Grid.Key(x, y), grid.get(x, y))));
+        sb.append(function.apply(new Entry<>(new Key(x, y), grid.get(x, y))));
       }
       if (y < grid.h() - 1) {
         sb.append(separator);
@@ -107,15 +117,11 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   default List<Entry<T>> entries() {
-    return keys().stream().map(k -> new Grid.Entry<>(k, get(k))).toList();
+    return keys().stream().map(k -> new Entry<>(k, get(k))).toList();
   }
 
   default T get(int x, int y) {
-    Key k = new Key(x, y);
-    if (!isValid(k)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(k.x(), k.y(), w(), h()));
-    }
-    return get(k);
+    return get(new Key(x, y));
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -123,15 +129,15 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
     return key.x() >= 0 && key.x() < w() && key.y() >= 0 && key.y() < h();
   }
 
-  default Iterator<Grid.Entry<T>> iterator() {
+  default Iterator<Entry<T>> iterator() {
     return entries().iterator();
   }
 
-  default List<Grid.Key> keys() {
-    List<Grid.Key> keys = new ArrayList<>(w() * h());
+  default List<Key> keys() {
+    List<Key> keys = new ArrayList<>(w() * h());
     for (int x = 0; x < w(); x++) {
       for (int y = 0; y < h(); y++) {
-        keys.add(new Grid.Key(x, y));
+        keys.add(new Key(x, y));
       }
     }
     return Collections.unmodifiableList(keys);
@@ -140,7 +146,7 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   default <S> Grid<S> map(Function<T, S> function) {
     return entries().stream()
         .map(e -> new Entry<>(e.key(), function.apply(e.value())))
-        .collect(Grid.collector());
+        .collect(collector());
   }
 
   default List<List<T>> rows() {
@@ -156,20 +162,16 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   default void set(int x, int y, T t) {
-    Key k = new Key(x, y);
-    if (!isValid(k)) {
-      throw new IllegalArgumentException("Invalid coords %d,%d on a %dx%d grid".formatted(k.x(), k.y(), w(), h()));
-    }
-    set(k, t);
+    set(new Key(x, y), t);
   }
 
-  default Stream<Grid.Entry<T>> stream() {
+  default Stream<Entry<T>> stream() {
     return StreamSupport.stream(spliterator(), false);
   }
 
   default boolean[][] toArray(Predicate<T> p) {
     boolean[][] b = new boolean[w()][h()];
-    for (Grid.Entry<T> entry : this) {
+    for (Entry<T> entry : this) {
       b[entry.key().x()][entry.key().y()] = p.test(entry.value);
     }
     return b;
