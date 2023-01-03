@@ -60,11 +60,19 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   static <K> Grid<K> create(
       int w,
       int h,
-      BiFunction<Integer, Integer, K> fillerFunction
+      Function<Key, K> fillerFunction
   ) {
     Grid<K> grid = new ArrayGrid<>(w, h);
-    grid.keys().forEach(k -> grid.set(k, fillerFunction.apply(k.x(), k.y())));
+    grid.keys().forEach(k -> grid.set(k, fillerFunction.apply(k)));
     return grid;
+  }
+
+  static <K> Grid<K> create(
+      int w,
+      int h,
+      BiFunction<Integer, Integer, K> fillerFunction
+  ) {
+    return create(w, h, k -> fillerFunction.apply(k.x(), k.y()));
   }
 
   static <K> Grid<K> create(int w, int h) {

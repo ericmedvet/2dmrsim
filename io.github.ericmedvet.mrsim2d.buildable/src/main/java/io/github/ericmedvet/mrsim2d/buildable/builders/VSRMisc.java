@@ -19,7 +19,7 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
-import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
+import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
@@ -31,8 +31,8 @@ public class VSRMisc {
 
   @SuppressWarnings("unused")
   public static GridBody gridBody(
-      @Param("shape") Grid<Boolean> shape,
-      @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> sensorizingFunction
+      @Param("shape") Grid<GridBody.VoxelType> shape,
+      @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction
   ) {
     return new GridBody(shape, sensorizingFunction);
   }

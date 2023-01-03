@@ -35,30 +35,53 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   private final Grid<double[]> fullInputsGrid;
   private final Grid<double[]> fullOutputsGrid;
 
-  public DistributedNumGridVSR(GridBody body, Grid<TimedRealFunction> timedRealFunctionsGrid, int nSignals, boolean directional) {
+  public DistributedNumGridVSR(
+      GridBody body,
+      Grid<TimedRealFunction> timedRealFunctionsGrid,
+      int nSignals,
+      boolean directional
+  ) {
     super(body);
     int communicationSize = directional ? nSignals * 4 : nSignals;
-    int nOfOutputs = communicationSize + 1;
     for (Grid.Key key : timedRealFunctionsGrid.keys()) {
-      if (body.sensorsGrid().get(key) == null) {
-        continue;
-      }
-      int nOfInputs = body.sensorsGrid().get(key).size() + 4 * nSignals;
-      timedRealFunctionsGrid.get(key).checkDimension(nOfInputs, nOfOutputs);
+      timedRealFunctionsGrid.get(key).checkDimension(
+          nOfInputs(body, key, nSignals, directional),
+          nOfOutputs(body, key, nSignals, directional)
+      );
     }
     this.nSignals = nSignals;
     this.directional = directional;
     this.timedRealFunctionsGrid = timedRealFunctionsGrid;
-    signalsGrid = voxelGrid.map(v -> v != null ? new double[communicationSize] : null);
-    fullInputsGrid = body.sensorsGrid().map(d -> d != null ? new double[d.size() + 4 * nSignals] : null);
-    fullOutputsGrid = voxelGrid.map(d -> d != null ? new double[1 + communicationSize] : null);
+    signalsGrid = bodyGrid.map(v -> v != null ? new double[communicationSize] : null);
+    fullInputsGrid = Grid.create(
+        body.grid().w(),
+        body.grid().h(),
+        k -> new double[nOfInputs(body, k, nSignals, directional)]
+    );
+    fullOutputsGrid = Grid.create(
+        body.grid().w(),
+        body.grid().h(),
+        k -> new double[nOfOutputs(body, k, nSignals, directional)]
+    );
+  }
+
+  public static int nOfInputs(GridBody body, Grid.Key key, int nSignals, boolean directional) {
+    return body.grid().get(key).sensors().size() + 4 * nSignals;
+  }
+
+  public static int nOfOutputs(GridBody body, Grid.Key key, int nSignals, boolean directional) {
+    int communicationSize = directional ? nSignals * 4 : nSignals;
+    return communicationSize + (body.grid().get(key).element().type().equals(GridBody.VoxelType.SOFT) ? 1 : 0);
   }
 
   @Override
   public List<BrainIO> brainIOs() {
-    return voxelGrid.entries().stream()
-        .filter(e -> e.value()!=null)
-        .map(e -> new BrainIO(new RangedValues(fullInputsGrid.get(e.key()), INPUT_RANGE), new RangedValues(fullOutputsGrid.get(e.key()), OUTPUT_RANGE)))
+    return getBody().grid().stream()
+        .filter(e -> !e.value().element().type().equals(GridBody.VoxelType.NONE))
+        .map(e -> new BrainIO(
+            new RangedValues(fullInputsGrid.get(e.key()), INPUT_RANGE),
+            new RangedValues(fullOutputsGrid.get(e.key()), OUTPUT_RANGE)
+        ))
         .toList();
   }
 
@@ -123,4 +146,5 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     double[] allSignals = signalsGrid.get(x, y);
     return directional ? Arrays.stream(allSignals, c * nSignals, (c + 1) * nSignals).toArray() : allSignals;
   }
+
 }

@@ -22,6 +22,7 @@ import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
+import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
@@ -38,7 +39,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
   protected final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   protected final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
-  private final Grid<List<Sensor<? super Voxel>>> sensorsGrid;
+  private final Grid<List<Sensor<? super Body>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<Double> outputGrid;
   private final GridBody body;
@@ -48,11 +49,12 @@ public abstract class NumGridVSR extends AbstractGridVSR {
       double voxelSideLength,
       double voxelMass
   ) {
-    super(body.materialGrid(), voxelSideLength, voxelMass);
-    this.sensorsGrid = body.sensorsGrid();
+    super(body.grid().map(GridBody.SensorizedElement::element), voxelSideLength, voxelMass);
+    this.sensorsGrid = body.grid().map(GridBody.SensorizedElement::sensors);
     this.body = body;
-    inputsGrid = sensorsGrid.map(l -> l != null ? new double[l.size()] : null);
-    outputGrid = voxelGrid.map(v -> v != null ? 0d : null);
+    inputsGrid = body.grid().map(e -> e.element().type().equals(GridBody.VoxelType.NONE) ? null : new double[e.sensors()
+        .size()]);
+    outputGrid = bodyGrid.map(v -> v != null ? 0d : null);
   }
 
   public NumGridVSR(GridBody body) {
@@ -87,7 +89,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     computeActuationValues(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), OUTPUT_RANGE.clip(e.value())));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
-    actions.addAll(voxelGrid.entries().stream()
+    actions.addAll(bodyGrid.entries().stream()
         .filter(e -> e.value() != null)
         .map(e -> sensorsGrid.get(e.key()).stream()
             .map(f -> f.apply(e.value()))
@@ -95,9 +97,9 @@ public abstract class NumGridVSR extends AbstractGridVSR {
         .flatMap(Collection::stream)
         .toList());
     //generate actuation actions
-    actions.addAll(voxelGrid.entries().stream()
-        .filter(e -> e.value() != null)
-        .map(e -> new ActuateVoxel(e.value(), outputGrid.get(e.key())))
+    actions.addAll(bodyGrid.entries().stream()
+        .filter(e -> e.value() instanceof Voxel)
+        .map(e -> new ActuateVoxel((Voxel) e.value(), outputGrid.get(e.key())))
         .toList());
     return actions;
   }

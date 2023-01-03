@@ -18,6 +18,7 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 /**
@@ -26,53 +27,70 @@ import io.github.ericmedvet.mrsim2d.core.util.Grid;
 public class GridShapes {
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> ball(@Param("d") Integer d) {
+  public static Grid<GridBody.VoxelType> ball(@Param("d") Integer d) {
     return Grid.create(
         d,
         d,
         (x, y) -> Math.round(Math.sqrt((x - (d - 1) / 2d) * (x - (d - 1) / 2d) + (y - (d - 1) / 2d) * (y - (d - 1) / 2d))) <= (int) Math.floor(
-            d / 2d)
+            d / 2d) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE
     );
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> biped(@Param("w") Integer w, @Param("h") Integer h) {
-    return Grid.create(w, h, (x, y) -> !(y < h / 2 && x >= w / 4 && x < w * 3 / 4));
+  public static Grid<GridBody.VoxelType> biped(@Param("w") Integer w, @Param("h") Integer h) {
+    return Grid.create(
+        w,
+        h,
+        (x, y) -> !(y < h / 2 && x >= w / 4 && x < w * 3 / 4) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE
+    );
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> comb(@Param("w") Integer w, @Param("h") Integer h) {
-    return Grid.create(w, h, (x, y) -> (y >= h / 2 || x % 2 == 0));
+  public static Grid<GridBody.VoxelType> comb(@Param("w") Integer w, @Param("h") Integer h) {
+    return Grid.create(w, h, (x, y) -> (y >= h / 2 || x % 2 == 0) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE);
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> free(@Param(value = "s", dS = "111-101") String s) {
+  public static Grid<GridBody.VoxelType> free(@Param(value = "s", dS = "rsr-s.s") String s) {
+    String innerS = s.toLowerCase();
     return Grid.create(
         s.split("-")[0].length(),
         s.split("-").length,
-        (x, y) -> s.split("-")[s.split("-").length - y - 1].charAt(x) == '1'
+        (x, y) -> switch (innerS.split("-")[innerS.split("-").length - y - 1].charAt(x)) {
+          case 's', '1' -> GridBody.VoxelType.SOFT;
+          case 'r' -> GridBody.VoxelType.RIGID;
+          default -> GridBody.VoxelType.NONE;
+        }
     );
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> t(@Param("w") Integer w, @Param("h") Integer h) {
+  public static Grid<GridBody.VoxelType> t(@Param("w") Integer w, @Param("h") Integer h) {
     int pad = (int) Math.floor((Math.floor((double) w / 2) / 2));
-    return Grid.create(w, h, (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)));
+    return Grid.create(
+        w,
+        h,
+        (x, y) -> (y == 0 || (x >= pad && x < h - pad - 1)) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE
+    );
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> triangle(@Param("l") Integer l) {
-    return Grid.create(l, l, (x, y) -> (y >= x));
+  public static Grid<GridBody.VoxelType> triangle(@Param("l") Integer l) {
+    return Grid.create(l, l, (x, y) -> (y >= x) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE);
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> tripod(@Param("w") Integer w, @Param("h") Integer h) {
-    return Grid.create(w, h, (x, y) -> !(y < h / 2 && x != 0 && x != w - 1 && x != w / 2));
+  public static Grid<GridBody.VoxelType> tripod(@Param("w") Integer w, @Param("h") Integer h) {
+    return Grid.create(
+        w,
+        h,
+        (x, y) -> !(y < h / 2 && x != 0 && x != w - 1 && x != w / 2) ? GridBody.VoxelType.SOFT : GridBody.VoxelType.NONE
+    );
   }
 
   @SuppressWarnings("unused")
-  public static Grid<Boolean> worm(@Param("w") Integer w, @Param("h") Integer h) {
-    return Grid.create(w, h, true);
+  public static Grid<GridBody.VoxelType> worm(@Param("w") Integer w, @Param("h") Integer h) {
+    return Grid.create(w, h, GridBody.VoxelType.SOFT);
   }
 
 }

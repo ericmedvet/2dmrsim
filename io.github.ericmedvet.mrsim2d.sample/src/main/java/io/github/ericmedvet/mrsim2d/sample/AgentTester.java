@@ -63,7 +63,7 @@ public class AgentTester {
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-drn";
+    String agentName = args.length > 1 ? args[0] : "hybrid-biped-vsr-centralized-mlp";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
     String agentDescription = null;

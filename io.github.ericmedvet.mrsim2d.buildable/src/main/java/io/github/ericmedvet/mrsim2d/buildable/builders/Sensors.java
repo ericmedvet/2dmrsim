@@ -22,7 +22,6 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
-import io.github.ericmedvet.mrsim2d.core.bodies.SoftBody;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 
 /**
@@ -39,7 +38,7 @@ public class Sensors {
   }
 
   @SuppressWarnings("unused")
-  public static Sensor<SoftBody> ar() {
+  public static Sensor<Body> ar() {
     return SenseAreaRatio::new;
   }
 

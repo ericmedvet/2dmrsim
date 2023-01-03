@@ -27,6 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot
 import io.github.ericmedvet.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
+import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
 
@@ -55,10 +56,20 @@ public class Agents {
   ) {
     return new DistributedNumGridVSR(
         body,
-        body.sensorsGrid().map(
+        /*body.sensorsGrid().map(
             v -> v != null ?
                 timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals))
                 : null
+        ),*/
+        Grid.create(
+            body.grid().w(),
+            body.grid().h(),
+            k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE) ?
+                null :
+                timedRealFunctionBuilder.apply(
+                    DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional),
+                    DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional)
+                )
         ),
         nSignals,
         directional

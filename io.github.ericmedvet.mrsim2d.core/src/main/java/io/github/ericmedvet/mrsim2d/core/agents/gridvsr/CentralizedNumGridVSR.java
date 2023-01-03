@@ -22,7 +22,6 @@ import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 import io.github.ericmedvet.mrsim2d.core.util.Utils;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -51,11 +50,15 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   public static int nOfInputs(GridBody body) {
-    return body.sensorsGrid().values().stream().filter(Objects::nonNull).mapToInt(List::size).sum();
+    return body.grid().values().stream()
+        .mapToInt(e -> e.sensors().size())
+        .sum();
   }
 
   public static int nOfOutputs(GridBody body) {
-    return (int) body.sensorsGrid().values().stream().filter(Objects::nonNull).count();
+    return (int) body.grid().values().stream()
+        .filter(e -> !e.element().type().equals(GridBody.VoxelType.NONE))
+        .count();
   }
 
   @Override
