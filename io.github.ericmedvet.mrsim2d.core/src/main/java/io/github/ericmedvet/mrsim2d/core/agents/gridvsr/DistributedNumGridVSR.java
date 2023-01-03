@@ -44,10 +44,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     super(body);
     int communicationSize = directional ? nSignals * 4 : nSignals;
     for (Grid.Key key : timedRealFunctionsGrid.keys()) {
-      timedRealFunctionsGrid.get(key).checkDimension(
-          nOfInputs(body, key, nSignals, directional),
-          nOfOutputs(body, key, nSignals, directional)
-      );
+      if (timedRealFunctionsGrid.get(key) != null) {
+        timedRealFunctionsGrid.get(key).checkDimension(
+            nOfInputs(body, key, nSignals, directional),
+            nOfOutputs(body, key, nSignals, directional)
+        );
+      }
     }
     this.nSignals = nSignals;
     this.directional = directional;
@@ -71,7 +73,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
 
   public static int nOfOutputs(GridBody body, Grid.Key key, int nSignals, boolean directional) {
     int communicationSize = directional ? nSignals * 4 : nSignals;
-    return communicationSize + (body.grid().get(key).element().type().equals(GridBody.VoxelType.SOFT) ? 1 : 0);
+    return communicationSize + 1;
   }
 
   @Override
@@ -108,8 +110,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       fullInputsGrid.set(key, fullInputs);
     }
     // process values
-    for (Grid.Key key : fullInputsGrid.keys()) {
-      if (fullInputsGrid.get(key) == null) {
+    for (Grid.Key key : timedRealFunctionsGrid.keys()) {
+      if (timedRealFunctionsGrid.get(key) == null) {
         continue;
       }
       double[] inputs = fullInputsGrid.get(key);
