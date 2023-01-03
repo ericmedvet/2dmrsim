@@ -10,28 +10,66 @@ import java.util.SortedMap;
 
 public class Outcome {
 
-  private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA}
+  private final static int N_OF_CACHED_SUB_OUTCOMES = 3;
+  private final SortedMap<Double, Observation> observations;
+  private final Map<Key, Double> metricMap;
+  private final Map<DoubleRange, Outcome> subOutcomes;
+
+  public Outcome(SortedMap<Double, Observation> observations) {
+    this.observations = observations;
+    metricMap = new HashMap<>();
+    subOutcomes = new HashMap<>();
+  }
 
   private enum Aggregate {INITIAL, FINAL, AVERAGE, MIN, MAX}
+  private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA}
 
   private enum Subject {FIRST, ALL}
 
   private record Key(Metric metric, Aggregate aggregate, Subject subject) {}
 
-  private final SortedMap<Double, Observation> observations;
-  private final Map<Key, Double> metricMap;
-
-  public Outcome(SortedMap<Double, Observation> observations) {
-    this.observations = observations;
-    metricMap = new HashMap<>();
+  public double allAgentsAverageHeight() {
+    return get(Aggregate.AVERAGE, Metric.BB_H, Subject.ALL);
   }
 
-  public Outcome subOutcome(DoubleRange tRange) {
-    return new Outcome(observations.subMap(tRange.min(), tRange.max()));
+  public double allAgentsAverageWidth() {
+    return get(Aggregate.AVERAGE, Metric.BB_W, Subject.ALL);
+  }
+
+  public double allAgentsFinalHeight() {
+    return get(Aggregate.FINAL, Metric.BB_H, Subject.ALL);
+  }
+
+  public double allAgentsFinalWidth() {
+    return get(Aggregate.FINAL, Metric.BB_W, Subject.ALL);
+  }
+
+  public double allAgentsMaxHeight() {
+    return get(Aggregate.MAX, Metric.BB_H, Subject.ALL);
+  }
+
+  public double allAgentsMaxWidth() {
+    return get(Aggregate.MAX, Metric.BB_W, Subject.ALL);
   }
 
   public double duration() {
     return observations.lastKey() - observations.firstKey();
+  }
+
+  public double firstAgentAverageArea() {
+    return get(Aggregate.AVERAGE, Metric.BB_AREA, Subject.FIRST);
+  }
+
+  public double firstAgentAverageTerrainHeight() {
+    return get(Aggregate.AVERAGE, Metric.TERRAIN_H, Subject.FIRST);
+  }
+
+  public double firstAgentXDistance() {
+    return get(Aggregate.FINAL, Metric.X, Subject.FIRST) - get(Aggregate.INITIAL, Metric.X, Subject.FIRST);
+  }
+
+  public double firstAgentXVelocity() {
+    return firstAgentXDistance() / duration();
   }
 
   private double get(Aggregate aggregate, Metric metric, Subject subject) {
@@ -77,44 +115,17 @@ public class Outcome {
     };
   }
 
-  public double firstAgentXDistance() {
-    return get(Aggregate.FINAL, Metric.X, Subject.FIRST) - get(Aggregate.INITIAL, Metric.X, Subject.FIRST);
-  }
-
-  public double firstAgentXVelocity() {
-    return firstAgentXDistance() / duration();
-  }
-
-  public double firstAgentAverageArea() {
-    return get(Aggregate.AVERAGE, Metric.BB_AREA, Subject.FIRST);
-  }
-
-  public double firstAgentAverageTerrainHeight() {
-    return get(Aggregate.AVERAGE, Metric.TERRAIN_H, Subject.FIRST);
-  }
-
-  public double allAgentsFinalHeight() {
-    return get(Aggregate.FINAL, Metric.BB_H, Subject.ALL);
-  }
-
-  public double allAgentsMaxHeight() {
-    return get(Aggregate.MAX, Metric.BB_H, Subject.ALL);
-  }
-
-  public double allAgentsFinalWidth() {
-    return get(Aggregate.FINAL, Metric.BB_W, Subject.ALL);
-  }
-
-  public double allAgentsMaxWidth() {
-    return get(Aggregate.MAX, Metric.BB_W, Subject.ALL);
-  }
-
-  public double allAgentsAverageWidth() {
-    return get(Aggregate.AVERAGE, Metric.BB_W, Subject.ALL);
-  }
-
-  public double allAgentsAverageHeight() {
-    return get(Aggregate.AVERAGE, Metric.BB_H, Subject.ALL);
+  public Outcome subOutcome(DoubleRange tRange) {
+    Outcome subOutcome = subOutcomes.get(tRange);
+    if (subOutcome == null) {
+      subOutcome = new Outcome(observations.subMap(tRange.min(), tRange.max()));
+      if (subOutcomes.size() >= N_OF_CACHED_SUB_OUTCOMES) {
+        //remove one
+        subOutcomes.remove(subOutcomes.keySet().iterator().next());
+      }
+      subOutcomes.put(tRange, subOutcome);
+    }
+    return subOutcome;
   }
 
   @Override
