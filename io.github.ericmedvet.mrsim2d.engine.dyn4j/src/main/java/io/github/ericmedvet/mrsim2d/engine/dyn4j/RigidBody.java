@@ -22,7 +22,10 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.geometry.*;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
 
@@ -47,13 +50,8 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
       double anchorSideDistance
   ) {
     this.mass = mass;
-    Convex convex = new Polygon(
-        Arrays.stream(convexPoly.vertexes()).sequential()
-            .map(Utils::point)
-            .toArray(Vector2[]::new)
-    );
     body = new Body();
-    body.addFixture(convex, mass / convexPoly.area(), friction, restitution);
+    body.addFixture(Utils.poly(convexPoly), mass / convexPoly.area(), friction, restitution);
     body.setMass(MassType.NORMAL);
     body.setLinearDamping(linearDamping);
     body.setAngularDamping(angularDamping);

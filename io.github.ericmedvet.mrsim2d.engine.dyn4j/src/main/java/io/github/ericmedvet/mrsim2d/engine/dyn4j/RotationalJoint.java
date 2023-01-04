@@ -9,7 +9,10 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.*;
+import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Polygon;
+import org.dyn4j.geometry.Transform;
+import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
 
@@ -113,11 +116,8 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
       Object userData,
       Poly poly
   ) {
-    Convex convex = new Polygon(Arrays.stream(poly.vertexes())
-        .map(Utils::point)
-        .toArray(Vector2[]::new));
     Body body = new Body();
-    body.addFixture(convex, mass / poly.area(), friction, restitution);
+    body.addFixture(Utils.poly(poly), mass / poly.area(), friction, restitution);
     body.setMass(MassType.NORMAL);
     body.setLinearDamping(linearDamping);
     body.setAngularDamping(angularDamping);

@@ -21,10 +21,9 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.geometry.decompose.Bayazit;
-import org.dyn4j.geometry.decompose.Decomposer;
-import org.dyn4j.geometry.decompose.EarClipping;
-import org.dyn4j.geometry.decompose.SweepLine;
+import org.dyn4j.geometry.decompose.*;
+import org.dyn4j.geometry.hull.GrahamScan;
+import org.dyn4j.geometry.hull.HullGenerator;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -36,6 +35,7 @@ import java.util.stream.Stream;
 public class Utils {
 
   private final static double NATIVE_THRESHOLD = 100;
+  private final static HullGenerator HULL_GENERATOR = new GrahamScan();
 
   private Utils() {
   }
@@ -70,12 +70,20 @@ public class Utils {
 
   public static List<Poly> decompose(Poly poly, DecomposeMethod method) {
     if (method.getDecomposer() != null) {
+      if (method.getDecomposer().get() instanceof Triangulator triangulator) {
+        return triangulator.triangulate(
+                Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)
+            ).stream()
+            .map(t -> new Poly(Arrays.stream(t.getVertices()).map(Utils::point).toArray(Point[]::new)))
+            .toList();
+      }
       return method.getDecomposer().get().decompose(
               Arrays.stream(poly.vertexes()).map(Utils::point).toList()
           ).stream()
           .map(c -> {
             if (c instanceof Polygon polygon) {
-              return new Poly(Arrays.stream(polygon.getVertices()).map(Utils::point).toArray(Point[]::new));
+              Vector2[] vertices = polygon.getVertices();
+              return new Poly(Arrays.stream(vertices).map(Utils::point).toArray(Point[]::new));
             }
             throw new IllegalArgumentException("Unsupported convex type %s".formatted(c.getClass().getSimpleName()));
           }).toList();
@@ -142,6 +150,12 @@ public class Utils {
 
   public static Point point(Vector2 v) {
     return new Point(v.x, v.y);
+  }
+
+  public static Polygon poly(Poly poly) {
+    return new Polygon(HULL_GENERATOR.generate(
+        Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)
+    ));
   }
 
 }

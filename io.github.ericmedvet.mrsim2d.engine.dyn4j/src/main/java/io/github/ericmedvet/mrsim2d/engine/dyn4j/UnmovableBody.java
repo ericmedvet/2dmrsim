@@ -26,8 +26,6 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Polygon;
-import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
 
@@ -53,11 +51,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
     List<Poly> parts = (poly.vertexes().length > 3) ? Utils.decompose(poly) : List.of(poly);
     List<Pair<Body, Poly>> bodyPairs = parts.stream()
         .map(c -> {
-          Convex convex = new Polygon(
-              Arrays.stream(c.vertexes()).sequential()
-                  .map(Utils::point)
-                  .toArray(Vector2[]::new)
-          );
+          Convex convex = Utils.poly(c);
           Body body = new Body();
           body.addFixture(convex, 1d, friction, restitution);
           body.setMass(MassType.INFINITE);
