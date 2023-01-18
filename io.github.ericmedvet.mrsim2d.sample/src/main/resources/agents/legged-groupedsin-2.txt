@@ -1,0 +1,15 @@
+s.a.numLeggedHybridRobot(
+  trunkLength = 20;
+  trunkMass = 1;
+  legs = 4 * [
+    s.a.l.leg(downConnector = rigid; legChunks = 2 * [s.a.l.legChunk()])
+  ];
+  function = s.f.groupedSin(
+    size = 4;
+    p = s.range(min = -1.57; max = 1.57);
+    f = s.range(min = 1.0; max = 1.0);
+    a = s.range(min = 0.5; max = 0.5);
+    b = s.range(min = 0.0; max = 0.0);
+    s = s.range(min = 0.0; max = 0.0)
+  )
+)

@@ -15,6 +15,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint, MultipartBody,
     Actuable {
@@ -29,6 +30,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
   private final Body body2;
   private final RevoluteJoint<Body> joint;
   private final double jointLength;
+  private final List<List<Integer>> polyIndexes;
 
   private final List<Anchor> anchors;
   private final Vector2 initialRefDirection;
@@ -77,6 +79,12 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
         .toPoly();
     body1 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly1);
     body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly2);
+    int jIndex1 = List.of(polyFromBody(body1).vertexes()).indexOf(new Point(length / 2d, width / 2d));
+    int jIndex2 = List.of(polyFromBody(body2).vertexes()).indexOf(new Point(length / 2d, width / 2d));
+    polyIndexes = List.of(
+        IntStream.range(0, 5).map(i -> (i + jIndex1) % 5).boxed().toList(),
+        IntStream.range(0, 5).map(i -> (i + jIndex2) % 5).boxed().toList()
+    );
     //create joint
     joint = new RevoluteJoint<>(body1, body2, new Vector2(length / 2d, width / 2d));
     //joint.setReferenceAngle(0);
@@ -185,14 +193,15 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
 
   @Override
   public Poly poly() {
-    Poly poly1 = polyFromBody(body1);
-    Poly poly2 = polyFromBody(body2);
-    Point[] ps1 = poly1.vertexes();
-    Point[] ps2 = poly2.vertexes();
+    Point[] ps1 = polyFromBody(body1).vertexes();
+    Point[] ps2 = polyFromBody(body2).vertexes();
     Point[] ps = new Point[10];
-    System.arraycopy(ps1, 0, ps, 0, 2);
-    System.arraycopy(ps2, 0, ps, 2, 5);
-    System.arraycopy(ps1, 2, ps, 7, 3);
+    for (int i = 0; i<5; i++) {
+      ps[i] = ps1[polyIndexes.get(0).get(i)];
+    }
+    for (int i = 0; i<5; i++) {
+      ps[i+5] = ps2[polyIndexes.get(1).get(i)];
+    }
     return new Poly(ps);
   }
 
@@ -237,7 +246,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
 
   @Override
   public Point jointPoint() {
-    return poly().vertexes()[2];
+    return Utils.point(joint.getAnchor1());
   }
 
   @Override
