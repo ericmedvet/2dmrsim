@@ -42,7 +42,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private final static Configuration DEFAULT_CONFIGURATION = new Configuration(
       2,
       1.5,
-      5
+      5,
+      0.5,
+      Math.PI / 2d
   );
   private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
   protected final AtomicDouble t;
@@ -82,7 +84,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
   public record Configuration(
       double attractionRange,
       double attractLinkRangeRatio,
-      double bodyFindRange
+      double bodyFindRange,
+      double nfcDistanceRange,
+      double nfcAngleRange
   ) {}
 
   protected abstract Collection<Body> getBodies();
