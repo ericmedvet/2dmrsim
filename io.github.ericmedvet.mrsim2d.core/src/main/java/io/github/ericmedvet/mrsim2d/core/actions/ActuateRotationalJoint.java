@@ -22,7 +22,7 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record ActuateRotationalJoint(RotationalJoint body, double value) implements Actuate<RotationalJoint> {
+public record ActuateRotationalJoint(RotationalJoint body, double value) implements Actuate<RotationalJoint, RotationalJoint> {
   @Override
   public DoubleRange range() {
     return DoubleRange.SYMMETRIC_UNIT;

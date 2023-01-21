@@ -25,12 +25,7 @@ import java.util.Map;
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
-public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel> {
-  @Override
-  public DoubleRange range() {
-    return DoubleRange.SYMMETRIC_UNIT;
-  }
-
+public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel, Voxel> {
   public ActuateVoxel(Voxel voxel, double value) {
     this(voxel, value, value, value, value);
   }
@@ -42,5 +37,10 @@ public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) imple
         Voxel.Side.S, sValue,
         Voxel.Side.W, wValue
     )));
+  }
+
+  @Override
+  public DoubleRange range() {
+    return DoubleRange.SYMMETRIC_UNIT;
   }
 }
