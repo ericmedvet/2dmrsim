@@ -236,7 +236,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
             action.body().poly().center().sum(action.displacement()),
             configuration.nfcDistanceRange
         ).stream()
-        .filter(m -> m.channel() == action.channel() && Math.abs(m.direction() - action.direction()) <= configuration.nfcAngleRange)
+        .filter(m -> m.channel() == action.channel() && Math.abs(m.direction() - action.direction()) >= configuration.nfcAngleRange)
         .mapToDouble(NFCMessage::value)
         .sum();
     return action.range().clip(sum);

@@ -22,4 +22,5 @@ public record SenseNFC(
   public DoubleRange range() {
     return DoubleRange.SYMMETRIC_UNIT;
   }
+
 }

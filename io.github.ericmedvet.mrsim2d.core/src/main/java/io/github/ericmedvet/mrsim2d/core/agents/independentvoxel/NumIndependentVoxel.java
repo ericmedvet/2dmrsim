@@ -108,8 +108,8 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     double[] readInputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
-          @SuppressWarnings("unchecked") ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<?
-              super Voxel>, Double>) ao;
+          @SuppressWarnings("unchecked")
+          ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
           return INPUT_RANGE.denormalize(so.action().range().normalize(so.outcome().orElse(0d)));
         })
         .toArray();
@@ -148,6 +148,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
               (short) i,
               outputs[aI++]
           ));
+          actions.add(new SenseNFC(voxel, mid, dir, (short) i));
         }
       }
     }

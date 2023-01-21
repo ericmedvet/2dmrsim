@@ -14,14 +14,14 @@ import java.util.List;
  */
 public class NFCDrawer implements Drawer {
   private final static Color[] COLORS = new Color[]{
-      Color.PINK,
-      Color.CYAN,
-      Color.YELLOW,
-      Color.MAGENTA,
-      Color.ORANGE
+      DrawingUtils.alphaed(Color.PINK, 0.5f),
+      DrawingUtils.alphaed(Color.CYAN, 0.5f),
+      DrawingUtils.alphaed(Color.MAGENTA, 0.5f),
+      DrawingUtils.alphaed(Color.YELLOW, 0.5f),
+      DrawingUtils.alphaed(Color.ORANGE, 0.5f)
   };
-  private final static double MAX_LENGTH = 1d;
-  private final static double ARROW_LENGTH = 0.15d;
+  private final static double MAX_LENGTH = 0.5d;
+  private final static double ARROW_LENGTH = 0.1d;
   private final static double ARROW_ANGLE = Math.PI / 6d;
 
   private final Color[] colors;
@@ -43,12 +43,10 @@ public class NFCDrawer implements Drawer {
       Point src = message.source();
       Point dst = src.sum(new Point(message.direction()).scale(maxLenght * Math.abs(message.value())));
       DrawingUtils.drawLine(g, src, dst);
-      Point mid = Point.average(src, dst);
       double dDirection = message.value() > 0d ? Math.PI : 0d;
-      Point arrowEnd1 = mid.sum(new Point(message.direction() + ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
-      Point arrowEnd2 = mid.sum(new Point(message.direction() - ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
-      DrawingUtils.drawLine(g, mid, arrowEnd1);
-      DrawingUtils.drawLine(g, mid, arrowEnd2);
+      Point arrowEnd1 = dst.sum(new Point(message.direction() + ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
+      Point arrowEnd2 = dst.sum(new Point(message.direction() - ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
+      DrawingUtils.fill(g, dst, arrowEnd1, arrowEnd2);
     }
     return true;
   }

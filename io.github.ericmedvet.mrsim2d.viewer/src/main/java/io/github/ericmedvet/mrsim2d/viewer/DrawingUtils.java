@@ -103,7 +103,11 @@ public class DrawingUtils {
   }
 
   public static void drawLine(Graphics2D g, Point src, Point dst) {
-    g.draw(new Line2D.Double(src.x(),src.y(),dst.x(),dst.y()));
+    g.draw(new Line2D.Double(src.x(), src.y(), dst.x(), dst.y()));
+  }
+
+  public static void fill(Graphics2D g, Point... points) {
+    g.fill(toPath(points));
   }
 
   public static BoundingBox getBoundingBox(Graphics2D g) {
