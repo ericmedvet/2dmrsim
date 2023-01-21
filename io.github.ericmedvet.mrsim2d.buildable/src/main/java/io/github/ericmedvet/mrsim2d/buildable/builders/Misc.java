@@ -28,10 +28,7 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.Drawers;
 import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
@@ -64,7 +61,8 @@ public class Misc {
       @Param(value = "miniWorld") boolean miniWorld,
       @Param(value = "miniAgents", dS = "brains") MiniAgentInfo miniAgentInfo,
       @Param(value = "engineProfiling") boolean engineProfiling,
-      @Param(value = "actions") boolean actions
+      @Param(value = "actions") boolean actions,
+      @Param(value = "nfc") boolean nfc
   ) {
     return s -> {
       Drawer baseDrawer = new ComponentsDrawer(
@@ -75,6 +73,7 @@ public class Misc {
               new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
           ), Snapshot::bodies
       ).onLastSnapshot();
+      Drawer nfcDrawer = new NFCDrawer();
       Drawer actionsDrawer = new ComponentsDrawer(
           List.of(
               new AttractAnchor(),
@@ -82,9 +81,17 @@ public class Misc {
               new SenseRotatedVelocity()
           ), Snapshot::actionOutcomes
       );
+      List<Drawer> thingsDrawers = new ArrayList<>();
+      thingsDrawers.add(baseDrawer);
+      if (actions) {
+        thingsDrawers.add(actionsDrawer);
+      }
+      if (nfc) {
+        thingsDrawers.add(nfcDrawer);
+      }
       Drawer worldDrawer = Drawer.transform(
           new AllAgentsFramer(enlargement).largest(followTime),
-          actions ? Drawer.of(baseDrawer, actionsDrawer) : baseDrawer
+          Drawer.of(Collections.unmodifiableList(thingsDrawers))
       );
       List<Drawer> drawers = new ArrayList<>(List.of(
           Drawer.clear(),

@@ -18,10 +18,10 @@ package io.github.ericmedvet.mrsim2d.viewer.drawers.actions;
 
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 
 /**
  * @author "Eric Medvet" on 2022/07/17 for 2dmrsim
@@ -56,7 +56,7 @@ public class SenseDistanceToBody extends AbstractActionComponentDrawer<io.github
     Point dst = src
         .sum(new Point(ao.action().direction() + ao.action().body().angle())
             .scale(ao.action().distanceRange()));
-    g.draw(new Line2D.Double(src.x(), src.y(), dst.x(), dst.y()));
+    DrawingUtils.drawLine(g, src, dst);
     //draw circle
     Point target = src
         .sum(new Point(ao.action().direction() + ao.action().body().angle())

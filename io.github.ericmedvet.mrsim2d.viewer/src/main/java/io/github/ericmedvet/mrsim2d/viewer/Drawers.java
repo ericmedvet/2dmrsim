@@ -154,6 +154,7 @@ public class Drawers {
                     new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
                 ), Snapshot::bodies
             ).onLastSnapshot(),
+            new NFCDrawer(),
             new ComponentsDrawer(
                 List.of(
                     //new CreateLink(), // both slow, because they add continuously drawers...

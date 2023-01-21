@@ -20,10 +20,10 @@ import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
+import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.util.function.BiPredicate;
 
 /**
@@ -64,7 +64,7 @@ public class CreateLink extends AbstractLastingActionOutcomeDrawer<io.github.eri
         double a = src.point().diff(dst.point()).direction();
         Point lSrc = src.point().diff(new Point(a).scale(r));
         Point lDst = dst.point().sum(new Point(a).scale(r));
-        g.draw(new Line2D.Double(lSrc.x(), lSrc.y(), lDst.x(), lDst.y()));
+        DrawingUtils.drawLine(g, lSrc, lDst);
         return dT > duration;
       } else {
         return true;

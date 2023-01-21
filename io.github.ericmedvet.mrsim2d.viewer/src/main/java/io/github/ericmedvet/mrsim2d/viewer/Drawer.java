@@ -91,7 +91,7 @@ public interface Drawer {
   }
 
   static Drawer of(Drawer... drawers) {
-    return of(java.util.List.of(drawers));
+    return of(List.of(drawers));
   }
 
   static Drawer of(List<Drawer> drawers) {

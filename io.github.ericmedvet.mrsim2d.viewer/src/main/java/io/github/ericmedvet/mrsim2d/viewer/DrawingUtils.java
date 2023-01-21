@@ -22,6 +22,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
@@ -99,6 +100,10 @@ public class DrawingUtils {
       Graphics2D g
   ) {
     drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
+  }
+
+  public static void drawLine(Graphics2D g, Point src, Point dst) {
+    g.draw(new Line2D.Double(src.x(),src.y(),dst.x(),dst.y()));
   }
 
   public static BoundingBox getBoundingBox(Graphics2D g) {
