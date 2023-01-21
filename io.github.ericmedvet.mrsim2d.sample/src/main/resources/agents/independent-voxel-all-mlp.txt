@@ -1,0 +1,13 @@
+s.a.numIndependentVoxel(
+  sensors = [
+    s.s.d(a = 0; r = 1);
+    s.s.d(a = 90; r = 1);
+    s.s.d(a = 180; r = 1);
+    s.s.d(a = 270; r = 1);
+    s.s.ar();
+    s.s.a();
+    s.s.sin()
+  ];
+  nOfNFCChannels = 2;
+  function = s.f.mlp()
+)

@@ -17,6 +17,7 @@
 package io.github.ericmedvet.mrsim2d.core.bodies;
 
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.Collection;
@@ -27,14 +28,20 @@ import java.util.Collection;
 public interface Voxel extends SoftBody, Anchorable {
   enum Side {
     N(Vertex.NE, Vertex.NW), E(Vertex.NE, Vertex.SE), W(Vertex.NW, Vertex.SW), S(Vertex.SE, Vertex.SW);
-    private final Vertex[] vertexes;
+    private final Vertex vertex1;
+    private final Vertex vertex2;
 
-    Side(Vertex... vertexes) {
-      this.vertexes = vertexes;
+    Side(Vertex vertex1, Vertex vertex2) {
+      this.vertex1 = vertex1;
+      this.vertex2 = vertex2;
     }
 
-    public Vertex[] vertexes() {
-      return vertexes;
+    public Vertex getVertex1() {
+      return vertex1;
+    }
+
+    public Vertex getVertex2() {
+      return vertex2;
     }
   }
 
@@ -58,5 +65,9 @@ public interface Voxel extends SoftBody, Anchorable {
   Collection<Anchor> anchorsOn(Side side);
 
   Point vertex(Vertex vertex);
+
+  default Segment side(Side side) {
+    return new Segment(vertex(side.getVertex1()), vertex(side.getVertex2()));
+  }
 
 }

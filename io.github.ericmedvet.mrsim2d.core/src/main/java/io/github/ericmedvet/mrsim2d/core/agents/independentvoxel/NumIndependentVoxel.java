@@ -20,13 +20,11 @@ import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
-import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
-import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
-import io.github.ericmedvet.mrsim2d.core.actions.DetachAnchors;
-import io.github.ericmedvet.mrsim2d.core.actions.Sense;
+import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
+import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.ArrayList;
@@ -40,12 +38,13 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
 
   private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
-  private final static double ATTACH_ACTION_THRESHOLD = 0.1d;
-  private final static int N_OF_OUTPUTS = 8;
-
+  private final static double ATTACH_ACTION_THRESHOLD = 0.25d;
   private final List<Sensor<? super Voxel>> sensors;
   private final double[] inputs;
   private final TimedRealFunction timedRealFunction;
+  private final AreaActuation areaActuation;
+  private final boolean attachActuation;
+  private final int nOfNFCChannels;
   private double[] outputs;
 
   public NumIndependentVoxel(
@@ -53,25 +52,54 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       double voxelSideLength,
       double voxelMass,
       List<Sensor<? super Voxel>> sensors,
+      AreaActuation areaActuation,
+      boolean attachActuation,
+      int nOfNFCChannels,
       TimedRealFunction timedRealFunction
   ) {
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
-    inputs = new double[sensors.size()];
-    timedRealFunction.checkDimension(nOfInputs(sensors), nOfOutputs());
+    inputs = new double[nOfInputs(sensors, nOfNFCChannels)];
+    this.areaActuation = areaActuation;
+    this.attachActuation = attachActuation;
+    this.nOfNFCChannels = nOfNFCChannels;
+    if (nOfNFCChannels < 0) {
+      throw new IllegalArgumentException("The number of channels must be 0 or more: %d found".formatted(nOfNFCChannels));
+    }
+    timedRealFunction.checkDimension(
+        nOfInputs(sensors, nOfNFCChannels),
+        nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
+    );
     this.timedRealFunction = timedRealFunction;
   }
 
-  public NumIndependentVoxel(List<Sensor<? super Voxel>> sensors, TimedRealFunction timedRealFunction) {
-    this(new Voxel.Material(), VOXEL_SIDE_LENGTH, VOXEL_MASS, sensors, timedRealFunction);
+  public NumIndependentVoxel(
+      List<Sensor<? super Voxel>> sensors,
+      AreaActuation areaActuation,
+      boolean attachActuation,
+      int nOfNFCChannels,
+      TimedRealFunction timedRealFunction
+  ) {
+    this(
+        new Voxel.Material(),
+        VOXEL_SIDE_LENGTH,
+        VOXEL_MASS,
+        sensors,
+        areaActuation,
+        attachActuation,
+        nOfNFCChannels,
+        timedRealFunction
+    );
   }
 
-  public static int nOfInputs(List<Sensor<? super Voxel>> sensors) {
-    return sensors.size();
+  public enum AreaActuation {OVERALL, SIDES}
+
+  public static int nOfInputs(List<Sensor<? super Voxel>> sensors, int nOfNFCChannels) {
+    return sensors.size() + nOfNFCChannels * 4;
   }
 
-  public static int nOfOutputs() {
-    return N_OF_OUTPUTS;
+  public static int nOfOutputs(AreaActuation areaActuation, boolean attachActuation, int nOfNFCChannels) {
+    return (areaActuation.equals(AreaActuation.OVERALL) ? 1 : 4) + (attachActuation ? 4 : 0) + nOfNFCChannels * 4;
   }
 
   @Override
@@ -91,14 +119,36 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions
-    actions.add(new ActuateVoxel(voxel, outputs[0], outputs[1], outputs[2], outputs[3]));
-    for (int i = 0; i < Voxel.Side.values().length; i++) {
-      Voxel.Side side = Voxel.Side.values()[i];
-      double m = outputs[i + 4];
-      if (m > ATTACH_ACTION_THRESHOLD) {
-        actions.add(new AttractAndLinkClosestAnchorable(voxel.anchorsOn(side), 1, Anchor.Link.Type.SOFT));
-      } else if (m < -ATTACH_ACTION_THRESHOLD) {
-        actions.add(new DetachAnchors(voxel.anchorsOn(side)));
+    int aI = 0;
+    if (areaActuation.equals(AreaActuation.SIDES)) {
+      actions.add(new ActuateVoxel(voxel, outputs[aI++], outputs[aI++], outputs[aI++], outputs[aI++]));
+    } else {
+      actions.add(new ActuateVoxel(voxel, outputs[aI++]));
+    }
+    if (attachActuation) {
+      for (Voxel.Side side : Voxel.Side.values()) {
+        double m = outputs[aI++];
+        if (m > ATTACH_ACTION_THRESHOLD) {
+          actions.add(new AttractAndLinkClosestAnchorable(voxel.anchorsOn(side), 1, Anchor.Link.Type.SOFT));
+        } else if (m < -ATTACH_ACTION_THRESHOLD) {
+          actions.add(new DetachAnchors(voxel.anchorsOn(side)));
+        }
+      }
+    }
+    if (nOfNFCChannels > 0) {
+      Point center = voxel.poly().center();
+      for (Voxel.Side side : Voxel.Side.values()) {
+        Point mid = voxel.side(side).center().diff(center);
+        double dir = mid.direction();
+        for (int i = 0; i < nOfNFCChannels; i++) {
+          actions.add(new EmitNFCMessage(
+              voxel,
+              mid,
+              dir,
+              (short) i,
+              outputs[aI++]
+          ));
+        }
       }
     }
     return actions;

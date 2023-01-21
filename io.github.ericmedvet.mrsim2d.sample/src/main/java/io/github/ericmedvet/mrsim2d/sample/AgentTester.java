@@ -46,23 +46,21 @@ public class AgentTester {
 
   private final static Logger L = Logger.getLogger(AgentTester.class.getName());
 
+  private final static String TASK_1 = "sim.task.locomotion(duration = 120; terrain = s.t.steppy(chunkW = 8.5; chunkH = 0.1; w = 250))";
+  private final static String TASK_2 = "s.task.prebuiltIndependentLocomotion(shape = s.a.vsr.s.biped(w = 4; h = 3))";
+  private final static String TASK_3 = "s.task.standPiling(nOfAgents = 3)";
+
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     //prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
+    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;nfc=true)")).apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
-    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
-        """
-              sim.task.locomotion(
-                duration = 120;
-                terrain = s.t.steppy(chunkW = 8.5; chunkH = 0.1; w = 250)
-              )
-            """);
+    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(TASK_2);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "hybrid-tripod-vsr-distributed-mlp";
+    String agentName = args.length > 1 ? args[0] : "independent-voxel-noanchors-mlp";
     //agentName = "legged-sin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
@@ -77,19 +75,23 @@ public class AgentTester {
         System.exit(-1);
       }
     }
-    EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-    //shuffle parameters
-    if (agent instanceof NumMultiBrained numMultiBrained) {
-      RandomGenerator random = new Random(1);
-      numMultiBrained.brains().forEach(b -> {
-        if (b instanceof Parametrized parametrized) {
-          System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
-          parametrized.randomize(random, DoubleRange.SYMMETRIC_UNIT);
-        }
-      });
-    }
+    String agentDesc = agentDescription;
+    RandomGenerator rg = new Random();
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDesc);
+      //shuffle parameters
+      if (agent instanceof NumMultiBrained numMultiBrained) {
+        numMultiBrained.brains().forEach(b -> {
+          if (b instanceof Parametrized parametrized) {
+            System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
+            parametrized.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+          }
+        });
+      }
+      return agent;
+    };
     //do task
-    task.run(() -> agent, engine, viewer);
+    task.run(agentSupplier, engine, viewer);
   }
 
 }

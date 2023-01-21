@@ -82,7 +82,7 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
       Anchorable srcBody = bodyGrid.get(key);
       if (srcBody != null) {
         if (bodyGrid.isValid(key.at(1, 0))) {
-          Anchorable other = bodyGrid.get(key.at(+1, 0));
+          Anchorable other = bodyGrid.get(key.at(1, 0));
           if (other != null) {
             actionPerformer.perform(new AttachClosestAnchors(2, srcBody, other, LINK_TYPE), this);
           }

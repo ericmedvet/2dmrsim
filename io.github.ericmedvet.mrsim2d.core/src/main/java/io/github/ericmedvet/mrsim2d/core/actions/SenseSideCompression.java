@@ -29,7 +29,7 @@ public record SenseSideCompression(Voxel.Side side, Voxel body) implements Sense
   @Override
   public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
     double avgL = Math.sqrt(body.areaRatio() * body.restArea());
-    return RANGE.clip(body.vertex(side.vertexes()[0]).distance(body.vertex(side.vertexes()[1])) / avgL);
+    return RANGE.clip(body.vertex(side.getVertex1()).distance(body.vertex(side.getVertex2())) / avgL);
   }
 
   @Override

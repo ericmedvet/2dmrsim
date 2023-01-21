@@ -61,4 +61,8 @@ public abstract class AbstractIndependentVoxel implements EmbodiedAgent {
   public List<Body> bodyParts() {
     return List.of(voxel);
   }
+
+  public Voxel voxel() {
+    return voxel;
+  }
 }

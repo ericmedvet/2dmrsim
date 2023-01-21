@@ -79,13 +79,19 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumIndependentVoxel numIndependentVoxel(
       @Param("sensors") List<Sensor<? super Voxel>> sensors,
+      @Param(value = "areaActuation", dS = "sides") NumIndependentVoxel.AreaActuation areaActuation,
+      @Param(value = "attachActuation", dB = true) boolean attachActuation,
+      @Param(value = "nOfNFCChannels", dI = 1) int nOfNFCChannels,
       @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
   ) {
     return new NumIndependentVoxel(
         sensors,
+        areaActuation,
+        attachActuation,
+        nOfNFCChannels,
         timedRealFunctionBuilder.apply(
-            NumIndependentVoxel.nOfInputs(sensors),
-            NumIndependentVoxel.nOfOutputs()
+            NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels),
+            NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
         )
     );
   }
