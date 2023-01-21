@@ -10,7 +10,10 @@ import java.util.Collection;
 public interface SpatialMap<T> {
   void add(Point p, T t);
 
+  Collection<T> all();
+
   void clear();
+
   Collection<T> get(Point p, double range);
 
 }

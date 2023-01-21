@@ -279,6 +279,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
         List.copyOf(getBodies()),
         agentPairs.stream().map(Pair::first).toList(),
         List.copyOf(lastTickPerformedActions),
+        lastNFCMessages.all(),
         times.entrySet().stream()
             .map(e -> Map.entry(e.getKey(), e.getValue().get()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),

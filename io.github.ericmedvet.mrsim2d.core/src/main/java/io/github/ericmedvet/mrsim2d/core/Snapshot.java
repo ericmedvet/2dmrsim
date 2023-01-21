@@ -29,6 +29,7 @@ public interface Snapshot {
   Collection<Agent> agents();
 
   Collection<Body> bodies();
+  Collection<NFCMessage> nfcMessages();
 
   double t();
 }

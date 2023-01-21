@@ -1,9 +1,6 @@
 package io.github.ericmedvet.mrsim2d.viewer;
 
-import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
-import io.github.ericmedvet.mrsim2d.core.Agent;
-import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 
 import java.util.ArrayList;
@@ -26,6 +23,7 @@ public class EmbodiedAgentsExtractor implements Function<Snapshot, List<Snapshot
       Collection<ActionOutcome<?, ?>> actionOutcomes,
       Collection<Agent> agents,
       Collection<Body> bodies,
+      Collection<NFCMessage> nfcMessages,
       double t
   ) implements Snapshot {}
 
@@ -34,6 +32,7 @@ public class EmbodiedAgentsExtractor implements Function<Snapshot, List<Snapshot
         s.actionOutcomes().stream().filter(ao -> a.equals(ao.agent())).toList(),
         List.of(a),
         s.bodies().stream().filter(b -> a.bodyParts().contains(b)).toList(),
+        s.nfcMessages(),
         s.t()
     );
   }
