@@ -21,10 +21,8 @@ import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.util.AtomicDouble;
-import io.github.ericmedvet.mrsim2d.core.util.Pair;
-import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-import io.github.ericmedvet.mrsim2d.core.util.Profiled;
+import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.core.util.*;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -44,7 +42,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
       1.5,
       5,
       0.5,
-      Math.PI / 2d
+      Math.PI / 2d,
+      8
   );
   private final static Logger L = Logger.getLogger(AbstractEngine.class.getName());
   protected final AtomicDouble t;
@@ -56,6 +55,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private final EnumMap<EngineSnapshot.TimeType, AtomicDouble> times;
   private final EnumMap<EngineSnapshot.CounterType, AtomicInteger> counters;
   private final List<ActionOutcome<?, ?>> lastTickPerformedActions;
+  private SpatialMap<NFCMessage> lastNFCMessages;
+  private SpatialMap<NFCMessage> newNFCMessages;
 
   public AbstractEngine(Configuration configuration) {
     this.configuration = configuration;
@@ -64,6 +65,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
     lastTickPerformedActions = new ArrayList<>();
+    lastNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     times = new EnumMap<>(EngineSnapshot.TimeType.class);
     counters = new EnumMap<>(EngineSnapshot.CounterType.class);
     Arrays.stream(EngineSnapshot.TimeType.values()).forEach(t -> times.put(t, new AtomicDouble(0d)));
@@ -86,7 +88,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
       double attractLinkRangeRatio,
       double bodyFindRange,
       double nfcDistanceRange,
-      double nfcAngleRange
+      double nfcAngleRange,
+      int nfcChannels
   ) {}
 
   protected abstract Collection<Body> getBodies();
@@ -152,6 +155,24 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return configuration;
   }
 
+  protected NFCMessage emitNFCMessage(EmitNFCMessage action, Agent agent) throws ActionException {
+    if (action.channel() < 0 || action.channel() >= configuration.nfcChannels) {
+      throw new ActionException("Invalid channel: %d not in [0,%d]".formatted(
+          action.channel(),
+          configuration.nfcChannels - 1
+      ));
+    }
+    Point source = action.body().poly().center().sum(action.displacement());
+    NFCMessage message = new NFCMessage(
+        source,
+        action.direction(),
+        action.channel(),
+        action.value()
+    );
+    newNFCMessages.add(source, message);
+    return message;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
@@ -206,6 +227,19 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
     registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
     registerActionSolver(SenseSinusoidal.class, this::senseSinusoidal);
+    registerActionSolver(EmitNFCMessage.class, this::emitNFCMessage);
+    registerActionSolver(SenseNFC.class, this::senseNFC);
+  }
+
+  protected Double senseNFC(SenseNFC action, Agent agent) {
+    double sum = lastNFCMessages.get(
+            action.body().poly().center().sum(action.displacement()),
+            configuration.nfcDistanceRange
+        ).stream()
+        .filter(m -> m.channel() == action.channel() && Math.abs(m.direction() - action.direction()) <= configuration.nfcAngleRange)
+        .mapToDouble(NFCMessage::value)
+        .sum();
+    return action.range().clip(sum);
   }
 
   protected double senseSinusoidal(SenseSinusoidal action, Agent agent) {
@@ -220,6 +254,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
   @Override
   public Snapshot tick() {
     Instant tickStartingInstant = Instant.now();
+    newNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
       List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
@@ -229,6 +264,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
       Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(agentPairs.get(i).first(), outcomes);
       agentPairs.set(i, pair);
     }
+    lastNFCMessages = newNFCMessages;
     Instant innerTickStartingInstant = Instant.now();
     double newT = innerTick();
     t.set(newT);
@@ -251,21 +287,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
     );
     lastTickPerformedActions.clear();
-
-    /*agentPairs.stream() // TODO remove
-        .map(p -> p.second().stream()
-            .map(o -> {
-                  String s = "";
-                  //s += o.action().toString().hashCode() % 100 + 100;
-                  //s += o.action();
-                  s += "/";
-                  //s += o.outcome().toString().hashCode() % 100 + 100;
-                  return s;
-                }
-            )
-            .collect(Collectors.joining("|"))
-        ).forEach(System.out::println);*/
-
     return snapshot;
   }
 

@@ -10,7 +10,7 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 public record SenseNFC(
     Body body,
     Point displacement,
-    double relativeAngle,
+    double direction,
     short channel
 ) implements Sense<Body> {
   @Override

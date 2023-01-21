@@ -57,13 +57,12 @@ public class AgentTester {
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
         """
               sim.task.locomotion(
-                initialYGap = 5.1;
                 duration = 120;
                 terrain = s.t.steppy(chunkW = 8.5; chunkH = 0.1; w = 250)
               )
             """);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "legged-groupedsin-2";
+    String agentName = args.length > 1 ? args[0] : "hybrid-tripod-vsr-distributed-mlp";
     //agentName = "legged-sin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));

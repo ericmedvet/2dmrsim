@@ -11,7 +11,7 @@ import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 public record EmitNFCMessage(
     Body body,
     Point displacement,
-    double relativeAngle,
+    double direction,
     short channel,
     double value
 ) implements Actuate<Body, NFCMessage> {
