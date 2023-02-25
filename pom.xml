@@ -62,7 +62,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>17</jdk.version>
         <revision>0.8.1-SNAPSHOT</revision>
-        <jnb.version>1.0.3</jnb.version>
+        <jnb.version>1.0.4</jnb.version>
     </properties>
     <dependencies>
     </dependencies>
