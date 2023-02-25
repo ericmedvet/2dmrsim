@@ -36,7 +36,7 @@ public record SenseAngle(Body body) implements Sense<Body>, SelfDescribedAction<
     if (a < -Math.PI) {
       a = a + 2d * Math.PI;
     }
-    return body.angle();
+    return a;
   }
 
   @Override
