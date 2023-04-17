@@ -35,11 +35,10 @@ public class NumMultiBrainedIODrawer implements Drawer {
       int bestNOfRows = 1;
       for (int nOfRows = 1; nOfRows <= MAX_N_OF_ROWS; nOfRows = nOfRows + 1) {
         int localNOfRows = nOfRows;
-        //noinspection IntegerDivisionInFloatingPointContext
         int allRowLength = brained.brainIOs().stream()
             .mapToInt(io -> Math.max(
-                (int) Math.ceil(io.input().values().length / localNOfRows),
-                (int) Math.ceil(io.output().values().length / localNOfRows)
+                (int) Math.ceil((double)io.input().values().length / (double)localNOfRows),
+                (int) Math.ceil((double)io.output().values().length / (double)localNOfRows)
             ))
             .sum();
         double itemMaxW = (gBB.width()
