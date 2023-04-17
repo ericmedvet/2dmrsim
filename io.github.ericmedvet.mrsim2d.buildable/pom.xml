@@ -51,6 +51,11 @@
             <artifactId>mrsim2d.engine.dyn4j</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.ericmedvet</groupId>
+            <artifactId>jsdynsym.buildable</artifactId>
+            <version>${jsdynsym.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

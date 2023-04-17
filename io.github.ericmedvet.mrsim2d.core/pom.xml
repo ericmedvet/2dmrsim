@@ -31,6 +31,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.ericmedvet</groupId>
+            <artifactId>jsdynsym.core</artifactId>
+            <version>${jsdynsym.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
