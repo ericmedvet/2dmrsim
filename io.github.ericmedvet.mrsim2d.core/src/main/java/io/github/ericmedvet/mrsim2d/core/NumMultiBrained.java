@@ -16,7 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core;
 
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
@@ -29,6 +29,6 @@ public interface NumMultiBrained {
 
   List<BrainIO> brainIOs();
 
-  List<TimedRealFunction> brains();
+  List<NumericalDynamicalSystem<?>> brains();
 
 }

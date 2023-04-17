@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.legged;
 
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
@@ -23,7 +24,6 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.ActuateRotationalJoint;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
   private final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   private final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
-  private final TimedRealFunction timedRealFunction;
+  private final NumericalDynamicalSystem<?> numericalDynamicalSystem;
   private final List<Sensor<?>> headSensors;
 
   private double[] inputs;
@@ -54,10 +54,10 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
       double trunkMass,
       double headMass,
       List<Sensor<?>> headSensors,
-      TimedRealFunction timedRealFunction
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
   ) {
     super(legs, trunkLength, trunkWidth, trunkMass, headMass);
-    this.timedRealFunction = timedRealFunction;
+    this.numericalDynamicalSystem = numericalDynamicalSystem;
     this.headSensors = headSensors;
   }
 
@@ -85,10 +85,10 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
         })
         .toArray();
     if (inputs.length == 0) {
-      inputs = new double[timedRealFunction.nOfInputs()];
+      inputs = new double[numericalDynamicalSystem.nOfInputs()];
     }
     //compute actuation
-    outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
+    outputs = Arrays.stream(numericalDynamicalSystem.step(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     for (int il = 0; il < legs.size(); il = il + 1) {
@@ -113,8 +113,8 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
   }
 
   @Override
-  public TimedRealFunction brain() {
-    return timedRealFunction;
+  public NumericalDynamicalSystem<?> brain() {
+    return numericalDynamicalSystem;
   }
 
   @Override

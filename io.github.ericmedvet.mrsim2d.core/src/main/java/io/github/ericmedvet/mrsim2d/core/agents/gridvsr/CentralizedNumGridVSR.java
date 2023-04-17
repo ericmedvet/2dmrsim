@@ -17,8 +17,8 @@
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
 
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 import io.github.ericmedvet.mrsim2d.core.util.Utils;
 
@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
 
-  private final TimedRealFunction timedRealFunction;
+  private final NumericalDynamicalSystem<?> numericalDynamicalSystem;
 
   private double[] inputs;
   private double[] outputs;
@@ -38,15 +38,15 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
       GridBody body,
       double voxelSideLength,
       double voxelMass,
-      TimedRealFunction timedRealFunction
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
   ) {
     super(body, voxelSideLength, voxelMass);
-    timedRealFunction.checkDimension(nOfInputs(body), nOfOutputs(body));
-    this.timedRealFunction = timedRealFunction;
+    numericalDynamicalSystem.checkDimension(nOfInputs(body), nOfOutputs(body));
+    this.numericalDynamicalSystem = numericalDynamicalSystem;
   }
 
-  public CentralizedNumGridVSR(GridBody body, TimedRealFunction timedRealFunction) {
-    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, timedRealFunction);
+  public CentralizedNumGridVSR(GridBody body, NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+    this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, numericalDynamicalSystem);
   }
 
   public static int nOfInputs(GridBody body) {
@@ -62,8 +62,8 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   @Override
-  public TimedRealFunction brain() {
-    return timedRealFunction;
+  public NumericalDynamicalSystem<?> brain() {
+    return numericalDynamicalSystem;
   }
 
   @Override
@@ -75,15 +75,15 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     //build inputs
     inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
-    if (inputs.length != timedRealFunction.nOfInputs()) {
+    if (inputs.length != numericalDynamicalSystem.nOfInputs()) {
       throw new IllegalArgumentException(String.format(
           "Wrong number of inputs: %d expected, %d found",
-          timedRealFunction.nOfInputs(),
+          numericalDynamicalSystem.nOfInputs(),
           inputs.length
       ));
     }
     //compute outputs
-    outputs = timedRealFunction.apply(t, inputs);
+    outputs = numericalDynamicalSystem.step(t, inputs);
     //split outputs
     Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
     int c = 0;

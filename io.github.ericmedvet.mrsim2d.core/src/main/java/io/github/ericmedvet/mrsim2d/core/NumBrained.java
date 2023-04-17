@@ -16,13 +16,13 @@
 
 package io.github.ericmedvet.mrsim2d.core;
 
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 
 import java.util.List;
 
 public interface NumBrained extends NumMultiBrained {
 
-  TimedRealFunction brain();
+  NumericalDynamicalSystem<?> brain();
 
   BrainIO brainIO();
 
@@ -32,7 +32,7 @@ public interface NumBrained extends NumMultiBrained {
   }
 
   @Override
-  default List<TimedRealFunction> brains() {
+  default List<NumericalDynamicalSystem<?>> brains() {
     return List.of(brain());
   }
 }

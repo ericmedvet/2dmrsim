@@ -16,8 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.Arrays;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
 
-  private final Grid<TimedRealFunction> timedRealFunctionsGrid;
+  private final Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid;
   private final int nSignals;
   private final boolean directional;
   private final Grid<double[]> signalsGrid;
@@ -37,15 +37,15 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
 
   public DistributedNumGridVSR(
       GridBody body,
-      Grid<TimedRealFunction> timedRealFunctionsGrid,
+      Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid,
       int nSignals,
       boolean directional
   ) {
     super(body);
     int communicationSize = directional ? nSignals * 4 : nSignals;
-    for (Grid.Key key : timedRealFunctionsGrid.keys()) {
-      if (timedRealFunctionsGrid.get(key) != null) {
-        timedRealFunctionsGrid.get(key).checkDimension(
+    for (Grid.Key key : numericalDynamicalSystemGrid.keys()) {
+      if (numericalDynamicalSystemGrid.get(key) != null) {
+        numericalDynamicalSystemGrid.get(key).checkDimension(
             nOfInputs(body, key, nSignals, directional),
             nOfOutputs(body, key, nSignals, directional)
         );
@@ -53,7 +53,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     }
     this.nSignals = nSignals;
     this.directional = directional;
-    this.timedRealFunctionsGrid = timedRealFunctionsGrid;
+    this.numericalDynamicalSystemGrid = numericalDynamicalSystemGrid;
     signalsGrid = bodyGrid.map(v -> v != null ? new double[communicationSize] : null);
     fullInputsGrid = Grid.create(
         body.grid().w(),
@@ -88,8 +88,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   }
 
   @Override
-  public List<TimedRealFunction> brains() {
-    return timedRealFunctionsGrid.values().stream().filter(Objects::nonNull).toList();
+  public List<NumericalDynamicalSystem<?>> brains() {
+    return numericalDynamicalSystemGrid.values().stream().filter(Objects::nonNull).toList();
   }
 
   @Override
@@ -110,21 +110,21 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       fullInputsGrid.set(key, fullInputs);
     }
     // process values
-    for (Grid.Key key : timedRealFunctionsGrid.keys()) {
-      if (timedRealFunctionsGrid.get(key) == null) {
+    for (Grid.Key key : numericalDynamicalSystemGrid.keys()) {
+      if (numericalDynamicalSystemGrid.get(key) == null) {
         continue;
       }
       double[] inputs = fullInputsGrid.get(key);
-      if (inputs.length != timedRealFunctionsGrid.get(key).nOfInputs()) {
+      if (inputs.length != numericalDynamicalSystemGrid.get(key).nOfInputs()) {
         throw new IllegalArgumentException(String.format(
             "Wrong number of inputs in position (%d,%d): %d expected, %d found",
             key.x(),
             key.y(),
-            timedRealFunctionsGrid.get(key).nOfInputs(),
+            numericalDynamicalSystemGrid.get(key).nOfInputs(),
             inputs.length
         ));
       }
-      fullOutputsGrid.set(key, timedRealFunctionsGrid.get(key).apply(t, inputs));
+      fullOutputsGrid.set(key, numericalDynamicalSystemGrid.get(key).step(t, inputs));
     }
     // split actuation and communication for next step
     Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);

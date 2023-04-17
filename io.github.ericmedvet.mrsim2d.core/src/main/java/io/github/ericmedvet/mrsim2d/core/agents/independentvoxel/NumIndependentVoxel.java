@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.independentvoxel;
 
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
@@ -23,7 +24,6 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.functions.TimedRealFunction;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
@@ -41,7 +41,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
   private final static double ATTACH_ACTION_THRESHOLD = 0.25d;
   private final List<Sensor<? super Voxel>> sensors;
   private final double[] inputs;
-  private final TimedRealFunction timedRealFunction;
+  private final NumericalDynamicalSystem<?> numericalDynamicalSystem;
   private final AreaActuation areaActuation;
   private final boolean attachActuation;
   private final int nOfNFCChannels;
@@ -55,7 +55,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       AreaActuation areaActuation,
       boolean attachActuation,
       int nOfNFCChannels,
-      TimedRealFunction timedRealFunction
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
   ) {
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
@@ -66,11 +66,11 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     if (nOfNFCChannels < 0) {
       throw new IllegalArgumentException("The number of channels must be 0 or more: %d found".formatted(nOfNFCChannels));
     }
-    timedRealFunction.checkDimension(
+    numericalDynamicalSystem.checkDimension(
         nOfInputs(sensors, nOfNFCChannels),
         nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
     );
-    this.timedRealFunction = timedRealFunction;
+    this.numericalDynamicalSystem = numericalDynamicalSystem;
   }
 
   public NumIndependentVoxel(
@@ -78,7 +78,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       AreaActuation areaActuation,
       boolean attachActuation,
       int nOfNFCChannels,
-      TimedRealFunction timedRealFunction
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
   ) {
     this(
         new Voxel.Material(),
@@ -88,7 +88,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
         areaActuation,
         attachActuation,
         nOfNFCChannels,
-        timedRealFunction
+        numericalDynamicalSystem
     );
   }
 
@@ -115,7 +115,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
         .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     //compute actuation
-    outputs = Arrays.stream(timedRealFunction.apply(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
+    outputs = Arrays.stream(numericalDynamicalSystem.step(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     //generate actuation actions
@@ -156,8 +156,8 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
   }
 
   @Override
-  public TimedRealFunction brain() {
-    return timedRealFunction;
+  public NumericalDynamicalSystem<?> brain() {
+    return numericalDynamicalSystem;
   }
 
   @Override
