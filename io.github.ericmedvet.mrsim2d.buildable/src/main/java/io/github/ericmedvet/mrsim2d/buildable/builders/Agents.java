@@ -17,6 +17,7 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
@@ -39,9 +40,9 @@ public class Agents {
   @SuppressWarnings("unused")
   public static CentralizedNumGridVSR centralizedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
-    return new CentralizedNumGridVSR(body, timedRealFunctionBuilder.apply(
+    return new CentralizedNumGridVSR(body, numericalDynamicalSystemBuilder.apply(
         CentralizedNumGridVSR.nOfInputs(body),
         CentralizedNumGridVSR.nOfOutputs(body)
     ));
@@ -50,23 +51,18 @@ public class Agents {
   @SuppressWarnings("unused")
   public static DistributedNumGridVSR distributedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder,
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder,
       @Param("signals") int nSignals,
       @Param("directional") boolean directional
   ) {
     return new DistributedNumGridVSR(
         body,
-        /*body.sensorsGrid().map(
-            v -> v != null ?
-                timedRealFunctionBuilder.apply(4 * nSignals + v.size(), 1 + (directional ? 4 * nSignals : nSignals))
-                : null
-        ),*/
         Grid.create(
             body.grid().w(),
             body.grid().h(),
             k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE) ?
                 null :
-                timedRealFunctionBuilder.apply(
+                numericalDynamicalSystemBuilder.apply(
                     DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional),
                     DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional)
                 )
@@ -82,14 +78,14 @@ public class Agents {
       @Param(value = "areaActuation", dS = "sides") NumIndependentVoxel.AreaActuation areaActuation,
       @Param(value = "attachActuation", dB = true) boolean attachActuation,
       @Param(value = "nOfNFCChannels", dI = 1) int nOfNFCChannels,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
   ) {
     return new NumIndependentVoxel(
         sensors,
         areaActuation,
         attachActuation,
         nOfNFCChannels,
-        timedRealFunctionBuilder.apply(
+        numericalDynamicalSystemBuilder.apply(
             NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels),
             NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
         )
@@ -99,11 +95,11 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumLeggedHybridModularRobot numLeggedHybridModularRobot(
       @Param("modules") List<AbstractLeggedHybridModularRobot.Module> modules,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
   ) {
     return new NumLeggedHybridModularRobot(
         modules,
-        timedRealFunctionBuilder.apply(
+        numericalDynamicalSystemBuilder.apply(
             NumLeggedHybridModularRobot.nOfInputs(modules),
             NumLeggedHybridModularRobot.nOfOutputs(modules)
         )
@@ -118,7 +114,7 @@ public class Agents {
       @Param(value = "trunkMass", dD = 4 * LeggedMisc.TRUNK_MASS) double trunkMass,
       @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY) double headMass,
       @Param("headSensors") List<Sensor<?>> headSensors,
-      @Param("function") TimedRealFunctions.Builder<?> timedRealFunctionBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
   ) {
     return new NumLeggedHybridRobot(
         legs,
@@ -127,7 +123,7 @@ public class Agents {
         trunkMass,
         headMass,
         headSensors,
-        timedRealFunctionBuilder.apply(
+        numericalDynamicalSystemBuilder.apply(
             NumLeggedHybridRobot.nOfInputs(legs, headSensors),
             NumLeggedHybridRobot.nOfOutputs(legs)
         )
