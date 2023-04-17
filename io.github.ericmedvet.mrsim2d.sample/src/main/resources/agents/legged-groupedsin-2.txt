@@ -4,7 +4,7 @@ s.a.numLeggedHybridRobot(
   legs = 4 * [
     s.a.l.leg(downConnector = rigid; legChunks = 2 * [s.a.l.legChunk()])
   ];
-  function = s.f.groupedSin(
+  function = ds.num.groupedSin(
     size = 4;
     p = s.range(min = -1.57; max = 1.57);
     f = s.range(min = 1.0; max = 1.0);

@@ -19,6 +19,7 @@ package io.github.ericmedvet.mrsim2d.sample;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
+import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
@@ -46,7 +47,8 @@ public class AgentTester {
 
   private final static Logger L = Logger.getLogger(AgentTester.class.getName());
 
-  private final static String TASK_1 = "sim.task.locomotion(duration = 120; terrain = s.t.steppy(chunkW = 8.5; chunkH = 0.1; w = 250))";
+  private final static String TASK_1 = "sim.task.locomotion(duration = 120; terrain = s.t.steppy(chunkW = 8.5; chunkH" +
+      " = 0.1; w = 250))";
   private final static String TASK_2 = "s.task.prebuiltIndependentLocomotion(shape = s.a.vsr.s.biped(w = 4; h = 3))";
   private final static String TASK_3 = "s.task.standPiling(nOfAgents = 3)";
 
@@ -58,9 +60,10 @@ public class AgentTester {
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
-    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(TASK_2);
+    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
+        TASK_1);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "independent-voxel-noanchors-mlp";
+    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-mlp";
     //agentName = "legged-sin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
@@ -81,12 +84,12 @@ public class AgentTester {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDesc);
       //shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().forEach(b -> {
-          if (b instanceof NumericalParametrized parametrized) {
-            System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
-            parametrized.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-          }
-        });
+        numMultiBrained.brains().stream()
+            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+            .forEach(o -> o.ifPresent(np -> {
+              System.out.printf("Shuffling %d parameters of brain %s %n", np.getParams().length, np);
+              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+            }));
       }
       return agent;
     };

@@ -9,5 +9,5 @@ s.a.numIndependentVoxel(
     s.s.sin()
   ];
   nOfNFCChannels = 2;
-  function = s.f.mlp()
+  function = ds.num.mlp()
 )

@@ -11,5 +11,5 @@ s.a.centralizedNumGridVSR(
       nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
     )
   );
-  function=s.f.drn(threshold = 0.1; innerNeuronsRatio = 1)
+  function=ds.num.drn(threshold = 0.1; innerNeuronsRatio = 1)
 )

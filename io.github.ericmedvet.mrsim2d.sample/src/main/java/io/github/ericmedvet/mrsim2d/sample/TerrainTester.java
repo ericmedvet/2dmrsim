@@ -18,9 +18,10 @@ package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
+import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
-import io.github.ericmedvet.mrsim2d.core.NumBrained;
+import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
@@ -161,10 +162,11 @@ public class TerrainTester {
     //prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-      if (agent instanceof NumBrained numBrained) {
-        if (numBrained.brain() instanceof NumericalParametrized parametrized) {
-          parametrized.setParams(params.stream().mapToDouble(d -> d).toArray());
-        }
+      //shuffle parameters
+      if (agent instanceof NumMultiBrained numMultiBrained) {
+        numMultiBrained.brains().stream()
+            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+            .forEach(o -> o.ifPresent(np -> np.setParams(params.stream().mapToDouble(d -> d).toArray())));
       }
       return agent;
     };

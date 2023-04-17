@@ -6,5 +6,5 @@ s.a.numLeggedHybridModularRobot(
       downConnectorSensors=[s.s.d(a=-90;r=1)]
     )
   ];
-  function=s.f.noised(innerFunction=s.f.mlp();outputSigma=0.1)
+  function=ds.num.noised(inner=ds.num.mlp();outputSigma=0.1)
 )

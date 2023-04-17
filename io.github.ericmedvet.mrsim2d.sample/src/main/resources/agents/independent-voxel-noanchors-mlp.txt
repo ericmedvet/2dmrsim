@@ -9,5 +9,5 @@ s.a.numIndependentVoxel(
   nOfNFCChannels = 2;
   attachActuation = false;
   areaActuation = overall;
-  function = s.f.mlp()
+  function = ds.num.mlp()
 )
