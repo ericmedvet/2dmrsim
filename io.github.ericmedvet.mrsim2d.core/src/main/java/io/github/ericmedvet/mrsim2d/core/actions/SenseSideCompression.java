@@ -16,12 +16,12 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 public record SenseSideCompression(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
   private final static DoubleRange RANGE = new DoubleRange(0.5, 1.5);

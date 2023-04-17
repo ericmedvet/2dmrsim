@@ -16,10 +16,10 @@
 
 package io.github.ericmedvet.mrsim2d.viewer.drawers.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;

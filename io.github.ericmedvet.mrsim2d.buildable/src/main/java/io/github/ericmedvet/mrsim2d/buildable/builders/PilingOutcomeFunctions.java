@@ -17,8 +17,8 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.function.Function;
 

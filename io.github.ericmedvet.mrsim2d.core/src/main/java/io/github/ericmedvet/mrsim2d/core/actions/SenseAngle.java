@@ -16,12 +16,12 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 public record SenseAngle(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 

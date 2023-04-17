@@ -1,11 +1,11 @@
 package io.github.ericmedvet.mrsim2d.engine.dyn4j;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
@@ -225,23 +225,23 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
   }
 
   @Override
-  public double jointAngle() {
-    return joint.getJointAngle();
-  }
-
-  @Override
   public DoubleRange jointActiveAngleRange() {
     return jointActiveAngleRange;
   }
 
   @Override
-  public DoubleRange jointPassiveAngleRange() {
-    return JOINT_PASSIVE_ANGLE_RANGE;
+  public double jointAngle() {
+    return joint.getJointAngle();
   }
 
   @Override
   public double jointLength() {
     return jointLength;
+  }
+
+  @Override
+  public DoubleRange jointPassiveAngleRange() {
+    return JOINT_PASSIVE_ANGLE_RANGE;
   }
 
   @Override

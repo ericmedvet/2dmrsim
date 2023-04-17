@@ -1,9 +1,9 @@
 package io.github.ericmedvet.mrsim2d.viewer.drawers;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.AbstractMemoryDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 

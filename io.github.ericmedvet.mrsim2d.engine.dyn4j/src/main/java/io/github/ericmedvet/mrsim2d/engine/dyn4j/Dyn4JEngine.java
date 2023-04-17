@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.engine.dyn4j;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
@@ -24,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.AbstractEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.IllegalActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.ContinuousDetectionMode;

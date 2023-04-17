@@ -1,8 +1,8 @@
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.HashMap;
 import java.util.Map;

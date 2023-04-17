@@ -16,9 +16,9 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.legged;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.List;
 

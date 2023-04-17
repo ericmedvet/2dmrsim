@@ -17,6 +17,7 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
@@ -24,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
-import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
@@ -162,7 +162,7 @@ public class TerrainTester {
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       if (agent instanceof NumBrained numBrained) {
-        if (numBrained.brain() instanceof Parametrized parametrized) {
+        if (numBrained.brain() instanceof NumericalParametrized parametrized) {
           parametrized.setParams(params.stream().mapToDouble(d -> d).toArray());
         }
       }

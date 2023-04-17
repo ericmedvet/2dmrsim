@@ -17,13 +17,13 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
-import io.github.ericmedvet.mrsim2d.core.util.Parametrized;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 
@@ -82,7 +82,7 @@ public class AgentTester {
       //shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
         numMultiBrained.brains().forEach(b -> {
-          if (b instanceof Parametrized parametrized) {
+          if (b instanceof NumericalParametrized parametrized) {
             System.out.printf("Shuffling %d parameters of one brain%n", parametrized.getParams().length);
             parametrized.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
           }

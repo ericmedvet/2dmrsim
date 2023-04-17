@@ -1,12 +1,12 @@
 package io.github.ericmedvet.mrsim2d.core.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 public record CreateAndTranslateRotationalJoint(
     double length,

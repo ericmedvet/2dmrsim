@@ -16,8 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.EnumMap;
 import java.util.Map;

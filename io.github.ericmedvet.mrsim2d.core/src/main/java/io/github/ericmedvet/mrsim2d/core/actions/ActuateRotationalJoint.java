@@ -16,8 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.actions;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim

@@ -16,10 +16,10 @@
 
 package io.github.ericmedvet.mrsim2d.viewer.drawers.bodies;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.SoftBody;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.AbstractComponentDrawer;
 

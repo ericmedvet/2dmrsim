@@ -1,6 +1,7 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
@@ -12,7 +13,6 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 

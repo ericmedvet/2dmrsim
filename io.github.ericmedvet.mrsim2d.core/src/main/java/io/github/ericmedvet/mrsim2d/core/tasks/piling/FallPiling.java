@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.tasks.piling;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
@@ -29,7 +30,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.Observation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 
 import java.util.*;

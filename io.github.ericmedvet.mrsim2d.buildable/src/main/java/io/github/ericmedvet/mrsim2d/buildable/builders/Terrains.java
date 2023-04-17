@@ -17,10 +17,10 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.Arrays;
 import java.util.Random;

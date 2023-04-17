@@ -16,10 +16,10 @@
 
 package io.github.ericmedvet.mrsim2d.engine.dyn4j;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import org.dyn4j.collision.Filter;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.DistanceJoint;

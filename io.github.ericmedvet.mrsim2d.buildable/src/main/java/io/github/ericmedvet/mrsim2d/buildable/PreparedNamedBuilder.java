@@ -23,10 +23,10 @@ import java.util.List;
 
 public class PreparedNamedBuilder {
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
+      .and(io.github.ericmedvet.jsdynsym.buildable.PreparedNamedBuilder.get())
       .and(List.of("sim", "s"), NamedBuilder.empty()
           .and(NamedBuilder.fromUtilityClass(Misc.class))
           .and(List.of("sensor", "s"), NamedBuilder.fromUtilityClass(Sensors.class))
-          .and(List.of("function", "f"), NamedBuilder.fromUtilityClass(TimedRealFunctions.class))
           .and(List.of("terrain", "t"), NamedBuilder.fromUtilityClass(Terrains.class))
           .and(List.of("agent", "a"), NamedBuilder.fromUtilityClass(Agents.class)
               .and(List.of("vsr"), NamedBuilder.empty()

@@ -16,8 +16,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.bodies;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 public interface RotationalJoint extends RigidBody, Anchorable {
 
@@ -41,12 +41,13 @@ public interface RotationalJoint extends RigidBody, Anchorable {
     }
   }
 
+  DoubleRange jointActiveAngleRange();
+
   double jointAngle();
 
-  DoubleRange jointActiveAngleRange();
-  DoubleRange jointPassiveAngleRange();
-
   double jointLength();
+
+  DoubleRange jointPassiveAngleRange();
 
   Point jointPoint();
 

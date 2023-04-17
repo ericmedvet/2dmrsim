@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.legged;
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
@@ -24,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.ActuateRotationalJoint;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 
 import java.util.ArrayList;
 import java.util.Arrays;

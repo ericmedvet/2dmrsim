@@ -17,6 +17,7 @@
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
 
+import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -24,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.util.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.ArrayList;
