@@ -67,7 +67,7 @@ public record Segment(Point p1, Point p2) implements Shape {
   public Optional<Double> yAt(double x) {
     BoundingBox bb = boundingBox();
     if (bb.xRange().contains(x)) {
-      return Optional.of(bb.yRange().denormalize(bb.xRange().normalize(x)));
+      return Optional.of(p1.y() + (p2.y() - p1.y()) * bb.xRange().normalize(x));
     }
     return Optional.empty();
   }

@@ -158,4 +158,8 @@ public class Utils {
     ));
   }
 
+  private static Poly poly(Polygon polygon) {
+    return new Poly(Arrays.stream(polygon.getVertices()).map(Utils::point).toArray(Point[]::new));
+  }
+
 }

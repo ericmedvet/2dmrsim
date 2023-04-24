@@ -65,14 +65,15 @@ public class TerrainTester {
     //do single task
     if (true) {
       @SuppressWarnings("unchecked")
-      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
-      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly(chunkW = 10.5; chunkH = 0.1)").run();
+      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)")).apply("test");
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly()").run();
       System.exit(0);
     }
     //prepare terrains
     List<String> terrains = List.of(
         "s.t.flat()",
         "s.t.flat(w = 500)",
+        "s.t.hilly()",
         "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
         "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
         "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",

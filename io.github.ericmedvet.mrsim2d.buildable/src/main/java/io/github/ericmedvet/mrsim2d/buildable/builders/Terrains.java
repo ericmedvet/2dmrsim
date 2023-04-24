@@ -34,7 +34,7 @@ public class Terrains {
   public static final double W = 500d;
   public static final double H = 25d;
   public static final double CHUNK_W = 5d;
-  public static final double CHUNK_H = 1d;
+  public static final double CHUNK_H = 0.75d;
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
 
