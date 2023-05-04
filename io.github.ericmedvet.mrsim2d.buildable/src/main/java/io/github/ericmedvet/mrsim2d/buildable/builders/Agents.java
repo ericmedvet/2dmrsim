@@ -31,10 +31,16 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Agents {
 
   private Agents() {
+  }
+
+  private static List<String> varNames(String name, int number) {
+    int digits = (int) Math.ceil(Math.log10(number + 1));
+    return IntStream.range(1, number + 1).mapToObj((name + "%0" + digits + "d")::formatted).toList();
   }
 
   @SuppressWarnings("unused")
@@ -43,8 +49,8 @@ public class Agents {
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new CentralizedNumGridVSR(body, numericalDynamicalSystemBuilder.apply(
-        CentralizedNumGridVSR.nOfInputs(body),
-        CentralizedNumGridVSR.nOfOutputs(body)
+        varNames("x",CentralizedNumGridVSR.nOfInputs(body)),
+        varNames("y",CentralizedNumGridVSR.nOfOutputs(body))
     ));
   }
 
@@ -63,8 +69,8 @@ public class Agents {
             k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE) ?
                 null :
                 numericalDynamicalSystemBuilder.apply(
-                    DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional),
-                    DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional)
+                    varNames("x",DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
+                    varNames("y",DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional))
                 )
         ),
         nSignals,
@@ -86,8 +92,8 @@ public class Agents {
         attachActuation,
         nOfNFCChannels,
         numericalDynamicalSystemBuilder.apply(
-            NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels),
-            NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
+            varNames("x",NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
+            varNames("y",NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))
         )
     );
   }
@@ -100,8 +106,8 @@ public class Agents {
     return new NumLeggedHybridModularRobot(
         modules,
         numericalDynamicalSystemBuilder.apply(
-            NumLeggedHybridModularRobot.nOfInputs(modules),
-            NumLeggedHybridModularRobot.nOfOutputs(modules)
+            varNames("x",NumLeggedHybridModularRobot.nOfInputs(modules)),
+            varNames("y",NumLeggedHybridModularRobot.nOfOutputs(modules))
         )
     );
   }
@@ -124,8 +130,8 @@ public class Agents {
         headMass,
         headSensors,
         numericalDynamicalSystemBuilder.apply(
-            NumLeggedHybridRobot.nOfInputs(legs, headSensors),
-            NumLeggedHybridRobot.nOfOutputs(legs)
+            varNames("x",NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
+            varNames("y",NumLeggedHybridRobot.nOfOutputs(legs))
         )
     );
   }
