@@ -38,7 +38,7 @@ public class Agents {
   private Agents() {
   }
 
-  private static List<String> varNames(String name, int number) {
+  public static List<String> varNames(String name, int number) {
     int digits = (int) Math.ceil(Math.log10(number + 1));
     return IntStream.range(1, number + 1).mapToObj((name + "%0" + digits + "d")::formatted).toList();
   }
