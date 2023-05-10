@@ -63,7 +63,6 @@ public abstract class NumGridVSR extends AbstractGridVSR {
 
   protected abstract Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid);
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     //read inputs from last request
@@ -75,7 +74,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
           for (int i = 0; i < inputs.length; i++) {
             ActionOutcome<?, ?> outcome = previousActionOutcomes.get(c);
             if (outcome.action() instanceof Sense<?>) {
-              ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
+              @SuppressWarnings("unchecked") ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
               inputs[i] = INPUT_RANGE.denormalize(
                   o.action().range().normalize(o.outcome().orElse(0d))
               );
