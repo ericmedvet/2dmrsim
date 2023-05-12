@@ -44,6 +44,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       int frameH,
       int nOfFrames,
       double deltaT,
+      double startTime,
       Direction direction,
       boolean justLastSnapshot,
       Drawer drawer
@@ -54,7 +55,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
     this.drawer = drawer;
     this.justLastSnapshot = justLastSnapshot;
     frameCount = 0;
-    lastDrawnT = 0d;
+    lastDrawnT = startTime;
     //prepare image
     int overallW = frameW;
     int overallH = frameH;
