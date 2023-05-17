@@ -13,6 +13,10 @@ public class ReactiveGridVSR extends NumGridVSR {
 
   private final Grid<ReactiveVoxel> reactiveVoxelGrid;
 
+  public ReactiveGridVSR(Grid<ReactiveVoxel> reactiveVoxelGrid) {
+    this(reactiveVoxelGrid, VOXEL_SIDE_LENGTH, VOXEL_MASS);
+  }
+
   public ReactiveGridVSR(
       Grid<ReactiveVoxel> reactiveVoxelGrid,
       double voxelSideLength,
@@ -51,11 +55,9 @@ public class ReactiveGridVSR extends NumGridVSR {
   ) {}
 
   @Override
-  protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
-    // TODO do new map with key method in Grid
-    for (Grid.Key key : inputsGrid.keys()) {
-
-    }
-    return null;
+  protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
+    return inputsGrid.map((k, inputs) -> inputs == null ? new double[4] : reactiveVoxelGrid.get(k)
+        .numericalDynamicalSystem()
+        .step(t, inputs));
   }
 }

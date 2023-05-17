@@ -63,7 +63,7 @@ public class AgentTester {
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
         TASK_1);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-centralized-mlp";
+    String agentName = args.length > 1 ? args[0] : "biped-vsr-reactive";
     //agentName = "legged-sin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));

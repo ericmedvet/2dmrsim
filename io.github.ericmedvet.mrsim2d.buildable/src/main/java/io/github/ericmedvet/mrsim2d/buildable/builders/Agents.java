@@ -22,6 +22,7 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.ReactiveGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
@@ -36,6 +37,13 @@ import java.util.stream.IntStream;
 public class Agents {
 
   private Agents() {
+  }
+
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR reactiveGridVSR(
+      @Param("body") Grid<ReactiveGridVSR.ReactiveVoxel> body
+  ) {
+    return new ReactiveGridVSR(body);
   }
 
   @SuppressWarnings("unused")

@@ -26,6 +26,9 @@ import java.util.Collection;
  * @author "Eric Medvet" on 2022/07/07 for 2dmrsim
  */
 public interface Voxel extends SoftBody, Anchorable {
+
+  Material DEFAULT_MATERIAL = new Material();
+
   enum Side {
     N(Vertex.NE, Vertex.NW), E(Vertex.NE, Vertex.SE), W(Vertex.NW, Vertex.SW), S(Vertex.SE, Vertex.SW);
     private final Vertex vertex1;

@@ -25,6 +25,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
+import io.github.ericmedvet.mrsim2d.core.util.Grid;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.Drawers;
 import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
@@ -46,6 +47,30 @@ public class Misc {
   }
 
   public enum MiniAgentInfo {NONE, VELOCITY, BRAINS}
+
+  @SuppressWarnings("unused")
+  public static <T> Grid<T> grid(
+      @Param("w") int w,
+      @Param("h") int h,
+      @Param("items") List<T> items
+  ) {
+    if (items.size() != w * h) {
+      throw new IllegalArgumentException(
+          "Wrong number of items: %d x %d = %d expected, %d found".formatted(
+              w,
+              h,
+              w * h,
+              items.size()
+          ));
+    }
+    Grid<T> grid = Grid.create(w, h);
+    int c = 0;
+    for (Grid.Key k : grid.keys()) {
+      grid.set(k, items.get(c));
+      c = c + 1;
+    }
+    return grid;
+  }
 
   @SuppressWarnings("unused")
   public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {

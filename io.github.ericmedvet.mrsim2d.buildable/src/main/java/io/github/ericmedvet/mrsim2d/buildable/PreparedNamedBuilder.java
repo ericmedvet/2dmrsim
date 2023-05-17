@@ -36,6 +36,7 @@ public class PreparedNamedBuilder {
                       List.of("sensorizingFunction", "sf"),
                       NamedBuilder.fromUtilityClass(VSRSensorizingFunctions.class)
                   )
+                  .and(List.of("reactiveVoxels", "rv"), NamedBuilder.fromUtilityClass(ReactiveVoxels.class))
               )
               .and(List.of("legged", "l"), NamedBuilder.empty()
                   .and(NamedBuilder.fromUtilityClass(LeggedMisc.class))

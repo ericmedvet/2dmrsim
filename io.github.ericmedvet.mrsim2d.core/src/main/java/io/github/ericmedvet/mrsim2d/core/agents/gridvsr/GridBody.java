@@ -36,7 +36,7 @@ public record GridBody(Grid<SensorizedElement> grid) {
         k -> new SensorizedElement(
             new Element(
                 shape.get(k),
-                new Voxel.Material()
+                Voxel.DEFAULT_MATERIAL
             ),
             !shape.get(k).equals(VoxelType.NONE) ? sensorizingFunction.apply(shape.map(t -> !t.equals(VoxelType.NONE)))
                 .get(k) : List.of()
