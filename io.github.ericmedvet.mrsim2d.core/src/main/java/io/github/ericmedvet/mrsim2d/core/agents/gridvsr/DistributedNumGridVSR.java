@@ -93,7 +93,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   }
 
   @Override
-  protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
+  protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     // create actual input grid (concat sensed values and communication signals)
     for (Grid.Key key : inputsGrid.keys()) {
       if (inputsGrid.get(key) == null) {
@@ -127,7 +127,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       fullOutputsGrid.set(key, numericalDynamicalSystemGrid.get(key).step(t, inputs));
     }
     // split actuation and communication for next step
-    Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
+    Grid<double[]> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), new double[4]);
     for (Grid.Key key : fullOutputsGrid.keys()) {
       if (fullOutputsGrid.get(key) == null) {
         continue;
@@ -135,7 +135,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       double[] fullOutputs = fullOutputsGrid.get(key);
       double actuationValue = fullOutputs[0];
       double[] signals = Arrays.stream(fullOutputs, 1, fullOutputs.length).toArray();
-      outputsGrid.set(key, actuationValue);
+      outputsGrid.set(key, new double[]{
+          actuationValue,
+          actuationValue,
+          actuationValue,
+          actuationValue
+      });
       signalsGrid.set(key, signals);
     }
     return outputsGrid;

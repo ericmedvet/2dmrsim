@@ -27,21 +27,21 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author "Eric Medvet" on 2022/07/09 for 2dmrsim
  */
 public abstract class NumGridVSR extends AbstractGridVSR {
 
+  private final static Voxel.Side[] SIDES = new Voxel.Side[]{Voxel.Side.N, Voxel.Side.E, Voxel.Side.S, Voxel.Side.W};
+
   protected final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   protected final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final Grid<List<Sensor<? super Body>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
-  private final Grid<Double> outputGrid;
+  private final Grid<double[]> outputGrid;
   private final GridBody body;
 
   public NumGridVSR(
@@ -54,14 +54,23 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     this.body = body;
     inputsGrid = body.grid().map(e -> e.element().type().equals(GridBody.VoxelType.NONE) ? null : new double[e.sensors()
         .size()]);
-    outputGrid = bodyGrid.map(v -> v != null ? 0d : null);
+    outputGrid = bodyGrid.map(v -> v != null ? new double[SIDES.length] : null);
   }
 
   public NumGridVSR(GridBody body) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS);
   }
 
-  protected abstract Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid);
+  protected abstract Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid);
+
+  private static EnumMap<Voxel.Side, Double> sideMap(double[] values) {
+    return new EnumMap<>(Map.of(
+        Voxel.Side.N, values[0],
+        Voxel.Side.E, values[1],
+        Voxel.Side.S, values[2],
+        Voxel.Side.W, values[3]
+    ));
+  }
 
   @Override
   public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
@@ -85,7 +94,8 @@ public abstract class NumGridVSR extends AbstractGridVSR {
       }
     }
     //compute actuation
-    computeActuationValues(t, inputsGrid).entries().forEach(e -> outputGrid.set(e.key(), OUTPUT_RANGE.clip(e.value())));
+    computeActuationValues(t, inputsGrid).entries()
+        .forEach(e -> outputGrid.set(e.key(), Arrays.stream(e.value()).map(OUTPUT_RANGE::clip).toArray()));
     //generate next sense actions
     List<Action<?>> actions = new ArrayList<>();
     actions.addAll(bodyGrid.entries().stream()
@@ -98,7 +108,10 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     //generate actuation actions
     actions.addAll(bodyGrid.entries().stream()
         .filter(e -> e.value() instanceof Voxel)
-        .map(e -> new ActuateVoxel((Voxel) e.value(), outputGrid.get(e.key())))
+        .map(e -> new ActuateVoxel(
+            (Voxel) e.value(),
+            sideMap(outputGrid.get(e.key()))
+        ))
         .toList());
     return actions;
   }

@@ -72,7 +72,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   @Override
-  protected Grid<Double> computeActuationValues(double t, Grid<double[]> inputsGrid) {
+  protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     //build inputs
     inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
     if (inputs.length != numericalDynamicalSystem.nOfInputs()) {
@@ -85,11 +85,15 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
     //compute outputs
     outputs = numericalDynamicalSystem.step(t, inputs);
     //split outputs
-    Grid<Double> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), 0d);
+    Grid<double[]> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), new double[4]);
     int c = 0;
     for (Grid.Entry<double[]> e : inputsGrid) {
       if (e.value() != null) {
-        outputsGrid.set(e.key(), outputs[c]);
+        outputsGrid.set(
+            e.key(), new double[]{
+                outputs[c], outputs[c], outputs[c], outputs[c]
+            }
+        );
         c = c + 1;
       }
     }
