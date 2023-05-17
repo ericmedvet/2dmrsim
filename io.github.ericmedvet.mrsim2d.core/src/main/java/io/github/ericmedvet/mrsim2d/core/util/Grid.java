@@ -152,8 +152,12 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   default <S> Grid<S> map(Function<T, S> function) {
+    return map((k, t) -> function.apply(t));
+  }
+
+  default <S> Grid<S> map(BiFunction<Key, T, S> function) {
     return entries().stream()
-        .map(e -> new Entry<>(e.key(), function.apply(e.value())))
+        .map(e -> new Entry<>(e.key(), function.apply(e.key(), e.value())))
         .collect(collector());
   }
 
