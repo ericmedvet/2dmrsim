@@ -1,10 +1,10 @@
 s.a.reactiveGridVSR(
   body = s.grid(w = 3; h = 2; items = [
     s.a.vsr.rv.ps();
-    s.a.vsr.rv.ph();
+    s.a.vsr.rv.asld();
     s.a.vsr.rv.none();
-    s.a.vsr.rv.ps();
-    s.a.vsr.rv.ps();
+    s.a.vsr.rv.asin();
+    s.a.vsr.rv.at();
     s.a.vsr.rv.ph()
   ])
 )

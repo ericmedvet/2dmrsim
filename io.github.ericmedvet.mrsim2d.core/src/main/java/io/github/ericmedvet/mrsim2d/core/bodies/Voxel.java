@@ -30,13 +30,18 @@ public interface Voxel extends SoftBody, Anchorable {
   Material DEFAULT_MATERIAL = new Material();
 
   enum Side {
-    N(Vertex.NE, Vertex.NW), E(Vertex.NE, Vertex.SE), W(Vertex.NW, Vertex.SW), S(Vertex.SE, Vertex.SW);
+    N(Vertex.NE, Vertex.NW, Math.PI / 2d),
+    E(Vertex.NE, Vertex.SE, 0d),
+    W(Vertex.NW, Vertex.SW, Math.PI),
+    S(Vertex.SE, Vertex.SW, -Math.PI / 2d);
     private final Vertex vertex1;
     private final Vertex vertex2;
+    private final double normalAngle;
 
-    Side(Vertex vertex1, Vertex vertex2) {
+    Side(Vertex vertex1, Vertex vertex2, double normalAngle) {
       this.vertex1 = vertex1;
       this.vertex2 = vertex2;
+      this.normalAngle = normalAngle;
     }
 
     public Vertex getVertex1() {
@@ -45,6 +50,10 @@ public interface Voxel extends SoftBody, Anchorable {
 
     public Vertex getVertex2() {
       return vertex2;
+    }
+
+    public double getNormalAngle() {
+      return normalAngle;
     }
   }
 

@@ -51,6 +51,7 @@ public class AgentTester {
       " = 0.1; w = 250))";
   private final static String TASK_2 = "s.task.prebuiltIndependentLocomotion(shape = s.a.vsr.s.biped(w = 4; h = 3))";
   private final static String TASK_3 = "s.task.standPiling(nOfAgents = 3)";
+  private final static String TASK_4 = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
@@ -61,9 +62,9 @@ public class AgentTester {
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
-        TASK_1);
+        TASK_4);
     //read agent resource
-    String agentName = args.length > 1 ? args[0] : "biped-vsr-reactive";
+    String agentName = args.length > 1 ? args[0] : "ball-vsr-reactive";
     //agentName = "legged-sin";
     L.config("Loading agent description \"%s\"".formatted(agentName));
     InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));

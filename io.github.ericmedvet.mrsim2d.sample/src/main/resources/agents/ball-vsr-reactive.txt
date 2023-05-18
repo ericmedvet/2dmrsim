@@ -1,0 +1,20 @@
+s.a.reactiveGridVSR(
+  body = s.grid(w = 4; h = 4; items = [
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.asld();
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.aa(angle = -90; action = contract);
+    s.a.vsr.rv.asin();
+    s.a.vsr.rv.none()
+  ])
+)

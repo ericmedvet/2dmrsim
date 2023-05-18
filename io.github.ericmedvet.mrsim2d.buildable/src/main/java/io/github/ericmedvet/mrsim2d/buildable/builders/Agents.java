@@ -52,8 +52,8 @@ public class Agents {
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new CentralizedNumGridVSR(body, numericalDynamicalSystemBuilder.apply(
-        varNames("x",CentralizedNumGridVSR.nOfInputs(body)),
-        varNames("y",CentralizedNumGridVSR.nOfOutputs(body))
+        varNames("x", CentralizedNumGridVSR.nOfInputs(body)),
+        varNames("y", CentralizedNumGridVSR.nOfOutputs(body))
     ));
   }
 
@@ -72,8 +72,8 @@ public class Agents {
             k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE) ?
                 null :
                 numericalDynamicalSystemBuilder.apply(
-                    varNames("x",DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
-                    varNames("y",DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional))
+                    varNames("x", DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
+                    varNames("y", DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional))
                 )
         ),
         nSignals,
@@ -87,7 +87,7 @@ public class Agents {
       @Param(value = "areaActuation", dS = "sides") NumIndependentVoxel.AreaActuation areaActuation,
       @Param(value = "attachActuation", dB = true) boolean attachActuation,
       @Param(value = "nOfNFCChannels", dI = 1) int nOfNFCChannels,
-      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new NumIndependentVoxel(
         sensors,
@@ -95,8 +95,8 @@ public class Agents {
         attachActuation,
         nOfNFCChannels,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x",NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
-            varNames("y",NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))
+            varNames("x", NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
+            varNames("y", NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))
         )
     );
   }
@@ -104,13 +104,13 @@ public class Agents {
   @SuppressWarnings("unused")
   public static NumLeggedHybridModularRobot numLeggedHybridModularRobot(
       @Param("modules") List<AbstractLeggedHybridModularRobot.Module> modules,
-      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new NumLeggedHybridModularRobot(
         modules,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x",NumLeggedHybridModularRobot.nOfInputs(modules)),
-            varNames("y",NumLeggedHybridModularRobot.nOfOutputs(modules))
+            varNames("x", NumLeggedHybridModularRobot.nOfInputs(modules)),
+            varNames("y", NumLeggedHybridModularRobot.nOfOutputs(modules))
         )
     );
   }
@@ -123,7 +123,7 @@ public class Agents {
       @Param(value = "trunkMass", dD = 4 * LeggedMisc.TRUNK_MASS) double trunkMass,
       @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY) double headMass,
       @Param("headSensors") List<Sensor<?>> headSensors,
-      @Param("function") NumericalDynamicalSystems.Builder<?,?> numericalDynamicalSystemBuilder
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new NumLeggedHybridRobot(
         legs,
@@ -133,8 +133,8 @@ public class Agents {
         headMass,
         headSensors,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x",NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
-            varNames("y",NumLeggedHybridRobot.nOfOutputs(legs))
+            varNames("x", NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
+            varNames("y", NumLeggedHybridRobot.nOfOutputs(legs))
         )
     );
   }
