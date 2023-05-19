@@ -67,6 +67,16 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
     return grid;
   }
 
+  static <K> Grid<K> create(int w, int h, List<K> ks) {
+    if (ks.size() != w * h) {
+      throw new IllegalArgumentException("Wrong list size: %d x %d = %d expected, %d found".formatted(w,
+          h,
+          w * h,
+          ks.size()));
+    }
+    return create(w, h, (x, y) -> ks.get(y + w + x));
+  }
+
   static <K> Grid<K> create(
       int w,
       int h,
