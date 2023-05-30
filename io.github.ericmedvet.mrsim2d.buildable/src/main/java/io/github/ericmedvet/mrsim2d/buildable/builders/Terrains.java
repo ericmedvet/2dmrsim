@@ -17,12 +17,10 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -46,7 +44,7 @@ public class Terrains {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "a", dD = ANGLE) Double a
   ) {
-    return fromPath(
+    return Terrain.fromPath(
         new Path(new Point(w, -w * Math.toRadians(a))),
         h, borderW, borderH
     );
@@ -59,30 +57,12 @@ public class Terrains {
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
       @Param(value = "borderH", dD = BORDER_H) Double borderH
   ) {
-    return fromPath(
+    return Terrain.fromPath(
         new Path(new Point(w, 0)),
         h,
         borderW,
         borderH
     );
-  }
-
-  @SuppressWarnings("unused")
-  private static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
-    Path path = new Path(Point.ORIGIN)
-        .moveBy(0, borderH)
-        .moveBy(borderW, 0)
-        .moveBy(0, -borderH)
-        .moveBy(partialPath)
-        .moveBy(0, borderH)
-        .moveBy(borderW, 0)
-        .moveBy(0, -borderH);
-    double maxX = Arrays.stream(path.points()).mapToDouble(Point::x).max().orElse(borderW);
-    double minY = Arrays.stream(path.points()).mapToDouble(Point::y).min().orElse(borderW);
-    path = path
-        .add(maxX, minY - terrainH)
-        .moveBy(-maxX, 0);
-    return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
   }
 
   @SuppressWarnings("unused")
@@ -104,7 +84,7 @@ public class Terrains {
       dW = dW + sW;
       path = path.moveBy(sW, sH);
     }
-    return fromPath(path, h, borderW, borderH);
+    return Terrain.fromPath(path, h, borderW, borderH);
   }
 
   @SuppressWarnings("unused")
@@ -128,7 +108,7 @@ public class Terrains {
           .moveBy(sW, 0)
           .moveBy(0, sH);
     }
-    return fromPath(path, h, borderW, borderH);
+    return Terrain.fromPath(path, h, borderW, borderH);
   }
 
   @SuppressWarnings("unused")
@@ -139,7 +119,7 @@ public class Terrains {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "a", dD = ANGLE) Double a
   ) {
-    return fromPath(
+    return Terrain.fromPath(
         new Path(new Point(w, w * Math.toRadians(a))),
         h, borderW, borderH
     );

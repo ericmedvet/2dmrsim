@@ -43,4 +43,22 @@ public record Terrain(Poly poly, DoubleRange withinBordersXRange) {
             ))
         );
   }
+
+  public static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {
+    Path path = new Path(Point.ORIGIN)
+        .moveBy(0, borderH)
+        .moveBy(borderW, 0)
+        .moveBy(0, -borderH)
+        .moveBy(partialPath)
+        .moveBy(0, borderH)
+        .moveBy(borderW, 0)
+        .moveBy(0, -borderH);
+    double maxX = Arrays.stream(path.points()).mapToDouble(Point::x).max().orElse(borderW);
+    double minY = Arrays.stream(path.points()).mapToDouble(Point::y).min().orElse(borderW);
+    path = path
+        .add(maxX, minY - terrainH)
+        .moveBy(-maxX, 0);
+    return new Terrain(path.toPoly(), new DoubleRange(borderW, maxX - borderW));
+  }
+
 }

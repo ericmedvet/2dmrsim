@@ -19,6 +19,7 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
+import io.github.ericmedvet.mrsim2d.core.tasks.jumping.Jumping;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLocomotion;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
@@ -54,6 +55,14 @@ public class Tasks {
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
     return new Locomotion(duration, terrain, initialXGap, initialYGap);
+  }
+
+  @SuppressWarnings("unused")
+  public static Jumping jumping(
+      @Param(value = "duration", dD = 30) double duration,
+      @Param(value = "initialYGap", dD = 0.1) double initialYGap
+  ) {
+    return new Jumping(duration, initialYGap);
   }
 
   @SuppressWarnings("unused")

@@ -22,6 +22,7 @@ public class Outcome {
   }
 
   private enum Aggregate {INITIAL, FINAL, AVERAGE, MIN, MAX}
+
   private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA}
 
   private enum Subject {FIRST, ALL}
@@ -62,6 +63,14 @@ public class Outcome {
 
   public double firstAgentAverageTerrainHeight() {
     return get(Aggregate.AVERAGE, Metric.TERRAIN_H, Subject.FIRST);
+  }
+
+  public double firstAgentAverageY() {
+    return get(Aggregate.AVERAGE, Metric.Y, Subject.FIRST);
+  }
+
+  public double firstAgentMaxY() {
+    return get(Aggregate.MAX, Metric.Y, Subject.FIRST);
   }
 
   public double firstAgentXDistance() {

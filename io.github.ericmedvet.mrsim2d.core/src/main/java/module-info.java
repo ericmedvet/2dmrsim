@@ -15,6 +15,7 @@ module io.github.ericmedvet.mrsim2d.core {
   exports io.github.ericmedvet.mrsim2d.core.geometry;
   exports io.github.ericmedvet.mrsim2d.core.tasks;
   exports io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
+  exports io.github.ericmedvet.mrsim2d.core.tasks.jumping;
   exports io.github.ericmedvet.mrsim2d.core.tasks.piling;
   exports io.github.ericmedvet.mrsim2d.core.util;
 }
