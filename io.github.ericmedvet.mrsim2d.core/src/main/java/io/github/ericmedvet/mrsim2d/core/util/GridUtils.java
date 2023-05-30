@@ -110,7 +110,7 @@ public class GridUtils {
     int maxX = g.entries().stream().filter(e -> p.test(e.value())).mapToInt(e -> e.key().x()).max().orElseThrow();
     int minY = g.entries().stream().filter(e -> p.test(e.value())).mapToInt(e -> e.key().y()).min().orElseThrow();
     int maxY = g.entries().stream().filter(e -> p.test(e.value())).mapToInt(e -> e.key().y()).max().orElseThrow();
-    return Grid.create(maxX - minX + 1, maxY - minY + 1, (x, y) -> g.get(x - minX, y - minY));
+    return Grid.create(maxX - minX + 1, maxY - minY + 1, (x, y) -> g.get(x + minX, y + minY));
   }
 
   public static <T> int h(Grid<T> g, Predicate<T> p) {
