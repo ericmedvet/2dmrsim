@@ -102,4 +102,8 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
   public List<Body> bodyParts() {
     return (List) bodyGrid.values().stream().filter(Objects::nonNull).toList();
   }
+
+  public Grid<GridBody.Element> getElementGrid() {
+    return elementGrid;
+  }
 }
