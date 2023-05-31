@@ -23,7 +23,7 @@ public class Outcome {
 
   private enum Aggregate {INITIAL, FINAL, AVERAGE, MIN, MAX}
 
-  private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA}
+  private enum Metric {X, Y, TERRAIN_H, BB_W, BB_H, BB_AREA, BB_MAX_X, BB_MAX_Y, BB_MIN_X, BB_MIN_Y}
 
   private enum Subject {FIRST, ALL}
 
@@ -69,8 +69,16 @@ public class Outcome {
     return get(Aggregate.AVERAGE, Metric.Y, Subject.FIRST);
   }
 
+  public double firstAgentAverageBBMinY() {
+    return get(Aggregate.AVERAGE, Metric.BB_MIN_Y, Subject.FIRST);
+  }
+
   public double firstAgentMaxY() {
     return get(Aggregate.MAX, Metric.Y, Subject.FIRST);
+  }
+
+  public double firstAgentMaxBBMinY() {
+    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST);
   }
 
   public double firstAgentXDistance() {
@@ -121,6 +129,14 @@ public class Outcome {
           .width() : observation.getAllBoundingBox().width();
       case BB_H -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox()
           .height() : observation.getAllBoundingBox().height();
+      case BB_MIN_Y -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox()
+          .min().y() : observation.getAllBoundingBox().min().y();
+      case BB_MAX_Y -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox()
+          .max().y() : observation.getAllBoundingBox().max().y();
+      case BB_MIN_X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox()
+          .min().x() : observation.getAllBoundingBox().min().x();
+      case BB_MAX_X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox()
+          .max().x() : observation.getAllBoundingBox().max().x();
     };
   }
 

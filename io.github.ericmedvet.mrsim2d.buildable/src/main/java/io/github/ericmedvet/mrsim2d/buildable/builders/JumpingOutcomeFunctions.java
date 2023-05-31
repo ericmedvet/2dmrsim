@@ -41,4 +41,18 @@ public class JumpingOutcomeFunctions {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxY();
   }
 
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> avgBBMinY(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageBBMinY();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> maxBBMinY(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxBBMinY();
+  }
+
 }
