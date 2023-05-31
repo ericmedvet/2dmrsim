@@ -59,7 +59,7 @@ public class Tasks {
 
   @SuppressWarnings("unused")
   public static Jumping jumping(
-      @Param(value = "duration", dD = 30) double duration,
+      @Param(value = "duration", dD = 10) double duration,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
     return new Jumping(duration, initialYGap);
