@@ -55,4 +55,10 @@ public class JumpingOutcomeFunctions {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxBBMinY();
   }
 
+  @SuppressWarnings("unused")
+  public static Function<Outcome, Double> maxMaxRelJumpH(
+      @Param(value = "transientTime", dD = 0) double transientTime
+  ) {
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxRelativeJumpHeight();
+  }
 }

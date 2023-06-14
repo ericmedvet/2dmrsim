@@ -89,6 +89,10 @@ public class Outcome {
     return firstAgentXDistance() / duration();
   }
 
+  public double firstAgentMaxRelativeJumpHeight() {
+    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST)/get(Aggregate.AVERAGE, Metric.BB_H, Subject.FIRST);
+  }
+
   private double get(Aggregate aggregate, Metric metric, Subject subject) {
     Double value = metricMap.get(new Key(metric, aggregate, subject));
     if (value == null) {
