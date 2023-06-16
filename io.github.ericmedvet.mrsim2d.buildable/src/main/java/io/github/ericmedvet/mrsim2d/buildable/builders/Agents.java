@@ -18,6 +18,7 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
+import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
@@ -32,18 +33,10 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Agents {
 
   private Agents() {
-  }
-
-  @SuppressWarnings("unused")
-  public static ReactiveGridVSR reactiveGridVSR(
-      @Param("body") Grid<ReactiveGridVSR.ReactiveVoxel> body
-  ) {
-    return new ReactiveGridVSR(body);
   }
 
   @SuppressWarnings("unused")
@@ -52,8 +45,8 @@ public class Agents {
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
   ) {
     return new CentralizedNumGridVSR(body, numericalDynamicalSystemBuilder.apply(
-        varNames("x", CentralizedNumGridVSR.nOfInputs(body)),
-        varNames("y", CentralizedNumGridVSR.nOfOutputs(body))
+        MultivariateRealFunction.varNames("x", CentralizedNumGridVSR.nOfInputs(body)),
+        MultivariateRealFunction.varNames("y", CentralizedNumGridVSR.nOfOutputs(body))
     ));
   }
 
@@ -72,8 +65,8 @@ public class Agents {
             k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE) ?
                 null :
                 numericalDynamicalSystemBuilder.apply(
-                    varNames("x", DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
-                    varNames("y", DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional))
+                    MultivariateRealFunction.varNames("x", DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
+                    MultivariateRealFunction.varNames("y", DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional))
                 )
         ),
         nSignals,
@@ -95,8 +88,8 @@ public class Agents {
         attachActuation,
         nOfNFCChannels,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x", NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
-            varNames("y", NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))
+            MultivariateRealFunction.varNames("x", NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
+            MultivariateRealFunction.varNames("y", NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))
         )
     );
   }
@@ -109,8 +102,8 @@ public class Agents {
     return new NumLeggedHybridModularRobot(
         modules,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x", NumLeggedHybridModularRobot.nOfInputs(modules)),
-            varNames("y", NumLeggedHybridModularRobot.nOfOutputs(modules))
+            MultivariateRealFunction.varNames("x", NumLeggedHybridModularRobot.nOfInputs(modules)),
+            MultivariateRealFunction.varNames("y", NumLeggedHybridModularRobot.nOfOutputs(modules))
         )
     );
   }
@@ -133,16 +126,17 @@ public class Agents {
         headMass,
         headSensors,
         numericalDynamicalSystemBuilder.apply(
-            varNames("x", NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
-            varNames("y", NumLeggedHybridRobot.nOfOutputs(legs))
+            MultivariateRealFunction.varNames("x", NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
+            MultivariateRealFunction.varNames("y", NumLeggedHybridRobot.nOfOutputs(legs))
         )
     );
   }
 
-  private static List<String> varNames(String name, int number) {
-    int digits = (int) Math.ceil(Math.log10(number + 1));
-    return IntStream.range(1, number + 1).mapToObj((name + "%0" + digits + "d")::formatted).toList();
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR reactiveGridVSR(
+      @Param("body") Grid<ReactiveGridVSR.ReactiveVoxel> body
+  ) {
+    return new ReactiveGridVSR(body);
   }
-
 
 }
