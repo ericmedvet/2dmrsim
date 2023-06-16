@@ -16,6 +16,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.AttachClosestAnchors;
@@ -27,7 +28,6 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
 import java.util.Objects;

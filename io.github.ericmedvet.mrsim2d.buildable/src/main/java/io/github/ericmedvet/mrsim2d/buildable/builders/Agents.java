@@ -19,6 +19,7 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
@@ -30,7 +31,6 @@ import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot
 import io.github.ericmedvet.mrsim2d.core.agents.legged.NumLeggedHybridModularRobot;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.NumLeggedHybridRobot;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
@@ -17,7 +18,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.Observation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 
 import java.util.HashMap;

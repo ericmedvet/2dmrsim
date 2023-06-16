@@ -18,6 +18,7 @@ package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -25,7 +26,6 @@ import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.*;
 
@@ -34,11 +34,9 @@ import java.util.*;
  */
 public abstract class NumGridVSR extends AbstractGridVSR {
 
-  private final static Voxel.Side[] SIDES = new Voxel.Side[]{Voxel.Side.N, Voxel.Side.E, Voxel.Side.S, Voxel.Side.W};
-
   protected final static DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   protected final static DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
-
+  private final static Voxel.Side[] SIDES = new Voxel.Side[]{Voxel.Side.N, Voxel.Side.E, Voxel.Side.S, Voxel.Side.W};
   private final Grid<List<Sensor<? super Body>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<double[]> outputGrid;

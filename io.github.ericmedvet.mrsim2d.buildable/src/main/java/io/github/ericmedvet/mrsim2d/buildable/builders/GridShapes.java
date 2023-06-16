@@ -18,8 +18,8 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 /**
  * @author "Eric Medvet" on 2022/08/11 for 2dmrsim

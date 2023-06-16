@@ -17,8 +17,8 @@
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
-import io.github.ericmedvet.mrsim2d.core.util.Grid;
 
 import java.util.Arrays;
 import java.util.List;
