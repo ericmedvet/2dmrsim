@@ -98,8 +98,8 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
         continue;
       }
       Grid.Key[] adjacentKeys = new Grid.Key[]{
-          key.at(1, 0),
-          key.at(0, 1)
+          key.translated(1, 0),
+          key.translated(0, 1)
       };
       for (Grid.Key adjacentKey : adjacentKeys) {
         if (agents.isValid(adjacentKey) && agents.get(adjacentKey) != null) {
