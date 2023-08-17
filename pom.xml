@@ -61,9 +61,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>17</jdk.version>
-        <revision>0.8.6-SNAPSHOT</revision>
-        <jnb.version>1.1.7-SNAPSHOT</jnb.version>
-        <jsdynsym.version>0.10.2-SNAPSHOT</jsdynsym.version>
+        <revision>0.8.6</revision>
+        <jnb.version>1.1.7</jnb.version>
+        <jsdynsym.version>0.10.2</jsdynsym.version>
     </properties>
     <dependencies>
     </dependencies>
