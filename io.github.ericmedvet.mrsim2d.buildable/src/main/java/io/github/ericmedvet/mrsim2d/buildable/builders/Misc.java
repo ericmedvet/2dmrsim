@@ -17,6 +17,7 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.core.NamedParamMap;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.core.ParamMap;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
@@ -166,7 +167,7 @@ public class Misc {
       @Param(value = "", injection = Param.Injection.BUILDER) NamedBuilder<?> builder
   ) {
     //noinspection unchecked
-    return () -> (T) builder.build(map.npm("of"));
+    return () -> (T) builder.build((NamedParamMap) map.value("of", ParamMap.Type.NAMED_PARAM_MAP));
   }
 
   @SuppressWarnings("unused")
