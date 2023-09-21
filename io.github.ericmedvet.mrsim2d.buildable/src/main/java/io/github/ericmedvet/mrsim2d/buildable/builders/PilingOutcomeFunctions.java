@@ -28,28 +28,28 @@ public class PilingOutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome, Double> avgH(
+  public static Function<Outcome<?>, Double> avgH(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageHeight();
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome, Double> avgW(
+  public static Function<Outcome<?>, Double> avgW(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageWidth();
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome, Double> maxH(
+  public static Function<Outcome<?>, Double> maxH(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxHeight();
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome, Double> maxW(
+  public static Function<Outcome<?>, Double> maxW(
       @Param(value = "transientTime", dD = 0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxWidth();

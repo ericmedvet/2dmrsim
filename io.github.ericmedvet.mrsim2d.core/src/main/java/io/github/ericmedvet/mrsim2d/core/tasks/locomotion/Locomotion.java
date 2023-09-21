@@ -26,7 +26,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
-import io.github.ericmedvet.mrsim2d.core.tasks.Observation;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
@@ -38,7 +38,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
+public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
 
   private final static double INITIAL_X_GAP = 1;
   private final static double INITIAL_Y_GAP = 0.25;
@@ -61,7 +61,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
   }
 
   @Override
-  public Outcome run(
+  public Outcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
@@ -84,14 +84,14 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
         maxY + initialYGap - agentBB.min().y()
     )));
     //run for defined time
-    Map<Double, Observation> observations = new HashMap<>();
+    Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new Observation(
-              List.of(new Observation.Agent(
+          new AgentsObservation(
+              List.of(new AgentsObservation.Agent(
                   embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
               ))
@@ -99,6 +99,6 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome> {
       );
     }
     //return
-    return new Outcome(new TreeMap<>(observations));
+    return new Outcome<>(new TreeMap<>(observations));
   }
 }

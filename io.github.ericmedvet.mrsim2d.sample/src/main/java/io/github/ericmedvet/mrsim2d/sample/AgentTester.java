@@ -47,11 +47,8 @@ public class AgentTester {
 
   private final static Logger L = Logger.getLogger(AgentTester.class.getName());
 
-  private final static String TASK_1 = "sim.task.locomotion(duration = 120; terrain = s.t.steppy(chunkW = 8.5; chunkH" +
-      " = 0.1; w = 250))";
-  private final static String TASK_2 = "s.task.prebuiltIndependentLocomotion(shape = s.a.vsr.s.biped(w = 4; h = 3))";
-  private final static String TASK_3 = "s.task.standPiling(nOfAgents = 3)";
-  private final static String TASK_4 = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
+  private final static String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
+  private final static String TASK_JUMPING = "sim.task.jumping()";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
@@ -62,7 +59,7 @@ public class AgentTester {
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
-        TASK_4);
+        TASK_JUMPING);
     //read agent resource
     String agentName = args.length >= 1 ? args[0] : "worm-vsr-reactive";
     L.info("Loading agent description \"%s\"".formatted(agentName));

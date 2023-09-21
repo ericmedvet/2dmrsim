@@ -27,7 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
-import io.github.ericmedvet.mrsim2d.core.tasks.Observation;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
+public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
 
   private final static double FIRST_X_GAP = 10;
   private final static double INITIAL_Y_GAP = 0.1;
@@ -84,7 +84,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
   }
 
   @Override
-  public Outcome run(
+  public Outcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
@@ -100,15 +100,15 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
       agents.add(agent);
     }
     //run for defined time
-    Map<Double, Observation> observations = new HashMap<>();
+    Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       //tick
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new Observation(agents.stream()
-              .map(a -> new Observation.Agent(
+          new AgentsObservation(agents.stream()
+              .map(a -> new AgentsObservation.Agent(
                   a.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())
               ))
@@ -116,7 +116,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome> {
           )
       );
     }
-    return new Outcome(new TreeMap<>(observations));
+    return new Outcome<>(new TreeMap<>(observations));
   }
 
 }

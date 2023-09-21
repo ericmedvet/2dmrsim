@@ -7,7 +7,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import java.util.Comparator;
 import java.util.List;
 
-public class Observation {
+public class AgentsObservation {
 
   public record Agent(
       List<Poly> polies,
@@ -25,7 +25,7 @@ public class Observation {
   private Point maxYAgentCenter;
   private Point minYAgentCenter;
 
-  public Observation(List<Agent> agents) {
+  public AgentsObservation(List<Agent> agents) {
     this.agents = agents;
   }
 

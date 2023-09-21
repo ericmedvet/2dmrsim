@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
-public class Outcome {
+public class Outcome<O extends AgentsObservation> {
 
   private final static int N_OF_CACHED_SUB_OUTCOMES = 3;
-  private final SortedMap<Double, Observation> observations;
+  private final SortedMap<Double, O> observations;
   private final Map<Key, Double> metricMap;
-  private final Map<DoubleRange, Outcome> subOutcomes;
+  private final Map<DoubleRange, Outcome<O>> subOutcomes;
 
-  public Outcome(SortedMap<Double, Observation> observations) {
+  public Outcome(SortedMap<Double, O> observations) {
     this.observations = observations;
     metricMap = new HashMap<>();
     subOutcomes = new HashMap<>();
@@ -108,7 +108,7 @@ public class Outcome {
     return value;
   }
 
-  private double get(Metric metric, Subject subject, Observation observation) {
+  private double get(Metric metric, Subject subject, AgentsObservation observation) {
     return switch (metric) {
       case X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentCenter().x() : observation.getAllBoundingBox()
           .center()
@@ -144,10 +144,10 @@ public class Outcome {
     };
   }
 
-  public Outcome subOutcome(DoubleRange tRange) {
-    Outcome subOutcome = subOutcomes.get(tRange);
+  public Outcome<O> subOutcome(DoubleRange tRange) {
+    Outcome<O> subOutcome = subOutcomes.get(tRange);
     if (subOutcome == null) {
-      subOutcome = new Outcome(observations.subMap(tRange.min(), tRange.max()));
+      subOutcome = new Outcome<>(observations.subMap(tRange.min(), tRange.max()));
       if (subOutcomes.size() >= N_OF_CACHED_SUB_OUTCOMES) {
         //remove one
         subOutcomes.remove(subOutcomes.keySet().iterator().next());
