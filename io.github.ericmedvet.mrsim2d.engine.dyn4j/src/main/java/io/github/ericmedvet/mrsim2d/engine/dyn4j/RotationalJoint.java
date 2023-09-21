@@ -196,11 +196,11 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     Point[] ps1 = polyFromBody(body1).vertexes();
     Point[] ps2 = polyFromBody(body2).vertexes();
     Point[] ps = new Point[10];
-    for (int i = 0; i<5; i++) {
+    for (int i = 0; i < 5; i++) {
       ps[i] = ps1[polyIndexes.get(0).get(i)];
     }
-    for (int i = 0; i<5; i++) {
-      ps[i+5] = ps2[polyIndexes.get(1).get(i)];
+    for (int i = 0; i < 5; i++) {
+      ps[i + 5] = ps2[polyIndexes.get(1).get(i)];
     }
     return new Poly(ps);
   }

@@ -20,6 +20,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
+import io.github.ericmedvet.mrsim2d.core.tasks.balancing.Balancing;
 import io.github.ericmedvet.mrsim2d.core.tasks.jumping.Jumping;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLocomotion;
@@ -53,6 +54,16 @@ public class Tasks {
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
     return new Jumping(duration, initialYGap);
+  }
+
+  public static Balancing balancing(
+      @Param(value = "duration", dD = 10) double duration,
+      @Param(value = "swingLength", dD = 10.0) double swingLength,
+      @Param(value = "supportHeight", dD = 1.0) double supportHeight,
+      @Param(value = "initialXGap", dD = 0.0) double initialXGap,
+      @Param(value = "initialYGap", dD = 0.1) double initialYGap
+  ) {
+    return new Balancing(duration, swingLength, supportHeight, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")

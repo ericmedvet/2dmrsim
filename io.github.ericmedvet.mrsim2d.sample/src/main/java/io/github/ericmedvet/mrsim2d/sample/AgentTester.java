@@ -25,13 +25,9 @@ import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
+import io.github.ericmedvet.mrsim2d.viewer.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Function;
@@ -49,17 +45,18 @@ public class AgentTester {
 
   private final static String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
   private final static String TASK_JUMPING = "sim.task.jumping()";
+  private final static String TASK_BALANCING = "sim.task.balancing(supportHeight = 1; swingLength = 10; duration = 100)";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
     //prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;nfc=true)")).apply("test");
+    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true; nfc=true; enlargement = 5)")).apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     //prepare task
     @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?> task = (Task<Supplier<EmbodiedAgent>, ?>) nb.build(
-        TASK_JUMPING);
+        TASK_BALANCING);
     //read agent resource
     String agentName = args.length >= 1 ? args[0] : "worm-vsr-reactive";
     L.info("Loading agent description \"%s\"".formatted(agentName));

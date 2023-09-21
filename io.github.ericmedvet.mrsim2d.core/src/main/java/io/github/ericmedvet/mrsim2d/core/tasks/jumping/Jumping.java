@@ -75,8 +75,8 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObse
         TERRAIN_BORDER_H
     );
     engine.perform(new CreateUnmovableBody(terrain.poly()));
-    engine.perform(new AddAgent(embodiedAgent));
     //place agent
+    engine.perform(new AddAgent(embodiedAgent));
     BoundingBox agentBB = embodiedAgent.boundingBox();
     engine.perform(new TranslateAgent(embodiedAgent, new Point(
         terrain.withinBordersXRange().min() + terrain.withinBordersXRange().extent()/2d - agentBB.min().x()+agentBB.xRange().extent()/2d,
