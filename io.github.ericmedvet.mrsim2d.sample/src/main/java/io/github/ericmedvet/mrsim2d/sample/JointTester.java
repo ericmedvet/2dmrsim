@@ -10,6 +10,7 @@ import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 import io.github.ericmedvet.mrsim2d.core.bodies.UnmovableBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
+import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
@@ -82,7 +83,7 @@ public class JointTester {
               new DoubleRange(-Math.PI / 3d, Math.PI / 3d)
           )
       ).outcome().orElseThrow();
-      engine.perform(new TranslateBodyAt(joint, new Point(5, 3)));
+      engine.perform(new TranslateBodyAt(joint, BoundingBox.Anchor.LU, new Point(5, 3)));
       engine.perform(new AttachClosestAnchors(
           1,
           joint,
@@ -98,7 +99,7 @@ public class JointTester {
       //place load
       if (loadMass > 0) {
         RigidBody load = engine.perform(new CreateRigidBody(Poly.square(1d), loadMass, 1)).outcome().orElseThrow();
-        engine.perform(new TranslateBodyAt(load, joint.poly().boundingBox().max()));
+        engine.perform(new TranslateBodyAt(load, BoundingBox.Anchor.LU, joint.poly().boundingBox().max()));
         engine.perform(new AttachClosestAnchors(
             2,
             joint,

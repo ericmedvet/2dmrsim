@@ -26,6 +26,7 @@ import io.github.ericmedvet.mrsim2d.core.actions.TranslateBodyAt;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 
@@ -73,6 +74,7 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
           };
           actionPerformer.perform(new TranslateBodyAt(
               anchorable,
+              BoundingBox.Anchor.LU,
               new Point(e.key().x() * voxelSideLength, e.key().y() * voxelSideLength)
           ), this);
           bodyGrid.set(e.key(), anchorable);

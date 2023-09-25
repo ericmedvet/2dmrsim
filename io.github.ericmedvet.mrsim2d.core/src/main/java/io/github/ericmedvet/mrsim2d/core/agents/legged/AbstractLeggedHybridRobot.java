@@ -22,6 +22,7 @@ import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.*;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
+import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 
@@ -90,7 +91,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
         .outcome()
         .orElseThrow(() -> new ActionException("Cannot create trunk"));
     bodies.add(head);
-    performer.perform(new TranslateBodyAt(head, trunk.poly().boundingBox().max()), this);
+    performer.perform(new TranslateBodyAt(head, BoundingBox.Anchor.LU,trunk.poly().boundingBox().max()), this);
     performer.perform(new AttachClosestAnchors(2, (Anchorable) head, trunk, Anchor.Link.Type.RIGID), this);
     //iterate over legs
     double maxLegWidth = legs.stream()
@@ -121,6 +122,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
           bodies.add(voxel);
           performer.perform(new TranslateBodyAt(
               voxel,
+              BoundingBox.Anchor.LU,
               new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())
           ), this);
           performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
@@ -137,6 +139,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
           bodies.add(connector);
           performer.perform(new TranslateBodyAt(
               connector,
+              BoundingBox.Anchor.LU,
               new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())
           ), this);
           performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
@@ -154,6 +157,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
         performer.perform(new RotateBody(joint, Math.toRadians(90)), this);
         performer.perform(new TranslateBodyAt(
             joint,
+            BoundingBox.Anchor.LU,
             new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())
         ), this);
         performer.perform(new AttachClosestAnchors(2, joint, upperBody, Anchor.Link.Type.RIGID));
@@ -172,6 +176,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
         bodies.add(voxel);
         performer.perform(new TranslateBodyAt(
             voxel,
+            BoundingBox.Anchor.LU,
             upperBody.poly().boundingBox().min()
         ), this);
         performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
@@ -187,6 +192,7 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
         bodies.add(connector);
         performer.perform(new TranslateBodyAt(
             connector,
+            BoundingBox.Anchor.LU,
             upperBody.poly().boundingBox().min()
         ), this);
         performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
