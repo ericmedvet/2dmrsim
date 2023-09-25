@@ -59,11 +59,12 @@ public class Tasks {
   public static Balancing balancing(
       @Param(value = "duration", dD = 10) double duration,
       @Param(value = "swingLength", dD = 10.0) double swingLength,
+      @Param(value = "swingDensity", dD = 0.1) double swingDensity,
       @Param(value = "supportHeight", dD = 1.0) double supportHeight,
       @Param(value = "initialXGap", dD = 0.0) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new Balancing(duration, swingLength, supportHeight, initialXGap, initialYGap);
+    return new Balancing(duration, swingLength, swingDensity, supportHeight, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")

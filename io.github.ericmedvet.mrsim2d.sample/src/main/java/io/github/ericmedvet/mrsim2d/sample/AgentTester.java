@@ -45,7 +45,7 @@ public class AgentTester {
 
   private final static String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
   private final static String TASK_JUMPING = "sim.task.jumping()";
-  private final static String TASK_BALANCING = "sim.task.balancing(supportHeight = 1; swingLength = 10; duration = 100)";
+  private final static String TASK_BALANCING = "sim.task.balancing(supportHeight = 0.5; swingLength = 20; duration = 100)";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();

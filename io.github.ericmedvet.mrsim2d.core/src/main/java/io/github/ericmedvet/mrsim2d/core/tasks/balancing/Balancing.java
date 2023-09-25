@@ -31,19 +31,28 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
   private final double duration;
   private final double initialYGap;
   private final double swingLength;
+  private final double swingDensity;
   private final double supportHeight;
   private final double initialXGap;
 
-  public Balancing(double duration, double swingLength, double supportHeight, double initialXGap, double initialYGap) {
+  public Balancing(
+      double duration,
+      double swingLength,
+      double swingDensity,
+      double supportHeight,
+      double initialXGap,
+      double initialYGap
+  ) {
     this.duration = duration;
     this.swingLength = swingLength;
+    this.swingDensity = swingDensity;
     this.supportHeight = supportHeight;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
-  public Balancing(double duration, double swingLength, double supportHeight, double initialXGap) {
-    this(duration, swingLength, supportHeight, initialXGap, INITIAL_Y_GAP);
+  public Balancing(double duration, double swingLength, double swingDensity, double supportHeight, double initialXGap) {
+    this(duration, swingLength, swingDensity, supportHeight, initialXGap, INITIAL_Y_GAP);
   }
 
 
@@ -65,14 +74,12 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     //create swing
     double worldCenterX = terrain.withinBordersXRange().min() + terrain.withinBordersXRange().extent() / 2d;
+    Point worldCenter = new Point(worldCenterX, terrain.maxHeightAt(new DoubleRange(worldCenterX, worldCenterX)));
     RigidBody support = engine.perform(new CreateUnmovableBody(
-        Poly.rectangle(SUPPORT_WIDTH, SUPPORT_WIDTH),
+        Poly.rectangle(SUPPORT_WIDTH, supportHeight),
         1d
     )).outcome().orElseThrow();
-    engine.perform(new TranslateBody(support, new Point(
-        worldCenterX - support.poly().boundingBox().width() / 2d,
-        0 - support.poly().boundingBox().min().y()
-    )));
+    engine.perform(new TranslateBodyAt(support, BoundingBox.Anchor.CL, worldCenter));
     RotationalJoint joint = engine.perform(new CreateRotationalJoint(
         2d * SUPPORT_WIDTH,
         SUPPORT_WIDTH,
@@ -80,29 +87,30 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
         new RotationalJoint.Motor(0d, 0d, 0d, 0d, 0d, 2d * Math.PI),
         DoubleRange.UNBOUNDED
     )).outcome().orElseThrow();
-    System.out.println(joint.poly().boundingBox());
     engine.perform(new RotateBody(joint, Math.PI / 2d));
-    System.out.println(joint.poly().boundingBox());
-    engine.perform(new TranslateBody(joint, new Point(
-        worldCenterX - joint.poly().boundingBox().width(), // TODO: check why not /2d
-        support.poly().boundingBox().max().y() - joint.poly().boundingBox().min().y()
-    )));
+    engine.perform(new TranslateBodyAt(
+        joint,
+        BoundingBox.Anchor.CL,
+        support.poly().boundingBox().anchor(BoundingBox.Anchor.CU)
+    ));
     RigidBody swing = engine.perform(new CreateRigidBody(Poly.rectangle(
         swingLength,
         SWING_HEIGHT
-    ), swingLength * SWING_HEIGHT, 1)).outcome().orElseThrow();
-    engine.perform(new TranslateBody(swing, new Point(
-        worldCenterX - swing.poly().boundingBox().width() / 2d,
-        joint.poly().boundingBox().max().y()
-    )));
+    ), swingDensity * swingLength * SWING_HEIGHT, 1)).outcome().orElseThrow();
+    engine.perform(new TranslateBodyAt(
+        swing,
+        BoundingBox.Anchor.CL,
+        joint.poly().boundingBox().anchor(BoundingBox.Anchor.CU)
+    ));
     engine.perform(new AttachClosestAnchors(2, joint, support, Anchor.Link.Type.RIGID));
     engine.perform(new AttachClosestAnchors(2, swing, joint, Anchor.Link.Type.RIGID));
     //add agent
     engine.perform(new AddAgent(embodiedAgent));
-    engine.perform(new TranslateAgent(embodiedAgent, new Point(
-        worldCenterX - embodiedAgent.boundingBox().width() / 2d + initialXGap,
-        swing.poly().boundingBox().max().y() + initialYGap - embodiedAgent.boundingBox().min().y()
-    )));
+    engine.perform(new TranslateAgentAt(
+        embodiedAgent,
+        BoundingBox.Anchor.CL,
+        swing.poly().boundingBox().anchor(BoundingBox.Anchor.CU).sum(new Point(initialXGap, initialYGap))
+    ));
     //run for defined time
     Map<Double, BalancingObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
@@ -115,7 +123,8 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
                   embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
               )),
-              0d // TODO fill
+              0d, // TODO fill
+              false // TODO fill
           )
       );
     }
