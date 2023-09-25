@@ -24,6 +24,9 @@ import java.util.Arrays;
  * @author "Eric Medvet" on 2022/07/06 for 2dmrsim
  */
 public record BoundingBox(Point min, Point max) implements Shape {
+
+  public enum Anchor {LL, CL, UL, LC, CC, UC, LU, CU, UU}
+
   public static BoundingBox enclosing(BoundingBox... boxes) {
     return Arrays.stream(boxes).sequential()
         .reduce((b1, b2) -> new BoundingBox(
@@ -62,5 +65,19 @@ public record BoundingBox(Point min, Point max) implements Shape {
 
   public DoubleRange yRange() {
     return new DoubleRange(min.y(), max.y());
+  }
+
+  public Point anchor(Anchor anchor) {
+    return switch (anchor) {
+      case LL -> min;
+      case LC -> new Point(min.x(), (min.y() + max().y()) / 2d);
+      case LU -> new Point(min().x(), max.y());
+      case CL -> new Point((min.x() + max.x()) / 2d, min.y());
+      case CC -> center();
+      case CU -> new Point((min.x() + max.x()) / 2d, max.y());
+      case UL -> new Point(max.x(), min.y());
+      case UC -> new Point(max.x(), (min.y() + max().y()) / 2d);
+      case UU -> max;
+    };
   }
 }
