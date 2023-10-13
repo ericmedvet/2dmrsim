@@ -4,10 +4,7 @@ import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
-import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
-import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
-import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
+import io.github.ericmedvet.mrsim2d.core.bodies.*;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.*;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
@@ -71,7 +68,7 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
         TERRAIN_BORDER_W,
         TERRAIN_BORDER_H
     );
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    UnmovableBody ground = engine.perform(new CreateUnmovableBody(terrain.poly())).outcome().orElseThrow();
     //create swing
     double worldCenterX = terrain.withinBordersXRange().min() + terrain.withinBordersXRange().extent() / 2d;
     Point worldCenter = new Point(worldCenterX, terrain.maxHeightAt(new DoubleRange(worldCenterX, worldCenterX)));
@@ -116,6 +113,7 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
+      Collection<Body> swingInContactBodies = engine.perform(new FindInContactBodies(swing)).outcome().orElseThrow();
       observations.put(
           engine.t(),
           new BalancingObservation(
@@ -123,8 +121,8 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
                   embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
               )),
-              0d, // TODO fill
-              false // TODO fill
+              Math.abs(swing.angle()),
+              swingInContactBodies.contains(ground)
           )
       );
     }
