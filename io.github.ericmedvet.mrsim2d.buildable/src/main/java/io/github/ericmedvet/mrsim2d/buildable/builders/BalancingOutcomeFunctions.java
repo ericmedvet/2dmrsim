@@ -12,7 +12,7 @@ public class BalancingOutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public Function<BalancingOutcome, Double> avgSwingAngle(
+  public static Function<BalancingOutcome, Double> avgSwingAngle(
       @Param(value = "transientTime", dD = 5.0) double transientTime
   ) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
@@ -20,7 +20,7 @@ public class BalancingOutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public Function<BalancingOutcome, Double> avgSwingAngleWithMalus(
+  public static Function<BalancingOutcome, Double> avgSwingAngleWithMalus(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "malus", dD = Math.PI / 2d) double malus
   ) {
