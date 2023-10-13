@@ -46,6 +46,7 @@ public class PreparedNamedBuilder {
               .and(List.of("locomotion", "l"), NamedBuilder.fromUtilityClass(LocomotionOutcomeFunctions.class))
               .and(List.of("jumping", "j"), NamedBuilder.fromUtilityClass(JumpingOutcomeFunctions.class))
               .and(List.of("piling", "p"), NamedBuilder.fromUtilityClass(PilingOutcomeFunctions.class))
+              .and(List.of("balancing", "b"), NamedBuilder.fromUtilityClass(BalancingOutcomeFunctions.class))
           )
       );
 

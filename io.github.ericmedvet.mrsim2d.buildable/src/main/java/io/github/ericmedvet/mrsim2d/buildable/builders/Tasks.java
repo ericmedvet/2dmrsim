@@ -56,6 +56,7 @@ public class Tasks {
     return new Jumping(duration, initialYGap);
   }
 
+  @SuppressWarnings("unused")
   public static Balancing balancing(
       @Param(value = "duration", dD = 10) double duration,
       @Param(value = "swingLength", dD = 10.0) double swingLength,
