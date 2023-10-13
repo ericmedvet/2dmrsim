@@ -8,7 +8,6 @@ import io.github.ericmedvet.mrsim2d.core.bodies.*;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.*;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 
@@ -16,7 +15,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<BalancingObservation>> {
+public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingOutcome> {
 
   public static final double TERRAIN_BORDER_W = 10d;
   public final static double TERRAIN_BORDER_H = 100d;
@@ -54,7 +53,7 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
 
 
   @Override
-  public Outcome<BalancingObservation> run(
+  public BalancingOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
@@ -121,12 +120,13 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, Outcome<Balancin
                   embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
               )),
-              Math.abs(swing.angle()),
-              swingInContactBodies.contains(ground)
+              swing.angle(),
+              swingInContactBodies.contains(ground),
+              swing.poly().boundingBox()
           )
       );
     }
     //return
-    return new Outcome<>(new TreeMap<>(observations));
+    return new BalancingOutcome(new TreeMap<>(observations));
   }
 }

@@ -11,7 +11,7 @@ import java.util.SortedMap;
 public class Outcome<O extends AgentsObservation> {
 
   private final static int N_OF_CACHED_SUB_OUTCOMES = 3;
-  private final SortedMap<Double, O> observations;
+  protected final SortedMap<Double, O> observations;
   private final Map<Key, Double> metricMap;
   private final Map<DoubleRange, Outcome<O>> subOutcomes;
 
@@ -90,7 +90,7 @@ public class Outcome<O extends AgentsObservation> {
   }
 
   public double firstAgentMaxRelativeJumpHeight() {
-    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST)/get(Aggregate.AVERAGE, Metric.BB_H, Subject.FIRST);
+    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST) / get(Aggregate.AVERAGE, Metric.BB_H, Subject.FIRST);
   }
 
   private double get(Aggregate aggregate, Metric metric, Subject subject) {
@@ -160,5 +160,9 @@ public class Outcome<O extends AgentsObservation> {
   @Override
   public String toString() {
     return "Outcome[%.1f->%.1f]".formatted(observations.firstKey(), observations.lastKey());
+  }
+
+  public SortedMap<Double, O> getObservations() {
+    return observations;
   }
 }
