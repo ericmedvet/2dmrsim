@@ -138,7 +138,7 @@
                 <version>2.2.0</version>
                 <configuration>
                     <organizationName>Eric Medvet</organizationName>
-                    <inceptionYear>2018</inceptionYear>
+                    <inceptionYear>2020</inceptionYear>
                     <licenseName>apache_v2</licenseName>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                     <processStartTag>========================LICENSE_START=================================
