@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-sample
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.sample;
 
@@ -13,7 +32,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,13 +44,14 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 public class TerrainTester {
 
-  private final static Logger L = Logger.getLogger(TerrainTester.class.getName());
+  private static final Logger L = Logger.getLogger(TerrainTester.class.getName());
 
   private static Object fromBase64(String content) throws IOException {
     try (ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getDecoder().decode(content));
-         ObjectInputStream ois = new ObjectInputStream(bais)) {
+        ObjectInputStream ois = new ObjectInputStream(bais)) {
       return ois.readObject();
     } catch (Throwable t) {
       throw new IOException(t);
@@ -41,39 +60,41 @@ public class TerrainTester {
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    //prepare engine
-    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    //do single task
+    // prepare engine
+    Supplier<Engine> engineSupplier =
+        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    // do single task
     if (true) {
       @SuppressWarnings("unchecked")
-      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)")).apply("test");
+      Drawer drawer =
+          ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)"))
+              .apply("test");
       taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly()").run();
       System.exit(0);
     }
-    //prepare terrains
-    List<String> terrains = List.of(
-        "s.t.flat()",
-        "s.t.flat(w = 500)",
-        "s.t.hilly()",
-        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
-        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
-        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",
-        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
-        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
-        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
-        "s.t.steppy(chunkW = 0.5; chunkH = 0.1)"
-    );
+    // prepare terrains
+    List<String> terrains =
+        List.of(
+            "s.t.flat()",
+            "s.t.flat(w = 500)",
+            "s.t.hilly()",
+            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
+            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
+            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",
+            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
+            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+            "s.t.steppy(chunkW = 0.5; chunkH = 0.1)");
     Consumer<Snapshot> nullConsumer = s -> {};
-    //warm up
+    // warm up
     int warmUpNOfTimes = 10;
     L.info("Warming up");
     System.out.printf(
         "t=%5.3f with n=%d on %s%n",
         profile(taskOn(nb, engineSupplier, nullConsumer, terrains.get(0)), warmUpNOfTimes),
         warmUpNOfTimes,
-        terrains.get(0)
-    );
-    //profile
+        terrains.get(0));
+    // profile
     L.info("Testing");
     int testNOfTimes = 5;
     for (String terrain : terrains) {
@@ -81,19 +102,21 @@ public class TerrainTester {
           "t=%5.3f with n=%d on %s%n",
           profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes),
           testNOfTimes,
-          terrain
-      );
+          terrain);
     }
   }
 
   private static double profile(Runnable runnable, int nOfTimes) {
     return IntStream.range(0, nOfTimes)
-        .mapToDouble(i -> {
-          Instant startingInstant = Instant.now();
-          runnable.run();
-          return Duration.between(startingInstant, Instant.now()).toMillis();
-        })
-        .average().orElse(Double.NaN) / 1000d;
+            .mapToDouble(
+                i -> {
+                  Instant startingInstant = Instant.now();
+                  runnable.run();
+                  return Duration.between(startingInstant, Instant.now()).toMillis();
+                })
+            .average()
+            .orElse(Double.NaN)
+        / 1000d;
   }
 
   private static String readResource(String resourcePath) throws IOException {
@@ -113,11 +136,10 @@ public class TerrainTester {
       NamedBuilder<?> nb,
       Supplier<Engine> engineSupplier,
       Consumer<Snapshot> consumer,
-      String terrain
-  ) {
-    //prepare task
+      String terrain) {
+    // prepare task
     Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
-    //read agent resource
+    // read agent resource
     String agentDescription;
     try {
       agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
@@ -125,7 +147,7 @@ public class TerrainTester {
       L.severe("Cannot read agent description: %s%n".formatted(e));
       throw new RuntimeException(e);
     }
-    //load weights
+    // load weights
     String serializedWeights;
     try {
       serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
@@ -141,17 +163,21 @@ public class TerrainTester {
       L.severe("Cannot deserialize params: %s%n".formatted(e));
       throw new RuntimeException(e);
     }
-    //prepare supplier
-    Supplier<EmbodiedAgent> agentSupplier = () -> {
-      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-      //shuffle parameters
-      if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().stream()
-            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> np.setParams(params.stream().mapToDouble(d -> d).toArray())));
-      }
-      return agent;
-    };
+    // prepare supplier
+    Supplier<EmbodiedAgent> agentSupplier =
+        () -> {
+          EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+          // shuffle parameters
+          if (agent instanceof NumMultiBrained numMultiBrained) {
+            numMultiBrained.brains().stream()
+                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+                .forEach(
+                    o ->
+                        o.ifPresent(
+                            np -> np.setParams(params.stream().mapToDouble(d -> d).toArray())));
+          }
+          return agent;
+        };
     return () -> locomotion.run(agentSupplier, engineSupplier.get(), consumer);
   }
 }

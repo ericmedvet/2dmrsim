@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-sample
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
@@ -16,7 +35,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -27,10 +45,16 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-public class JointTester {
-  private final static Logger L = Logger.getLogger(JointTester.class.getName());
 
-  enum Type {SIN, SQUARE, ZERO, UP}
+public class JointTester {
+  private static final Logger L = Logger.getLogger(JointTester.class.getName());
+
+  enum Type {
+    SIN,
+    SQUARE,
+    ZERO,
+    UP
+  }
 
   public static class JointTask implements Task<DoubleUnaryOperator, JointTask.Outcome> {
 
@@ -51,71 +75,59 @@ public class JointTester {
     public record Outcome(SortedMap<Double, Observation> observations) {}
 
     @Override
-    public Outcome run(DoubleUnaryOperator targetF, Engine engine, Consumer<Snapshot> snapshotConsumer) {
-      //prepare world
-      UnmovableBody sBox = engine.perform(new CreateUnmovableBody(
-              Poly.rectangle(5 + jointLength / 2d - 1, 2),
-              1
-          ))
-          .outcome()
-          .orElseThrow();
-      engine.perform(new CreateAndTranslateUnmovableBody(
-          Poly.rectangle(5, 1),
-          1,
-          new Point(0, 2)
-      ));
+    public Outcome run(
+        DoubleUnaryOperator targetF, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      // prepare world
+      UnmovableBody sBox =
+          engine
+              .perform(new CreateUnmovableBody(Poly.rectangle(5 + jointLength / 2d - 1, 2), 1))
+              .outcome()
+              .orElseThrow();
+      engine.perform(new CreateAndTranslateUnmovableBody(Poly.rectangle(5, 1), 1, new Point(0, 2)));
       double nLength = obstacle ? (5 + jointLength) : (5 + jointLength / 2d - 1);
-      UnmovableBody nBox = engine.perform(new CreateAndTranslateUnmovableBody(
-          Poly.rectangle(nLength, 1),
-          1,
-          new Point(0, 3)
-      )).outcome().orElseThrow();
-      //place joint
-      RotationalJoint joint = engine.perform(new CreateRotationalJoint(
-              jointLength,
-              1,
-              1,
-              new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0),
-              new DoubleRange(-Math.PI / 3d, Math.PI / 3d)
-          )
-      ).outcome().orElseThrow();
+      UnmovableBody nBox =
+          engine
+              .perform(
+                  new CreateAndTranslateUnmovableBody(
+                      Poly.rectangle(nLength, 1), 1, new Point(0, 3)))
+              .outcome()
+              .orElseThrow();
+      // place joint
+      RotationalJoint joint =
+          engine
+              .perform(
+                  new CreateRotationalJoint(
+                      jointLength,
+                      1,
+                      1,
+                      new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0),
+                      new DoubleRange(-Math.PI / 3d, Math.PI / 3d)))
+              .outcome()
+              .orElseThrow();
       engine.perform(new TranslateBodyAt(joint, BoundingBox.Anchor.LU, new Point(5, 3)));
-      engine.perform(new AttachClosestAnchors(
-          1,
-          joint,
-          nBox,
-          Anchor.Link.Type.RIGID
-      ));
-      engine.perform(new AttachClosestAnchors(
-          1,
-          joint,
-          sBox,
-          Anchor.Link.Type.RIGID
-      ));
-      //place load
+      engine.perform(new AttachClosestAnchors(1, joint, nBox, Anchor.Link.Type.RIGID));
+      engine.perform(new AttachClosestAnchors(1, joint, sBox, Anchor.Link.Type.RIGID));
+      // place load
       if (loadMass > 0) {
-        RigidBody load = engine.perform(new CreateRigidBody(Poly.square(1d), loadMass, 1)).outcome().orElseThrow();
-        engine.perform(new TranslateBodyAt(load, BoundingBox.Anchor.LU, joint.poly().boundingBox().max()));
-        engine.perform(new AttachClosestAnchors(
-            2,
-            joint,
-            load,
-            Anchor.Link.Type.RIGID
-        ));
+        RigidBody load =
+            engine
+                .perform(new CreateRigidBody(Poly.square(1d), loadMass, 1))
+                .outcome()
+                .orElseThrow();
+        engine.perform(
+            new TranslateBodyAt(load, BoundingBox.Anchor.LU, joint.poly().boundingBox().max()));
+        engine.perform(new AttachClosestAnchors(2, joint, load, Anchor.Link.Type.RIGID));
       }
-      //run for defined time
+      // run for defined time
       Map<Double, Observation> observations = new HashMap<>();
       while (engine.t() < duration) {
         double targetAngle = targetF.applyAsDouble(engine.t());
         engine.perform(new ActuateRotationalJoint(joint, targetAngle));
         Snapshot snapshot = engine.tick();
         snapshotConsumer.accept(snapshot);
-        observations.put(
-            engine.t(),
-            new Observation(targetAngle, joint.jointAngle())
-        );
+        observations.put(engine.t(), new Observation(targetAngle, joint.jointAngle()));
       }
-      //return
+      // return
       return new Outcome(new TreeMap<>(observations));
     }
   }
@@ -123,40 +135,36 @@ public class JointTester {
   private static void doAll(double duration, String filePath) {
     File outFile = new File(filePath);
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
-      //write header
+      // write header
       bw.append("f;load;type;t;targetA;actualA\n");
-      //prepare engine
-      Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+      // prepare engine
+      Supplier<Engine> engineSupplier =
+          () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
       List<Double> freqs = List.of(0.1, 0.25, 0.5, 0.75, 1d, 1.25);
       List<Double> loads = List.of(0d, 1.5d, 3d, 4.5d, 6d, 7.5d, 9d, 10d);
       List<Type> types = List.of(Type.values());
-      //iterate
+      // iterate
       for (double freq : freqs) {
         for (double load : loads) {
           for (Type type : types) {
-            L.info("Doing f=%.3f load=%.3f type=%s".formatted(freq, load, type.toString().toLowerCase()));
-            JointTask.Outcome outcome = doTask(
-                duration,
-                engineSupplier,
-                freq,
-                load,
-                type,
-                false,
-                null
-            );
-            //print results
+            L.info(
+                "Doing f=%.3f load=%.3f type=%s"
+                    .formatted(freq, load, type.toString().toLowerCase()));
+            JointTask.Outcome outcome =
+                doTask(duration, engineSupplier, freq, load, type, false, null);
+            // print results
             for (double t : outcome.observations().keySet()) {
               JointTask.Observation obs = outcome.observations().get(t);
-              bw.append(String.format(
-                  Locale.ROOT,
-                  "%5.3f; %5.3f; %10.10s; %6.3f; %+6.4f; %+6.4f%n",
-                  freq,
-                  load,
-                  type.toString().toLowerCase(),
-                  t,
-                  obs.target,
-                  obs.actual
-              ));
+              bw.append(
+                  String.format(
+                      Locale.ROOT,
+                      "%5.3f; %5.3f; %10.10s; %6.3f; %+6.4f; %+6.4f%n",
+                      freq,
+                      load,
+                      type.toString().toLowerCase(),
+                      t,
+                      obs.target,
+                      obs.actual));
             }
           }
         }
@@ -166,22 +174,16 @@ public class JointTester {
     }
   }
 
-  private static void doSingle(double duration, double freq, double load, Type type, boolean obstacle) {
+  private static void doSingle(
+      double duration, double freq, double load, Type type, boolean obstacle) {
     NamedBuilder<Object> nb = PreparedNamedBuilder.get();
-    //prepare drawer, viewer, engine
+    // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
     Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    doTask(
-        duration,
-        engineSupplier,
-        freq,
-        load,
-        type,
-        obstacle,
-        viewer
-    );
+    Supplier<Engine> engineSupplier =
+        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    doTask(duration, engineSupplier, freq, load, type, obstacle, viewer);
   }
 
   private static JointTask.Outcome doTask(
@@ -191,30 +193,23 @@ public class JointTester {
       double load,
       Type type,
       boolean obstacle,
-      Consumer<Snapshot> consumer
-  ) {
-    //prepare function
-    DoubleUnaryOperator targetF = switch (type) {
-      case SIN -> t -> Math.PI / 2d * Math.sin(2d * Math.PI * freq * t);
-      case SQUARE -> t -> Math.PI / 2d * (Math.sin(2d * Math.PI * freq * t) > 0 ? 1d : -1d);
-      case UP -> t -> -.5;
-      case ZERO -> t -> 0d;
-    };
-    //prepare task
+      Consumer<Snapshot> consumer) {
+    // prepare function
+    DoubleUnaryOperator targetF =
+        switch (type) {
+          case SIN -> t -> Math.PI / 2d * Math.sin(2d * Math.PI * freq * t);
+          case SQUARE -> t -> Math.PI / 2d * (Math.sin(2d * Math.PI * freq * t) > 0 ? 1d : -1d);
+          case UP -> t -> -.5;
+          case ZERO -> t -> 0d;
+        };
+    // prepare task
     JointTask task = new JointTask(6, load, duration, obstacle);
-    //do task
-    return task.run(
-        targetF,
-        engineSupplier.get(),
-        (consumer == null) ? (s -> {
-        }) : consumer
-    );
+    // do task
+    return task.run(targetF, engineSupplier.get(), (consumer == null) ? (s -> {}) : consumer);
   }
 
   public static void main(String[] args) {
-    //doAll(60, "/home/eric/experiments/2dmrsim/joint/test.csv");
+    // doAll(60, "/home/eric/experiments/2dmrsim/joint/test.csv");
     doSingle(600, 1, 1, Type.UP, false);
   }
-
-
 }

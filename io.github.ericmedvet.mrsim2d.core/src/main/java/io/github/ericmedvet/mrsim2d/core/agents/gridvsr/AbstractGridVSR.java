@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
@@ -14,20 +33,21 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-
 import java.util.List;
 import java.util.Objects;
+
 public abstract class AbstractGridVSR implements EmbodiedAgent {
 
-  protected final static double VOXEL_SIDE_LENGTH = 1d;
-  protected final static double VOXEL_MASS = 1d;
-  protected final static Anchor.Link.Type LINK_TYPE = Anchor.Link.Type.RIGID;
+  protected static final double VOXEL_SIDE_LENGTH = 1d;
+  protected static final double VOXEL_MASS = 1d;
+  protected static final Anchor.Link.Type LINK_TYPE = Anchor.Link.Type.RIGID;
   protected final Grid<Anchorable> bodyGrid;
   private final Grid<GridBody.Element> elementGrid;
   private final double voxelSideLength;
   private final double voxelMass;
 
-  public AbstractGridVSR(Grid<GridBody.Element> elementGrid, double voxelSideLength, double voxelMass) {
+  public AbstractGridVSR(
+      Grid<GridBody.Element> elementGrid, double voxelSideLength, double voxelMass) {
     this.elementGrid = elementGrid;
     this.voxelSideLength = voxelSideLength;
     this.voxelMass = voxelMass;
@@ -36,31 +56,37 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
 
   @Override
   public void assemble(ActionPerformer actionPerformer) {
-    //create and translate
+    // create and translate
     elementGrid.entries().stream()
         .filter(e -> !e.value().type().equals(GridBody.VoxelType.NONE))
-        .forEach(e -> {
-          Anchorable anchorable = switch (e.value().type()) {
-            case SOFT -> actionPerformer.perform(new CreateVoxel(
-                voxelSideLength,
-                voxelMass,
-                e.value().material()
-            ), this).outcome().orElseThrow();
-            case RIGID -> actionPerformer.perform(new CreateRigidBody(
-                Poly.square(voxelSideLength),
-                voxelMass,
-                3d / voxelSideLength
-            ), this).outcome().orElseThrow();
-            default -> throw new IllegalStateException("Unexpected value: " + e.value().type());
-          };
-          actionPerformer.perform(new TranslateBodyAt(
-              anchorable,
-              BoundingBox.Anchor.LU,
-              new Point(e.key().x() * voxelSideLength, e.key().y() * voxelSideLength)
-          ), this);
-          bodyGrid.set(e.key(), anchorable);
-        });
-    //attach
+        .forEach(
+            e -> {
+              Anchorable anchorable =
+                  switch (e.value().type()) {
+                    case SOFT -> actionPerformer
+                        .perform(
+                            new CreateVoxel(voxelSideLength, voxelMass, e.value().material()), this)
+                        .outcome()
+                        .orElseThrow();
+                    case RIGID -> actionPerformer
+                        .perform(
+                            new CreateRigidBody(
+                                Poly.square(voxelSideLength), voxelMass, 3d / voxelSideLength),
+                            this)
+                        .outcome()
+                        .orElseThrow();
+                    default -> throw new IllegalStateException(
+                        "Unexpected value: " + e.value().type());
+                  };
+              actionPerformer.perform(
+                  new TranslateBodyAt(
+                      anchorable,
+                      BoundingBox.Anchor.LU,
+                      new Point(e.key().x() * voxelSideLength, e.key().y() * voxelSideLength)),
+                  this);
+              bodyGrid.set(e.key(), anchorable);
+            });
+    // attach
     for (Grid.Key key : bodyGrid.keys()) {
       Anchorable srcBody = bodyGrid.get(key);
       if (srcBody != null) {

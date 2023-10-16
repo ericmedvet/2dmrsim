@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
 import io.github.ericmedvet.jsdynsym.grid.Grid;
@@ -19,14 +38,15 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractIndependentVoxel>, Outcome<AgentsObservation>> {
+
+public class PrebuiltIndependentLocomotion
+    implements Task<Supplier<AbstractIndependentVoxel>, Outcome<AgentsObservation>> {
 
   private final double duration;
   private final Terrain terrain;
@@ -39,8 +59,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       Terrain terrain,
       double initialXGap,
       double initialYGap,
-      Grid<GridBody.VoxelType> shape
-  ) {
+      Grid<GridBody.VoxelType> shape) {
     this.duration = duration;
     this.terrain = terrain;
     this.initialXGap = initialXGap;
@@ -52,80 +71,80 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
   public Outcome<AgentsObservation> run(
       Supplier<AbstractIndependentVoxel> abstractIndependentVoxelSupplier,
       Engine engine,
-      Consumer<Snapshot> snapshotConsumer
-  ) {
-    //build world
+      Consumer<Snapshot> snapshotConsumer) {
+    // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
-    //place agents
-    Grid<AbstractIndependentVoxel> agents = shape.map(t -> switch (t) {
-      case NONE, RIGID -> null;
-      case SOFT -> (AbstractIndependentVoxel) engine
-          .perform(new AddAgent(abstractIndependentVoxelSupplier.get()))
-          .outcome()
-          .orElseThrow();
-    });
-    BoundingBox oneBB = agents.values().stream()
-        .filter(Objects::nonNull)
-        .findFirst()
-        .orElseThrow()
-        .boundingBox();
+    // place agents
+    Grid<AbstractIndependentVoxel> agents =
+        shape.map(
+            t ->
+                switch (t) {
+                  case NONE, RIGID -> null;
+                  case SOFT -> (AbstractIndependentVoxel)
+                      engine
+                          .perform(new AddAgent(abstractIndependentVoxelSupplier.get()))
+                          .outcome()
+                          .orElseThrow();
+                });
+    BoundingBox oneBB =
+        agents.values().stream().filter(Objects::nonNull).findFirst().orElseThrow().boundingBox();
     agents.entries().stream()
         .filter(e -> e.value() != null)
-        .forEach(e -> engine.perform(new TranslateAgent(e.value(), new Point(
-            oneBB.width() * e.key().x(),
-            oneBB.height() * e.key().y()
-        ))));
-    BoundingBox allBB = agents.values().stream()
-        .filter(Objects::nonNull)
-        .map(EmbodiedAgent::boundingBox)
-        .reduce(BoundingBox::enclosing)
-        .orElseThrow();
+        .forEach(
+            e ->
+                engine.perform(
+                    new TranslateAgent(
+                        e.value(),
+                        new Point(oneBB.width() * e.key().x(), oneBB.height() * e.key().y()))));
+    BoundingBox allBB =
+        agents.values().stream()
+            .filter(Objects::nonNull)
+            .map(EmbodiedAgent::boundingBox)
+            .reduce(BoundingBox::enclosing)
+            .orElseThrow();
     double dX = terrain.withinBordersXRange().min() + initialXGap - allBB.min().x();
     double maxY = terrain.maxHeightAt(allBB.xRange().delta(dX));
     agents.values().stream()
         .filter(Objects::nonNull)
-        .forEach(a -> engine.perform(new TranslateAgent(a, new Point(
-            dX,
-            maxY + initialYGap - allBB.min().y()
-        ))));
-    //attach agents
+        .forEach(
+            a ->
+                engine.perform(
+                    new TranslateAgent(a, new Point(dX, maxY + initialYGap - allBB.min().y()))));
+    // attach agents
     for (Grid.Key key : agents.keys()) {
       if (agents.get(key) == null) {
         continue;
       }
-      Grid.Key[] adjacentKeys = new Grid.Key[]{
-          key.translated(1, 0),
-          key.translated(0, 1)
-      };
+      Grid.Key[] adjacentKeys = new Grid.Key[] {key.translated(1, 0), key.translated(0, 1)};
       for (Grid.Key adjacentKey : adjacentKeys) {
         if (agents.isValid(adjacentKey) && agents.get(adjacentKey) != null) {
-          engine.perform(new AttachClosestAnchors(
-              2,
-              agents.get(key).voxel(),
-              agents.get(adjacentKey).voxel(),
-              Anchor.Link.Type.RIGID
-          ));
+          engine.perform(
+              new AttachClosestAnchors(
+                  2,
+                  agents.get(key).voxel(),
+                  agents.get(adjacentKey).voxel(),
+                  Anchor.Link.Type.RIGID));
         }
       }
     }
-    //run for defined time
+    // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(agents.values().stream()
-              .filter(Objects::nonNull)
-              .map(a -> new AgentsObservation.Agent(
-                  a.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())
-              ))
-              .toList()
-          )
-      );
+          new AgentsObservation(
+              agents.values().stream()
+                  .filter(Objects::nonNull)
+                  .map(
+                      a ->
+                          new AgentsObservation.Agent(
+                              a.bodyParts().stream().map(Body::poly).toList(),
+                              PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())))
+                  .toList()));
     }
-    //return
+    // return
     return new Outcome<>(new TreeMap<>(observations));
   }
 }

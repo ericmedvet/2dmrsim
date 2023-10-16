@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-viewer
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.viewer;
 
@@ -5,28 +24,31 @@ import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+
 public class DrawingUtils {
 
-  public final static Font FONT = new Font("Monospaced", Font.PLAIN, 12);
+  public static final Font FONT = new Font("Monospaced", Font.PLAIN, 12);
 
-  private DrawingUtils() {
+  private DrawingUtils() {}
+
+  public enum Alignment {
+    LEFT,
+    CENTER,
+    RIGHT
   }
 
-  public enum Alignment {LEFT, CENTER, RIGHT}
-
   public static class Colors {
-    public final static Color TEXT = Color.BLUE;
-    public final static Color AXES = Color.BLACK;
-    public final static Color DATA = Color.RED;
-    public final static Color DATA_POSITIVE = Color.BLUE;
-    public final static Color DATA_NEGATIVE = Color.YELLOW;
-    public final static Color DATA_ZERO = Color.BLACK;
-    public final static Color DATA_BACKGROUND = Color.WHITE;
+    public static final Color TEXT = Color.BLUE;
+    public static final Color AXES = Color.BLACK;
+    public static final Color DATA = Color.RED;
+    public static final Color DATA_POSITIVE = Color.BLUE;
+    public static final Color DATA_NEGATIVE = Color.YELLOW;
+    public static final Color DATA_ZERO = Color.BLACK;
+    public static final Color DATA_BACKGROUND = Color.WHITE;
   }
 
   public static Color alphaed(Color color, float alpha) {
@@ -34,8 +56,7 @@ public class DrawingUtils {
         (float) color.getRed() / 255f,
         (float) color.getGreen() / 255f,
         (float) color.getBlue() / 255f,
-        alpha
-    );
+        alpha);
   }
 
   public static void drawFilledBar(
@@ -49,8 +70,7 @@ public class DrawingUtils {
       Graphics2D g,
       Color lineColor,
       Color fillColor,
-      Color bgColor
-  ) {
+      Color bgColor) {
     if (bgColor != null) {
       g.setColor(bgColor);
       g.fill(new Rectangle2D.Double(x, y, w, h));
@@ -62,11 +82,7 @@ public class DrawingUtils {
     if (format != null) {
       String s = String.format(format, value);
       g.setColor(Colors.TEXT);
-      g.drawString(
-          s,
-          Math.round(x + g.getFontMetrics().charWidth('x') + w),
-          Math.round(y + h)
-      );
+      g.drawString(s, Math.round(x + g.getFontMetrics().charWidth('x') + w), Math.round(y + h));
     }
   }
 
@@ -78,9 +94,9 @@ public class DrawingUtils {
       double value,
       DoubleRange range,
       String format,
-      Graphics2D g
-  ) {
-    drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
+      Graphics2D g) {
+    drawFilledBar(
+        x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
   }
 
   public static void drawLine(Graphics2D g, Point src, Point dst) {
@@ -94,8 +110,7 @@ public class DrawingUtils {
   public static BoundingBox getBoundingBox(Graphics2D g) {
     return new BoundingBox(
         new Point(g.getClipBounds().getMinX(), g.getClipBounds().getMinY()),
-        new Point(g.getClipBounds().getMaxX(), g.getClipBounds().getMaxY())
-    );
+        new Point(g.getClipBounds().getMaxX(), g.getClipBounds().getMaxY()));
   }
 
   public static Stroke getScaleIndependentStroke(float thickness, float scale) {
@@ -120,7 +135,8 @@ public class DrawingUtils {
     return new Color(r, g, b, a);
   }
 
-  public static Color linear(final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
+  public static Color linear(
+      final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
     if (x < x2) {
       return linear(c1, c2, x1, x2, x);
     }
@@ -143,5 +159,4 @@ public class DrawingUtils {
     }
     return path;
   }
-
 }

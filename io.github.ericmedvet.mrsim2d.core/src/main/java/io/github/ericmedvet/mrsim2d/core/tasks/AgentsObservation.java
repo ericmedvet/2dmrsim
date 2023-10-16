@@ -1,18 +1,33 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
-
 import java.util.Comparator;
 import java.util.List;
 
 public class AgentsObservation {
 
-  public record Agent(
-      List<Poly> polies,
-      double terrainHeight
-  ) {}
+  public record Agent(List<Poly> polies, double terrainHeight) {}
 
   private final List<Agent> agents;
   private BoundingBox allBoundingBox;
@@ -43,23 +58,22 @@ public class AgentsObservation {
   public List<BoundingBox> getBoundingBoxes() {
     if (boundingBoxes == null) {
       //noinspection OptionalGetWithoutIsPresent
-      boundingBoxes = agents.stream()
-          .map(a -> a.polies.stream()
-              .map(Poly::boundingBox)
-              .reduce(BoundingBox::enclosing)
-              .get())
-          .toList();
+      boundingBoxes =
+          agents.stream()
+              .map(
+                  a ->
+                      a.polies.stream().map(Poly::boundingBox).reduce(BoundingBox::enclosing).get())
+              .toList();
     }
     return boundingBoxes;
   }
 
   public List<Point> getCenters() {
     if (centers == null) {
-      centers = agents.stream()
-          .map(a -> Point.average(a.polies.stream()
-              .map(Poly::center)
-              .toArray(Point[]::new)))
-          .toList();
+      centers =
+          agents.stream()
+              .map(a -> Point.average(a.polies.stream().map(Poly::center).toArray(Point[]::new)))
+              .toList();
     }
     return centers;
   }

@@ -1,8 +1,26 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-viewer
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.viewer;
 
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,6 +31,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
 public class VideoBuilder implements Accumulator<File, Snapshot> {
 
   private static final Logger L = Logger.getLogger(VideoBuilder.class.getName());
@@ -39,8 +58,7 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
       double frameRate,
       VideoUtils.EncoderFacility encoder,
       File file,
-      Drawer drawer
-  ) {
+      Drawer drawer) {
     this.w = w;
     this.h = h;
     this.startTime = startTime;
@@ -68,14 +86,14 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
     snapshots.add(snapshot);
     if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
       lastDrawnT = snapshot.t();
-      //create image
+      // create image
       BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
-      //draw
+      // draw
       Graphics2D g = image.createGraphics();
       g.setClip(0, 0, image.getWidth(), image.getHeight());
       drawer.draw(snapshots, g);
       g.dispose();
-      //add
+      // add
       images.add(image);
       snapshots.clear();
     }
@@ -91,11 +109,11 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
     try {
       Instant encodingStartInstant = Instant.now();
       VideoUtils.encodeAndSave(images, frameRate, file, encoder);
-      L.fine(String.format(
-          "Video saved: %.1fMB written in %.2fs",
-          Files.size(file.toPath()) / 1024f / 1024f,
-          Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f
-      ));
+      L.fine(
+          String.format(
+              "Video saved: %.1fMB written in %.2fs",
+              Files.size(file.toPath()) / 1024f / 1024f,
+              Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f));
     } catch (IOException e) {
       L.severe(String.format("Cannot save file due to %s", e));
       return null;

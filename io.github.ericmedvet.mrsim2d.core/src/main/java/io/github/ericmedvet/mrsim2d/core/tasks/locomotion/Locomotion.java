@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
@@ -15,7 +34,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +43,13 @@ import java.util.function.Supplier;
 
 public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
 
-  private final static double INITIAL_X_GAP = 1;
-  private final static double INITIAL_Y_GAP = 0.25;
+  private static final double INITIAL_X_GAP = 1;
+  private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
   private final double initialXGap;
   private final double initialYGap;
+
   public Locomotion(double duration, Terrain terrain, double initialXGap, double initialYGap) {
     this.duration = duration;
     this.terrain = terrain;
@@ -38,10 +57,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
     this.initialYGap = initialYGap;
   }
 
-  public Locomotion(
-      double duration,
-      Terrain terrain
-  ) {
+  public Locomotion(double duration, Terrain terrain) {
     this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
@@ -49,26 +65,23 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
   public Outcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
       Engine engine,
-      Consumer<Snapshot> snapshotConsumer
-  ) {
-    //create agent
+      Consumer<Snapshot> snapshotConsumer) {
+    // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
-    //build world
+    // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(embodiedAgent));
-    //place agent
+    // place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();
-    engine.perform(new TranslateAgent(embodiedAgent, new Point(
-        terrain.withinBordersXRange().min() + initialXGap - agentBB.min().x(),
-        0
-    )));
+    engine.perform(
+        new TranslateAgent(
+            embodiedAgent,
+            new Point(terrain.withinBordersXRange().min() + initialXGap - agentBB.min().x(), 0)));
     agentBB = embodiedAgent.boundingBox();
     double maxY = terrain.maxHeightAt(agentBB.xRange());
-    engine.perform(new TranslateAgent(embodiedAgent, new Point(
-        0,
-        maxY + initialYGap - agentBB.min().y()
-    )));
-    //run for defined time
+    engine.perform(
+        new TranslateAgent(embodiedAgent, new Point(0, maxY + initialYGap - agentBB.min().y())));
+    // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
@@ -76,14 +89,13 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
       observations.put(
           engine.t(),
           new AgentsObservation(
-              List.of(new AgentsObservation.Agent(
-                  embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(terrain.poly(), embodiedAgent.boundingBox().center().x())
-              ))
-          )
-      );
+              List.of(
+                  new AgentsObservation.Agent(
+                      embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(), embodiedAgent.boundingBox().center().x())))));
     }
-    //return
+    // return
     return new Outcome<>(new TreeMap<>(observations));
   }
 }

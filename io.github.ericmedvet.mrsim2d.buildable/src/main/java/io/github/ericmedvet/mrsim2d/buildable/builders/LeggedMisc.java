@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-buildable
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
@@ -9,31 +28,28 @@ import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot
 import io.github.ericmedvet.mrsim2d.core.agents.legged.ConnectorType;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.LegChunk;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
-
 import java.util.List;
 
 public class LeggedMisc {
-  protected final static double RIGID_DENSITY = 1d;
-  protected final static double LEG_CHUNK_LENGTH = 1.05d;
-  protected final static double LEG_CHUNK_WIDTH = 1d;
-  protected final static double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH * RIGID_DENSITY;
-  protected final static double TRUNK_LENGTH = 6d;
-  protected final static double TRUNK_WIDTH = 1d;
-  protected final static double TRUNK_MASS = TRUNK_LENGTH * TRUNK_WIDTH * RIGID_DENSITY;
+  protected static final double RIGID_DENSITY = 1d;
+  protected static final double LEG_CHUNK_LENGTH = 1.05d;
+  protected static final double LEG_CHUNK_WIDTH = 1d;
+  protected static final double LEG_CHUNK_MASS = LEG_CHUNK_LENGTH * LEG_CHUNK_WIDTH * RIGID_DENSITY;
+  protected static final double TRUNK_LENGTH = 6d;
+  protected static final double TRUNK_WIDTH = 1d;
+  protected static final double TRUNK_MASS = TRUNK_LENGTH * TRUNK_WIDTH * RIGID_DENSITY;
 
-  private LeggedMisc() {
-  }
+  private LeggedMisc() {}
 
   @SuppressWarnings("unused")
   public static AbstractLeggedHybridRobot.Leg leg(
       @Param("legChunks") List<LegChunk> legChunks,
-      @Param(value = "downConnectorMass", dD = LEG_CHUNK_LENGTH * LEG_CHUNK_LENGTH * RIGID_DENSITY) double downConnectorMass,
+      @Param(value = "downConnectorMass", dD = LEG_CHUNK_LENGTH * LEG_CHUNK_LENGTH * RIGID_DENSITY)
+          double downConnectorMass,
       @Param(value = "downConnector", dS = "rigid") ConnectorType downConnector,
-      @Param("downConnectorSensors") List<Sensor<?>> downConnectorSensors
-  ) {
+      @Param("downConnectorSensors") List<Sensor<?>> downConnectorSensors) {
     return new AbstractLeggedHybridRobot.Leg(
-        legChunks, downConnector, downConnectorMass, downConnectorSensors
-    );
+        legChunks, downConnector, downConnectorMass, downConnectorSensors);
   }
 
   @SuppressWarnings("unused")
@@ -48,9 +64,10 @@ public class LeggedMisc {
       @Param(value = "motorControlP", dD = RotationalJoint.Motor.CONTROL_P) double motorControlP,
       @Param(value = "motorControlI", dD = RotationalJoint.Motor.CONTROL_I) double motorControlI,
       @Param(value = "motorControlD", dD = RotationalJoint.Motor.CONTROL_D) double motorControlD,
-      @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE) double motorAngleTolerance,
-      @Param(value = "activeAngleRange", dNPM = "sim.range(min=-1.047;max=1.047)") DoubleRange activeAngleRange
-  ) {
+      @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE)
+          double motorAngleTolerance,
+      @Param(value = "activeAngleRange", dNPM = "sim.range(min=-1.047;max=1.047)")
+          DoubleRange activeAngleRange) {
     return new LegChunk(
         length,
         width,
@@ -61,12 +78,10 @@ public class LeggedMisc {
             motorControlP,
             motorControlI,
             motorControlD,
-            motorAngleTolerance
-        ),
+            motorAngleTolerance),
         activeAngleRange,
         upConnector,
-        jointSensors
-    );
+        jointSensors);
   }
 
   @SuppressWarnings("unused")
@@ -79,8 +94,7 @@ public class LeggedMisc {
       @Param(value = "rightConnector", dS = "rigid") ConnectorType rightConnector,
       @Param("trunkSensors") List<Sensor<?>> trunkSensors,
       @Param("rightConnectorSensors") List<Sensor<?>> rightConnectorSensors,
-      @Param("downConnectorSensors") List<Sensor<?>> downConnectorSensors
-  ) {
+      @Param("downConnectorSensors") List<Sensor<?>> downConnectorSensors) {
     return new AbstractLeggedHybridModularRobot.Module(
         trunkLength,
         trunkWidth,
@@ -90,8 +104,6 @@ public class LeggedMisc {
         rightConnector,
         trunkSensors,
         rightConnectorSensors,
-        downConnectorSensors
-    );
+        downConnectorSensors);
   }
-
 }

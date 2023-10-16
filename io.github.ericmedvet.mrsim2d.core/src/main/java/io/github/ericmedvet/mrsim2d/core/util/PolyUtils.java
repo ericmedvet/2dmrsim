@@ -1,12 +1,31 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.core.util;
 
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.*;
+
 public class PolyUtils {
 
-  private PolyUtils() {
-  }
+  private PolyUtils() {}
 
   private static double angle(Point a, Point b, Point c) {
     double angle = c.diff(b).direction() - a.diff(b).direction();
@@ -56,7 +75,8 @@ public class PolyUtils {
     return poly.sides().stream()
         .mapToDouble(s -> yAtX(s, x))
         .filter(y -> !Double.isNaN(y))
-        .max().orElse(Double.NaN);
+        .max()
+        .orElse(Double.NaN);
   }
 
   public static double minAnchorDistance(Anchor anchor1, Anchor anchor2) {
@@ -77,14 +97,10 @@ public class PolyUtils {
     Point dL = dst.diff(src).scale(0.5d / (double) n);
     double a = dL.direction() + Math.PI / 2d;
     Point dP = new Point(a).scale(w);
-    Path p = new Path(src)
-        .moveBy(dL.diff(dP.scale(0.5)));
+    Path p = new Path(src).moveBy(dL.diff(dP.scale(0.5)));
     for (int i = 0; i < n - 1; i++) {
-      p = p
-          .moveBy(dL.sum(dP))
-          .moveBy(dL.diff(dP));
+      p = p.moveBy(dL.sum(dP)).moveBy(dL.diff(dP));
     }
     return p.moveBy(dL.sum(dP.scale(0.5)));
   }
-
 }

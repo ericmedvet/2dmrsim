@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-buildable
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
@@ -20,7 +39,6 @@ import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.*;
 import io.github.ericmedvet.mrsim2d.viewer.framers.AllAgentsFramer;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,10 +46,13 @@ import java.util.random.RandomGenerator;
 
 public class Misc {
 
-  private Misc() {
-  }
+  private Misc() {}
 
-  public enum MiniAgentInfo {NONE, VELOCITY, BRAINS}
+  public enum MiniAgentInfo {
+    NONE,
+    VELOCITY,
+    BRAINS
+  }
 
   @SuppressWarnings("unused")
   public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
@@ -48,25 +69,22 @@ public class Misc {
       @Param(value = "miniAgents", dS = "brains") MiniAgentInfo miniAgentInfo,
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions,
-      @Param(value = "nfc") boolean nfc
-  ) {
+      @Param(value = "nfc") boolean nfc) {
     return s -> {
-      Drawer baseDrawer = new ComponentsDrawer(
-          List.of(
-              new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
-              new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-              new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
-              new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())
-          ), Snapshot::bodies
-      ).onLastSnapshot();
+      Drawer baseDrawer =
+          new ComponentsDrawer(
+                  List.of(
+                      new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                      new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
+                      new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                      new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())),
+                  Snapshot::bodies)
+              .onLastSnapshot();
       Drawer nfcDrawer = new NFCDrawer();
-      Drawer actionsDrawer = new ComponentsDrawer(
-          List.of(
-              new AttractAnchor(),
-              new SenseDistanceToBody(),
-              new SenseRotatedVelocity()
-          ), Snapshot::actionOutcomes
-      );
+      Drawer actionsDrawer =
+          new ComponentsDrawer(
+              List.of(new AttractAnchor(), new SenseDistanceToBody(), new SenseRotatedVelocity()),
+              Snapshot::actionOutcomes);
       List<Drawer> thingsDrawers = new ArrayList<>();
       thingsDrawers.add(baseDrawer);
       if (actions) {
@@ -75,31 +93,29 @@ public class Misc {
       if (nfc) {
         thingsDrawers.add(nfcDrawer);
       }
-      Drawer worldDrawer = Drawer.transform(
-          new AllAgentsFramer(enlargement).largest(followTime),
-          Drawer.of(Collections.unmodifiableList(thingsDrawers))
-      );
-      List<Drawer> drawers = new ArrayList<>(List.of(
-          Drawer.clear(),
-          worldDrawer
-      ));
+      Drawer worldDrawer =
+          Drawer.transform(
+              new AllAgentsFramer(enlargement).largest(followTime),
+              Drawer.of(Collections.unmodifiableList(thingsDrawers)));
+      List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
-        drawers.add(new StackedMultipliedDrawer<>(
-            switch (miniAgentInfo) {
-              case BRAINS -> Drawers::simpleAgentWithBrainsIO;
-              case VELOCITY -> Drawers::simpleAgentWithVelocities;
-              default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
-            },
-            new EmbodiedAgentsExtractor(),
-            0.25,
-            0.05,
-            StackedMultipliedDrawer.Direction.VERTICAL,
-            Drawer.VerticalPosition.TOP,
-            Drawer.HorizontalPosition.RIGHT
-        ));
+        drawers.add(
+            new StackedMultipliedDrawer<>(
+                switch (miniAgentInfo) {
+                  case BRAINS -> Drawers::simpleAgentWithBrainsIO;
+                  case VELOCITY -> Drawers::simpleAgentWithVelocities;
+                  default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
+                },
+                new EmbodiedAgentsExtractor(),
+                0.25,
+                0.05,
+                StackedMultipliedDrawer.Direction.VERTICAL,
+                Drawer.VerticalPosition.TOP,
+                Drawer.HorizontalPosition.RIGHT));
       }
       if (miniWorld) {
-        drawers.add(Drawer.clip(
+        drawers.add(
+            Drawer.clip(
                 new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
                 Drawer.of(
                     Drawer.clear(),
@@ -107,25 +123,18 @@ public class Misc {
                         new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
                         Drawer.of(
                             new ComponentsDrawer(
-                                List.of(
-                                    new UnmovableBodyDrawer(),
-                                    new RotationalJointDrawer(),
-                                    new SoftBodyDrawer(),
-                                    new RigidBodyDrawer()
-                                ), Snapshot::bodies
-                            ).onLastSnapshot()
-                        )
-                    )
-                )
-            )
-        );
+                                    List.of(
+                                        new UnmovableBodyDrawer(),
+                                        new RotationalJointDrawer(),
+                                        new SoftBodyDrawer(),
+                                        new RigidBodyDrawer()),
+                                    Snapshot::bodies)
+                                .onLastSnapshot())))));
       }
       if (engineProfiling) {
-        drawers.add(new EngineProfilingDrawer(
-            profilingTime,
-            Drawer.VerticalPosition.BOTTOM,
-            Drawer.HorizontalPosition.LEFT
-        ));
+        drawers.add(
+            new EngineProfilingDrawer(
+                profilingTime, Drawer.VerticalPosition.BOTTOM, Drawer.HorizontalPosition.LEFT));
       }
       drawers.add(new InfoDrawer(s));
       return Drawer.of(Collections.unmodifiableList(drawers));
@@ -138,10 +147,7 @@ public class Misc {
   }
 
   @SuppressWarnings("unused")
-  public static DoubleRange range(
-      @Param("min") double min,
-      @Param("max") double max
-  ) {
+  public static DoubleRange range(@Param("min") double min, @Param("max") double max) {
     return new DoubleRange(min, max);
   }
 
@@ -149,8 +155,7 @@ public class Misc {
   public static <T> Supplier<T> supplier(
       @Param("of") T target,
       @Param(value = "", injection = Param.Injection.MAP) ParamMap map,
-      @Param(value = "", injection = Param.Injection.BUILDER) NamedBuilder<?> builder
-  ) {
+      @Param(value = "", injection = Param.Injection.BUILDER) NamedBuilder<?> builder) {
     //noinspection unchecked
     return () -> (T) builder.build((NamedParamMap) map.value("of", ParamMap.Type.NAMED_PARAM_MAP));
   }
@@ -158,10 +163,7 @@ public class Misc {
   @SuppressWarnings("unused")
   public static <A, O> Function<A, O> taskRunner(
       @Param("task") Task<A, O> task,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
-  ) {
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
     return a -> task.run(a, engineSupplier.get());
   }
-
-
 }

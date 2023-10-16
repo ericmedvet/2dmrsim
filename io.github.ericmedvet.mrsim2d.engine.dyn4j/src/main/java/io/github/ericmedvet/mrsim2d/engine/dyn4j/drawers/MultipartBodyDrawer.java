@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-engine-dyn4j
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers;
 
@@ -5,18 +24,18 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.engine.dyn4j.MultipartBody;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.AbstractComponentDrawer;
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
-import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Path2D;
 public class MultipartBodyDrawer extends AbstractComponentDrawer<Body> {
-  private final static Color BORDER_COLOR = Color.RED;
-  private final static double VERTEX_DOT_RADIUS = .05;
+  private static final Color BORDER_COLOR = Color.RED;
+  private static final double VERTEX_DOT_RADIUS = .05;
 
   private final Color drawColor;
   private final Color fillColor;
@@ -43,12 +62,12 @@ public class MultipartBodyDrawer extends AbstractComponentDrawer<Body> {
             for (int i = 0; i < polygon.getVertices().length; i++) {
               Vector2 tV = polygon.getVertices()[i].copy();
               trans.transform(tV);
-              g.fill(new Ellipse2D.Double(
-                  tV.x - VERTEX_DOT_RADIUS,
-                  tV.y - VERTEX_DOT_RADIUS,
-                  VERTEX_DOT_RADIUS * 2d,
-                  VERTEX_DOT_RADIUS * 2d
-              ));
+              g.fill(
+                  new Ellipse2D.Double(
+                      tV.x - VERTEX_DOT_RADIUS,
+                      tV.y - VERTEX_DOT_RADIUS,
+                      VERTEX_DOT_RADIUS * 2d,
+                      VERTEX_DOT_RADIUS * 2d));
               if (i == 0) {
                 path.moveTo(tV.x, tV.y);
               } else {

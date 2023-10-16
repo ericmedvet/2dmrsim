@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-core
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.core.geometry;
 
@@ -8,8 +27,7 @@ public record Segment(Point p1, Point p2) implements Shape {
   public BoundingBox boundingBox() {
     return new BoundingBox(
         new Point(Math.min(p1.x(), p2().x()), Math.min(p1.y(), p2().y())),
-        new Point(Math.max(p1.x(), p2().x()), Math.max(p1.y(), p2().y()))
-    );
+        new Point(Math.max(p1.x(), p2().x()), Math.max(p1.y(), p2().y())));
   }
 
   @Override
@@ -35,10 +53,7 @@ public record Segment(Point p1, Point p2) implements Shape {
   }
 
   public Point pointAtRate(double r) {
-    return new Point(
-        p1.x() + (p2.x() - p1.x()) * r,
-        p1.y() + (p2.y() - p1.y()) * r
-    );
+    return new Point(p1.x() + (p2.x() - p1.x()) * r, p1.y() + (p2.y() - p1.y()) * r);
   }
 
   public Optional<Double> xAt(double y) {

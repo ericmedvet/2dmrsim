@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-viewer
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.viewer;
 
@@ -6,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.AtomicDouble;
 import io.github.ericmedvet.mrsim2d.core.util.Profiled;
-
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -15,13 +33,23 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+
 public interface Drawer {
 
-  enum Direction {HORIZONTAL, VERTICAL}
+  enum Direction {
+    HORIZONTAL,
+    VERTICAL
+  }
 
-  enum HorizontalPosition {LEFT, RIGHT}
+  enum HorizontalPosition {
+    LEFT,
+    RIGHT
+  }
 
-  enum VerticalPosition {TOP, BOTTOM}
+  enum VerticalPosition {
+    TOP,
+    BOTTOM
+  }
 
   interface ProfiledDrawer extends Drawer, Profiled {}
 
@@ -46,15 +74,15 @@ public interface Drawer {
       double clipY = shape.getBounds2D().getY();
       double clipW = shape.getBounds2D().getWidth();
       double clipH = shape.getBounds2D().getHeight();
-      g.clip(new Rectangle2D.Double(
-          clipX + boundingBox.min().x() * clipW,
-          clipY + boundingBox.min().y() * clipH,
-          clipW * boundingBox.width(),
-          clipH * boundingBox.height()
-      ));
-      //draw
+      g.clip(
+          new Rectangle2D.Double(
+              clipX + boundingBox.min().x() * clipW,
+              clipY + boundingBox.min().y() * clipH,
+              clipW * boundingBox.width(),
+              clipH * boundingBox.height()));
+      // draw
       boolean drawn = drawer.draw(snapshots, g);
-      //restore clip and transform
+      // restore clip and transform
       g.setClip(shape);
       return drawn;
     };
@@ -96,56 +124,50 @@ public interface Drawer {
   static Drawer text(String string, DrawingUtils.Alignment alignment, Color color) {
     return (snapshots, g) -> {
       g.setColor(color);
-      g.drawString(string, switch (alignment) {
-        case LEFT -> g.getClipBounds().x + 1;
-        case CENTER -> g.getClipBounds().x + g.getClipBounds().width / 2 - g.getFontMetrics().stringWidth(string) / 2;
-        case RIGHT -> g.getClipBounds().x + g.getClipBounds().width - 1 - g.getFontMetrics().stringWidth(string);
-      }, g.getClipBounds().y + 1 + g.getFontMetrics().getMaxAscent());
+      g.drawString(
+          string,
+          switch (alignment) {
+            case LEFT -> g.getClipBounds().x + 1;
+            case CENTER -> g.getClipBounds().x
+                + g.getClipBounds().width / 2
+                - g.getFontMetrics().stringWidth(string) / 2;
+            case RIGHT -> g.getClipBounds().x
+                + g.getClipBounds().width
+                - 1
+                - g.getFontMetrics().stringWidth(string);
+          },
+          g.getClipBounds().y + 1 + g.getFontMetrics().getMaxAscent());
       return string.isEmpty();
     };
   }
 
   static Drawer transform(Framer<Snapshot> framer, Drawer drawer) {
     return (snapshots, g) -> {
-      BoundingBox graphicsFrame = new BoundingBox(
-          new Point(
-              g.getClip().getBounds2D().getX(),
-              g.getClip().getBounds2D().getY()
-          ),
-          new Point(
-              g.getClip().getBounds2D().getMaxX(),
-              g.getClip().getBounds2D().getMaxY()
-          )
-      );
+      BoundingBox graphicsFrame =
+          new BoundingBox(
+              new Point(g.getClip().getBounds2D().getX(), g.getClip().getBounds2D().getY()),
+              new Point(g.getClip().getBounds2D().getMaxX(), g.getClip().getBounds2D().getMaxY()));
       Snapshot lastSnapshot = snapshots.get(snapshots.size() - 1);
-      BoundingBox worldFrame = framer.getFrame(
-          lastSnapshot.t(),
-          lastSnapshot,
-          graphicsFrame.width() / graphicsFrame.height()
-      );
-      //save original transform and stroke
+      BoundingBox worldFrame =
+          framer.getFrame(
+              lastSnapshot.t(), lastSnapshot, graphicsFrame.width() / graphicsFrame.height());
+      // save original transform and stroke
       AffineTransform oAt = g.getTransform();
       Stroke oStroke = g.getStroke();
-      //prepare transformation
+      // prepare transformation
       double xRatio = graphicsFrame.width() / worldFrame.width();
       double yRatio = graphicsFrame.height() / worldFrame.height();
       double ratio = Math.min(xRatio, yRatio);
       AffineTransform at = new AffineTransform();
-      at.translate(
-          graphicsFrame.center().x(),
-          graphicsFrame.center().y()
-      );
+      at.translate(graphicsFrame.center().x(), graphicsFrame.center().y());
       at.scale(ratio, -ratio);
-      at.translate(
-          -worldFrame.center().x(),
-          -worldFrame.center().y()
-      );
-      //apply transform and stroke
+      at.translate(-worldFrame.center().x(), -worldFrame.center().y());
+      // apply transform and stroke
       g.setTransform(at);
       g.setStroke(DrawingUtils.getScaleIndependentStroke(1, (float) ratio));
-      //draw
+      // draw
       boolean drawn = drawer.draw(snapshots, g);
-      //restore transform
+      // restore transform
       g.setTransform(oAt);
       g.setStroke(oStroke);
       return drawn;
@@ -154,7 +176,8 @@ public interface Drawer {
 
   default Drawer onLastSnapshot() {
     Drawer thisDrawer = this;
-    return (snapshots, g) -> thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
+    return (snapshots, g) ->
+        thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
   }
 
   default ProfiledDrawer profiled() {
@@ -171,11 +194,8 @@ public interface Drawer {
 
       @Override
       public Map<String, Number> values() {
-        return Map.ofEntries(
-            Map.entry("drawingT", drawingT.get())
-        );
+        return Map.ofEntries(Map.entry("drawingT", drawingT.get()));
       }
     };
   }
-
 }

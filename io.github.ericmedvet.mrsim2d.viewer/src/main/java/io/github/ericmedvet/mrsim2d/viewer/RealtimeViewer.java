@@ -1,9 +1,26 @@
+/*-
+ * ========================LICENSE_START=================================
+ * mrsim2d-viewer
+ * %%
+ * Copyright (C) 2020 - 2023 Eric Medvet
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 
 package io.github.ericmedvet.mrsim2d.viewer;
 
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.time.Duration;
@@ -11,11 +28,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.swing.*;
+
 public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
-  private final static long WAIT_MILLIS = 10;
-  private final static double FRAME_RATE = 24;
-  private final static int INIT_WIN_WIDTH = 1000;
-  private final static int INIT_WIN_HEIGHT = 600;
+  private static final long WAIT_MILLIS = 10;
+  private static final double FRAME_RATE = 24;
+  private static final int INIT_WIN_WIDTH = 1000;
+  private static final int INIT_WIN_HEIGHT = 600;
 
   private final double frameRate;
   private final Drawer drawer;
@@ -32,7 +51,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     super("Realtime simulation viewer");
     this.frameRate = frameRate;
     this.drawer = drawer;
-    //create/set ui components
+    // create/set ui components
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     Dimension dimension = new Dimension(INIT_WIN_WIDTH, INIT_WIN_HEIGHT);
     canvas = new Canvas();
@@ -43,14 +62,15 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     pauseButton = new JButton();
     pauseButton.setText("Pause");
     isPaused = false;
-    pauseButton.addActionListener(e -> {
-      isPaused = !isPaused;
-      pauseButton.setText(isPaused ? "Unpause" : "Pause");
-    });
+    pauseButton.addActionListener(
+        e -> {
+          isPaused = !isPaused;
+          pauseButton.setText(isPaused ? "Unpause" : "Pause");
+        });
     getContentPane().add(pauseButton, BorderLayout.PAGE_END);
-    //pack
+    // pack
     pack();
-    //start
+    // start
     setVisible(true);
     canvas.setIgnoreRepaint(true);
     canvas.createBufferStrategy(2);
@@ -70,26 +90,28 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     }
     snapshots.add(snapshot);
     if (snapshot.t() - lastDrawnT >= 1d / frameRate) {
-      //wait
+      // wait
       while (true) {
-        double currentWallTime = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
-        if (isPaused || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
+        double currentWallTime =
+            Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
+        if (isPaused
+            || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
           try {
             Thread.sleep(WAIT_MILLIS);
           } catch (InterruptedException e) {
-            //ignore
+            // ignore
           }
         } else {
           break;
         }
       }
       Instant drawingTimeStart = Instant.now();
-      //get graphics
+      // get graphics
       Graphics2D g = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
       g.setClip(0, 0, canvas.getWidth(), canvas.getHeight());
-      //draw
+      // draw
       drawer.draw(snapshots, g);
-      //dispose and encode
+      // dispose and encode
       g.dispose();
       BufferStrategy strategy = canvas.getBufferStrategy();
       if (!strategy.contentsLost()) {
@@ -97,7 +119,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
       }
       Toolkit.getDefaultToolkit().sync();
       lastDrawingMillis = Duration.between(drawingTimeStart, Instant.now()).toMillis();
-      //update time
+      // update time
       lastDrawnT = snapshot.t();
       snapshots.clear();
     }
