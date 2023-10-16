@@ -10,10 +10,6 @@ import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import java.awt.*;
 import java.util.SortedMap;
 import java.util.function.Function;
-
-/**
- * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
- */
 public class LinePlotter extends AbstractMemoryDrawer<Double> {
   private final String format;
 

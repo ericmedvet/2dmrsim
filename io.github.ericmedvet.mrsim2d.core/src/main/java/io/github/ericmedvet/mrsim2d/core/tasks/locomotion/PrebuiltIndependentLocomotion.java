@@ -26,10 +26,6 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-/**
- * @author "Eric Medvet" on 2023/01/21 for 2dmrsim
- */
 public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractIndependentVoxel>, Outcome<AgentsObservation>> {
 
   private final double duration;

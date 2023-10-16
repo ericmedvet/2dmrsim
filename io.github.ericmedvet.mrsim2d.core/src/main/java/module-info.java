@@ -1,6 +1,3 @@
-/**
- * @author "Eric Medvet" on 2022/08/28 for 2dmrsim
- */
 
 module io.github.ericmedvet.mrsim2d.core {
   requires java.logging;

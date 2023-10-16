@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
-
-/**
- * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
- */
 public class EmbodiedAgentsExtractor implements Function<Snapshot, List<Snapshot>> {
 
   private final List<EmbodiedAgent> agents;

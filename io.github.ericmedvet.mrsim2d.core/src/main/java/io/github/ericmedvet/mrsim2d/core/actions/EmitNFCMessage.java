@@ -5,10 +5,6 @@ import io.github.ericmedvet.mrsim2d.core.NFCMessage;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-
-/**
- * @author "Eric Medvet" on 2023/01/21 for 2dmrsim
- */
 public record EmitNFCMessage(
     Body body,
     Point displacement,

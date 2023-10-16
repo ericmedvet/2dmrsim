@@ -27,10 +27,6 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-
-/**
- * @author "Eric Medvet" on 2022/12/27 for 2dmrsim
- */
 public class JointTester {
   private final static Logger L = Logger.getLogger(JointTester.class.getName());
 

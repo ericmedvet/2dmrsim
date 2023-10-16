@@ -8,10 +8,6 @@ import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 
 import java.awt.*;
 import java.util.List;
-
-/**
- * @author "Eric Medvet" on 2023/01/21 for 2dmrsim
- */
 public class NFCDrawer implements Drawer {
   private final static Color[] COLORS = new Color[]{
       DrawingUtils.alphaed(Color.PINK, 0.5f),

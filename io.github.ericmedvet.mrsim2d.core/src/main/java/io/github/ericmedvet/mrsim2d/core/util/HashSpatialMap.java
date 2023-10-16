@@ -3,10 +3,6 @@ package io.github.ericmedvet.mrsim2d.core.util;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
 import java.util.*;
-
-/**
- * @author "Eric Medvet" on 2023/01/21 for 2dmrsim
- */
 public class HashSpatialMap<T> implements SpatialMap<T> {
 
   private final double cellSize;

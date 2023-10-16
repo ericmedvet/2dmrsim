@@ -8,10 +8,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
-
-/**
- * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
- */
 public class FirstAgentVelocityExtractor implements Function<Snapshot, Optional<Point>> {
   private final double windowT;
   private final SortedMap<Double, Point> memory;
