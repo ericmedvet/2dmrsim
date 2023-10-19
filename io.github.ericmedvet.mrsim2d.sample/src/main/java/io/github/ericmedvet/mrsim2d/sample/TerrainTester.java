@@ -23,7 +23,6 @@ package io.github.ericmedvet.mrsim2d.sample;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
-import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
@@ -59,7 +58,7 @@ public class TerrainTester {
   }
 
   public static void main(String[] args) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare engine
     Supplier<Engine> engineSupplier =
         () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();

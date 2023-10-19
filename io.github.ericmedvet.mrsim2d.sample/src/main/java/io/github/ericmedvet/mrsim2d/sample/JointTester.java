@@ -21,7 +21,6 @@ package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
-import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
@@ -176,7 +175,7 @@ public class JointTester {
 
   private static void doSingle(
       double duration, double freq, double load, Type type, boolean obstacle) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
     Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true)")).apply("test");
