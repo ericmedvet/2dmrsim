@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -29,7 +30,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
+@Discoverable(prefixTemplate = "sim|s.agent|a.vsr.sensorizingFunction|sf")
 public class VSRSensorizingFunctions {
+  private VSRSensorizingFunctions() {}
 
   @SuppressWarnings("unused")
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> directional(

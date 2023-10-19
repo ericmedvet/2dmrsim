@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
@@ -32,6 +33,7 @@ import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.StandPiling;
 import java.util.random.RandomGenerator;
 
+@Discoverable(prefixTemplate = "sim|s.task")
 public class Tasks {
   private Tasks() {}
 

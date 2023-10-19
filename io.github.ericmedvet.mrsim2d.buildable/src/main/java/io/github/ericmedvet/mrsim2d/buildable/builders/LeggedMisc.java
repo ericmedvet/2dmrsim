@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -30,6 +31,7 @@ import io.github.ericmedvet.mrsim2d.core.agents.legged.LegChunk;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 import java.util.List;
 
+@Discoverable(prefixTemplate = "sim|s.agent|a.legged|l")
 public class LeggedMisc {
   protected static final double RIGID_DENSITY = 1d;
   protected static final double LEG_CHUNK_LENGTH = 1.05d;

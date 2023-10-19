@@ -19,11 +19,13 @@
  */
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.tasks.balancing.BalancingOutcome;
 import java.util.function.Function;
 
+@Discoverable(prefixTemplate = "sim|s.task.balancing|b")
 public class BalancingOutcomeFunctions {
 
   private BalancingOutcomeFunctions() {}

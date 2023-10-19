@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
@@ -27,9 +28,10 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 
+@Discoverable(prefixTemplate = "sim|s.sensors|s")
 public class Sensors {
 
-  public Sensors() {}
+  private Sensors() {}
 
   @SuppressWarnings("unused")
   public static Sensor<Body> a() {

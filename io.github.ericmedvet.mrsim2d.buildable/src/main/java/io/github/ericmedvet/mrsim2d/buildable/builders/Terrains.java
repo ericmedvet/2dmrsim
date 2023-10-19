@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
@@ -27,6 +28,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
+@Discoverable(prefixTemplate = "sim|s.terrain|t")
 public class Terrains {
   public static final double BORDER_H = 100d;
   public static final double W = 500d;
@@ -35,6 +37,8 @@ public class Terrains {
   public static final double CHUNK_H = 0.75d;
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
+
+  private Terrains() {}
 
   @SuppressWarnings("unused")
   public static Terrain downhill(

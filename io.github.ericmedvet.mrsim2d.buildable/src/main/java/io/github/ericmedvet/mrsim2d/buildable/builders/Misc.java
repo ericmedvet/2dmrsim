@@ -20,10 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
-import io.github.ericmedvet.jnb.core.NamedBuilder;
-import io.github.ericmedvet.jnb.core.NamedParamMap;
-import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jnb.core.ParamMap;
+import io.github.ericmedvet.jnb.core.*;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
@@ -44,6 +41,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
+@Discoverable(prefixTemplate = "sim|s")
 public class Misc {
 
   private Misc() {}

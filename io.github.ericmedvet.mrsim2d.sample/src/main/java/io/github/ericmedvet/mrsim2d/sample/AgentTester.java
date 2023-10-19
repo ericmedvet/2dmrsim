@@ -24,7 +24,6 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
-import io.github.ericmedvet.mrsim2d.buildable.PreparedNamedBuilder;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
@@ -54,7 +53,7 @@ public class AgentTester {
       "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
 
   public static void main(String[] args) {
-    NamedBuilder<Object> nb = PreparedNamedBuilder.get();
+    NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
     Drawer drawer =

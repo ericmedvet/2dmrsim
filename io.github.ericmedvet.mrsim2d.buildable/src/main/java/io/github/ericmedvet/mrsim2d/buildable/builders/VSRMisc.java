@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -28,6 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import java.util.List;
 import java.util.function.Function;
 
+@Discoverable(prefixTemplate = "sim|s.agent|a.vsr")
 public class VSRMisc {
   private VSRMisc() {}
 

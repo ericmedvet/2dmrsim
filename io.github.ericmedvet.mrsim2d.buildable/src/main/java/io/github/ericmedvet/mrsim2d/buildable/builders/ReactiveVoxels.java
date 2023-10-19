@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
@@ -35,6 +36,7 @@ import io.github.ericmedvet.mrsim2d.core.util.Pair;
 import java.util.List;
 import java.util.function.BiFunction;
 
+@Discoverable(prefixTemplate = "sim|s.agent|a.vsr.reactiveVoxel|rv")
 public class ReactiveVoxels {
 
   public enum Action {
@@ -64,6 +66,7 @@ public class ReactiveVoxels {
         nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t))));
   }
 
+  @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel aa(
       @Param(value = "angle", dD = 0d) double a,
       @Param(value = "action", dS = "expand") Action action) {

@@ -27,7 +27,7 @@ import java.util.List;
 public class PreparedNamedBuilder {
   private static final NamedBuilder<Object> NB =
       NamedBuilder.empty()
-          .and(io.github.ericmedvet.jsdynsym.buildable.PreparedNamedBuilder.get())
+          // .and(io.github.ericmedvet.jsdynsym.buildable.PreparedNamedBuilder.get())
           .and(
               List.of("sim", "s"),
               NamedBuilder.empty()
