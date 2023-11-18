@@ -32,8 +32,7 @@ public class ComponentsDrawer implements Drawer {
   private final List<ComponentDrawer> componentDrawers;
   private final Function<Snapshot, Collection<?>> extractor;
 
-  public ComponentsDrawer(
-      List<ComponentDrawer> componentDrawers, Function<Snapshot, Collection<?>> extractor) {
+  public ComponentsDrawer(List<ComponentDrawer> componentDrawers, Function<Snapshot, Collection<?>> extractor) {
     this.componentDrawers = componentDrawers;
     this.extractor = extractor;
   }

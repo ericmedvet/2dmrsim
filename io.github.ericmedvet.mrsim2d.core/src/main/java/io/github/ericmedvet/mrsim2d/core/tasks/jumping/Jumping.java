@@ -63,32 +63,28 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObse
 
   @Override
   public Outcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier,
-      Engine engine,
-      Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
     Terrain terrain =
-        Terrain.fromPath(
-            new Path(new Point(TERRAIN_W, 0)), TERRAIN_H, TERRAIN_BORDER_W, TERRAIN_BORDER_H);
+        Terrain.fromPath(new Path(new Point(TERRAIN_W, 0)), TERRAIN_H, TERRAIN_BORDER_W, TERRAIN_BORDER_H);
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // place agent
     engine.perform(new AddAgent(embodiedAgent));
     BoundingBox agentBB = embodiedAgent.boundingBox();
-    engine.perform(
-        new TranslateAgent(
-            embodiedAgent,
-            new Point(
-                terrain.withinBordersXRange().min()
-                    + terrain.withinBordersXRange().extent() / 2d
-                    - agentBB.min().x()
-                    + agentBB.xRange().extent() / 2d,
-                0)));
+    engine.perform(new TranslateAgent(
+        embodiedAgent,
+        new Point(
+            terrain.withinBordersXRange().min()
+                + terrain.withinBordersXRange().extent() / 2d
+                - agentBB.min().x()
+                + agentBB.xRange().extent() / 2d,
+            0)));
     agentBB = embodiedAgent.boundingBox();
     double maxY = terrain.maxHeightAt(agentBB.xRange());
-    engine.perform(
-        new TranslateAgent(embodiedAgent, new Point(0, maxY + initialYGap - agentBB.min().y())));
+    engine.perform(new TranslateAgent(
+        embodiedAgent, new Point(0, maxY + initialYGap - agentBB.min().y())));
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
@@ -96,12 +92,11 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObse
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(
-              List.of(
-                  new AgentsObservation.Agent(
-                      embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
-                      PolyUtils.maxYAtX(
-                          terrain.poly(), embodiedAgent.boundingBox().center().x())))));
+          new AgentsObservation(List.of(new AgentsObservation.Agent(
+              embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
+              PolyUtils.maxYAtX(
+                  terrain.poly(),
+                  embodiedAgent.boundingBox().center().x())))));
     }
     // return
     return new Outcome<>(new TreeMap<>(observations));

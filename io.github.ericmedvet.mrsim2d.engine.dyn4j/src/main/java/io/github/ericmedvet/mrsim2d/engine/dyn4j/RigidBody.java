@@ -32,8 +32,7 @@ import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
-public class RigidBody
-    implements io.github.ericmedvet.mrsim2d.core.bodies.RigidBody, MultipartBody {
+public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.RigidBody, MultipartBody {
 
   private final Body body;
   private final double mass;
@@ -63,9 +62,7 @@ public class RigidBody
         double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
         for (double i = 0; i < nOfAnchors; i = i + 1) {
           Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
-          Point aP =
-              sidePoint.sum(
-                  new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+          Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
           localAnchors.add(new BodyAnchor(body, aP, this));
         }
       }
@@ -99,15 +96,13 @@ public class RigidBody
   @Override
   public Poly poly() {
     Transform t = body.getTransform();
-    return new Poly(
-        Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
-            .map(
-                v -> {
-                  Vector2 cv = v.copy();
-                  t.transform(cv);
-                  return Utils.point(cv);
-                })
-            .toArray(Point[]::new));
+    return new Poly(Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
+        .map(v -> {
+          Vector2 cv = v.copy();
+          t.transform(cv);
+          return Utils.point(cv);
+        })
+        .toArray(Point[]::new));
   }
 
   @Override
@@ -123,8 +118,7 @@ public class RigidBody
   private Vector2 getFirstSideDirection() {
     Poly poly = poly();
     return new Vector2(
-        poly.vertexes()[1].x() - poly.vertexes()[0].x(),
-        poly.vertexes()[1].y() - poly.vertexes()[0].y());
+        poly.vertexes()[1].x() - poly.vertexes()[0].x(), poly.vertexes()[1].y() - poly.vertexes()[0].y());
   }
 
   @Override

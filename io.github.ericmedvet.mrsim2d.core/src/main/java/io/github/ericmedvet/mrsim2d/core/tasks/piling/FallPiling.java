@@ -80,44 +80,39 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
       RandomGenerator randomGenerator,
       Terrain terrain,
       double yGapRatio) {
-    this(
-        duration, fallInterval, nOfAgents, xSigmaRatio, randomGenerator, terrain, yGapRatio, X_GAP);
+    this(duration, fallInterval, nOfAgents, xSigmaRatio, randomGenerator, terrain, yGapRatio, X_GAP);
   }
 
   private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
     BoundingBox agentBB = agent.boundingBox();
-    DoubleRange xRange =
-        new DoubleRange(-agentBB.width() / 2d, agentBB.width() / 2d)
-            .delta(terrain.withinBordersXRange().min() + xGap);
+    DoubleRange xRange = new DoubleRange(-agentBB.width() / 2d, agentBB.width() / 2d)
+        .delta(terrain.withinBordersXRange().min() + xGap);
     double baseY;
     if (agents.isEmpty()) {
       baseY = terrain.maxHeightAt(xRange);
     } else {
-      baseY =
-          agents.stream()
-              .map(EmbodiedAgent::boundingBox)
-              .filter(b -> xRange.overlaps(new DoubleRange(b.min().x(), b.max().x())))
-              .mapToDouble(b -> b.max().y())
-              .max()
-              .orElse(0d);
+      baseY = agents.stream()
+          .map(EmbodiedAgent::boundingBox)
+          .filter(b ->
+              xRange.overlaps(new DoubleRange(b.min().x(), b.max().x())))
+          .mapToDouble(b -> b.max().y())
+          .max()
+          .orElse(0d);
     }
     baseY = baseY + agentBB.height() * yGapRatio;
-    engine.perform(
-        new TranslateAgent(
-            agent,
-            new Point(
-                xRange.min()
-                    + xRange.extent() / 2d
-                    + randomGenerator.nextGaussian(0d, xSigmaRatio * agentBB.width())
-                    - agentBB.min().x(),
-                baseY - agentBB.min().y())));
+    engine.perform(new TranslateAgent(
+        agent,
+        new Point(
+            xRange.min()
+                + xRange.extent() / 2d
+                + randomGenerator.nextGaussian(0d, xSigmaRatio * agentBB.width())
+                - agentBB.min().x(),
+            baseY - agentBB.min().y())));
   }
 
   @Override
   public Outcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier,
-      Engine engine,
-      Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // run for defined time
@@ -136,14 +131,13 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(
-              agents.stream()
-                  .map(
-                      a ->
-                          new AgentsObservation.Agent(
-                              a.bodyParts().stream().map(Body::poly).toList(),
-                              PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())))
-                  .toList()));
+          new AgentsObservation(agents.stream()
+              .map(a -> new AgentsObservation.Agent(
+                  a.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(
+                      terrain.poly(),
+                      a.boundingBox().center().x())))
+              .toList()));
     }
     return new Outcome<>(new TreeMap<>(observations));
   }

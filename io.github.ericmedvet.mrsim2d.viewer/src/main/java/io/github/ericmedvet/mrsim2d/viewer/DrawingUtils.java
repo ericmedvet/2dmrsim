@@ -53,10 +53,7 @@ public class DrawingUtils {
 
   public static Color alphaed(Color color, float alpha) {
     return new Color(
-        (float) color.getRed() / 255f,
-        (float) color.getGreen() / 255f,
-        (float) color.getBlue() / 255f,
-        alpha);
+        (float) color.getRed() / 255f, (float) color.getGreen() / 255f, (float) color.getBlue() / 255f, alpha);
   }
 
   public static void drawFilledBar(
@@ -87,16 +84,8 @@ public class DrawingUtils {
   }
 
   public static void drawFilledBar(
-      double x,
-      double y,
-      double w,
-      double h,
-      double value,
-      DoubleRange range,
-      String format,
-      Graphics2D g) {
-    drawFilledBar(
-        x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
+      double x, double y, double w, double h, double value, DoubleRange range, String format, Graphics2D g) {
+    drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
   }
 
   public static void drawLine(Graphics2D g, Point src, Point dst) {
@@ -135,8 +124,7 @@ public class DrawingUtils {
     return new Color(r, g, b, a);
   }
 
-  public static Color linear(
-      final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
+  public static Color linear(final Color c1, final Color c2, final Color c3, float x1, float x2, float x3, float x) {
     if (x < x2) {
       return linear(c1, c2, x1, x2, x);
     }

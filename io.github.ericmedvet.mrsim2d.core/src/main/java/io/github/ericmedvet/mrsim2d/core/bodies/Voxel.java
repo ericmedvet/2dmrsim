@@ -69,9 +69,7 @@ public interface Voxel extends SoftBody, Anchorable {
     static DoubleRange AREA_RATIO_RANGE = new DoubleRange(0.8, 1.2);
 
     public Material(double softness, double areaRatioRangeDelta) {
-      this(
-          softness,
-          new DoubleRange(1 - Math.abs(areaRatioRangeDelta), 1 + Math.abs(areaRatioRangeDelta)));
+      this(softness, new DoubleRange(1 - Math.abs(areaRatioRangeDelta), 1 + Math.abs(areaRatioRangeDelta)));
     }
 
     public Material() {

@@ -31,8 +31,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import java.util.Collection;
 import java.util.List;
 
-public record SenseSideAttachment(Voxel.Side side, Voxel body)
-    implements Sense<Voxel>, SelfDescribedAction<Double> {
+public record SenseSideAttachment(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
 
   @Override
   public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
@@ -42,16 +41,17 @@ public record SenseSideAttachment(Voxel.Side side, Voxel body)
       return 0d;
     }
     // find "most attached" other body
-    List<Anchorable> anchorables =
-        anchors.stream().map(Anchor::attachedAnchorables).flatMap(Collection::stream).toList();
+    List<Anchorable> anchorables = anchors.stream()
+        .map(Anchor::attachedAnchorables)
+        .flatMap(Collection::stream)
+        .toList();
     if (anchorables.isEmpty()) {
       return 0d;
     }
-    long maxAttachedAnchorsOfSameBody =
-        anchorables.stream()
-            .mapToLong(b -> anchors.stream().filter(a -> a.isAnchoredTo(b)).count())
-            .max()
-            .orElse(0);
+    long maxAttachedAnchorsOfSameBody = anchorables.stream()
+        .mapToLong(b -> anchors.stream().filter(a -> a.isAnchoredTo(b)).count())
+        .max()
+        .orElse(0);
     // return
     return (double) maxAttachedAnchorsOfSameBody / (double) anchors.size();
   }

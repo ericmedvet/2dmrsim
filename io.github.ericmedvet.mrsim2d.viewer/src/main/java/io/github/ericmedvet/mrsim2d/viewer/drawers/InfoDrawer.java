@@ -98,8 +98,10 @@ public class InfoDrawer implements Drawer {
     // write
     g.setFont(DrawingUtils.FONT);
     String[] lines = sb.toString().split(String.format("%n"));
-    double bbW =
-        Arrays.stream(lines).mapToDouble(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0d);
+    double bbW = Arrays.stream(lines)
+        .mapToDouble(s -> g.getFontMetrics().stringWidth(s))
+        .max()
+        .orElse(0d);
     double bbH = lines.length * g.getFontMetrics().getHeight();
     double x =
         switch (horizontalPosition) {

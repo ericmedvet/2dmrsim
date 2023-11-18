@@ -71,33 +71,29 @@ public class Drawers {
   public static Drawer miniWorld() {
     return Drawer.transform(
         new AllAgentsFramer(10d).largest(2d),
-        Drawer.of(
-            new ComponentsDrawer(
-                    List.of(
-                        new UnmovableBodyDrawer(),
-                        new RotationalJointDrawer(),
-                        new SoftBodyDrawer(),
-                        new RigidBodyDrawer()),
-                    Snapshot::bodies)
-                .onLastSnapshot()));
+        Drawer.of(new ComponentsDrawer(
+                List.of(
+                    new UnmovableBodyDrawer(),
+                    new RotationalJointDrawer(),
+                    new SoftBodyDrawer(),
+                    new RigidBodyDrawer()),
+                Snapshot::bodies)
+            .onLastSnapshot()));
   }
 
   public static Drawer simpleAgent() {
     return Drawer.transform(
         new AllAgentsFramer(1.1d).largest(2d),
-        Drawer.of(
-            new ComponentsDrawer(
-                    List.of(
-                        new RotationalJointDrawer(), new SoftBodyDrawer(), new RigidBodyDrawer()),
-                    Snapshot::bodies)
-                .onLastSnapshot()));
+        Drawer.of(new ComponentsDrawer(
+                List.of(new RotationalJointDrawer(), new SoftBodyDrawer(), new RigidBodyDrawer()),
+                Snapshot::bodies)
+            .onLastSnapshot()));
   }
 
   public static Drawer simpleAgentWithBrainsIO() {
     return Drawer.of(
         Drawer.clip(new BoundingBox(new Point(0, 0), new Point(0.30, 1)), simpleAgent()),
-        Drawer.clip(
-            new BoundingBox(new Point(0.30, 0), new Point(1, 1)), new NumMultiBrainedIODrawer()));
+        Drawer.clip(new BoundingBox(new Point(0.30, 0), new Point(1, 1)), new NumMultiBrainedIODrawer()));
   }
 
   public static Drawer simpleAgentWithVelocities() {

@@ -27,8 +27,7 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 
 public class SenseDistanceToBody
-    extends AbstractActionComponentDrawer<
-        io.github.ericmedvet.mrsim2d.core.actions.SenseDistanceToBody, Double> {
+    extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.SenseDistanceToBody, Double> {
 
   private static final Color COLOR = Color.RED;
 
@@ -54,17 +53,14 @@ public class SenseDistanceToBody
     g.setColor(color);
     Point src = ao.action().body().poly().center();
     Point dst =
-        src.sum(
-            new Point(ao.action().direction() + ao.action().body().angle())
-                .scale(ao.action().distanceRange()));
+        src.sum(new Point(ao.action().direction() + ao.action().body().angle())
+            .scale(ao.action().distanceRange()));
     DrawingUtils.drawLine(g, src, dst);
     // draw circle
     Point target =
-        src.sum(
-            new Point(ao.action().direction() + ao.action().body().angle())
-                .scale(ao.outcome().orElse(ao.action().distanceRange())));
-    g.draw(
-        new Ellipse2D.Double(target.x() - RADIUS / 2d, target.y() - RADIUS / 2d, RADIUS, RADIUS));
+        src.sum(new Point(ao.action().direction() + ao.action().body().angle())
+            .scale(ao.outcome().orElse(ao.action().distanceRange())));
+    g.draw(new Ellipse2D.Double(target.x() - RADIUS / 2d, target.y() - RADIUS / 2d, RADIUS, RADIUS));
     return true;
   }
 }

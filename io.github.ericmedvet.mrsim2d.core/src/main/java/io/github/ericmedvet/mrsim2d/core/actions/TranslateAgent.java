@@ -27,8 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record TranslateAgent(EmbodiedAgent agent, Point translation)
-    implements SelfDescribedAction<EmbodiedAgent> {
+public record TranslateAgent(EmbodiedAgent agent, Point translation) implements SelfDescribedAction<EmbodiedAgent> {
   @Override
   public EmbodiedAgent perform(ActionPerformer performer, Agent agent) throws ActionException {
     agent().bodyParts().forEach(b -> performer.perform(new TranslateBody(b, translation), agent));

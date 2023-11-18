@@ -33,10 +33,13 @@ public record DetachAnchorFromAnchorable(Anchor anchor, Anchorable anchorable)
   @Override
   public Anchor.Link perform(ActionPerformer performer, Agent agent) throws ActionException {
     // find anchor
-    Optional<Anchor.Link> optionalLink =
-        anchor.links().stream().filter(l -> l.destination().anchorable() == anchorable).findFirst();
+    Optional<Anchor.Link> optionalLink = anchor.links().stream()
+        .filter(l -> l.destination().anchorable() == anchorable)
+        .findFirst();
     return optionalLink
-        .flatMap(l -> performer.perform(new RemoveLink(optionalLink.get()), agent).outcome())
+        .flatMap(l -> performer
+            .perform(new RemoveLink(optionalLink.get()), agent)
+            .outcome())
         .orElse(null);
   }
 }

@@ -33,14 +33,11 @@ public record DetachAnchorsFromAnchorable(Anchorable sourceAnchorable, Anchorabl
     implements SelfDescribedAction<Collection<Anchor.Link>> {
 
   @Override
-  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent)
-      throws ActionException {
+  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) throws ActionException {
     return sourceAnchorable.anchors().stream()
-        .map(
-            a ->
-                performer
-                    .perform(new DetachAnchorFromAnchorable(a, targetAnchorable), agent)
-                    .outcome())
+        .map(a -> performer
+            .perform(new DetachAnchorFromAnchorable(a, targetAnchorable), agent)
+            .outcome())
         .filter(Optional::isPresent)
         .map(Optional::get)
         .toList();

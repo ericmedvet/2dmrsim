@@ -42,14 +42,13 @@ public class FirstAgentVelocityExtractor implements Function<Snapshot, Optional<
       return Optional.empty();
     }
     // add new sample
-    Point c =
-        snapshot.agents().stream()
-            .filter(a -> a instanceof EmbodiedAgent)
-            .map(a -> (EmbodiedAgent) a)
-            .findFirst()
-            .orElseThrow()
-            .boundingBox()
-            .center();
+    Point c = snapshot.agents().stream()
+        .filter(a -> a instanceof EmbodiedAgent)
+        .map(a -> (EmbodiedAgent) a)
+        .findFirst()
+        .orElseThrow()
+        .boundingBox()
+        .center();
     // update memory
     memory.put(snapshot.t(), c);
     memory.keySet().stream()

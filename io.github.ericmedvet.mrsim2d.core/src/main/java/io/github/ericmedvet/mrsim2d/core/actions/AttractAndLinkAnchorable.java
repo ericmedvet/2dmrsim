@@ -34,31 +34,25 @@ public record AttractAndLinkAnchorable(
     implements SelfDescribedAction<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {
 
   @Override
-  public Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> perform(
-      ActionPerformer performer, Agent agent) throws ActionException {
+  public Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> perform(ActionPerformer performer, Agent agent)
+      throws ActionException {
     // discard already attached
-    Collection<Anchor> srcAnchors =
-        anchors.stream()
-            .filter(
-                a ->
-                    a.links().stream()
-                        .map(l -> l.destination().anchorable())
-                        .filter(dst -> dst == anchorable)
-                        .toList()
-                        .isEmpty())
-            .toList();
+    Collection<Anchor> srcAnchors = anchors.stream()
+        .filter(a -> a.links().stream()
+            .map(l -> l.destination().anchorable())
+            .filter(dst -> dst == anchorable)
+            .toList()
+            .isEmpty())
+        .toList();
     // match anchor pairs
     Collection<Anchor> dstAnchors = new LinkedHashSet<>(anchorable.anchors());
     Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
-    srcAnchors.forEach(
-        src ->
-            dstAnchors.stream()
-                .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
-                .ifPresent(
-                    dstAnchor -> {
-                      pairs.add(new Pair<>(src, dstAnchor));
-                      dstAnchors.remove(dstAnchor);
-                    }));
+    srcAnchors.forEach(src -> dstAnchors.stream()
+        .min(Comparator.comparingDouble(a -> a.point().distance(src.point())))
+        .ifPresent(dstAnchor -> {
+          pairs.add(new Pair<>(src, dstAnchor));
+          dstAnchors.remove(dstAnchor);
+        }));
     // attract and link
     Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> map = new LinkedHashMap<>();
     for (Pair<Anchor, Anchor> pair : pairs) {

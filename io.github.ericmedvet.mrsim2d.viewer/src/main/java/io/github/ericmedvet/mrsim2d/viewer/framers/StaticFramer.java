@@ -39,11 +39,10 @@ public class StaticFramer extends AbstractFramer<Snapshot> {
   @Override
   protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
     if (initialBoundingBox == null) {
-      initialBoundingBox =
-          snapshot.bodies().stream()
-              .map(b -> b.poly().boundingBox())
-              .reduce(BoundingBox::enclosing)
-              .orElse(DEFAULT_BOUNDING_BOX);
+      initialBoundingBox = snapshot.bodies().stream()
+          .map(b -> b.poly().boundingBox())
+          .reduce(BoundingBox::enclosing)
+          .orElse(DEFAULT_BOUNDING_BOX);
     }
     return initialBoundingBox;
   }

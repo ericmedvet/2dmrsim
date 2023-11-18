@@ -69,20 +69,18 @@ public class Misc {
       @Param(value = "actions") boolean actions,
       @Param(value = "nfc") boolean nfc) {
     return s -> {
-      Drawer baseDrawer =
-          new ComponentsDrawer(
-                  List.of(
-                      new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                      new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-                      new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                      new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())),
-                  Snapshot::bodies)
-              .onLastSnapshot();
+      Drawer baseDrawer = new ComponentsDrawer(
+              List.of(
+                  new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                  new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
+                  new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
+                  new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())),
+              Snapshot::bodies)
+          .onLastSnapshot();
       Drawer nfcDrawer = new NFCDrawer();
-      Drawer actionsDrawer =
-          new ComponentsDrawer(
-              List.of(new AttractAnchor(), new SenseDistanceToBody(), new SenseRotatedVelocity()),
-              Snapshot::actionOutcomes);
+      Drawer actionsDrawer = new ComponentsDrawer(
+          List.of(new AttractAnchor(), new SenseDistanceToBody(), new SenseRotatedVelocity()),
+          Snapshot::actionOutcomes);
       List<Drawer> thingsDrawers = new ArrayList<>();
       thingsDrawers.add(baseDrawer);
       if (actions) {
@@ -91,48 +89,43 @@ public class Misc {
       if (nfc) {
         thingsDrawers.add(nfcDrawer);
       }
-      Drawer worldDrawer =
-          Drawer.transform(
-              new AllAgentsFramer(enlargement).largest(followTime),
-              Drawer.of(Collections.unmodifiableList(thingsDrawers)));
+      Drawer worldDrawer = Drawer.transform(
+          new AllAgentsFramer(enlargement).largest(followTime),
+          Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
-        drawers.add(
-            new StackedMultipliedDrawer<>(
-                switch (miniAgentInfo) {
-                  case BRAINS -> Drawers::simpleAgentWithBrainsIO;
-                  case VELOCITY -> Drawers::simpleAgentWithVelocities;
-                  default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
-                },
-                new EmbodiedAgentsExtractor(),
-                0.25,
-                0.05,
-                StackedMultipliedDrawer.Direction.VERTICAL,
-                Drawer.VerticalPosition.TOP,
-                Drawer.HorizontalPosition.RIGHT));
+        drawers.add(new StackedMultipliedDrawer<>(
+            switch (miniAgentInfo) {
+              case BRAINS -> Drawers::simpleAgentWithBrainsIO;
+              case VELOCITY -> Drawers::simpleAgentWithVelocities;
+              default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
+            },
+            new EmbodiedAgentsExtractor(),
+            0.25,
+            0.05,
+            StackedMultipliedDrawer.Direction.VERTICAL,
+            Drawer.VerticalPosition.TOP,
+            Drawer.HorizontalPosition.RIGHT));
       }
       if (miniWorld) {
-        drawers.add(
-            Drawer.clip(
-                new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
-                Drawer.of(
-                    Drawer.clear(),
-                    Drawer.transform(
-                        new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
-                        Drawer.of(
-                            new ComponentsDrawer(
-                                    List.of(
-                                        new UnmovableBodyDrawer(),
-                                        new RotationalJointDrawer(),
-                                        new SoftBodyDrawer(),
-                                        new RigidBodyDrawer()),
-                                    Snapshot::bodies)
-                                .onLastSnapshot())))));
+        drawers.add(Drawer.clip(
+            new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
+            Drawer.of(
+                Drawer.clear(),
+                Drawer.transform(
+                    new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
+                    Drawer.of(new ComponentsDrawer(
+                            List.of(
+                                new UnmovableBodyDrawer(),
+                                new RotationalJointDrawer(),
+                                new SoftBodyDrawer(),
+                                new RigidBodyDrawer()),
+                            Snapshot::bodies)
+                        .onLastSnapshot())))));
       }
       if (engineProfiling) {
-        drawers.add(
-            new EngineProfilingDrawer(
-                profilingTime, Drawer.VerticalPosition.BOTTOM, Drawer.HorizontalPosition.LEFT));
+        drawers.add(new EngineProfilingDrawer(
+            profilingTime, Drawer.VerticalPosition.BOTTOM, Drawer.HorizontalPosition.LEFT));
       }
       drawers.add(new InfoDrawer(s));
       return Drawer.of(Collections.unmodifiableList(drawers));

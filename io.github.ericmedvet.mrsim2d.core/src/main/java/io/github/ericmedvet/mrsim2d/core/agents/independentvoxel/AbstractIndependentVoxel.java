@@ -40,8 +40,7 @@ public abstract class AbstractIndependentVoxel implements EmbodiedAgent {
 
   protected Voxel voxel;
 
-  public AbstractIndependentVoxel(
-      Voxel.Material material, double voxelSideLength, double voxelMass) {
+  public AbstractIndependentVoxel(Voxel.Material material, double voxelSideLength, double voxelMass) {
     this.material = material;
     this.voxelSideLength = voxelSideLength;
     this.voxelMass = voxelMass;

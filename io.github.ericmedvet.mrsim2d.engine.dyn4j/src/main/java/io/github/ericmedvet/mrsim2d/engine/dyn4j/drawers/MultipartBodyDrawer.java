@@ -62,12 +62,11 @@ public class MultipartBodyDrawer extends AbstractComponentDrawer<Body> {
             for (int i = 0; i < polygon.getVertices().length; i++) {
               Vector2 tV = polygon.getVertices()[i].copy();
               trans.transform(tV);
-              g.fill(
-                  new Ellipse2D.Double(
-                      tV.x - VERTEX_DOT_RADIUS,
-                      tV.y - VERTEX_DOT_RADIUS,
-                      VERTEX_DOT_RADIUS * 2d,
-                      VERTEX_DOT_RADIUS * 2d));
+              g.fill(new Ellipse2D.Double(
+                  tV.x - VERTEX_DOT_RADIUS,
+                  tV.y - VERTEX_DOT_RADIUS,
+                  VERTEX_DOT_RADIUS * 2d,
+                  VERTEX_DOT_RADIUS * 2d));
               if (i == 0) {
                 path.moveTo(tV.x, tV.y);
               } else {

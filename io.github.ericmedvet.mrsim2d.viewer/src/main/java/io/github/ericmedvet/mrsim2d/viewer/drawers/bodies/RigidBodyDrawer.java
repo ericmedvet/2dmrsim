@@ -58,8 +58,7 @@ public class RigidBodyDrawer extends AbstractComponentDrawer<RigidBody> {
     // plot angle
     Point center = poly.center();
     Point firstSideMeanPoint = poly.sides().get(0).center();
-    g.draw(
-        new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
+    g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
     return true;
   }
 }

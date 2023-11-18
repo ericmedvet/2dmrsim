@@ -41,8 +41,7 @@ public record BoundingBox(Point min, Point max) implements Shape {
     return Arrays.stream(boxes)
         .sequential()
         .reduce((b1, b2) -> new BoundingBox(Point.min(b1.min, b2.min), Point.max(b1.max, b2.max)))
-        .orElseThrow(
-            () -> new IllegalArgumentException("There has to be at least one bounding box"));
+        .orElseThrow(() -> new IllegalArgumentException("There has to be at least one bounding box"));
   }
 
   @Override

@@ -120,8 +120,7 @@ public class Outcome<O extends AgentsObservation> {
   }
 
   public double firstAgentXDistance() {
-    return get(Aggregate.FINAL, Metric.X, Subject.FIRST)
-        - get(Aggregate.INITIAL, Metric.X, Subject.FIRST);
+    return get(Aggregate.FINAL, Metric.X, Subject.FIRST) - get(Aggregate.INITIAL, Metric.X, Subject.FIRST);
   }
 
   public double firstAgentXVelocity() {
@@ -129,30 +128,27 @@ public class Outcome<O extends AgentsObservation> {
   }
 
   public double firstAgentMaxRelativeJumpHeight() {
-    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST)
-        / get(Aggregate.AVERAGE, Metric.BB_H, Subject.FIRST);
+    return get(Aggregate.MAX, Metric.BB_MIN_Y, Subject.FIRST) / get(Aggregate.AVERAGE, Metric.BB_H, Subject.FIRST);
   }
 
   private double get(Aggregate aggregate, Metric metric, Subject subject) {
     Double value = metricMap.get(new Key(metric, aggregate, subject));
     if (value == null) {
-      value =
-          switch (aggregate) {
-            case FINAL -> get(metric, subject, observations.get(observations.lastKey()));
-            case INITIAL -> get(metric, subject, observations.get(observations.firstKey()));
-            case AVERAGE -> observations.values().stream()
-                .mapToDouble(o -> get(metric, subject, o))
-                .average()
-                .orElse(0d);
-            case MIN -> observations.values().stream()
-                .mapToDouble(o -> get(metric, subject, o))
-                .min()
-                .orElse(0d);
-            case MAX -> observations.values().stream()
-                .mapToDouble(o -> get(metric, subject, o))
-                .max()
-                .orElse(0d);
-          };
+      value = switch (aggregate) {
+        case FINAL -> get(metric, subject, observations.get(observations.lastKey()));
+        case INITIAL -> get(metric, subject, observations.get(observations.firstKey()));
+        case AVERAGE -> observations.values().stream()
+            .mapToDouble(o -> get(metric, subject, o))
+            .average()
+            .orElse(0d);
+        case MIN -> observations.values().stream()
+            .mapToDouble(o -> get(metric, subject, o))
+            .min()
+            .orElse(0d);
+        case MAX -> observations.values().stream()
+            .mapToDouble(o -> get(metric, subject, o))
+            .max()
+            .orElse(0d);};
       metricMap.put(new Key(metric, aggregate, subject), value);
     }
     return value;
@@ -172,10 +168,11 @@ public class Outcome<O extends AgentsObservation> {
               - observation.getAgents().get(0).terrainHeight();
         } else {
           yield observation.getAgents().stream()
-              .mapToDouble(
-                  a ->
-                      Point.average(a.polies().stream().map(Poly::center).toArray(Point[]::new)).y()
-                          - a.terrainHeight())
+              .mapToDouble(a -> Point.average(a.polies().stream()
+                          .map(Poly::center)
+                          .toArray(Point[]::new))
+                      .y()
+                  - a.terrainHeight())
               .average()
               .orElse(0d);
         }

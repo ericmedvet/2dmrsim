@@ -51,12 +51,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome<Agents
   private final double initialYGap;
 
   public StandPiling(
-      double duration,
-      int nOfAgents,
-      double xGapRatio,
-      Terrain terrain,
-      double firstXGap,
-      double initialYGap) {
+      double duration, int nOfAgents, double xGapRatio, Terrain terrain, double firstXGap, double initialYGap) {
     this.duration = duration;
     this.nOfAgents = nOfAgents;
     this.xGapRatio = xGapRatio;
@@ -70,27 +65,23 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome<Agents
   }
 
   private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
-    double baseX =
-        agents.stream()
-            .mapToDouble(a -> a.boundingBox().max().x())
-            .max()
-            .orElse(terrain.withinBordersXRange().min() + firstXGap);
+    double baseX = agents.stream()
+        .mapToDouble(a -> a.boundingBox().max().x())
+        .max()
+        .orElse(terrain.withinBordersXRange().min() + firstXGap);
     BoundingBox agentBB = agent.boundingBox();
-    DoubleRange xRange =
-        agentBB.xRange().delta(-agentBB.width() / 2d).delta(baseX + agentBB.width() * xGapRatio);
+    DoubleRange xRange = agentBB.xRange().delta(-agentBB.width() / 2d).delta(baseX + agentBB.width() * xGapRatio);
     double y = terrain.maxHeightAt(xRange) + initialYGap;
-    engine.perform(
-        new TranslateAgent(
-            agent,
-            new Point(
-                xRange.min() + xRange.extent() / 2d - agentBB.min().x(), y - agentBB.min().y())));
+    engine.perform(new TranslateAgent(
+        agent,
+        new Point(
+            xRange.min() + xRange.extent() / 2d - agentBB.min().x(),
+            y - agentBB.min().y())));
   }
 
   @Override
   public Outcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier,
-      Engine engine,
-      Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // place agents
@@ -109,14 +100,13 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, Outcome<Agents
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(
-              agents.stream()
-                  .map(
-                      a ->
-                          new AgentsObservation.Agent(
-                              a.bodyParts().stream().map(Body::poly).toList(),
-                              PolyUtils.maxYAtX(terrain.poly(), a.boundingBox().center().x())))
-                  .toList()));
+          new AgentsObservation(agents.stream()
+              .map(a -> new AgentsObservation.Agent(
+                  a.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(
+                      terrain.poly(),
+                      a.boundingBox().center().x())))
+              .toList()));
     }
     return new Outcome<>(new TreeMap<>(observations));
   }

@@ -84,12 +84,8 @@ public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
       }
       g.setColor(drawColor);
       for (Joint<Body> joint : voxel.getJoints()) {
-        g.draw(
-            new Line2D.Double(
-                joint.getAnchor1().x,
-                joint.getAnchor1().y,
-                joint.getAnchor2().x,
-                joint.getAnchor2().y));
+        g.draw(new Line2D.Double(
+            joint.getAnchor1().x, joint.getAnchor1().y, joint.getAnchor2().x, joint.getAnchor2().y));
       }
       return true;
     }

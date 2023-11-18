@@ -28,11 +28,9 @@ import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import java.util.Collection;
 import java.util.Optional;
 
-public record DetachAnchors(Collection<Anchor> anchors)
-    implements SelfDescribedAction<Collection<Anchor.Link>> {
+public record DetachAnchors(Collection<Anchor> anchors) implements SelfDescribedAction<Collection<Anchor.Link>> {
   @Override
-  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent)
-      throws ActionException {
+  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) throws ActionException {
     Collection<Anchor.Link> toRemoveLinks =
         anchors.stream().map(Anchor::links).flatMap(Collection::stream).toList();
     return toRemoveLinks.stream()

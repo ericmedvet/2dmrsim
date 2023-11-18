@@ -51,26 +51,20 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
   protected boolean innerDraw(double t, Anchorable anchorable, Graphics2D g) {
     g.setColor(anchorColor);
     for (Anchor anchor : anchorable.anchors()) {
-      g.fill(
-          new Ellipse2D.Double(
-              anchor.point().x() - ANCHOR_DOT_RADIUS,
-              anchor.point().y() - ANCHOR_DOT_RADIUS,
-              ANCHOR_DOT_RADIUS * 2d,
-              ANCHOR_DOT_RADIUS * 2d));
+      g.fill(new Ellipse2D.Double(
+          anchor.point().x() - ANCHOR_DOT_RADIUS,
+          anchor.point().y() - ANCHOR_DOT_RADIUS,
+          ANCHOR_DOT_RADIUS * 2d,
+          ANCHOR_DOT_RADIUS * 2d));
       for (Anchor.Link link : anchor.links()) {
         switch (link.type()) {
-          case RIGID -> g.draw(
-              new Line2D.Double(
-                  anchor.point().x(), anchor.point().y(),
-                  link.destination().point().x(), link.destination().point().y()));
-          case SOFT -> g.draw(
-              DrawingUtils.toPath(
-                  PolyUtils.zigZag(
-                          anchor.point(),
-                          link.destination().point(),
-                          SOFT_LINK_POINTS,
-                          SOFT_LINK_WIDTH)
-                      .points()));
+          case RIGID -> g.draw(new Line2D.Double(
+              anchor.point().x(), anchor.point().y(),
+              link.destination().point().x(),
+                  link.destination().point().y()));
+          case SOFT -> g.draw(DrawingUtils.toPath(PolyUtils.zigZag(
+                  anchor.point(), link.destination().point(), SOFT_LINK_POINTS, SOFT_LINK_WIDTH)
+              .points()));
         }
       }
     }

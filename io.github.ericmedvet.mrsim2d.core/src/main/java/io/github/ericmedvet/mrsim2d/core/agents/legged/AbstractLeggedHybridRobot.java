@@ -70,99 +70,93 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
   @Override
   public void assemble(ActionPerformer performer) throws ActionException {
     // create trunk
-    RigidBody trunk =
-        performer
-            .perform(
-                new CreateRigidBody(
-                    Poly.rectangle(trunkLength, trunkWidth), trunkMass, 1d / trunkWidth),
-                this)
-            .outcome()
-            .orElseThrow(() -> new ActionException("Cannot create trunk"));
+    RigidBody trunk = performer
+        .perform(new CreateRigidBody(Poly.rectangle(trunkLength, trunkWidth), trunkMass, 1d / trunkWidth), this)
+        .outcome()
+        .orElseThrow(() -> new ActionException("Cannot create trunk"));
     bodies.add(trunk);
     // create and attach head
-    head =
-        performer
-            .perform(new CreateRigidBody(Poly.square(trunkWidth), trunkMass, 1d / trunkWidth), this)
-            .outcome()
-            .orElseThrow(() -> new ActionException("Cannot create trunk"));
+    head = performer
+        .perform(new CreateRigidBody(Poly.square(trunkWidth), trunkMass, 1d / trunkWidth), this)
+        .outcome()
+        .orElseThrow(() -> new ActionException("Cannot create trunk"));
     bodies.add(head);
     performer.perform(
-        new TranslateBodyAt(head, BoundingBox.Anchor.LU, trunk.poly().boundingBox().max()), this);
-    performer.perform(
-        new AttachClosestAnchors(2, (Anchorable) head, trunk, Anchor.Link.Type.RIGID), this);
+        new TranslateBodyAt(
+            head, BoundingBox.Anchor.LU, trunk.poly().boundingBox().max()),
+        this);
+    performer.perform(new AttachClosestAnchors(2, (Anchorable) head, trunk, Anchor.Link.Type.RIGID), this);
     // iterate over legs
-    double maxLegWidth =
-        legs.stream()
-            .mapToDouble(l -> l.legChunks().stream().mapToDouble(LegChunk::width).max().orElse(0d))
+    double maxLegWidth = legs.stream()
+        .mapToDouble(l -> l.legChunks().stream()
+            .mapToDouble(LegChunk::width)
             .max()
-            .orElse(0d);
-    double dCX =
-        (trunk.poly().boundingBox().width() - 2 * maxLegWidth) / ((double) legs.size() - 1);
+            .orElse(0d))
+        .max()
+        .orElse(0d);
+    double dCX = (trunk.poly().boundingBox().width() - 2 * maxLegWidth) / ((double) legs.size() - 1);
     double cX = trunk.poly().boundingBox().min().x() + maxLegWidth;
     for (Leg leg : legs) {
       Anchorable upperBody = trunk;
       List<LegChunkBody> chunkBodies = new ArrayList<>(leg.legChunks().size());
       for (LegChunk legChunk : leg.legChunks()) {
-        double rotationalJointMass =
-            legChunk.upConnector().equals(ConnectorType.NONE)
-                ? legChunk.mass()
-                : (legChunk.mass() * legChunk.length() / (legChunk.length() + legChunk.width()));
+        double rotationalJointMass = legChunk.upConnector().equals(ConnectorType.NONE)
+            ? legChunk.mass()
+            : (legChunk.mass() * legChunk.length() / (legChunk.length() + legChunk.width()));
         // create up connector
         Body upConnector = null;
         if (legChunk.upConnector().equals(ConnectorType.SOFT)) {
-          Voxel voxel =
-              performer
-                  .perform(
-                      new CreateVoxel(legChunk.width(), legChunk.mass() - rotationalJointMass),
-                      this)
-                  .outcome()
-                  .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
+          Voxel voxel = performer
+              .perform(new CreateVoxel(legChunk.width(), legChunk.mass() - rotationalJointMass), this)
+              .outcome()
+              .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
           bodies.add(voxel);
           performer.perform(
               new TranslateBodyAt(
                   voxel,
                   BoundingBox.Anchor.LU,
-                  new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())),
+                  new Point(
+                      cX - legChunk.width() / 2d,
+                      upperBody.poly().boundingBox().min().y())),
               this);
           performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
           upperBody = voxel;
           upConnector = voxel;
         } else if (legChunk.upConnector().equals(ConnectorType.RIGID)) {
-          RigidBody connector =
-              performer
-                  .perform(
-                      new CreateRigidBody(
-                          Poly.square(legChunk.width()),
-                          legChunk.mass() - rotationalJointMass,
-                          1d / legChunk.width()),
-                      this)
-                  .outcome()
-                  .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
+          RigidBody connector = performer
+              .perform(
+                  new CreateRigidBody(
+                      Poly.square(legChunk.width()),
+                      legChunk.mass() - rotationalJointMass,
+                      1d / legChunk.width()),
+                  this)
+              .outcome()
+              .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
           bodies.add(connector);
           performer.perform(
               new TranslateBodyAt(
                   connector,
                   BoundingBox.Anchor.LU,
-                  new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())),
+                  new Point(
+                      cX - legChunk.width() / 2d,
+                      upperBody.poly().boundingBox().min().y())),
               this);
-          performer.perform(
-              new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
+          performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
           upperBody = connector;
           upConnector = connector;
         }
         // create joint
-        RotationalJoint joint =
-            performer
-                .perform(
-                    new CreateRotationalJoint(
-                        legChunk.length(),
-                        legChunk.width(),
-                        rotationalJointMass,
-                        legChunk.motor(),
-                        legChunk.activeAngleRange()),
-                    this)
-                .outcome()
-                .orElseThrow(() -> new ActionException("Cannot leg chunk rotational joint"));
+        RotationalJoint joint = performer
+            .perform(
+                new CreateRotationalJoint(
+                    legChunk.length(),
+                    legChunk.width(),
+                    rotationalJointMass,
+                    legChunk.motor(),
+                    legChunk.activeAngleRange()),
+                this)
+            .outcome()
+            .orElseThrow(() -> new ActionException("Cannot leg chunk rotational joint"));
         bodies.add(joint);
         rotationalJoints.add(joint);
         performer.perform(new RotateBody(joint, Math.toRadians(90)), this);
@@ -170,7 +164,9 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
             new TranslateBodyAt(
                 joint,
                 BoundingBox.Anchor.LU,
-                new Point(cX - legChunk.width() / 2d, upperBody.poly().boundingBox().min().y())),
+                new Point(
+                    cX - legChunk.width() / 2d,
+                    upperBody.poly().boundingBox().min().y())),
             this);
         performer.perform(new AttachClosestAnchors(2, joint, upperBody, Anchor.Link.Type.RIGID));
         upperBody = joint;
@@ -180,38 +176,38 @@ public abstract class AbstractLeggedHybridRobot implements EmbodiedAgent {
       // create down connector (foot)
       Body downConnector = null;
       if (leg.downConnector().equals(ConnectorType.SOFT)) {
-        Voxel voxel =
-            performer
-                .perform(
-                    new CreateVoxel(
-                        upperBody.poly().boundingBox().width(), leg.downConnectorMass()),
-                    this)
-                .outcome()
-                .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
+        Voxel voxel = performer
+            .perform(new CreateVoxel(upperBody.poly().boundingBox().width(), leg.downConnectorMass()), this)
+            .outcome()
+            .orElseThrow(() -> new ActionException("Cannot leg chunk soft connector"));
         bodies.add(voxel);
         performer.perform(
-            new TranslateBodyAt(voxel, BoundingBox.Anchor.LU, upperBody.poly().boundingBox().min()),
+            new TranslateBodyAt(
+                voxel,
+                BoundingBox.Anchor.LU,
+                upperBody.poly().boundingBox().min()),
             this);
         performer.perform(new AttachClosestAnchors(2, voxel, upperBody, Anchor.Link.Type.RIGID));
         downConnector = voxel;
       } else if (leg.downConnector().equals(ConnectorType.RIGID)) {
-        RigidBody connector =
-            performer
-                .perform(
-                    new CreateRigidBody(
-                        Poly.square(upperBody.poly().boundingBox().width()),
-                        leg.downConnectorMass(),
-                        1d / upperBody.poly().boundingBox().width()),
-                    this)
-                .outcome()
-                .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
+        RigidBody connector = performer
+            .perform(
+                new CreateRigidBody(
+                    Poly.square(
+                        upperBody.poly().boundingBox().width()),
+                    leg.downConnectorMass(),
+                    1d / upperBody.poly().boundingBox().width()),
+                this)
+            .outcome()
+            .orElseThrow(() -> new ActionException("Cannot leg chunk rigid connector"));
         bodies.add(connector);
         performer.perform(
             new TranslateBodyAt(
-                connector, BoundingBox.Anchor.LU, upperBody.poly().boundingBox().min()),
+                connector,
+                BoundingBox.Anchor.LU,
+                upperBody.poly().boundingBox().min()),
             this);
-        performer.perform(
-            new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
+        performer.perform(new AttachClosestAnchors(2, connector, upperBody, Anchor.Link.Type.RIGID));
         downConnector = connector;
       }
       legBodies.add(new LegBody(chunkBodies, downConnector));

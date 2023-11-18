@@ -49,8 +49,7 @@ public class Sensors {
   }
 
   @SuppressWarnings("unused")
-  public static Sensor<Body> d(
-      @Param(value = "a", dD = 0) Double a, @Param(value = "r", dD = 1) Double r) {
+  public static Sensor<Body> d(@Param(value = "a", dD = 0) Double a, @Param(value = "r", dD = 1) Double r) {
     return b -> new SenseDistanceToBody(Math.toRadians(a), r, b);
   }
 
@@ -75,8 +74,7 @@ public class Sensors {
   }
 
   @SuppressWarnings("unused")
-  public static Sensor<Body> sin(
-      @Param(value = "f", dD = 1) Double f, @Param(value = "p", dD = 0) Double p) {
+  public static Sensor<Body> sin(@Param(value = "f", dD = 1) Double f, @Param(value = "p", dD = 0) Double p) {
     return b -> new SenseSinusoidal(f, p, b);
   }
 }

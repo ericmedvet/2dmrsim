@@ -63,9 +63,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
 
   @Override
   public Outcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier,
-      Engine engine,
-      Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
@@ -73,14 +71,17 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
     engine.perform(new AddAgent(embodiedAgent));
     // place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();
-    engine.perform(
-        new TranslateAgent(
-            embodiedAgent,
-            new Point(terrain.withinBordersXRange().min() + initialXGap - agentBB.min().x(), 0)));
+    engine.perform(new TranslateAgent(
+        embodiedAgent,
+        new Point(
+            terrain.withinBordersXRange().min()
+                + initialXGap
+                - agentBB.min().x(),
+            0)));
     agentBB = embodiedAgent.boundingBox();
     double maxY = terrain.maxHeightAt(agentBB.xRange());
-    engine.perform(
-        new TranslateAgent(embodiedAgent, new Point(0, maxY + initialYGap - agentBB.min().y())));
+    engine.perform(new TranslateAgent(
+        embodiedAgent, new Point(0, maxY + initialYGap - agentBB.min().y())));
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
@@ -88,12 +89,11 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(
-              List.of(
-                  new AgentsObservation.Agent(
-                      embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
-                      PolyUtils.maxYAtX(
-                          terrain.poly(), embodiedAgent.boundingBox().center().x())))));
+          new AgentsObservation(List.of(new AgentsObservation.Agent(
+              embodiedAgent.bodyParts().stream().map(Body::poly).toList(),
+              PolyUtils.maxYAtX(
+                  terrain.poly(),
+                  embodiedAgent.boundingBox().center().x())))));
     }
     // return
     return new Outcome<>(new TreeMap<>(observations));

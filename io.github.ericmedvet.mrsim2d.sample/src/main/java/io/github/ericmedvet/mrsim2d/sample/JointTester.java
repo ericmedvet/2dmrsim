@@ -74,47 +74,36 @@ public class JointTester {
     public record Outcome(SortedMap<Double, Observation> observations) {}
 
     @Override
-    public Outcome run(
-        DoubleUnaryOperator targetF, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+    public Outcome run(DoubleUnaryOperator targetF, Engine engine, Consumer<Snapshot> snapshotConsumer) {
       // prepare world
-      UnmovableBody sBox =
-          engine
-              .perform(new CreateUnmovableBody(Poly.rectangle(5 + jointLength / 2d - 1, 2), 1))
-              .outcome()
-              .orElseThrow();
+      UnmovableBody sBox = engine.perform(new CreateUnmovableBody(Poly.rectangle(5 + jointLength / 2d - 1, 2), 1))
+          .outcome()
+          .orElseThrow();
       engine.perform(new CreateAndTranslateUnmovableBody(Poly.rectangle(5, 1), 1, new Point(0, 2)));
       double nLength = obstacle ? (5 + jointLength) : (5 + jointLength / 2d - 1);
-      UnmovableBody nBox =
-          engine
-              .perform(
-                  new CreateAndTranslateUnmovableBody(
-                      Poly.rectangle(nLength, 1), 1, new Point(0, 3)))
-              .outcome()
-              .orElseThrow();
+      UnmovableBody nBox = engine.perform(
+              new CreateAndTranslateUnmovableBody(Poly.rectangle(nLength, 1), 1, new Point(0, 3)))
+          .outcome()
+          .orElseThrow();
       // place joint
-      RotationalJoint joint =
-          engine
-              .perform(
-                  new CreateRotationalJoint(
-                      jointLength,
-                      1,
-                      1,
-                      new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0),
-                      new DoubleRange(-Math.PI / 3d, Math.PI / 3d)))
-              .outcome()
-              .orElseThrow();
+      RotationalJoint joint = engine.perform(new CreateRotationalJoint(
+              jointLength,
+              1,
+              1,
+              new RotationalJoint.Motor(10, 1000, 10, 1, 1, 0.0),
+              new DoubleRange(-Math.PI / 3d, Math.PI / 3d)))
+          .outcome()
+          .orElseThrow();
       engine.perform(new TranslateBodyAt(joint, BoundingBox.Anchor.LU, new Point(5, 3)));
       engine.perform(new AttachClosestAnchors(1, joint, nBox, Anchor.Link.Type.RIGID));
       engine.perform(new AttachClosestAnchors(1, joint, sBox, Anchor.Link.Type.RIGID));
       // place load
       if (loadMass > 0) {
-        RigidBody load =
-            engine
-                .perform(new CreateRigidBody(Poly.square(1d), loadMass, 1))
-                .outcome()
-                .orElseThrow();
-        engine.perform(
-            new TranslateBodyAt(load, BoundingBox.Anchor.LU, joint.poly().boundingBox().max()));
+        RigidBody load = engine.perform(new CreateRigidBody(Poly.square(1d), loadMass, 1))
+            .outcome()
+            .orElseThrow();
+        engine.perform(new TranslateBodyAt(
+            load, BoundingBox.Anchor.LU, joint.poly().boundingBox().max()));
         engine.perform(new AttachClosestAnchors(2, joint, load, Anchor.Link.Type.RIGID));
       }
       // run for defined time
@@ -146,24 +135,21 @@ public class JointTester {
       for (double freq : freqs) {
         for (double load : loads) {
           for (Type type : types) {
-            L.info(
-                "Doing f=%.3f load=%.3f type=%s"
-                    .formatted(freq, load, type.toString().toLowerCase()));
-            JointTask.Outcome outcome =
-                doTask(duration, engineSupplier, freq, load, type, false, null);
+            L.info("Doing f=%.3f load=%.3f type=%s"
+                .formatted(freq, load, type.toString().toLowerCase()));
+            JointTask.Outcome outcome = doTask(duration, engineSupplier, freq, load, type, false, null);
             // print results
             for (double t : outcome.observations().keySet()) {
               JointTask.Observation obs = outcome.observations().get(t);
-              bw.append(
-                  String.format(
-                      Locale.ROOT,
-                      "%5.3f; %5.3f; %10.10s; %6.3f; %+6.4f; %+6.4f%n",
-                      freq,
-                      load,
-                      type.toString().toLowerCase(),
-                      t,
-                      obs.target,
-                      obs.actual));
+              bw.append(String.format(
+                  Locale.ROOT,
+                  "%5.3f; %5.3f; %10.10s; %6.3f; %+6.4f; %+6.4f%n",
+                  freq,
+                  load,
+                  type.toString().toLowerCase(),
+                  t,
+                  obs.target,
+                  obs.actual));
             }
           }
         }
@@ -173,8 +159,7 @@ public class JointTester {
     }
   }
 
-  private static void doSingle(
-      double duration, double freq, double load, Type type, boolean obstacle) {
+  private static void doSingle(double duration, double freq, double load, Type type, boolean obstacle) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")

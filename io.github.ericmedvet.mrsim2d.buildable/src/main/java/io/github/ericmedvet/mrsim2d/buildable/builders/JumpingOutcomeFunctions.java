@@ -34,13 +34,11 @@ public class JumpingOutcomeFunctions {
   @SuppressWarnings("unused")
   public static Function<Outcome<?>, Double> avgBBMinY(
       @Param(value = "transientTime", dD = 5.0) double transientTime) {
-    return o ->
-        o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageBBMinY();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageBBMinY();
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome<?>, Double> avgY(
-      @Param(value = "transientTime", dD = 5.0) double transientTime) {
+  public static Function<Outcome<?>, Double> avgY(@Param(value = "transientTime", dD = 5.0) double transientTime) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageY();
   }
 
@@ -53,14 +51,11 @@ public class JumpingOutcomeFunctions {
   @SuppressWarnings("unused")
   public static Function<Outcome<?>, Double> maxMaxRelJumpH(
       @Param(value = "transientTime", dD = 5.0) double transientTime) {
-    return o ->
-        o.subOutcome(new DoubleRange(transientTime, o.duration()))
-            .firstAgentMaxRelativeJumpHeight();
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxRelativeJumpHeight();
   }
 
   @SuppressWarnings("unused")
-  public static Function<Outcome<?>, Double> maxY(
-      @Param(value = "transientTime", dD = 5.0) double transientTime) {
+  public static Function<Outcome<?>, Double> maxY(@Param(value = "transientTime", dD = 5.0) double transientTime) {
     return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxY();
   }
 }

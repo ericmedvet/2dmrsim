@@ -40,7 +40,6 @@ public class BalancingOutcomeFunctions {
   public static Function<BalancingOutcome, Double> avgSwingAngleWithMalus(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "malus", dD = Math.PI / 2d) double malus) {
-    return o ->
-        o.subOutcome(new DoubleRange(transientTime, o.duration())).avgSwingAngleWithMalus(malus);
+    return o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).avgSwingAngleWithMalus(malus);
   }
 }

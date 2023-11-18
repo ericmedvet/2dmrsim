@@ -33,8 +33,10 @@ public record SenseContact(Body body) implements Sense<Body>, SelfDescribedActio
 
   @Override
   public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
-    Collection<Body> bodies =
-        performer.perform(new FindInContactBodies(body), agent).outcome().orElse(List.of());
+    Collection<Body> bodies = performer
+        .perform(new FindInContactBodies(body), agent)
+        .outcome()
+        .orElse(List.of());
     return bodies.isEmpty() ? 0d : 1d;
   }
 

@@ -67,8 +67,7 @@ public class Tasks {
       @Param(value = "supportHeight", dD = 1.0) double supportHeight,
       @Param(value = "initialXGap", dD = 0.0) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap) {
-    return new Balancing(
-        duration, swingLength, swingDensity, supportHeight, initialXGap, initialYGap);
+    return new Balancing(duration, swingLength, swingDensity, supportHeight, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")

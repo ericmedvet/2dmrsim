@@ -67,8 +67,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
           "The number of channels must be 0 or more: %d found".formatted(nOfNFCChannels));
     }
     numericalDynamicalSystem.checkDimension(
-        nOfInputs(sensors, nOfNFCChannels),
-        nOfOutputs(areaActuation, attachActuation, nOfNFCChannels));
+        nOfInputs(sensors, nOfNFCChannels), nOfOutputs(areaActuation, attachActuation, nOfNFCChannels));
     this.numericalDynamicalSystem = numericalDynamicalSystem;
   }
 
@@ -98,39 +97,34 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     return sensors.size() + nOfNFCChannels * 4;
   }
 
-  public static int nOfOutputs(
-      AreaActuation areaActuation, boolean attachActuation, int nOfNFCChannels) {
-    return (areaActuation.equals(AreaActuation.OVERALL) ? 1 : 4)
-        + (attachActuation ? 4 : 0)
-        + nOfNFCChannels * 4;
+  public static int nOfOutputs(AreaActuation areaActuation, boolean attachActuation, int nOfNFCChannels) {
+    return (areaActuation.equals(AreaActuation.OVERALL) ? 1 : 4) + (attachActuation ? 4 : 0) + nOfNFCChannels * 4;
   }
 
   @Override
   public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
     // read inputs from last request
-    double[] readInputs =
-        previousActionOutcomes.stream()
-            .filter(ao -> ao.action() instanceof Sense)
-            .mapToDouble(
-                ao -> {
-                  @SuppressWarnings("unchecked")
-                  ActionOutcome<Sense<? super Voxel>, Double> so =
-                      (ActionOutcome<Sense<? super Voxel>, Double>) ao;
-                  return INPUT_RANGE.denormalize(
-                      so.action().range().normalize(so.outcome().orElse(0d)));
-                })
-            .toArray();
+    double[] readInputs = previousActionOutcomes.stream()
+        .filter(ao -> ao.action() instanceof Sense)
+        .mapToDouble(ao -> {
+          @SuppressWarnings("unchecked")
+          ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
+          return INPUT_RANGE.denormalize(
+              so.action().range().normalize(so.outcome().orElse(0d)));
+        })
+        .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
     // compute actuation
-    outputs =
-        Arrays.stream(numericalDynamicalSystem.step(t, inputs)).map(OUTPUT_RANGE::clip).toArray();
+    outputs = Arrays.stream(numericalDynamicalSystem.step(t, inputs))
+        .map(OUTPUT_RANGE::clip)
+        .toArray();
     // generate next sense actions
-    List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
+    List<Action<?>> actions =
+        new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     // generate actuation actions
     int aI = 0;
     if (areaActuation.equals(AreaActuation.SIDES)) {
-      actions.add(
-          new ActuateVoxel(voxel, outputs[aI++], outputs[aI++], outputs[aI++], outputs[aI++]));
+      actions.add(new ActuateVoxel(voxel, outputs[aI++], outputs[aI++], outputs[aI++], outputs[aI++]));
     } else {
       actions.add(new ActuateVoxel(voxel, outputs[aI++]));
     }
@@ -138,8 +132,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       for (Voxel.Side side : Voxel.Side.values()) {
         double m = outputs[aI++];
         if (m > ATTACH_ACTION_THRESHOLD) {
-          actions.add(
-              new AttractAndLinkClosestAnchorable(voxel.anchorsOn(side), 1, Anchor.Link.Type.SOFT));
+          actions.add(new AttractAndLinkClosestAnchorable(voxel.anchorsOn(side), 1, Anchor.Link.Type.SOFT));
         } else if (m < -ATTACH_ACTION_THRESHOLD) {
           actions.add(new DetachAnchors(voxel.anchorsOn(side)));
         }
@@ -166,7 +159,6 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
 
   @Override
   public BrainIO brainIO() {
-    return new BrainIO(
-        new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
   }
 }

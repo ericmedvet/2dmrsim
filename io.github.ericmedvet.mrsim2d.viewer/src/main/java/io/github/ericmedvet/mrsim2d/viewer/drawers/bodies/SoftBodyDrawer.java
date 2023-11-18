@@ -66,23 +66,21 @@ public class SoftBodyDrawer extends AbstractComponentDrawer<SoftBody> {
   protected boolean innerDraw(double t, SoftBody body, Graphics2D g) {
     Poly poly = body.poly();
     Path2D path = DrawingUtils.toPath(poly, true);
-    g.setColor(
-        DrawingUtils.linear(
-            contractedColor,
-            restColor,
-            expandedColor,
-            (float) areaRatioRange.min(),
-            1,
-            (float) areaRatioRange.max(),
-            (float) body.areaRatio()));
+    g.setColor(DrawingUtils.linear(
+        contractedColor,
+        restColor,
+        expandedColor,
+        (float) areaRatioRange.min(),
+        1,
+        (float) areaRatioRange.max(),
+        (float) body.areaRatio()));
     g.fill(path);
     g.setColor(borderColor);
     g.draw(path);
     // angle line
     Point center = poly.center();
     Point firstSideMeanPoint = Point.average(poly.vertexes()[0], poly.vertexes()[1]);
-    g.draw(
-        new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
+    g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
     return true;
   }
 }

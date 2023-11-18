@@ -83,26 +83,20 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       // frame
       BoundingBox imageFrame;
       if (direction.equals(Direction.HORIZONTAL)) {
-        imageFrame =
-            new BoundingBox(
-                new Point((double) frameCount / (double) nOfFrames, 0),
-                new Point((double) (frameCount + 1) / (double) nOfFrames, 1d));
+        imageFrame = new BoundingBox(
+            new Point((double) frameCount / (double) nOfFrames, 0),
+            new Point((double) (frameCount + 1) / (double) nOfFrames, 1d));
       } else {
-        imageFrame =
-            new BoundingBox(
-                new Point(0d, (double) frameCount / (double) nOfFrames),
-                new Point(1d, (double) (frameCount + 1) / (double) nOfFrames));
+        imageFrame = new BoundingBox(
+            new Point(0d, (double) frameCount / (double) nOfFrames),
+            new Point(1d, (double) (frameCount + 1) / (double) nOfFrames));
       }
       frameCount = frameCount + 1;
       // draw
       Graphics2D g = image.createGraphics();
       g.setClip(0, 0, image.getWidth(), image.getHeight());
       Drawer.clip(imageFrame, drawer)
-          .draw(
-              justLastSnapshot
-                  ? snapshots.subList(snapshots.size() - 1, snapshots.size())
-                  : snapshots,
-              g);
+          .draw(justLastSnapshot ? snapshots.subList(snapshots.size() - 1, snapshots.size()) : snapshots, g);
       g.dispose();
       snapshots.clear();
     }

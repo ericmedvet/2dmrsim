@@ -1,36 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.ericmedvet</groupId>
+    <artifactId>mrsim2d</artifactId>
+    <version>${revision}</version>
+  </parent>
+  <artifactId>mrsim2d.engine.dyn4j</artifactId>
+  <packaging>jar</packaging>
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>mrsim2d</artifactId>
-        <groupId>io.github.ericmedvet</groupId>
-        <version>${revision}</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  <name>mrsim2d-engine-dyn4j</name>
+  <description>dyn4j-based physics engine implementation for 2D-MR-Sim.</description>
 
-    <name>mrsim2d-engine-dyn4j</name>
-    <description>dyn4j-based physics engine implementation for 2D-MR-Sim.</description>
-    <artifactId>mrsim2d.engine.dyn4j</artifactId>
-    <packaging>jar</packaging>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.github.ericmedvet</groupId>
-            <artifactId>mrsim2d.core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.ericmedvet</groupId>
-            <artifactId>mrsim2d.viewer</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dyn4j</groupId>
-            <artifactId>dyn4j</artifactId>
-            <version>4.2.2</version>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>mrsim2d.core</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>mrsim2d.viewer</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dyn4j</groupId>
+      <artifactId>dyn4j</artifactId>
+      <version>4.2.2</version>
+    </dependency>
+  </dependencies>
 
 </project>

@@ -32,8 +32,7 @@ import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
 
-public class UnmovableBody
-    implements io.github.ericmedvet.mrsim2d.core.bodies.UnmovableBody, MultipartBody {
+public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.UnmovableBody, MultipartBody {
 
   private final Poly poly;
   private final List<Body> bodies;
@@ -42,24 +41,18 @@ public class UnmovableBody
   private final Point initialCenter;
 
   public UnmovableBody(
-      Poly poly,
-      double anchorsDensity,
-      double friction,
-      double restitution,
-      double anchorSideDistance) {
+      Poly poly, double anchorsDensity, double friction, double restitution, double anchorSideDistance) {
     this.poly = poly;
     List<Poly> parts = (poly.vertexes().length > 3) ? Utils.decompose(poly) : List.of(poly);
-    List<Pair<Body, Poly>> bodyPairs =
-        parts.stream()
-            .map(
-                c -> {
-                  Convex convex = Utils.poly(c);
-                  Body body = new Body();
-                  body.addFixture(convex, 1d, friction, restitution);
-                  body.setMass(MassType.INFINITE);
-                  return new Pair<>(body, c);
-                })
-            .toList();
+    List<Pair<Body, Poly>> bodyPairs = parts.stream()
+        .map(c -> {
+          Convex convex = Utils.poly(c);
+          Body body = new Body();
+          body.addFixture(convex, 1d, friction, restitution);
+          body.setMass(MassType.INFINITE);
+          return new Pair<>(body, c);
+        })
+        .toList();
     bodies = bodyPairs.stream().map(Pair::first).toList();
     initialCenter = center(bodies);
     bodies.forEach(b -> b.setUserData(this));
@@ -69,14 +62,11 @@ public class UnmovableBody
         double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
         for (double i = 0; i < nOfAnchors; i = i + 1) {
           Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
-          Point aP =
-              sidePoint.sum(
-                  new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
-          Body closest =
-              bodies.stream()
-                  .min(
-                      Comparator.comparingDouble(b -> Utils.point(b.getLocalCenter()).distance(aP)))
-                  .orElseThrow();
+          Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+          Body closest = bodies.stream()
+              .min(Comparator.comparingDouble(
+                  b -> Utils.point(b.getLocalCenter()).distance(aP)))
+              .orElseThrow();
           localAnchors.add(new BodyAnchor(closest, aP, this));
         }
       }
@@ -87,11 +77,10 @@ public class UnmovableBody
   }
 
   private static Point center(List<Body> bodies) {
-    return Point.average(
-        bodies.stream()
-            .map(AbstractPhysicsBody::getWorldCenter)
-            .map(Utils::point)
-            .toArray(Point[]::new));
+    return Point.average(bodies.stream()
+        .map(AbstractPhysicsBody::getWorldCenter)
+        .map(Utils::point)
+        .toArray(Point[]::new));
   }
 
   @Override

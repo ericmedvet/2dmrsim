@@ -25,8 +25,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.viewer.Framer;
 
 public abstract class AbstractFramer<K> implements Framer<K> {
-  public static final BoundingBox DEFAULT_BOUNDING_BOX =
-      new BoundingBox(Point.ORIGIN, new Point(10, 5));
+  public static final BoundingBox DEFAULT_BOUNDING_BOX = new BoundingBox(Point.ORIGIN, new Point(10, 5));
   private final double sizeRelativeMargin;
 
   public AbstractFramer(double sizeRelativeMargin) {
@@ -43,25 +42,26 @@ public abstract class AbstractFramer<K> implements Framer<K> {
     double cy = currentBB.center().y();
     double w = currentBB.width();
     double h = currentBB.height();
-    BoundingBox enlarged =
-        new BoundingBox(
-            new Point(cx - w / 2d * sizeRelativeMargin, cy - h / 2d * sizeRelativeMargin),
-            new Point(cx + w / 2d * sizeRelativeMargin, cy + h / 2d * sizeRelativeMargin));
+    BoundingBox enlarged = new BoundingBox(
+        new Point(cx - w / 2d * sizeRelativeMargin, cy - h / 2d * sizeRelativeMargin),
+        new Point(cx + w / 2d * sizeRelativeMargin, cy + h / 2d * sizeRelativeMargin));
     // adjust
     BoundingBox adjusted = enlarged;
     double fRatio = enlarged.width() / enlarged.height();
     if (fRatio > ratio) {
       // enlarge h
-      adjusted =
-          new BoundingBox(
-              new Point(enlarged.min().x(), cy - h / 2d * sizeRelativeMargin * fRatio / ratio),
-              new Point(enlarged.max().x(), cy + h / 2d * sizeRelativeMargin * fRatio / ratio));
+      adjusted = new BoundingBox(
+          new Point(enlarged.min().x(), cy - h / 2d * sizeRelativeMargin * fRatio / ratio),
+          new Point(enlarged.max().x(), cy + h / 2d * sizeRelativeMargin * fRatio / ratio));
     } else if (fRatio < ratio) {
       // enlarge w
-      adjusted =
-          new BoundingBox(
-              new Point(cx - w / 2d * sizeRelativeMargin * ratio / fRatio, enlarged.min().y()),
-              new Point(cx + w / 2d * sizeRelativeMargin * ratio / fRatio, enlarged.max().y()));
+      adjusted = new BoundingBox(
+          new Point(
+              cx - w / 2d * sizeRelativeMargin * ratio / fRatio,
+              enlarged.min().y()),
+          new Point(
+              cx + w / 2d * sizeRelativeMargin * ratio / fRatio,
+              enlarged.max().y()));
     }
     return adjusted;
   }

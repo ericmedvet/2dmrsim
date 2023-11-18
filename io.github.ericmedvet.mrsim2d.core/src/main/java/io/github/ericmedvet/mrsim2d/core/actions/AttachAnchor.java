@@ -35,18 +35,16 @@ public record AttachAnchor(Anchor anchor, Anchorable anchorable, Anchor.Link.Typ
   @Override
   public Anchor.Link perform(ActionPerformer performer, Agent agent) throws ActionException {
     // find already attached anchors
-    Collection<Anchor> attachedAnchors =
-        anchor.links().stream()
-            .map(Anchor.Link::destination)
-            .filter(a -> a.anchorable() == anchorable)
-            .distinct()
-            .toList();
+    Collection<Anchor> attachedAnchors = anchor.links().stream()
+        .map(Anchor.Link::destination)
+        .filter(a -> a.anchorable() == anchorable)
+        .distinct()
+        .toList();
     // find closest anchor on destination
-    Anchor destination =
-        anchorable.anchors().stream()
-            .filter(a -> !attachedAnchors.contains(a))
-            .min(Comparator.comparingDouble(a -> a.point().distance(anchor.point())))
-            .orElse(null);
+    Anchor destination = anchorable.anchors().stream()
+        .filter(a -> !attachedAnchors.contains(a))
+        .min(Comparator.comparingDouble(a -> a.point().distance(anchor.point())))
+        .orElse(null);
     // create link
     if (destination != null) {
       return performer

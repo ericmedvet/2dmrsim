@@ -74,12 +74,11 @@ public interface Drawer {
       double clipY = shape.getBounds2D().getY();
       double clipW = shape.getBounds2D().getWidth();
       double clipH = shape.getBounds2D().getHeight();
-      g.clip(
-          new Rectangle2D.Double(
-              clipX + boundingBox.min().x() * clipW,
-              clipY + boundingBox.min().y() * clipH,
-              clipW * boundingBox.width(),
-              clipH * boundingBox.height()));
+      g.clip(new Rectangle2D.Double(
+          clipX + boundingBox.min().x() * clipW,
+          clipY + boundingBox.min().y() * clipH,
+          clipW * boundingBox.width(),
+          clipH * boundingBox.height()));
       // draw
       boolean drawn = drawer.draw(snapshots, g);
       // restore clip and transform
@@ -93,8 +92,10 @@ public interface Drawer {
       BoundingBox gBB = DrawingUtils.getBoundingBox(g);
       g.setColor(DrawingUtils.Colors.AXES);
       g.draw(new Rectangle2D.Double(gBB.min().x(), gBB.min().y(), gBB.width(), gBB.height()));
-      g.draw(new Line2D.Double(gBB.min().x(), gBB.min().y(), gBB.max().x(), gBB.max().y()));
-      g.draw(new Line2D.Double(gBB.min().x(), gBB.max().y(), gBB.max().x(), gBB.min().y()));
+      g.draw(new Line2D.Double(
+          gBB.min().x(), gBB.min().y(), gBB.max().x(), gBB.max().y()));
+      g.draw(new Line2D.Double(
+          gBB.min().x(), gBB.max().y(), gBB.max().x(), gBB.min().y()));
       return true;
     };
   }
@@ -143,14 +144,16 @@ public interface Drawer {
 
   static Drawer transform(Framer<Snapshot> framer, Drawer drawer) {
     return (snapshots, g) -> {
-      BoundingBox graphicsFrame =
-          new BoundingBox(
-              new Point(g.getClip().getBounds2D().getX(), g.getClip().getBounds2D().getY()),
-              new Point(g.getClip().getBounds2D().getMaxX(), g.getClip().getBounds2D().getMaxY()));
+      BoundingBox graphicsFrame = new BoundingBox(
+          new Point(
+              g.getClip().getBounds2D().getX(),
+              g.getClip().getBounds2D().getY()),
+          new Point(
+              g.getClip().getBounds2D().getMaxX(),
+              g.getClip().getBounds2D().getMaxY()));
       Snapshot lastSnapshot = snapshots.get(snapshots.size() - 1);
       BoundingBox worldFrame =
-          framer.getFrame(
-              lastSnapshot.t(), lastSnapshot, graphicsFrame.width() / graphicsFrame.height());
+          framer.getFrame(lastSnapshot.t(), lastSnapshot, graphicsFrame.width() / graphicsFrame.height());
       // save original transform and stroke
       AffineTransform oAt = g.getTransform();
       Stroke oStroke = g.getStroke();
@@ -176,8 +179,7 @@ public interface Drawer {
 
   default Drawer onLastSnapshot() {
     Drawer thisDrawer = this;
-    return (snapshots, g) ->
-        thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
+    return (snapshots, g) -> thisDrawer.draw(snapshots.subList(snapshots.size() - 1, snapshots.size()), g);
   }
 
   default ProfiledDrawer profiled() {

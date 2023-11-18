@@ -49,7 +49,8 @@ public class TerrainTester {
   private static final Logger L = Logger.getLogger(TerrainTester.class.getName());
 
   private static Object fromBase64(String content) throws IOException {
-    try (ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getDecoder().decode(content));
+    try (ByteArrayInputStream bais =
+            new ByteArrayInputStream(Base64.getDecoder().decode(content));
         ObjectInputStream ois = new ObjectInputStream(bais)) {
       return ois.readObject();
     } catch (Throwable t) {
@@ -66,24 +67,23 @@ public class TerrainTester {
     if (true) {
       @SuppressWarnings("unchecked")
       Drawer drawer =
-          ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)"))
-              .apply("test");
-      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly()").run();
+          ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)")).apply("test");
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly()")
+          .run();
       System.exit(0);
     }
     // prepare terrains
-    List<String> terrains =
-        List.of(
-            "s.t.flat()",
-            "s.t.flat(w = 500)",
-            "s.t.hilly()",
-            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
-            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
-            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",
-            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
-            "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
-            "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
-            "s.t.steppy(chunkW = 0.5; chunkH = 0.1)");
+    List<String> terrains = List.of(
+        "s.t.flat()",
+        "s.t.flat(w = 500)",
+        "s.t.hilly()",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 250)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 250)",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
+        "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1)");
     Consumer<Snapshot> nullConsumer = s -> {};
     // warm up
     int warmUpNOfTimes = 10;
@@ -99,20 +99,18 @@ public class TerrainTester {
     for (String terrain : terrains) {
       System.out.printf(
           "t=%5.3f with n=%d on %s%n",
-          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes),
-          testNOfTimes,
-          terrain);
+          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes), testNOfTimes, terrain);
     }
   }
 
   private static double profile(Runnable runnable, int nOfTimes) {
     return IntStream.range(0, nOfTimes)
-            .mapToDouble(
-                i -> {
-                  Instant startingInstant = Instant.now();
-                  runnable.run();
-                  return Duration.between(startingInstant, Instant.now()).toMillis();
-                })
+            .mapToDouble(i -> {
+              Instant startingInstant = Instant.now();
+              runnable.run();
+              return Duration.between(startingInstant, Instant.now())
+                  .toMillis();
+            })
             .average()
             .orElse(Double.NaN)
         / 1000d;
@@ -132,10 +130,7 @@ public class TerrainTester {
   }
 
   private static Runnable taskOn(
-      NamedBuilder<?> nb,
-      Supplier<Engine> engineSupplier,
-      Consumer<Snapshot> consumer,
-      String terrain) {
+      NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
     // prepare task
     Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
     // read agent resource
@@ -163,20 +158,17 @@ public class TerrainTester {
       throw new RuntimeException(e);
     }
     // prepare supplier
-    Supplier<EmbodiedAgent> agentSupplier =
-        () -> {
-          EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-          // shuffle parameters
-          if (agent instanceof NumMultiBrained numMultiBrained) {
-            numMultiBrained.brains().stream()
-                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-                .forEach(
-                    o ->
-                        o.ifPresent(
-                            np -> np.setParams(params.stream().mapToDouble(d -> d).toArray())));
-          }
-          return agent;
-        };
+    Supplier<EmbodiedAgent> agentSupplier = () -> {
+      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+      // shuffle parameters
+      if (agent instanceof NumMultiBrained numMultiBrained) {
+        numMultiBrained.brains().stream()
+            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+            .forEach(o -> o.ifPresent(np ->
+                np.setParams(params.stream().mapToDouble(d -> d).toArray())));
+      }
+      return agent;
+    };
     return () -> locomotion.run(agentSupplier, engineSupplier.get(), consumer);
   }
 }

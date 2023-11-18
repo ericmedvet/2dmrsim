@@ -25,8 +25,7 @@ import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
 import java.awt.*;
 
-public abstract class AbstractActionComponentDrawer<A extends Action<O>, O>
-    implements ComponentDrawer {
+public abstract class AbstractActionComponentDrawer<A extends Action<O>, O> implements ComponentDrawer {
   private final Class<A> actionClass;
 
   public AbstractActionComponentDrawer(Class<A> actionClass) {

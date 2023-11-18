@@ -41,8 +41,7 @@ public class RotationalJointDrawer extends AbstractComponentDrawer<RotationalJoi
   private final Color angleCurrentColor;
   private final Color angleTargetColor;
 
-  public RotationalJointDrawer(
-      Color fillColor, Color strokeColor, Color angleCurrentColor, Color TargetColor) {
+  public RotationalJointDrawer(Color fillColor, Color strokeColor, Color angleCurrentColor, Color TargetColor) {
     super(RotationalJoint.class);
     this.fillColor = fillColor;
     this.strokeColor = strokeColor;

@@ -23,8 +23,7 @@ import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record SenseNFC(Body body, Point displacement, double direction, short channel)
-    implements Sense<Body> {
+public record SenseNFC(Body body, Point displacement, double direction, short channel) implements Sense<Body> {
   @Override
   public Body body() {
     return body;

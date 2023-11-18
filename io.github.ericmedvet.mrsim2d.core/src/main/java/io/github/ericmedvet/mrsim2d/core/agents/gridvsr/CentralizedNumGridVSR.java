@@ -43,8 +43,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
     this.numericalDynamicalSystem = numericalDynamicalSystem;
   }
 
-  public CentralizedNumGridVSR(
-      GridBody body, NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+  public CentralizedNumGridVSR(GridBody body, NumericalDynamicalSystem<?> numericalDynamicalSystem) {
     this(body, VOXEL_SIDE_LENGTH, VOXEL_MASS, numericalDynamicalSystem);
   }
 
@@ -53,10 +52,9 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   public static int nOfOutputs(GridBody body) {
-    return (int)
-        body.grid().values().stream()
-            .filter(e -> !e.element().type().equals(GridBody.VoxelType.NONE))
-            .count();
+    return (int) body.grid().values().stream()
+        .filter(e -> !e.element().type().equals(GridBody.VoxelType.NONE))
+        .count();
   }
 
   @Override
@@ -66,19 +64,18 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
 
   @Override
   public BrainIO brainIO() {
-    return new BrainIO(
-        new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
   }
 
   @Override
   protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     // build inputs
-    inputs = Utils.concat(inputsGrid.values().stream().filter(Objects::nonNull).toList());
+    inputs = Utils.concat(
+        inputsGrid.values().stream().filter(Objects::nonNull).toList());
     if (inputs.length != numericalDynamicalSystem.nOfInputs()) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Wrong number of inputs: %d expected, %d found",
-              numericalDynamicalSystem.nOfInputs(), inputs.length));
+      throw new IllegalArgumentException(String.format(
+          "Wrong number of inputs: %d expected, %d found",
+          numericalDynamicalSystem.nOfInputs(), inputs.length));
     }
     // compute outputs
     outputs = numericalDynamicalSystem.step(t, inputs);

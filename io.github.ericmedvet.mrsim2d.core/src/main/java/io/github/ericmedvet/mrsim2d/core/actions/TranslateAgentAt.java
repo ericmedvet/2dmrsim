@@ -33,10 +33,7 @@ public record TranslateAgentAt(EmbodiedAgent agent, BoundingBox.Anchor anchor, P
   @Override
   public EmbodiedAgent perform(ActionPerformer performer, Agent agent) throws ActionException {
     Point anchorPoint = agent().boundingBox().anchor(anchor);
-    agent()
-        .bodyParts()
-        .forEach(
-            b -> performer.perform(new TranslateBody(b, destination.diff(anchorPoint)), agent));
+    agent().bodyParts().forEach(b -> performer.perform(new TranslateBody(b, destination.diff(anchorPoint)), agent));
     return agent();
   }
 }

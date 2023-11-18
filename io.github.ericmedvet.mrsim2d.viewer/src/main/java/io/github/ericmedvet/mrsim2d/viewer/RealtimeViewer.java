@@ -62,11 +62,10 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     pauseButton = new JButton();
     pauseButton.setText("Pause");
     isPaused = false;
-    pauseButton.addActionListener(
-        e -> {
-          isPaused = !isPaused;
-          pauseButton.setText(isPaused ? "Unpause" : "Pause");
-        });
+    pauseButton.addActionListener(e -> {
+      isPaused = !isPaused;
+      pauseButton.setText(isPaused ? "Unpause" : "Pause");
+    });
     getContentPane().add(pauseButton, BorderLayout.PAGE_END);
     // pack
     pack();
@@ -94,8 +93,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
       while (true) {
         double currentWallTime =
             Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
-        if (isPaused
-            || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
+        if (isPaused || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
           try {
             Thread.sleep(WAIT_MILLIS);
           } catch (InterruptedException e) {
@@ -118,7 +116,8 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
         strategy.show();
       }
       Toolkit.getDefaultToolkit().sync();
-      lastDrawingMillis = Duration.between(drawingTimeStart, Instant.now()).toMillis();
+      lastDrawingMillis =
+          Duration.between(drawingTimeStart, Instant.now()).toMillis();
       // update time
       lastDrawnT = snapshot.t();
       snapshots.clear();

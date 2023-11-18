@@ -72,42 +72,34 @@ public class RotationalJoint
       double anchorSideDistance) {
     // check length and with consistency
     if (length < width) {
-      throw new IllegalArgumentException(
-          "Length must be at least %f%% w.r.t. width: found l=%f and w=%f"
-              .formatted(1d + ANCHOR_REL_GAP, length, width));
+      throw new IllegalArgumentException("Length must be at least %f%% w.r.t. width: found l=%f and w=%f"
+          .formatted(1d + ANCHOR_REL_GAP, length, width));
     }
     this.mass = mass;
     this.motor = motor;
     this.jointActiveAngleRange = jointActiveAngleRange;
     jointLength = Math.sqrt(2d) * width / 2d;
     // create bodies
-    Poly poly1 =
-        new Path(Point.ORIGIN)
-            .moveBy(length / 2d - width / 2d, 0)
-            .moveBy(width / 2d, width / 2d)
-            .moveBy(-width / 2d, width / 2d)
-            .moveBy(-(length / 2d - width / 2d), 0)
-            .toPoly();
+    Poly poly1 = new Path(Point.ORIGIN)
+        .moveBy(length / 2d - width / 2d, 0)
+        .moveBy(width / 2d, width / 2d)
+        .moveBy(-width / 2d, width / 2d)
+        .moveBy(-(length / 2d - width / 2d), 0)
+        .toPoly();
     @SuppressWarnings("SuspiciousNameCombination")
-    Poly poly2 =
-        new Path(new Point(length / 2d, width / 2d))
-            .moveBy(width / 2d, -width / 2d)
-            .moveBy(length / 2d - width / 2d, 0)
-            .moveBy(0, width)
-            .moveBy(-(length / 2d - width / 2d), 0)
-            .toPoly();
-    body1 =
-        createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly1);
-    body2 =
-        createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly2);
-    int jIndex1 =
-        List.of(polyFromBody(body1).vertexes()).indexOf(new Point(length / 2d, width / 2d));
-    int jIndex2 =
-        List.of(polyFromBody(body2).vertexes()).indexOf(new Point(length / 2d, width / 2d));
-    polyIndexes =
-        List.of(
-            IntStream.range(0, 5).map(i -> (i + jIndex1) % 5).boxed().toList(),
-            IntStream.range(0, 5).map(i -> (i + jIndex2) % 5).boxed().toList());
+    Poly poly2 = new Path(new Point(length / 2d, width / 2d))
+        .moveBy(width / 2d, -width / 2d)
+        .moveBy(length / 2d - width / 2d, 0)
+        .moveBy(0, width)
+        .moveBy(-(length / 2d - width / 2d), 0)
+        .toPoly();
+    body1 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly1);
+    body2 = createBody(mass / 2d, friction, restitution, linearDamping, angularDamping, this, poly2);
+    int jIndex1 = List.of(polyFromBody(body1).vertexes()).indexOf(new Point(length / 2d, width / 2d));
+    int jIndex2 = List.of(polyFromBody(body2).vertexes()).indexOf(new Point(length / 2d, width / 2d));
+    polyIndexes = List.of(
+        IntStream.range(0, 5).map(i -> (i + jIndex1) % 5).boxed().toList(),
+        IntStream.range(0, 5).map(i -> (i + jIndex2) % 5).boxed().toList());
     // create joint
     joint = new RevoluteJoint<>(body1, body2, new Vector2(length / 2d, width / 2d));
     // joint.setReferenceAngle(0);
@@ -120,23 +112,17 @@ public class RotationalJoint
     // create anchors
     List<Anchor> localAnchors = new ArrayList<>();
     List.of(0, 1, 3, 4)
-        .forEach(
-            i ->
-                localAnchors.add(
-                    new BodyAnchor(
-                        body1,
-                        new Segment(poly1.vertexes()[i], Utils.point(body1.getLocalCenter()))
-                            .pointAtDistance(anchorSideDistance),
-                        this)));
+        .forEach(i -> localAnchors.add(new BodyAnchor(
+            body1,
+            new Segment(poly1.vertexes()[i], Utils.point(body1.getLocalCenter()))
+                .pointAtDistance(anchorSideDistance),
+            this)));
     List.of(1, 2, 3, 4)
-        .forEach(
-            i ->
-                localAnchors.add(
-                    new BodyAnchor(
-                        body2,
-                        new Segment(poly2.vertexes()[i], Utils.point(body2.getLocalCenter()))
-                            .pointAtDistance(anchorSideDistance),
-                        this)));
+        .forEach(i -> localAnchors.add(new BodyAnchor(
+            body2,
+            new Segment(poly2.vertexes()[i], Utils.point(body2.getLocalCenter()))
+                .pointAtDistance(anchorSideDistance),
+            this)));
     anchors = Collections.unmodifiableList(localAnchors);
     // set initial first direction
     initialRefDirection = getRefDirection();
@@ -165,15 +151,13 @@ public class RotationalJoint
 
   private static Poly polyFromBody(Body body) {
     Transform t = body.getTransform();
-    return new Poly(
-        Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
-            .map(
-                v -> {
-                  Vector2 cv = v.copy();
-                  t.transform(cv);
-                  return Utils.point(cv);
-                })
-            .toArray(Point[]::new));
+    return new Poly(Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
+        .map(v -> {
+          Vector2 cv = v.copy();
+          t.transform(cv);
+          return Utils.point(cv);
+        })
+        .toArray(Point[]::new));
   }
 
   @Override
@@ -190,10 +174,9 @@ public class RotationalJoint
       return;
     }
     // control
-    double motorSpeed =
-        motor.controlP() * angleError
-            + motor.controlI() * angleErrorSummation
-            + motor.controlD() * angleDerivate;
+    double motorSpeed = motor.controlP() * angleError
+        + motor.controlI() * angleErrorSummation
+        + motor.controlD() * angleDerivate;
     if (motorSpeed > motor.maxSpeed()) {
       motorSpeed = motor.maxSpeed();
     } else if (motorSpeed < -motor.maxSpeed()) {
@@ -215,8 +198,7 @@ public class RotationalJoint
 
   @Override
   public Point centerLinearVelocity() {
-    return Point.average(
-        Utils.point(body1.getLinearVelocity()), Utils.point(body2.getLinearVelocity()));
+    return Point.average(Utils.point(body1.getLinearVelocity()), Utils.point(body2.getLinearVelocity()));
   }
 
   @Override

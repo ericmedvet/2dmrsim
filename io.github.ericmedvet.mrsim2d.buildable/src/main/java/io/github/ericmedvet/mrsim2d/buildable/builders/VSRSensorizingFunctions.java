@@ -41,52 +41,45 @@ public class VSRSensorizingFunctions {
       @Param(value = "sSensors") List<Sensor<? super Voxel>> sSensors,
       @Param(value = "wSensors") List<Sensor<? super Voxel>> wSensors,
       @Param(value = "headSensors") List<Sensor<? super Voxel>> headSensors) {
-    return shape ->
-        Grid.create(
-            shape.w(),
-            shape.h(),
-            (Integer x, Integer y) -> {
-              if (!shape.get(x, y)) {
-                return null;
-              }
-              int maxX =
-                  shape.entries().stream()
-                      .filter(e -> e.key().y() == y && e.value())
-                      .mapToInt(e -> e.key().x())
-                      .max()
-                      .orElse(0);
-              int minX =
-                  shape.entries().stream()
-                      .filter(e -> e.key().y() == y && e.value())
-                      .mapToInt(e -> e.key().x())
-                      .min()
-                      .orElse(0);
-              Grid.Key headKey =
-                  shape.entries().stream()
-                      .filter(Grid.Entry::value)
-                      .sorted(Comparator.comparingInt(e -> -e.key().x() - e.key().y()))
-                      .limit(1)
-                      .toList()
-                      .get(0)
-                      .key();
-              List<Sensor<? super Voxel>> localSensors = new ArrayList<>();
-              if (x == maxX) {
-                localSensors.addAll(eSensors);
-              }
-              if (x == minX) {
-                localSensors.addAll(wSensors);
-              }
-              if (y == 0) {
-                localSensors.addAll(sSensors);
-              }
-              if (y == shape.h() - 1) {
-                localSensors.addAll(nSensors);
-              }
-              if (x == headKey.x() && y == headKey.y()) {
-                localSensors.addAll(headSensors);
-              }
-              return localSensors;
-            });
+    return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
+      if (!shape.get(x, y)) {
+        return null;
+      }
+      int maxX = shape.entries().stream()
+          .filter(e -> e.key().y() == y && e.value())
+          .mapToInt(e -> e.key().x())
+          .max()
+          .orElse(0);
+      int minX = shape.entries().stream()
+          .filter(e -> e.key().y() == y && e.value())
+          .mapToInt(e -> e.key().x())
+          .min()
+          .orElse(0);
+      Grid.Key headKey = shape.entries().stream()
+          .filter(Grid.Entry::value)
+          .sorted(Comparator.comparingInt(e -> -e.key().x() - e.key().y()))
+          .limit(1)
+          .toList()
+          .get(0)
+          .key();
+      List<Sensor<? super Voxel>> localSensors = new ArrayList<>();
+      if (x == maxX) {
+        localSensors.addAll(eSensors);
+      }
+      if (x == minX) {
+        localSensors.addAll(wSensors);
+      }
+      if (y == 0) {
+        localSensors.addAll(sSensors);
+      }
+      if (y == shape.h() - 1) {
+        localSensors.addAll(nSensors);
+      }
+      if (x == headKey.x() && y == headKey.y()) {
+        localSensors.addAll(headSensors);
+      }
+      return localSensors;
+    });
   }
 
   @SuppressWarnings("unused")

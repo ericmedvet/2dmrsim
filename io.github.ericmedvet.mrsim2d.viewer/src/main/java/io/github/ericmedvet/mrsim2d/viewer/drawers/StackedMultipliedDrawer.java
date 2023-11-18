@@ -63,7 +63,8 @@ public class StackedMultipliedDrawer<T> implements Drawer {
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     // build list of seqs of snapshots
-    List<List<Snapshot>> multiplied = snapshots.stream().map(multiplier::apply).toList();
+    List<List<Snapshot>> multiplied =
+        snapshots.stream().map(multiplier::apply).toList();
     int lastSize = multiplied.get(multiplied.size() - 1).size();
     multiplied = multiplied.stream().filter(l -> l.size() == lastSize).toList();
     List<List<Snapshot>> lists = new ArrayList<>(lastSize);

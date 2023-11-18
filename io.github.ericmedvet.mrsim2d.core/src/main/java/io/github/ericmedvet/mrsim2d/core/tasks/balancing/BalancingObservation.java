@@ -29,10 +29,7 @@ public class BalancingObservation extends AgentsObservation {
   private final BoundingBox swingBoundingBox;
 
   public BalancingObservation(
-      List<Agent> agents,
-      double swingAngle,
-      boolean swingTouchingGround,
-      BoundingBox swingBoundingBox) {
+      List<Agent> agents, double swingAngle, boolean swingTouchingGround, BoundingBox swingBoundingBox) {
     super(agents);
     this.swingAngle = swingAngle;
     this.swingTouchingGround = swingTouchingGround;

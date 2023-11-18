@@ -71,12 +71,11 @@ public class Utils {
     if (method.getDecomposer() != null) {
       if (method.getDecomposer().get() instanceof Triangulator triangulator) {
         return triangulator
-            .triangulate(Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new))
+            .triangulate(
+                Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new))
             .stream()
-            .map(
-                t ->
-                    new Poly(
-                        Arrays.stream(t.getVertices()).map(Utils::point).toArray(Point[]::new)))
+            .map(t -> new Poly(
+                Arrays.stream(t.getVertices()).map(Utils::point).toArray(Point[]::new)))
             .toList();
       }
       return method
@@ -84,24 +83,23 @@ public class Utils {
           .get()
           .decompose(Arrays.stream(poly.vertexes()).map(Utils::point).toList())
           .stream()
-          .map(
-              c -> {
-                if (c instanceof Polygon polygon) {
-                  Vector2[] vertices = polygon.getVertices();
-                  return new Poly(Arrays.stream(vertices).map(Utils::point).toArray(Point[]::new));
-                }
-                throw new IllegalArgumentException(
-                    "Unsupported convex type %s".formatted(c.getClass().getSimpleName()));
-              })
+          .map(c -> {
+            if (c instanceof Polygon polygon) {
+              Vector2[] vertices = polygon.getVertices();
+              return new Poly(
+                  Arrays.stream(vertices).map(Utils::point).toArray(Point[]::new));
+            }
+            throw new IllegalArgumentException("Unsupported convex type %s"
+                .formatted(c.getClass().getSimpleName()));
+          })
           .toList();
     }
     if (method.equals(DecomposeMethod.Y_SECTION)) {
-      List<Double> xs =
-          Arrays.stream(poly.vertexes())
-              .map(Point::x)
-              .distinct()
-              .sorted(Comparator.comparingDouble(x -> x))
-              .toList();
+      List<Double> xs = Arrays.stream(poly.vertexes())
+          .map(Point::x)
+          .distinct()
+          .sorted(Comparator.comparingDouble(x -> x))
+          .toList();
       List<Segment> nonVerticalSides =
           poly.sides().stream().filter(s -> s.p1().x() != s.p2().x()).toList();
       List<Poly> polies = new ArrayList<>();
@@ -109,21 +107,19 @@ public class Utils {
         double x1 = xs.get(i - 1);
         double x2 = xs.get(i);
         // find left intersections
-        List<Double> ys1 =
-            nonVerticalSides.stream()
-                .filter(s -> s.boundingBox().max().x() != x1)
-                .map(s -> s.yAt(x1))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+        List<Double> ys1 = nonVerticalSides.stream()
+            .filter(s -> s.boundingBox().max().x() != x1)
+            .map(s -> s.yAt(x1))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
         // find right intersections
-        List<Double> ys2 =
-            nonVerticalSides.stream()
-                .filter(s -> s.boundingBox().min().x() != x2)
-                .map(s -> s.yAt(x2))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+        List<Double> ys2 = nonVerticalSides.stream()
+            .filter(s -> s.boundingBox().min().x() != x2)
+            .map(s -> s.yAt(x2))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
         // check number (>2 <5)
         if (ys1.size() + ys2.size() <= 2) {
           throw new IllegalArgumentException(
@@ -138,24 +134,34 @@ public class Utils {
               "Unsupported poly type: %d>4 intersections at %.3f".formatted(ys2.size(), x2));
         }
         // build poly
-        List<Point> points =
-            Stream.of(
-                    new Point(
-                        x1, ys1.stream().min(Comparator.comparingDouble(v -> v)).orElseThrow()),
-                    new Point(
-                        x2, ys2.stream().min(Comparator.comparingDouble(v -> v)).orElseThrow()),
-                    new Point(
-                        x2, ys2.stream().max(Comparator.comparingDouble(v -> v)).orElseThrow()),
-                    new Point(
-                        x1, ys1.stream().max(Comparator.comparingDouble(v -> v)).orElseThrow()))
-                .distinct()
-                .toList();
+        List<Point> points = Stream.of(
+                new Point(
+                    x1,
+                    ys1.stream()
+                        .min(Comparator.comparingDouble(v -> v))
+                        .orElseThrow()),
+                new Point(
+                    x2,
+                    ys2.stream()
+                        .min(Comparator.comparingDouble(v -> v))
+                        .orElseThrow()),
+                new Point(
+                    x2,
+                    ys2.stream()
+                        .max(Comparator.comparingDouble(v -> v))
+                        .orElseThrow()),
+                new Point(
+                    x1,
+                    ys1.stream()
+                        .max(Comparator.comparingDouble(v -> v))
+                        .orElseThrow()))
+            .distinct()
+            .toList();
         polies.add(new Poly(points.toArray(Point[]::new)));
       }
       return polies;
     }
-    throw new UnsupportedOperationException(
-        "Decompose method %s is not supported".formatted(method));
+    throw new UnsupportedOperationException("Decompose method %s is not supported".formatted(method));
   }
 
   public static Vector2 point(Point p) {
@@ -167,9 +173,8 @@ public class Utils {
   }
 
   public static Polygon poly(Poly poly) {
-    return new Polygon(
-        HULL_GENERATOR.generate(
-            Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)));
+    return new Polygon(HULL_GENERATOR.generate(
+        Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)));
   }
 
   private static Poly poly(Polygon polygon) {

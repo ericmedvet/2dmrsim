@@ -30,8 +30,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.function.BiPredicate;
 
 public class CreateLink
-    extends AbstractLastingActionOutcomeDrawer<
-        io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> {
+    extends AbstractLastingActionOutcomeDrawer<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> {
 
   private static final Color COLOR = Color.GREEN;
 
@@ -50,8 +49,7 @@ public class CreateLink
 
   @Override
   protected BiPredicate<Double, Graphics2D> innerBuildTask(
-      double t,
-      ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> o) {
+      double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> o) {
     return (dT, g) -> {
       if (o.outcome().isPresent()) {
         g.setColor(color);

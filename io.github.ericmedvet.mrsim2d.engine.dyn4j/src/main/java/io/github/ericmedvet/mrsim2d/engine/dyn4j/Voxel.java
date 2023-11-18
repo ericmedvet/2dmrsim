@@ -87,9 +87,8 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     Arrays.stream(Side.values()).forEach(s -> sideJoints.put(s, new ArrayList<>()));
     centralJoints = new ArrayList<>();
     assemble();
-    anchors =
-        vertexes.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> new BodyAnchor(e.getValue(), this)));
+    anchors = vertexes.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> new BodyAnchor(e.getValue(), this)));
     initialSidesAverageDirection = getSidesAverageDirection();
   }
 
@@ -109,8 +108,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
     public SpringRange {
       if ((min > rest) || (max < rest) || (min < 0)) {
-        throw new IllegalArgumentException(
-            String.format("Wrong spring range [%f, %f, %f]", min, rest, max));
+        throw new IllegalArgumentException(String.format("Wrong spring range [%f, %f, %f]", min, rest, max));
       }
     }
   }
@@ -127,8 +125,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     @Override
     public boolean isAllowed(Filter otherFilter) {
       if (otherFilter instanceof VoxelFilter otherVoxelFilter) {
-        return getOwner() != otherVoxelFilter.getOwner()
-            || bodyType.equals(otherVoxelFilter.bodyType);
+        return getOwner() != otherVoxelFilter.getOwner() || bodyType.equals(otherVoxelFilter.bodyType);
       }
       return true;
     }
@@ -148,11 +145,10 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     // apply on central
-    double v =
-        sideValues.values().stream()
-            .mapToDouble(d -> DoubleRange.SYMMETRIC_UNIT.clip(d))
-            .average()
-            .orElse(0d);
+    double v = sideValues.values().stream()
+        .mapToDouble(d -> DoubleRange.SYMMETRIC_UNIT.clip(d))
+        .average()
+        .orElse(0d);
     for (DistanceJoint<Body> joint : centralJoints) {
       Voxel.SpringRange range = (SpringRange) joint.getUserData();
       if (v >= 0) { // shrink
@@ -180,8 +176,9 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
   @Override
   public Point vertex(Vertex vertex) {
-    List<Point> centers =
-        vertexes.values().stream().map(b -> Utils.point(b.getWorldCenter())).toList();
+    List<Point> centers = vertexes.values().stream()
+        .map(b -> Utils.point(b.getWorldCenter()))
+        .toList();
     Point c = Point.average(centers.toArray(Point[]::new));
     double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
     return enlongForm(c, Utils.point(vertexes.get(vertex).getWorldCenter()), d);
@@ -217,8 +214,9 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
   @Override
   public Poly poly() {
-    List<Point> centers =
-        vertexes.values().stream().map(b -> Utils.point(b.getWorldCenter())).toList();
+    List<Point> centers = vertexes.values().stream()
+        .map(b -> Utils.point(b.getWorldCenter()))
+        .toList();
     Point c = Point.average(centers.toArray(Point[]::new));
     double d = sideLength * vertexMassSideLengthRatio / 2d * Math.sqrt(2d);
     return new Poly(centers.stream().map(vc -> enlongForm(c, vc, d)).toArray(Point[]::new));
@@ -233,117 +231,60 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     vertexes.put(Vertex.NE, new Body()); // 1
     vertexes.put(Vertex.SE, new Body()); // 2
     vertexes.put(Vertex.SW, new Body()); // 3
-    vertexes
-        .values()
-        .forEach(
-            v ->
-                v.addFixture(
-                    MASS_SHAPE_PROVIDER.apply(massSideLength), density, friction, restitution));
-    vertexes
-        .get(Vertex.NW)
-        .translate(
-            -(sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
-    vertexes
-        .get(Vertex.NE)
-        .translate(
-            (sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
-    vertexes
-        .get(Vertex.SE)
-        .translate(
-            (sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
-    vertexes
-        .get(Vertex.SW)
-        .translate(
-            -(sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
+    vertexes.values()
+        .forEach(v -> v.addFixture(MASS_SHAPE_PROVIDER.apply(massSideLength), density, friction, restitution));
+    vertexes.get(Vertex.NW)
+        .translate(-(sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
+    vertexes.get(Vertex.NE)
+        .translate((sideLength / 2d - massSideLength / 2d), (sideLength / 2d - massSideLength / 2d));
+    vertexes.get(Vertex.SE)
+        .translate((sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
+    vertexes.get(Vertex.SW)
+        .translate(-(sideLength / 2d - massSideLength / 2d), -(sideLength / 2d - massSideLength / 2d));
     for (Body body : vertexes.values()) {
       body.setMass(MassType.NORMAL);
       body.setLinearDamping(linearDamping);
       body.setAngularDamping(angularDamping);
     }
     // build distance joints constraints
-    DoubleRange activeSideRange =
-        new DoubleRange(
-            Math.sqrt(sideLength * sideLength * areaRatioActiveRange.min()),
-            Math.sqrt(sideLength * sideLength * areaRatioActiveRange.max()));
-    SpringRange sideParallelActiveRange =
-        new SpringRange(
-            activeSideRange.min() - 2d * massSideLength,
-            sideLength - 2d * massSideLength,
-            activeSideRange.max() - 2d * massSideLength);
-    SpringRange sideCrossActiveRange =
-        new SpringRange(
-            Math.sqrt(
-                massSideLength * massSideLength
-                    + sideParallelActiveRange.min * sideParallelActiveRange.min),
-            Math.sqrt(
-                massSideLength * massSideLength
-                    + sideParallelActiveRange.rest * sideParallelActiveRange.rest),
-            Math.sqrt(
-                massSideLength * massSideLength
-                    + sideParallelActiveRange.max * sideParallelActiveRange.max));
-    SpringRange centralCrossActiveRange =
-        new SpringRange(
-            (activeSideRange.min() - massSideLength) * Math.sqrt(2d),
-            (sideLength - massSideLength) * Math.sqrt(2d),
-            (activeSideRange.max() - massSideLength) * Math.sqrt(2d));
+    DoubleRange activeSideRange = new DoubleRange(
+        Math.sqrt(sideLength * sideLength * areaRatioActiveRange.min()),
+        Math.sqrt(sideLength * sideLength * areaRatioActiveRange.max()));
+    SpringRange sideParallelActiveRange = new SpringRange(
+        activeSideRange.min() - 2d * massSideLength,
+        sideLength - 2d * massSideLength,
+        activeSideRange.max() - 2d * massSideLength);
+    SpringRange sideCrossActiveRange = new SpringRange(
+        Math.sqrt(massSideLength * massSideLength + sideParallelActiveRange.min * sideParallelActiveRange.min),
+        Math.sqrt(
+            massSideLength * massSideLength + sideParallelActiveRange.rest * sideParallelActiveRange.rest),
+        Math.sqrt(massSideLength * massSideLength + sideParallelActiveRange.max * sideParallelActiveRange.max));
+    SpringRange centralCrossActiveRange = new SpringRange(
+        (activeSideRange.min() - massSideLength) * Math.sqrt(2d),
+        (sideLength - massSideLength) * Math.sqrt(2d),
+        (activeSideRange.max() - massSideLength) * Math.sqrt(2d));
     // build distance joints
     if (springScaffoldings.contains(SpringScaffolding.SIDE_INTERNAL)) {
-      DistanceJoint<Body> nj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NW),
-              vertexes.get(Vertex.NE),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d));
-      DistanceJoint<Body> ej =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NE),
-              vertexes.get(Vertex.SE),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> sj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SE),
-              vertexes.get(Vertex.SW),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> wj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SW),
-              vertexes.get(Vertex.NW),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> nj = new DistanceJoint<>(
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> ej = new DistanceJoint<>(
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> sj = new DistanceJoint<>(
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> wj = new DistanceJoint<>(
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d));
       sideJoints.get(Side.N).add(nj);
       sideJoints.get(Side.E).add(ej);
       sideJoints.get(Side.S).add(sj);
@@ -353,62 +294,26 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     if (springScaffoldings.contains(SpringScaffolding.SIDE_EXTERNAL)) {
-      DistanceJoint<Body> nj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NW),
-              vertexes.get(Vertex.NE),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> ej =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NE),
-              vertexes.get(Vertex.SE),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> sj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SE),
-              vertexes.get(Vertex.SW),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d));
-      DistanceJoint<Body> wj =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SW),
-              vertexes.get(Vertex.NW),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> nj = new DistanceJoint<>(
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> ej = new DistanceJoint<>(
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> sj = new DistanceJoint<>(
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> wj = new DistanceJoint<>(
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d));
       sideJoints.get(Side.N).add(nj);
       sideJoints.get(Side.E).add(ej);
       sideJoints.get(Side.S).add(sj);
@@ -418,118 +323,46 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     if (springScaffoldings.contains(SpringScaffolding.SIDE_CROSS)) {
-      DistanceJoint<Body> nj1 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NW),
-              vertexes.get(Vertex.NE),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d));
-      DistanceJoint<Body> nj2 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NW),
-              vertexes.get(Vertex.NE),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> ej1 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NE),
-              vertexes.get(Vertex.SE),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> ej2 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NE),
-              vertexes.get(Vertex.SE),
-              vertexes
-                  .get(Vertex.NE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> sj1 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SE),
-              vertexes.get(Vertex.SW),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d));
-      DistanceJoint<Body> sj2 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SE),
-              vertexes.get(Vertex.SW),
-              vertexes
-                  .get(Vertex.SE)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d));
-      DistanceJoint<Body> wj1 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SW),
-              vertexes.get(Vertex.NW),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, -massSideLength / 2d));
-      DistanceJoint<Body> wj2 =
-          new DistanceJoint<>(
-              vertexes.get(Vertex.SW),
-              vertexes.get(Vertex.NW),
-              vertexes
-                  .get(Vertex.SW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(massSideLength / 2d, massSideLength / 2d),
-              vertexes
-                  .get(Vertex.NW)
-                  .getWorldCenter()
-                  .copy()
-                  .add(-massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> nj1 = new DistanceJoint<>(
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> nj2 = new DistanceJoint<>(
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> ej1 = new DistanceJoint<>(
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> ej2 = new DistanceJoint<>(
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.NE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> sj1 = new DistanceJoint<>(
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> sj2 = new DistanceJoint<>(
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.SE).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d));
+      DistanceJoint<Body> wj1 = new DistanceJoint<>(
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(-massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(massSideLength / 2d, -massSideLength / 2d));
+      DistanceJoint<Body> wj2 = new DistanceJoint<>(
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.SW).getWorldCenter().copy().add(massSideLength / 2d, massSideLength / 2d),
+          vertexes.get(Vertex.NW).getWorldCenter().copy().add(-massSideLength / 2d, -massSideLength / 2d));
       sideJoints.get(Side.N).add(nj1);
       sideJoints.get(Side.N).add(nj2);
       sideJoints.get(Side.E).add(ej1);
@@ -543,26 +376,22 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     if (springScaffoldings.contains(SpringScaffolding.CENTRAL_CROSS)) {
-      centralJoints.add(
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NW),
-              vertexes.get(Vertex.SE),
-              vertexes.get(Vertex.NW).getWorldCenter(),
-              vertexes.get(Vertex.SE).getWorldCenter()));
-      centralJoints.add(
-          new DistanceJoint<>(
-              vertexes.get(Vertex.NE),
-              vertexes.get(Vertex.SW),
-              vertexes.get(Vertex.NE).getWorldCenter(),
-              vertexes.get(Vertex.SW).getWorldCenter()));
+      centralJoints.add(new DistanceJoint<>(
+          vertexes.get(Vertex.NW),
+          vertexes.get(Vertex.SE),
+          vertexes.get(Vertex.NW).getWorldCenter(),
+          vertexes.get(Vertex.SE).getWorldCenter()));
+      centralJoints.add(new DistanceJoint<>(
+          vertexes.get(Vertex.NE),
+          vertexes.get(Vertex.SW),
+          vertexes.get(Vertex.NE).getWorldCenter(),
+          vertexes.get(Vertex.SW).getWorldCenter()));
       for (DistanceJoint<Body> joint : centralJoints) {
         joint.setUserData(centralCrossActiveRange);
       }
     }
     // set collision filter
-    getBodies()
-        .forEach(
-            b -> b.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.VERTEX))));
+    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.VERTEX))));
     // add central mass
     //noinspection ConstantConditions
     if (CENTRAL_MASS_RATIO > 0) {
@@ -577,28 +406,24 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       otherBodies.add(centralMass);
       for (Body vertex : vertexes.values()) {
         DistanceJoint<Body> joint =
-            new DistanceJoint<>(
-                centralMass, vertex, centralMass.getWorldCenter(), vertex.getWorldCenter());
-        joint.setUserData(
-            new SpringRange(
-                centralCrossActiveRange.min / 2d,
-                centralCrossActiveRange.rest / 2d,
-                centralCrossActiveRange.max / 2));
+            new DistanceJoint<>(centralMass, vertex, centralMass.getWorldCenter(), vertex.getWorldCenter());
+        joint.setUserData(new SpringRange(
+            centralCrossActiveRange.min / 2d,
+            centralCrossActiveRange.rest / 2d,
+            centralCrossActiveRange.max / 2));
         joint.setCollisionAllowed(false);
         centralJoints.add(joint);
       }
     }
     // setup spring joints
-    getJoints()
-        .forEach(
-            j -> {
-              if (j instanceof DistanceJoint<Body> joint) {
-                joint.setRestDistance(((SpringRange) joint.getUserData()).rest);
-                joint.setCollisionAllowed(true);
-                joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
-                joint.setDampingRatio(SPRING_D);
-              }
-            });
+    getJoints().forEach(j -> {
+      if (j instanceof DistanceJoint<Body> joint) {
+        joint.setRestDistance(((SpringRange) joint.getUserData()).rest);
+        joint.setCollisionAllowed(true);
+        joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
+        joint.setDampingRatio(SPRING_D);
+      }
+    });
     // set user data
     vertexes.values().forEach(b -> b.setUserData(this));
     otherBodies.forEach(b -> b.setUserData(this));
@@ -610,21 +435,22 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
 
   @Override
   public Collection<Body> getBodies() {
-    return Stream.of(vertexes.values(), otherBodies).flatMap(Collection::stream).toList();
+    return Stream.of(vertexes.values(), otherBodies)
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public Collection<Joint<Body>> getJoints() {
-    List<DistanceJoint<Body>> allJoints =
-        Stream.of(
-                sideJoints.get(Side.N),
-                sideJoints.get(Side.E),
-                sideJoints.get(Side.S),
-                sideJoints.get(Side.W),
-                centralJoints)
-            .flatMap(Collection::stream)
-            .toList();
+    List<DistanceJoint<Body>> allJoints = Stream.of(
+            sideJoints.get(Side.N),
+            sideJoints.get(Side.E),
+            sideJoints.get(Side.S),
+            sideJoints.get(Side.W),
+            centralJoints)
+        .flatMap(Collection::stream)
+        .toList();
     return (List) allJoints;
   }
 

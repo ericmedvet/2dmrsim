@@ -38,8 +38,7 @@ public abstract class AbstractLastingActionOutcomeDrawer<A extends Action<O>, O>
     this.duration = duration;
   }
 
-  protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(
-      double t, ActionOutcome<A, O> o);
+  protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(double t, ActionOutcome<A, O> o);
 
   @SuppressWarnings("unchecked")
   @Override

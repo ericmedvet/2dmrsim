@@ -71,9 +71,7 @@ public class EngineProfilingDrawer
 
   @Override
   protected boolean innerDraw(
-      SortedMap<
-              Double,
-              Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>>
+      SortedMap<Double, Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>>
           memory,
       Graphics2D g) {
     // check if empty
@@ -81,60 +79,44 @@ public class EngineProfilingDrawer
       return false;
     }
     // obtain relative data
-    Map<EngineSnapshot.TimeType, Double> relTimes =
-        Arrays.stream(EngineSnapshot.TimeType.values())
-            .collect(
-                Collectors.toMap(
-                    k -> k,
-                    k ->
-                        memory.get(memory.lastKey()).first().get(k)
-                            - memory.get(memory.firstKey()).first().get(k)));
-    Map<EngineSnapshot.CounterType, Integer> relCounters =
-        Arrays.stream(EngineSnapshot.CounterType.values())
-            .collect(
-                Collectors.toMap(
-                    k -> k,
-                    k ->
-                        memory.get(memory.lastKey()).second().get(k)
-                            - memory.get(memory.firstKey()).second().get(k)));
+    Map<EngineSnapshot.TimeType, Double> relTimes = Arrays.stream(EngineSnapshot.TimeType.values())
+        .collect(Collectors.toMap(
+            k -> k,
+            k -> memory.get(memory.lastKey()).first().get(k)
+                - memory.get(memory.firstKey()).first().get(k)));
+    Map<EngineSnapshot.CounterType, Integer> relCounters = Arrays.stream(EngineSnapshot.CounterType.values())
+        .collect(Collectors.toMap(
+            k -> k,
+            k -> memory.get(memory.lastKey()).second().get(k)
+                - memory.get(memory.firstKey()).second().get(k)));
     // update bounds
     DoubleRange percRange = new DoubleRange(0, 100);
     Arrays.stream(EngineSnapshot.CounterType.values())
-        .forEach(
-            k -> maxCounterValues.put(k, Math.max(maxCounterValues.get(k), relCounters.get(k))));
+        .forEach(k -> maxCounterValues.put(k, Math.max(maxCounterValues.get(k), relCounters.get(k))));
     // compute box w and h
     double bbW = 0d;
-    bbW =
-        Math.max(
-            bbW,
-            BAR_W
-                + g.getFontMetrics().charWidth('x')
-                + g.getFontMetrics()
-                    .stringWidth(
-                        TICK_PS_FORMAT.formatted(
-                            100
-                                * relTimes.get(EngineSnapshot.TimeType.TICK)
-                                / relTimes.get(EngineSnapshot.TimeType.WALL))));
-    bbW =
-        Math.max(
-            bbW,
-            BAR_W
-                + g.getFontMetrics().charWidth('x')
-                + g.getFontMetrics()
-                    .stringWidth(
-                        INNER_TICK_RATE_FORMAT.formatted(
-                            100
-                                * relTimes.get(EngineSnapshot.TimeType.INNER_TICK)
-                                / relTimes.get(EngineSnapshot.TimeType.TICK))));
-    bbW =
-        Math.max(
-            bbW,
-            BAR_W
-                + g.getFontMetrics().charWidth('x')
-                + g.getFontMetrics()
-                    .stringWidth(
-                        ACTION_COUNT_FORMAT.formatted(
-                            (float) relCounters.get(EngineSnapshot.CounterType.ACTION))));
+    bbW = Math.max(
+        bbW,
+        BAR_W
+            + g.getFontMetrics().charWidth('x')
+            + g.getFontMetrics()
+                .stringWidth(TICK_PS_FORMAT.formatted(100
+                    * relTimes.get(EngineSnapshot.TimeType.TICK)
+                    / relTimes.get(EngineSnapshot.TimeType.WALL))));
+    bbW = Math.max(
+        bbW,
+        BAR_W
+            + g.getFontMetrics().charWidth('x')
+            + g.getFontMetrics()
+                .stringWidth(INNER_TICK_RATE_FORMAT.formatted(100
+                    * relTimes.get(EngineSnapshot.TimeType.INNER_TICK)
+                    / relTimes.get(EngineSnapshot.TimeType.TICK))));
+    bbW = Math.max(
+        bbW,
+        BAR_W
+            + g.getFontMetrics().charWidth('x')
+            + g.getFontMetrics().stringWidth(ACTION_COUNT_FORMAT.formatted((float)
+                relCounters.get(EngineSnapshot.CounterType.ACTION))));
     double bbH = 3 * g.getFontMetrics().getHeight();
     // draw
     double x =
@@ -153,9 +135,7 @@ public class EngineProfilingDrawer
         y,
         BAR_W,
         BAR_H,
-        100
-            * relTimes.get(EngineSnapshot.TimeType.TICK)
-            / relTimes.get(EngineSnapshot.TimeType.WALL),
+        100 * relTimes.get(EngineSnapshot.TimeType.TICK) / relTimes.get(EngineSnapshot.TimeType.WALL),
         percRange,
         TICK_PS_FORMAT,
         g);
@@ -165,9 +145,7 @@ public class EngineProfilingDrawer
         y,
         BAR_W,
         BAR_H,
-        100
-            * relTimes.get(EngineSnapshot.TimeType.INNER_TICK)
-            / relTimes.get(EngineSnapshot.TimeType.TICK),
+        100 * relTimes.get(EngineSnapshot.TimeType.INNER_TICK) / relTimes.get(EngineSnapshot.TimeType.TICK),
         percRange,
         INNER_TICK_RATE_FORMAT,
         g);
