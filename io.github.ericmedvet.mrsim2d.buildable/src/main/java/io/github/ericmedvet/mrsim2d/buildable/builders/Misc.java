@@ -27,15 +27,14 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawers;
-import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
+import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.*;
 import io.github.ericmedvet.mrsim2d.viewer.framers.AllAgentsFramer;
+import io.github.ericmedvet.mrsim2d.viewer.framers.StaticFramer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,24 +58,29 @@ public class Misc {
 
   @SuppressWarnings("unused")
   public static Function<String, Drawer> drawer(
-      @Param(value = "enlargement", dD = 1.5) double enlargement,
-      @Param(value = "followTime", dD = 2) double followTime,
+      @Param(value = "framer", dNPM = "s.allAgentsFramer()") Framer<Snapshot> framer,
       @Param(value = "profilingTime", dD = 1) double profilingTime,
       @Param(value = "miniWorldEnlargement", dD = 10) double miniWorldEnlargement,
       @Param(value = "miniWorld") boolean miniWorld,
+      @Param(
+              value = "components",
+              dSs = {"unmovable_bodies", "soft_bodies", "rigid_bodies", "rotational_joints"})
+          List<Drawers.Component> components,
       @Param(value = "miniAgents", dS = "brains") MiniAgentInfo miniAgentInfo,
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions,
+      @Param(value = "info", dB = true) boolean info,
       @Param(value = "nfc") boolean nfc) {
     return s -> {
-      Drawer baseDrawer = new ComponentsDrawer(
-              List.of(
-                  new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                  new RotationalJointDrawer().andThen(new AnchorableBodyDrawer()),
-                  new SoftBodyDrawer().andThen(new AnchorableBodyDrawer()),
-                  new RigidBodyDrawer().andThen(new AnchorableBodyDrawer())),
-              Snapshot::bodies)
-          .onLastSnapshot();
+      List<ComponentDrawer> componentDrawers = components.stream()
+          .map(c -> switch (c) {
+            case SOFT_BODIES -> new SoftBodyDrawer().andThen(new AnchorableBodyDrawer());
+            case RIGID_BODIES -> new RigidBodyDrawer().andThen(new AnchorableBodyDrawer());
+            case UNMOVABLE_BODIES -> new UnmovableBodyDrawer().andThen(new AnchorableBodyDrawer());
+            case ROTATIONAL_JOINTS -> new RotationalJointDrawer().andThen(new AnchorableBodyDrawer());
+          })
+          .toList();
+      Drawer baseDrawer = new ComponentsDrawer(componentDrawers, Snapshot::bodies).onLastSnapshot();
       Drawer nfcDrawer = new NFCDrawer();
       Drawer actionsDrawer = new ComponentsDrawer(
           List.of(new AttractAnchor(), new SenseDistanceToBody(), new SenseRotatedVelocity()),
@@ -89,9 +93,7 @@ public class Misc {
       if (nfc) {
         thingsDrawers.add(nfcDrawer);
       }
-      Drawer worldDrawer = Drawer.transform(
-          new AllAgentsFramer(enlargement).largest(followTime),
-          Drawer.of(Collections.unmodifiableList(thingsDrawers)));
+      Drawer worldDrawer = Drawer.transform(framer, Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
         drawers.add(new StackedMultipliedDrawer<>(
@@ -113,7 +115,7 @@ public class Misc {
             Drawer.of(
                 Drawer.clear(),
                 Drawer.transform(
-                    new AllAgentsFramer(miniWorldEnlargement).largest(followTime),
+                    new AllAgentsFramer(miniWorldEnlargement).largest(2),
                     Drawer.of(new ComponentsDrawer(
                             List.of(
                                 new UnmovableBodyDrawer(),
@@ -127,9 +129,27 @@ public class Misc {
         drawers.add(new EngineProfilingDrawer(
             profilingTime, Drawer.VerticalPosition.BOTTOM, Drawer.HorizontalPosition.LEFT));
       }
-      drawers.add(new InfoDrawer(s));
+      if (info) {
+        drawers.add(new InfoDrawer(s));
+      }
       return Drawer.of(Collections.unmodifiableList(drawers));
     };
+  }
+
+  @SuppressWarnings("unused")
+  public static Framer<Snapshot> allAgentsFramer(
+      @Param(value = "enlargement", dD = 1.5) double enlargement,
+      @Param(value = "followTime", dD = 2) double followTime) {
+    return new AllAgentsFramer(enlargement).largest(followTime);
+  }
+
+  @SuppressWarnings("unused")
+  public static Framer<Snapshot> staticFramer(
+      @Param("minX") double minX,
+      @Param("maxX") double maxX,
+      @Param("minY") double minY,
+      @Param("maxY") double maxY) {
+    return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
   }
 
   @SuppressWarnings("unused")

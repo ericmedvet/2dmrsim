@@ -35,6 +35,13 @@ public class Drawers {
 
   private Drawers() {}
 
+  public enum Component {
+    SOFT_BODIES,
+    RIGID_BODIES,
+    UNMOVABLE_BODIES,
+    ROTATIONAL_JOINTS
+  }
+
   public static Drawer basic(String string) {
     return Drawer.of(Drawer.clear(), world(), new InfoDrawer(string), new EngineProfilingDrawer());
   }
