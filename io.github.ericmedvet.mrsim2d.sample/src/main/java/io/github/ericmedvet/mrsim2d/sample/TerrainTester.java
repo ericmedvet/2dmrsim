@@ -30,7 +30,8 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
+import io.github.ericmedvet.mrsim2d.viewer.VideoBuilder;
+import io.github.ericmedvet.mrsim2d.viewer.VideoUtils;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -66,10 +67,31 @@ public class TerrainTester {
     // do single task
     if (true) {
       @SuppressWarnings("unchecked")
-      Drawer drawer =
-          ((Function<String, Drawer>) nb.build("sim.drawer(actions=true;enlargement=5)")).apply("test");
-      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.hilly()")
-          .run();
+      Drawer drawer = ((Function<String, Drawer>)
+              nb.build(
+                  """
+sim.drawer(
+actions = true;
+components = [soft_bodies];
+actions = false;
+miniAgents = none;
+info = false;
+framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
+)
+"""))
+          .apply("test");
+      // taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")          .run();
+      VideoBuilder consumer = new VideoBuilder(
+          800,
+          100,
+          0,
+          10,
+          30,
+          VideoUtils.EncoderFacility.FFMPEG_SMALL,
+          new File("/home/eric/striscia.mp4"),
+          drawer);
+      taskOn(nb, engineSupplier, consumer, "s.t.flat()").run();
+      consumer.get();
       System.exit(0);
     }
     // prepare terrains
