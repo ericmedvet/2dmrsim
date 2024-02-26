@@ -20,13 +20,18 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.independentvoxel;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.NumBrained;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
-import io.github.ericmedvet.mrsim2d.core.actions.*;
+import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
+import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
+import io.github.ericmedvet.mrsim2d.core.actions.DetachAnchors;
+import io.github.ericmedvet.mrsim2d.core.actions.EmitNFCMessage;
+import io.github.ericmedvet.mrsim2d.core.actions.Sense;
+import io.github.ericmedvet.mrsim2d.core.actions.SenseNFC;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;

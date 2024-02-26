@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.geometry;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import java.util.Arrays;
 
 public record BoundingBox(Point min, Point max) implements Shape {

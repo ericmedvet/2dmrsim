@@ -20,8 +20,8 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
-import io.github.ericmedvet.jsdynsym.grid.Grid;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
@@ -29,7 +29,12 @@ import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class NumGridVSR extends AbstractGridVSR {
 

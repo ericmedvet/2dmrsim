@@ -19,7 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.core.actions;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 

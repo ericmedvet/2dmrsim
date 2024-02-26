@@ -18,6 +18,11 @@
       <artifactId>jsdynsym.core</artifactId>
       <version>${jsdynsym.version}</version>
     </dependency>
+    <dependency>
+      <artifactId>jnb.datastructure</artifactId>
+      <groupId>io.github.ericmedvet</groupId>
+      <version>${jnb.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

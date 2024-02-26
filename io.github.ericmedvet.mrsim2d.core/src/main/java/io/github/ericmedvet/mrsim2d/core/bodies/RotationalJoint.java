@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.bodies;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
 public interface RotationalJoint extends RigidBody, Anchorable {

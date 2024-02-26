@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
-import io.github.ericmedvet.jsdynsym.grid.Grid;
+import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.AttachClosestAnchors;

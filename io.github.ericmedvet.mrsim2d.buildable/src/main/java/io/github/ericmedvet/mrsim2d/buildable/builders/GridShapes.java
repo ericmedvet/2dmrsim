@@ -22,8 +22,9 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jsdynsym.grid.Grid;
+import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody.VoxelType;
 
 @Discoverable(prefixTemplate = "sim|s.agent|a.vsr.shape|s")
 public class GridShapes {
@@ -31,7 +32,7 @@ public class GridShapes {
   private GridShapes() {}
 
   @SuppressWarnings("unused")
-  public static Grid<GridBody.VoxelType> ball(@Param("d") Integer d) {
+  public static Grid<VoxelType> ball(@Param("d") Integer d) {
     return Grid.create(
         d,
         d,

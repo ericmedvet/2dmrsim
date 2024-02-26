@@ -19,7 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
-import io.github.ericmedvet.jsdynsym.grid.Grid;
+import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
@@ -27,6 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.actions.AttachClosestAnchors;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
 import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody.VoxelType;
 import io.github.ericmedvet.mrsim2d.core.agents.independentvoxel.AbstractIndependentVoxel;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
@@ -52,7 +53,7 @@ public class PrebuiltIndependentLocomotion
   private final Terrain terrain;
   private final double initialXGap;
   private final double initialYGap;
-  private final Grid<GridBody.VoxelType> shape;
+  private final Grid<VoxelType> shape;
 
   public PrebuiltIndependentLocomotion(
       double duration, Terrain terrain, double initialXGap, double initialYGap, Grid<GridBody.VoxelType> shape) {

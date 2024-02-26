@@ -20,12 +20,12 @@
 
 package io.github.ericmedvet.mrsim2d.viewer.drawers;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.engine.EngineSnapshot;
 import io.github.ericmedvet.mrsim2d.core.util.Pair;
 import io.github.ericmedvet.mrsim2d.viewer.AbstractMemoryDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;

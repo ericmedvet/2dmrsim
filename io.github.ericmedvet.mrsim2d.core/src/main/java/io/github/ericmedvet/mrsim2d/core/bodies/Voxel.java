@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.bodies;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
 import java.util.Collection;

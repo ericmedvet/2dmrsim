@@ -22,14 +22,15 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
-import io.github.ericmedvet.jsdynsym.grid.Grid;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.ReactiveGridVSR;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.ReactiveGridVSR.ReactiveVoxel;
 import io.github.ericmedvet.mrsim2d.core.agents.independentvoxel.NumIndependentVoxel;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridModularRobot;
 import io.github.ericmedvet.mrsim2d.core.agents.legged.AbstractLeggedHybridRobot;
@@ -129,7 +130,7 @@ public class Agents {
   }
 
   @SuppressWarnings("unused")
-  public static ReactiveGridVSR reactiveGridVSR(@Param("body") Grid<ReactiveGridVSR.ReactiveVoxel> body) {
+  public static ReactiveGridVSR reactiveGridVSR(@Param("body") Grid<ReactiveVoxel> body) {
     return new ReactiveGridVSR(body);
   }
 }

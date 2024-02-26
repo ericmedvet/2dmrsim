@@ -21,6 +21,7 @@
 module io.github.ericmedvet.mrsim2d.core {
   requires java.logging;
   requires io.github.ericmedvet.jsdynsym.core;
+  requires io.github.ericmedvet.jnb.datastructure;
 
   exports io.github.ericmedvet.mrsim2d.core;
   exports io.github.ericmedvet.mrsim2d.core.actions;

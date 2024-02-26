@@ -22,8 +22,8 @@ package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jsdynsym.grid.Grid;
-import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
+import io.github.ericmedvet.jnb.datastructure.Grid;
+import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody.VoxelType;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.balancing.Balancing;
 import io.github.ericmedvet.mrsim2d.core.tasks.jumping.Jumping;
@@ -85,7 +85,7 @@ public class Tasks {
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap,
-      @Param(value = "shape") Grid<GridBody.VoxelType> shape) {
+      @Param(value = "shape") Grid<VoxelType> shape) {
     return new PrebuiltIndependentLocomotion(duration, terrain, initialXGap, initialYGap, shape);
   }
 
