@@ -19,8 +19,8 @@
       <version>${jsdynsym.version}</version>
     </dependency>
     <dependency>
-      <artifactId>jnb.datastructure</artifactId>
       <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jnb.datastructure</artifactId>
       <version>${jnb.version}</version>
     </dependency>
   </dependencies>
