@@ -61,7 +61,7 @@ public class AgentTester {
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // prepare task
     @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ? > task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_BALANCING);
+    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_BALANCING);
     // read agent resource
     String agentName = args.length >= 1 ? args[0] : "worm-vsr-reactive";
     L.info("Loading agent description \"%s\"".formatted(agentName));
@@ -86,7 +86,8 @@ public class AgentTester {
         numMultiBrained.brains().stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np -> {
-              System.out.printf("Shuffling %d parameters of brain %s %n", ((double[])np.getParams()).length, np);
+              System.out.printf(
+                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
               np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
             }));
       }

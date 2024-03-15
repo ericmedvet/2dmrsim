@@ -23,7 +23,6 @@ package io.github.ericmedvet.mrsim2d.core.tasks;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 

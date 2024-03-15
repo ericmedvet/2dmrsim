@@ -20,6 +20,7 @@
 
 module io.github.ericmedvet.mrsim2d.core {
   uses io.github.ericmedvet.mrsim2d.core.engine.Engine;
+
   requires java.logging;
   requires io.github.ericmedvet.jsdynsym.core;
   requires io.github.ericmedvet.jsdynsym.control;

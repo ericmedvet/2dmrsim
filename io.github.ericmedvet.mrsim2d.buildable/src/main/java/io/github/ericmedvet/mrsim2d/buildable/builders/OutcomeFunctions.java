@@ -25,23 +25,20 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.balancing.BalancingAgentsOutcome;
-
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "sim|s.function|f.outcome|o")
 public class OutcomeFunctions {
 
-  private OutcomeFunctions() {
-  }
+  private OutcomeFunctions() {}
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaAvgH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .allAgentsAverageHeight();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageHeight();
     return FormattedNamedFunction.from(f, format, "all.agents.avg.h").compose(beforeF);
   }
 
@@ -49,10 +46,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> aaAvgW(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .allAgentsAverageWidth();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageWidth();
     return FormattedNamedFunction.from(f, format, "all.agents.avg.w").compose(beforeF);
   }
 
@@ -60,10 +56,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> aaMaxH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .allAgentsMaxHeight();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxHeight();
     return FormattedNamedFunction.from(f, format, "all.agents.max.h").compose(beforeF);
   }
 
@@ -71,10 +66,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> aaMaxW(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .allAgentsMaxWidth();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsMaxWidth();
     return FormattedNamedFunction.from(f, format, "all.agents.max.w").compose(beforeF);
   }
 
@@ -82,10 +76,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> avgSwingAngle(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, BalancingAgentsOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<BalancingAgentsOutcome, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .avgSwingAngle();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<BalancingAgentsOutcome, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).avgSwingAngle();
     return FormattedNamedFunction.from(f, format, "avg.swing.angle").compose(beforeF);
   }
 
@@ -94,21 +87,20 @@ public class OutcomeFunctions {
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "malus", dD = Math.PI / 2d) double malus,
       @Param(value = "of", dNPM = "f.identity()") Function<X, BalancingAgentsOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<BalancingAgentsOutcome, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .avgSwingAngleWithMalus(malus);
-    return FormattedNamedFunction.from(f, format, "avg.swing.angle.with.malus").compose(beforeF);
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<BalancingAgentsOutcome, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).avgSwingAngleWithMalus(malus);
+    return FormattedNamedFunction.from(f, format, "avg.swing.angle.with.malus")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> faAvgArea(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentAverageArea();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageArea();
     return FormattedNamedFunction.from(f, format, "first.agent.avg.area").compose(beforeF);
   }
 
@@ -116,32 +108,31 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> faAvgBBMinY(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentAverageBBMinY();
-    return FormattedNamedFunction.from(f, format, "first.agent.avg.bb.min.y").compose(beforeF);
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageBBMinY();
+    return FormattedNamedFunction.from(f, format, "first.agent.avg.bb.min.y")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> faAvgTerrainHeight(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentAverageTerrainHeight();
-    return FormattedNamedFunction.from(f, format, "first.agent.avg.terrain.h").compose(beforeF);
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageTerrainHeight();
+    return FormattedNamedFunction.from(f, format, "first.agent.avg.terrain.h")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> faAvgY(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentAverageY();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentAverageY();
     return FormattedNamedFunction.from(f, format, "first.agent.avg.y").compose(beforeF);
   }
 
@@ -149,32 +140,31 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> faMaxBBMinY(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentMaxBBMinY();
-    return FormattedNamedFunction.from(f, format, "first.agent.max.bb.min.y").compose(beforeF);
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxBBMinY();
+    return FormattedNamedFunction.from(f, format, "first.agent.max.bb.min.y")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> faMaxMaxRelJumpH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentMaxRelativeJumpHeight();
-    return FormattedNamedFunction.from(f, format, "first.agent.max.rel.jump.h").compose(beforeF);
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxRelativeJumpHeight();
+    return FormattedNamedFunction.from(f, format, "first.agent.max.rel.jump.h")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> faMaxY(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentMaxY();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentMaxY();
     return FormattedNamedFunction.from(f, format, "first.agent.max.y").compose(beforeF);
   }
 
@@ -182,10 +172,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> faXDistance(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentXDistance();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXDistance();
     return FormattedNamedFunction.from(f, format, "first.agent.distance.x").compose(beforeF);
   }
 
@@ -193,11 +182,9 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> faXVelocity(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
-        .firstAgentXVelocity();
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXVelocity();
     return FormattedNamedFunction.from(f, format, "first.agent.velocity.x").compose(beforeF);
   }
-
 }

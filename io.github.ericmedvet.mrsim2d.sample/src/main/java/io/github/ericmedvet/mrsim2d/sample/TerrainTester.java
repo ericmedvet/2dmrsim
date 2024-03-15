@@ -77,19 +77,19 @@ public class TerrainTester {
               nb.build(
                   """
 sim.drawer(
-  actions = true;
-  components = [soft_bodies];
-  actions = false;
-  miniAgents = none;
-  info = false;
-  framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
+actions = true;
+components = [soft_bodies];
+actions = false;
+miniAgents = none;
+info = false;
+framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
 )
 """))
           .apply("test");
       // taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")          .run();
       VideoBuilder consumer = new VideoBuilder(
-          800,
-          100,
+          1600,
+          200,
           0,
           10,
           30,
