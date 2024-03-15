@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>io.github.ericmedvet</groupId>
-      <artifactId>jsdynsym.core</artifactId>
+      <artifactId>jsdynsym.control</artifactId>
       <version>${jsdynsym.version}</version>
     </dependency>
     <dependency>

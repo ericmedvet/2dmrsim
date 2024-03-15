@@ -17,12 +17,10 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-
 module io.github.ericmedvet.mrsim2d.sample {
   requires java.logging;
 
-  uses Engine;
+  uses io.github.ericmedvet.mrsim2d.core.engine.Engine;
 
   requires io.github.ericmedvet.mrsim2d.core;
   requires io.github.ericmedvet.mrsim2d.viewer;

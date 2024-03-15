@@ -53,7 +53,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingOutcome> {
+public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObservation, BalancingAgentsOutcome> {
 
   public static final double TERRAIN_BORDER_W = 10d;
   public static final double TERRAIN_BORDER_H = 100d;
@@ -90,7 +90,7 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingOutcome
   }
 
   @Override
-  public BalancingOutcome run(
+  public BalancingAgentsOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
@@ -155,6 +155,6 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingOutcome
               swing.poly().boundingBox()));
     }
     // return
-    return new BalancingOutcome(new TreeMap<>(observations));
+    return new BalancingAgentsOutcome(new TreeMap<>(observations));
   }
 }

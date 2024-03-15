@@ -32,7 +32,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
-public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
+public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
   private static final double X_GAP = 10;
 
@@ -115,7 +115,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
   }
 
   @Override
-  public Outcome<AgentsObservation> run(
+  public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
@@ -143,6 +143,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
                       a.boundingBox().center().x())))
               .toList()));
     }
-    return new Outcome<>(new TreeMap<>(observations));
+    return new AgentsOutcome<>(new TreeMap<>(observations));
   }
 }

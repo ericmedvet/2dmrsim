@@ -20,20 +20,21 @@
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
-public class Outcome<O extends AgentsObservation> {
+public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Outcome<O> {
 
   private static final int N_OF_CACHED_SUB_OUTCOMES = 3;
   protected final SortedMap<Double, O> observations;
   private final Map<Key, Double> metricMap;
-  private final Map<DoubleRange, Outcome<O>> subOutcomes;
+  private final Map<DoubleRange, AgentsOutcome<O>> subOutcomes;
 
-  public Outcome(SortedMap<Double, O> observations) {
+  public AgentsOutcome(SortedMap<Double, O> observations) {
     this.observations = observations;
     metricMap = new HashMap<>();
     subOutcomes = new HashMap<>();
@@ -201,10 +202,10 @@ public class Outcome<O extends AgentsObservation> {
     };
   }
 
-  public Outcome<O> subOutcome(DoubleRange tRange) {
-    Outcome<O> subOutcome = subOutcomes.get(tRange);
+  public AgentsOutcome<O> subOutcome(DoubleRange tRange) {
+    AgentsOutcome<O> subOutcome = subOutcomes.get(tRange);
     if (subOutcome == null) {
-      subOutcome = new Outcome<>(observations.subMap(tRange.min(), tRange.max()));
+      subOutcome = new AgentsOutcome<>(observations.subMap(tRange.min(), tRange.max()));
       if (subOutcomes.size() >= N_OF_CACHED_SUB_OUTCOMES) {
         // remove one
         subOutcomes.remove(subOutcomes.keySet().iterator().next());
@@ -219,7 +220,8 @@ public class Outcome<O extends AgentsObservation> {
     return "Outcome[%.1f->%.1f]".formatted(observations.firstKey(), observations.lastKey());
   }
 
-  public SortedMap<Double, O> getObservations() {
+  @Override
+  public SortedMap<Double, O> snapshots() {
     return observations;
   }
 }

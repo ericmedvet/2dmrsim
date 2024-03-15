@@ -31,7 +31,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
+public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
   private static final double INITIAL_X_GAP = 1;
   private static final double INITIAL_Y_GAP = 0.25;
@@ -62,7 +62,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
   }
 
   @Override
-  public Outcome<AgentsObservation> run(
+  public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
@@ -96,6 +96,6 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsO
                   embodiedAgent.boundingBox().center().x())))));
     }
     // return
-    return new Outcome<>(new TreeMap<>(observations));
+    return new AgentsOutcome<>(new TreeMap<>(observations));
   }
 }

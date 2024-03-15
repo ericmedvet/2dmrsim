@@ -43,7 +43,7 @@ public class Tasks {
       @Param(value = "fallInterval", dD = 5d) double fallInterval,
       @Param("nOfAgents") int nOfAgents,
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
-      @Param(value = "randomGenerator", dNPM = "sim.defaultRG()") RandomGenerator randomGenerator,
+      @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "yGapRatio", dD = 1d) double yGapRatio,
       @Param(value = "xGap", dD = 10d) double xGap) {

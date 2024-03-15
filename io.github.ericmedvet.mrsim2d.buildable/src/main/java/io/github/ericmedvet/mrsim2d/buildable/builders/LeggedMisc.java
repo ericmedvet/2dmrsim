@@ -67,7 +67,7 @@ public class LeggedMisc {
       @Param(value = "motorControlD", dD = RotationalJoint.Motor.CONTROL_D) double motorControlD,
       @Param(value = "motorAngleTolerance", dD = RotationalJoint.Motor.ANGLE_TOLERANCE)
           double motorAngleTolerance,
-      @Param(value = "activeAngleRange", dNPM = "sim.range(min=-1.047;max=1.047)") DoubleRange activeAngleRange) {
+      @Param(value = "activeAngleRange", dNPM = "m.range(min=-1.047;max=1.047)") DoubleRange activeAngleRange) {
     return new LegChunk(
         length,
         width,

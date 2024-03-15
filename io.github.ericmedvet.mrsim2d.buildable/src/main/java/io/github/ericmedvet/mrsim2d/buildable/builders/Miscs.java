@@ -21,15 +21,13 @@
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
-import io.github.ericmedvet.jnb.core.NamedBuilder;
-import io.github.ericmedvet.jnb.core.NamedParamMap;
 import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jnb.core.ParamMap;
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
@@ -54,26 +52,19 @@ import io.github.ericmedvet.mrsim2d.viewer.framers.StaticFramer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "sim|s")
-public class Misc {
+public class Miscs {
 
-  private Misc() {}
+  private Miscs() {}
 
   public enum MiniAgentInfo {
     NONE,
     VELOCITY,
     BRAINS
-  }
-
-  @SuppressWarnings("unused")
-  public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {
-    return seed >= 0 ? new Random(seed) : new Random();
   }
 
   @SuppressWarnings("unused")
@@ -178,22 +169,8 @@ public class Misc {
   }
 
   @SuppressWarnings("unused")
-  public static DoubleRange range(@Param("min") double min, @Param("max") double max) {
-    return new DoubleRange(min, max);
-  }
-
-  @SuppressWarnings("unused")
-  public static <T> Supplier<T> supplier(
-      @Param("of") T target,
-      @Param(value = "", injection = Param.Injection.MAP) ParamMap map,
-      @Param(value = "", injection = Param.Injection.BUILDER) NamedBuilder<?> builder) {
-    //noinspection unchecked
-    return () -> (T) builder.build((NamedParamMap) map.value("of", ParamMap.Type.NAMED_PARAM_MAP));
-  }
-
-  @SuppressWarnings("unused")
-  public static <A, O> Function<A, O> taskRunner(
-      @Param("task") Task<A, O> task,
+  public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
+      @Param("task") Task<A, S, O> task,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
     return a -> task.run(a, engineSupplier.get());
   }

@@ -36,7 +36,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PrebuiltIndependentLocomotion
-    implements Task<Supplier<AbstractIndependentVoxel>, Outcome<AgentsObservation>> {
+    implements Task<Supplier<AbstractIndependentVoxel>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
   private final double duration;
   private final Terrain terrain;
@@ -65,7 +65,7 @@ public class PrebuiltIndependentLocomotion
   }
 
   @Override
-  public Outcome<AgentsObservation> run(
+  public AgentsOutcome<AgentsObservation> run(
       Supplier<AbstractIndependentVoxel> abstractIndependentVoxelSupplier,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer) {
@@ -132,6 +132,6 @@ public class PrebuiltIndependentLocomotion
               .toList()));
     }
     // return
-    return new Outcome<>(new TreeMap<>(observations));
+    return new AgentsOutcome<>(new TreeMap<>(observations));
   }
 }

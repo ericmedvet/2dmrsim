@@ -32,7 +32,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.Outcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObservation>> {
+public class Jumping implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
   public static final double TERRAIN_BORDER_W = 10d;
   public static final double TERRAIN_BORDER_H = 100d;
@@ -62,7 +62,7 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObse
   }
 
   @Override
-  public Outcome<AgentsObservation> run(
+  public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
@@ -99,6 +99,6 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, Outcome<AgentsObse
                   embodiedAgent.boundingBox().center().x())))));
     }
     // return
-    return new Outcome<>(new TreeMap<>(observations));
+    return new AgentsOutcome<>(new TreeMap<>(observations));
   }
 }
