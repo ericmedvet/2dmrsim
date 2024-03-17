@@ -30,7 +30,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.VideoBuilder;
+import io.github.ericmedvet.mrsim2d.viewer.OnlineVideoBuilder;
 import io.github.ericmedvet.mrsim2d.viewer.VideoUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -87,7 +87,7 @@ framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
 """))
           .apply("test");
       // taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")          .run();
-      VideoBuilder consumer = new VideoBuilder(
+      OnlineVideoBuilder consumer = new OnlineVideoBuilder(
           1600,
           200,
           0,

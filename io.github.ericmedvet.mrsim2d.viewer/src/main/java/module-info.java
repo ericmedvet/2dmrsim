@@ -22,8 +22,9 @@ module io.github.ericmedvet.mrsim2d.viewer {
   requires java.desktop;
   requires java.logging;
   requires io.github.ericmedvet.mrsim2d.core;
-  requires io.github.ericmedvet.jsdynsym.core;
+  requires io.github.ericmedvet.jsdynsym.control;
   requires io.github.ericmedvet.jnb.datastructure;
+  requires io.github.ericmedvet.jviz.core;
 
   exports io.github.ericmedvet.mrsim2d.viewer;
   exports io.github.ericmedvet.mrsim2d.viewer.drawers;

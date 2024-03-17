@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class VideoBuilder implements Accumulator<File, Snapshot> {
+public class OnlineVideoBuilder implements Accumulator<File, Snapshot> {
 
-  private static final Logger L = Logger.getLogger(VideoBuilder.class.getName());
+  private static final Logger L = Logger.getLogger(OnlineVideoBuilder.class.getName());
 
   private final int w;
   private final int h;
@@ -50,7 +50,7 @@ public class VideoBuilder implements Accumulator<File, Snapshot> {
   private double lastDrawnT;
   private double lastT;
 
-  public VideoBuilder(
+  public OnlineVideoBuilder(
       int w,
       int h,
       double startTime,
