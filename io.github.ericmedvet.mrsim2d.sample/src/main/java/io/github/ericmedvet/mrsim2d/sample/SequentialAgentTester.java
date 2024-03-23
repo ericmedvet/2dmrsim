@@ -17,7 +17,6 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
@@ -26,59 +25,63 @@ import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
-import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Random;
-import java.util.ServiceLoader;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
-public class AgentTester {
+/**
+ * @author "Eric Medvet" on 2024/03/23 for 2dmrsim
+ */
+public class SequentialAgentTester {
 
   private static final Logger L = Logger.getLogger(AgentTester.class.getName());
-
-  private static final String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
-  private static final String TASK_JUMPING = "sim.task.jumping()";
-  private static final String TASK_BALANCING =
-      "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
+  private static final String TASK = "sim.task.locomotion(duration = 10; terrain = s.t.downhill(a = 5))";
+  private static final List<String> AGENTS = List.of(
+      "ball-vsr-reactive.txt",
+      "biped-vsr-centralized-drn.txt",
+      "biped-vsr-centralized-mlp.txt",
+      "biped-vsr-reactive.txt",
+      "hybrid-biped-vsr-centralized-mlp.txt",
+      "hybrid-tripod-vsr-distributed-mlp.txt",
+      "independent-voxel-all-mlp.txt",
+      "independent-voxel-noanchors-mlp.txt",
+      "legged-mlp.txt",
+      "legged-sin.txt",
+      "modular-legged-mlp.txt",
+      "modular-legged-sin.txt",
+      "trained-biped-vsr-centralized-mlp.txt",
+      "tripod-vsr-distributed-mlp.txt",
+      "worm-vsr-reactive.txt");
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
-    // prepare drawer, viewer, engine
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true; nfc=true; enlargement = 5)"))
-        .apply("test");
-    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // prepare task
     @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_LOCOMOTION);
-    // read agent resource
-    String agentName = args.length >= 1 ? args[0] : "biped-vsr-centralized-mlp";
-    L.info("Loading agent description \"%s\"".formatted(agentName));
-    InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s.txt".formatted(agentName));
-    String agentDescription = null;
-    if (inputStream == null) {
-      L.severe("Cannot find agent description");
-    } else {
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-        agentDescription = br.lines().collect(Collectors.joining());
-      } catch (IOException e) {
-        L.severe("Cannot read agent description: %s%n".formatted(e));
-        System.exit(-1);
+    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK);
+    for (String agent : AGENTS) {
+      System.out.printf("Loading agent description \"%s\"%n", agent);
+      InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s".formatted(agent));
+      String agentDescription = null;
+      if (inputStream == null) {
+        L.severe("Cannot find agent description");
+      } else {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+          agentDescription = br.lines().collect(Collectors.joining());
+        } catch (IOException e) {
+          L.severe("Cannot read agent description: %s%n".formatted(e));
+          System.exit(-1);
+        }
       }
+      System.out.println(task.simulate(getEmbodiedAgentSupplier(agentDescription, nb)));
     }
-    // do task
-    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
   }
 
   private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {

@@ -23,15 +23,10 @@ package io.github.ericmedvet.mrsim2d.core.tasks;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ServiceLoader;
-import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-public interface Task<A, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends Simulation<A, Snapshot, Simulation.Outcome<Snapshot>> {
+public interface Task<A, S extends AgentsObservation, O extends AgentsOutcome<S>> extends Simulation<A, S, O> {
 
   O run(A a, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
@@ -40,10 +35,7 @@ public interface Task<A, S extends AgentsObservation, O extends AgentsOutcome<S>
   }
 
   @Override
-  default Simulation.Outcome<Snapshot> simulate(A a) {
-    List<Snapshot> snapshots = new ArrayList<>();
-    run(a, ServiceLoader.load(Engine.class).findFirst().orElseThrow(), snapshots::add);
-    return Simulation.Outcome.of(
-        snapshots.stream().collect(Collectors.toMap(Snapshot::t, s -> s, (s1, s2) -> s1, TreeMap::new)));
+  default O simulate(A a) {
+    return run(a, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
   }
 }

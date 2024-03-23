@@ -1,23 +1,23 @@
 s.a.distributedNumGridVSR(
-  body=s.a.vsr.gridBody(
-    shape=s.a.vsr.s.free(s="rsrsrsr-rsrsrsr-.s.s.s.");
-    sensorizingFunction=s.a.vsr.sf.directional(
-      sSensors=[s.s.d(a=-90)];
-      headSensors=[
+  body = s.a.vsr.gridBody(
+    shape = s.a.vsr.s.free(s = "rsrsrsr-rsrsrsr-.s.s.s.");
+    sensorizingFunction = s.a.vsr.sf.directional(
+      sSensors = [s.s.d(a = -90)];
+      headSensors = [
         s.s.sin();
-        s.s.d(a=-30;r=8);
-        s.s.d(a=-40;r=8)
+        s.s.d(a = -30; r = 8);
+        s.s.d(a = -40; r = 8)
       ];
-      nSensors=[s.s.ar();s.s.rv(a=0);s.s.rv(a=90)]
+      nSensors = [s.s.ar(); s.s.rv(a = 0); s.s.rv(a = 90)]
   ));
-  function=ds.num.outStepped(
-    stepT=0.2;
-    inner=ds.num.enhanced(
-      windowT=0.2;
-      inner=ds.num.mlp(nOfInnerLayers=2;activationFunction=tanh);
-      types=[avg]
+  function = ds.num.outStepped(
+    stepT = 0.2;
+    inner = ds.num.enhanced(
+      windowT = 0.2;
+      inner = ds.num.mlp(nOfInnerLayers = 2; activationFunction = tanh);
+      types = [avg]
     )
   );
-  signals=1;
-  directional=true
+  signals = 1;
+  directional = true
 )

@@ -1,15 +1,15 @@
 s.a.numLeggedHybridRobot(
-  legs=3 * [
+  legs = 3 * [
     s.a.l.leg(
-      legChunks=[s.a.l.legChunk(); s.a.l.legChunk()];
-      downConnector=soft;
-      downConnectorSensors=[s.s.d(a=-90;r=1)]
+      legChunks = [s.a.l.legChunk(); s.a.l.legChunk()];
+      downConnector = soft;
+      downConnectorSensors = [s.s.d(a = -90;r = 1)]
     )
   ];
-  headSensors=[
+  headSensors = [
     s.s.sin();
-    s.s.d(a=-30;r=8);
-    s.s.d(a=-40;r=8)
+    s.s.d(a = -30;r = 8);
+    s.s.d(a = -40;r = 8)
   ];
-  function=ds.num.noised(inner=ds.num.mlp();outputSigma=0.01)
+  function = ds.num.noised(inner = ds.num.mlp(); outputSigma = 0.01)
 )

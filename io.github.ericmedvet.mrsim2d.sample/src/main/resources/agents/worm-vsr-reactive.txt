@@ -1,5 +1,5 @@
 s.a.reactiveGridVSR(
-  body = ds.grid(w = 6; h = 1; items = [
+  body = m.grid(w = 6; h = 1; items = [
     s.a.vsr.rv.asin();
     s.a.vsr.rv.asld();
     s.a.vsr.rv.asld();

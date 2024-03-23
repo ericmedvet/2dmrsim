@@ -30,15 +30,8 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.OnlineVideoBuilder;
-import io.github.ericmedvet.mrsim2d.viewer.VideoUtils;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
+import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
+import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -73,31 +66,9 @@ public class TerrainTester {
     // do single task
     if (true) {
       @SuppressWarnings("unchecked")
-      Drawer drawer = ((Function<String, Drawer>)
-              nb.build(
-                  """
-sim.drawer(
-actions = true;
-components = [soft_bodies];
-actions = false;
-miniAgents = none;
-info = false;
-framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
-)
-"""))
-          .apply("test");
-      // taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")          .run();
-      OnlineVideoBuilder consumer = new OnlineVideoBuilder(
-          1600,
-          200,
-          0,
-          10,
-          30,
-          VideoUtils.EncoderFacility.FFMPEG_SMALL,
-          new File("/home/eric/striscia.mp4"),
-          drawer);
-      taskOn(nb, engineSupplier, consumer, "s.t.flat()").run();
-      consumer.get();
+      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply("test");
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")
+          .run();
       System.exit(0);
     }
     // prepare terrains
@@ -190,6 +161,7 @@ framer = s.staticFramer(minX = 10; maxX = 30; minY = 0; maxY = 4)
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
+        //noinspection unchecked
         numMultiBrained.brains().stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np ->
