@@ -29,11 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawers;
-import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
-import io.github.ericmedvet.mrsim2d.viewer.Framer;
+import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
@@ -65,6 +61,13 @@ public class Miscs {
     NONE,
     VELOCITY,
     BRAINS
+  }
+
+  @SuppressWarnings("unused")
+  public static Framer<Snapshot> allAgentsFramer(
+      @Param(value = "enlargement", dD = 1.5) double enlargement,
+      @Param(value = "followTime", dD = 2) double followTime) {
+    return new AllAgentsFramer(enlargement).largest(followTime);
   }
 
   @SuppressWarnings("unused")
@@ -148,10 +151,8 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
-  public static Framer<Snapshot> allAgentsFramer(
-      @Param(value = "enlargement", dD = 1.5) double enlargement,
-      @Param(value = "followTime", dD = 2) double followTime) {
-    return new AllAgentsFramer(enlargement).largest(followTime);
+  public static Supplier<Engine> engine() {
+    return () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
   }
 
   @SuppressWarnings("unused")
@@ -164,14 +165,20 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
-  public static Supplier<Engine> engine() {
-    return () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-  }
-
-  @SuppressWarnings("unused")
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
       @Param("task") Task<A, S, O> task,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
     return a -> task.run(a, engineSupplier.get());
+  }
+
+  @SuppressWarnings("unused")
+  public static <A> TaskVideoBuilder<A> taskVideoBuilder(
+      @Param("task") Task<A, ?, ?> task,
+      @Param(value = "drawer", dNPM = "sim.drawer()") Drawer drawer,
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
+      @Param(value = "startTime", dD = 0) double startTime,
+      @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
+      @Param(value = "frameRate", dD = 0) double frameRate) {
+    return new TaskVideoBuilder<>(task, drawer, engineSupplier.get(), startTime, endTime, frameRate);
   }
 }
