@@ -29,7 +29,12 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.*;
+import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawers;
+import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
+import io.github.ericmedvet.mrsim2d.viewer.Framer;
+import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
@@ -174,11 +179,12 @@ public class Miscs {
   @SuppressWarnings("unused")
   public static <A> TaskVideoBuilder<A> taskVideoBuilder(
       @Param("task") Task<A, ?, ?> task,
-      @Param(value = "drawer", dNPM = "sim.drawer()") Drawer drawer,
+      @Param(value = "title", dS = "") String title,
+      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawer,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
       @Param(value = "startTime", dD = 0) double startTime,
       @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
-      @Param(value = "frameRate", dD = 0) double frameRate) {
-    return new TaskVideoBuilder<>(task, drawer, engineSupplier.get(), startTime, endTime, frameRate);
+      @Param(value = "frameRate", dD = 30) double frameRate) {
+    return new TaskVideoBuilder<>(task, drawer.apply(title), engineSupplier.get(), startTime, endTime, frameRate);
   }
 }
