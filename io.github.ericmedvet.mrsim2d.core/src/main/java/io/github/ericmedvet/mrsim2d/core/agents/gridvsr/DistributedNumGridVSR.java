@@ -45,13 +45,19 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       boolean directional) {
     super(body);
     int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
-    body.grid().entries().stream()
-        .filter(e -> !e.value().element().type().equals(GridBody.VoxelType.NONE))
-        .forEach(e -> numericalDynamicalSystemGrid
+    body.grid().entries().forEach(e -> {
+      if (e.value().element().type().equals(GridBody.VoxelType.NONE)) {
+        if (numericalDynamicalSystemGrid.get(e.key()) != null) {
+          throw new IllegalArgumentException("Unexpected non-null NDS at %s".formatted(e.key()));
+        }
+      } else {
+        numericalDynamicalSystemGrid
             .get(e.key())
             .checkDimension(
                 nOfInputs(body, e.key(), nOfSignals, directional),
-                nOfOutputs(body, e.key(), nOfSignals, directional)));
+                nOfOutputs(body, e.key(), nOfSignals, directional));
+      }
+    });
     this.nOfSignals = nOfSignals;
     this.directional = directional;
     this.numericalDynamicalSystemGrid = numericalDynamicalSystemGrid;
