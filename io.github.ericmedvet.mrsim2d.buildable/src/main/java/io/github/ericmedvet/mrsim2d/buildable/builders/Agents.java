@@ -59,7 +59,7 @@ public class Agents {
   public static DistributedNumGridVSR distributedNumGridVSR(
       @Param("body") GridBody body,
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder,
-      @Param("signals") int nSignals,
+      @Param("nOfSignals") int nOfSignals,
       @Param("directional") boolean directional) {
     return new DistributedNumGridVSR(
         body,
@@ -70,11 +70,11 @@ public class Agents {
                 ? null
                 : numericalDynamicalSystemBuilder.apply(
                     MultivariateRealFunction.varNames(
-                        "x", DistributedNumGridVSR.nOfInputs(body, k, nSignals, directional)),
+                        "x", DistributedNumGridVSR.nOfInputs(body, k, nOfSignals, directional)),
                     MultivariateRealFunction.varNames(
                         "y",
-                        DistributedNumGridVSR.nOfOutputs(body, k, nSignals, directional)))),
-        nSignals,
+                        DistributedNumGridVSR.nOfOutputs(body, k, nOfSignals, directional)))),
+        nOfSignals,
         directional);
   }
 

@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
 
   private final Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid;
-  private final int nSignals;
+  private final int nOfSignals;
   private final boolean directional;
   private final Grid<double[]> signalsGrid;
 
@@ -41,35 +41,35 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   public DistributedNumGridVSR(
       GridBody body,
       Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid,
-      int nSignals,
+      int nOfSignals,
       boolean directional) {
     super(body);
-    int communicationSize = directional ? nSignals * 4 : nSignals;
+    int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
     for (Grid.Key key : numericalDynamicalSystemGrid.keys()) {
       if (numericalDynamicalSystemGrid.get(key) != null) {
         numericalDynamicalSystemGrid
             .get(key)
             .checkDimension(
-                nOfInputs(body, key, nSignals, directional),
-                nOfOutputs(body, key, nSignals, directional));
+                nOfInputs(body, key, nOfSignals, directional),
+                nOfOutputs(body, key, nOfSignals, directional));
       }
     }
-    this.nSignals = nSignals;
+    this.nOfSignals = nOfSignals;
     this.directional = directional;
     this.numericalDynamicalSystemGrid = numericalDynamicalSystemGrid;
     signalsGrid = bodyGrid.map(v -> v != null ? new double[communicationSize] : null);
     fullInputsGrid = Grid.create(
-        body.grid().w(), body.grid().h(), k -> new double[nOfInputs(body, k, nSignals, directional)]);
+        body.grid().w(), body.grid().h(), k -> new double[nOfInputs(body, k, nOfSignals, directional)]);
     fullOutputsGrid = Grid.create(
-        body.grid().w(), body.grid().h(), k -> new double[nOfOutputs(body, k, nSignals, directional)]);
+        body.grid().w(), body.grid().h(), k -> new double[nOfOutputs(body, k, nOfSignals, directional)]);
   }
 
-  public static int nOfInputs(GridBody body, Grid.Key key, int nSignals, boolean directional) {
-    return body.grid().get(key).sensors().size() + 4 * nSignals;
+  public static int nOfInputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
+    return body.grid().get(key).sensors().size() + 4 * nOfSignals;
   }
 
-  public static int nOfOutputs(GridBody body, Grid.Key key, int nSignals, boolean directional) {
-    int communicationSize = directional ? nSignals * 4 : nSignals;
+  public static int nOfOutputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
+    int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
     return communicationSize + 1;
   }
 
@@ -137,11 +137,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
 
   private double[] getLastSignals(int x, int y, int c) {
     if (x < 0 || y < 0 || x >= signalsGrid.w() || y >= signalsGrid.h() || signalsGrid.get(x, y) == null) {
-      return new double[nSignals];
+      return new double[nOfSignals];
     }
     double[] allSignals = signalsGrid.get(x, y);
     return directional
-        ? Arrays.stream(allSignals, c * nSignals, (c + 1) * nSignals).toArray()
+        ? Arrays.stream(allSignals, c * nOfSignals, (c + 1) * nOfSignals)
+            .toArray()
         : allSignals;
   }
 }
