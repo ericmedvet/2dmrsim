@@ -180,11 +180,11 @@ public class Miscs {
   public static <A> TaskVideoBuilder<A> taskVideoBuilder(
       @Param("task") Task<A, ?, ?> task,
       @Param(value = "title", dS = "") String title,
-      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawer,
+      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawerBuilder,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
       @Param(value = "startTime", dD = 0) double startTime,
       @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
       @Param(value = "frameRate", dD = 30) double frameRate) {
-    return new TaskVideoBuilder<>(task, drawer.apply(title), engineSupplier, startTime, endTime, frameRate);
+    return new TaskVideoBuilder<>(task, drawerBuilder, engineSupplier, title, startTime, endTime, frameRate);
   }
 }

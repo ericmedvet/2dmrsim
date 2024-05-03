@@ -29,13 +29,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class TaskVideoBuilder<A> implements VideoBuilder<A> {
 
   private final Task<A, ?, ?> task;
-  private final Drawer drawer;
+  private final Function<String, Drawer> drawerBuilder;
   private final Supplier<Engine> engineSupplier;
+  private final String title;
   private final double startTime;
   private final double endTime;
   private final double frameRate;
@@ -48,10 +50,12 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
     private double lastT;
     private final int w;
     private final int h;
+    private final Drawer drawer;
 
     public ImageCollector(int w, int h) {
       this.w = w;
       this.h = h;
+      drawer = drawerBuilder.apply(title);
     }
 
     public void accept(Snapshot snapshot) {
@@ -82,14 +86,16 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
 
   public TaskVideoBuilder(
       Task<A, ?, ?> task,
-      Drawer drawer,
+      Function<String, Drawer> drawerBuilder,
       Supplier<Engine> engineSupplier,
+      String title,
       double startTime,
       double endTime,
       double frameRate) {
     this.task = task;
-    this.drawer = drawer;
+    this.drawerBuilder = drawerBuilder;
     this.engineSupplier = engineSupplier;
+    this.title = title;
     this.startTime = startTime;
     this.endTime = endTime;
     this.frameRate = frameRate;
