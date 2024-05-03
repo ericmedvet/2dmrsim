@@ -29,12 +29,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class TaskVideoBuilder<A> implements VideoBuilder<A> {
 
   private final Task<A, ?, ?> task;
   private final Drawer drawer;
-  private final Engine engine;
+  private final Supplier<Engine> engineSupplier;
   private final double startTime;
   private final double endTime;
   private final double frameRate;
@@ -80,10 +81,15 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
   }
 
   public TaskVideoBuilder(
-      Task<A, ?, ?> task, Drawer drawer, Engine engine, double startTime, double endTime, double frameRate) {
+      Task<A, ?, ?> task,
+      Drawer drawer,
+      Supplier<Engine> engineSupplier,
+      double startTime,
+      double endTime,
+      double frameRate) {
     this.task = task;
     this.drawer = drawer;
-    this.engine = engine;
+    this.engineSupplier = engineSupplier;
     this.startTime = startTime;
     this.endTime = endTime;
     this.frameRate = frameRate;
@@ -92,7 +98,7 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
   @Override
   public Video build(VideoInfo videoInfo, A a) throws IOException {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
-    task.run(a, engine, collector);
+    task.run(a, engineSupplier.get(), collector);
     return new Video(collector.images, frameRate);
   }
 }

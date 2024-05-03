@@ -185,6 +185,6 @@ public class Miscs {
       @Param(value = "startTime", dD = 0) double startTime,
       @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
       @Param(value = "frameRate", dD = 30) double frameRate) {
-    return new TaskVideoBuilder<>(task, drawer.apply(title), engineSupplier.get(), startTime, endTime, frameRate);
+    return new TaskVideoBuilder<>(task, drawer.apply(title), engineSupplier, startTime, endTime, frameRate);
   }
 }
