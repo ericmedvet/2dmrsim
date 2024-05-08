@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.engine;
 
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.*;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;

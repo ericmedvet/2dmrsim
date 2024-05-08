@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.viewer.drawers;
 
-import io.github.ericmedvet.mrsim2d.core.util.Pair;
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
 import java.awt.*;
 import java.util.ArrayList;

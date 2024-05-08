@@ -20,11 +20,11 @@
 
 package io.github.ericmedvet.mrsim2d.engine.dyn4j;
 
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Segment;
-import io.github.ericmedvet.mrsim2d.core.util.Pair;
 import java.util.*;
 import org.dyn4j.dynamics.AbstractPhysicsBody;
 import org.dyn4j.dynamics.Body;
