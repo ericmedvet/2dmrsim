@@ -23,6 +23,8 @@ package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
+import io.github.ericmedvet.mrsim2d.core.Sensor;
+import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -69,10 +71,18 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   }
 
   public static int nOfInputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
-    return body.grid().get(key).sensors().size() + 4 * nOfSignals;
+    return nOfInputs(body.grid().get(key).sensors(), nOfSignals, directional);
+  }
+
+  public static int nOfInputs(List<Sensor<? super Body>> sensors, int nOfSignals, boolean directional) {
+    return sensors.size() + 4 * nOfSignals;
   }
 
   public static int nOfOutputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
+    return nOfOutputs(body.grid().get(key).sensors(), nOfSignals, directional);
+  }
+
+  public static int nOfOutputs(List<Sensor<? super Body>> sensors, int nOfSignals, boolean directional) {
     int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
     return communicationSize + 1;
   }
