@@ -41,4 +41,9 @@ public class VSRMisc {
           Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction) {
     return new GridBody(shape, sensorizingFunction);
   }
+
+  @SuppressWarnings("unused")
+  public static VoxelType voxel(@Param("type") VoxelType type) {
+    return type;
+  }
 }
