@@ -19,13 +19,14 @@
  */
 package io.github.ericmedvet.mrsim2d.viewer;
 
+import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
+import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -102,9 +103,9 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
   }
 
   @Override
-  public Video build(VideoInfo videoInfo, A a) throws IOException {
+  public Video build(VideoInfo videoInfo, A a) {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
     task.run(a, engineSupplier.get(), collector);
-    return new Video(collector.images, frameRate);
+    return new Video(collector.images, frameRate, VideoUtils.EncoderFacility.DEFAULT);
   }
 }
