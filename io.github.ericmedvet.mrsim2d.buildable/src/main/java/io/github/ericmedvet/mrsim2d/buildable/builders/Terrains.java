@@ -25,7 +25,6 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
-
 import java.util.List;
 import java.util.Random;
 import java.util.random.RandomGenerator;
@@ -89,13 +88,16 @@ public class Terrains {
 
   @SuppressWarnings("unused")
   public static Terrain holed(
-          @Param(value = "startW", dD = START_W) double startW,
-          @Param(value = "holeH", dD = HOLE_H) double holeH,
-          @Param(value = "holeWs", dDs = {HOLE_W}) List<Double> holeWs,
-          @Param(value = "holeDisW", dD = HOLE_DIS_W) double holeDisW,
-          @Param(value = "endW", dD = END_W) double endW,
-          @Param(value = "borderW", dD = BORDER_W) double borderW,
-          @Param(value = "borderH", dD = BORDER_H) double borderH) {
+      @Param(value = "startW", dD = START_W) double startW,
+      @Param(value = "holeH", dD = HOLE_H) double holeH,
+      @Param(
+              value = "holeWs",
+              dDs = {HOLE_W})
+          List<Double> holeWs,
+      @Param(value = "holeDisW", dD = HOLE_DIS_W) double holeDisW,
+      @Param(value = "endW", dD = END_W) double endW,
+      @Param(value = "borderW", dD = BORDER_W) double borderW,
+      @Param(value = "borderH", dD = BORDER_H) double borderH) {
 
     Path p = new Path(new Point(startW, 0));
     for (double holeW : holeWs) {
