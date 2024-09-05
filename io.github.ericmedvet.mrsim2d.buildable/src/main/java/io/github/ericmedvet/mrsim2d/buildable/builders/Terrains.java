@@ -25,6 +25,8 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
+
+import java.util.List;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -37,6 +39,11 @@ public class Terrains {
   public static final double CHUNK_H = 0.75d;
   public static final double BORDER_W = 10d;
   public static final double ANGLE = 10d;
+  public static final double START_W = 30d;
+  public static final double HOLE_H = 10d;
+  public static final double HOLE_W = 5d;
+  public static final double END_W = 30d;
+  public static final double HOLE_DIS_W = 9d;
 
   private Terrains() {}
 
@@ -78,6 +85,25 @@ public class Terrains {
       path = path.moveBy(sW, sH);
     }
     return Terrain.fromPath(path, h, borderW, borderH);
+  }
+
+  @SuppressWarnings("unused")
+  public static Terrain holed(
+          @Param(value = "startW", dD = START_W) double startW,
+          @Param(value = "holeH", dD = HOLE_H) double holeH,
+          @Param(value = "holeWs", dDs = {HOLE_W}) List<Double> holeWs,
+          @Param(value = "holeDisW", dD = HOLE_DIS_W) double holeDisW,
+          @Param(value = "endW", dD = END_W) double endW,
+          @Param(value = "borderW", dD = BORDER_W) double borderW,
+          @Param(value = "borderH", dD = BORDER_H) double borderH) {
+
+    Path p = new Path(new Point(startW, 0));
+    for (double holeW : holeWs) {
+      p = p.moveBy(0, -holeH).moveBy(holeW, 0).moveBy(0, holeH).moveBy(holeDisW, 0);
+    }
+    p = p.moveBy(endW, 0);
+
+    return Terrain.fromPath(p, H, borderW, borderH);
   }
 
   @SuppressWarnings("unused")
