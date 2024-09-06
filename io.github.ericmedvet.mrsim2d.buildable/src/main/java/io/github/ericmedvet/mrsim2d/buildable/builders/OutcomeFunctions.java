@@ -73,6 +73,46 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMaxH(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMaxHeight();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.max.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMaxW(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMaxWidth();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.max.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMinH(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMinHeight();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.min.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMinW(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMinWidth();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.min.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaMaxH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
