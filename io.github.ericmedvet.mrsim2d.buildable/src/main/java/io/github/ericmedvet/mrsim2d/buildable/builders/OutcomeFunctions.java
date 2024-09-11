@@ -53,6 +53,70 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalAvgH(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalAvgW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalH(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMaxH(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMaxHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.max.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMaxW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMaxWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.max.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMinH(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMinHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.min.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMinW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMinWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.min.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaMaxH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
