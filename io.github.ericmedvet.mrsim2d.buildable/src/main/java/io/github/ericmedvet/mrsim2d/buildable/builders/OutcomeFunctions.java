@@ -53,6 +53,26 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalAvgH(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalAverageHeight();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalAvgW(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalAverageWidth();
+    return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalH(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
