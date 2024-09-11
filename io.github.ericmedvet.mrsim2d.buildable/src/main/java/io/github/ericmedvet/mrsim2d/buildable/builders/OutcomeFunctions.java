@@ -54,81 +54,65 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalAvgH(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalAverageHeight();
-    return FormattedNamedFunction.from(f, format, "all.agents.final.h").compose(beforeF);
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalAvgW(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalAverageWidth();
-    return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalH(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalHeight();
-    return FormattedNamedFunction.from(f, format, "all.agents.final.h").compose(beforeF);
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalW(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalWidth();
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalWidth;
     return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalMaxH(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMaxHeight();
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMaxHeight;
     return FormattedNamedFunction.from(f, format, "all.agents.final.max.h").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalMaxW(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMaxWidth();
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMaxWidth;
     return FormattedNamedFunction.from(f, format, "all.agents.final.max.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalMinH(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMinHeight();
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMinHeight;
     return FormattedNamedFunction.from(f, format, "all.agents.final.min.h").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalMinW(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f =
-        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsFinalMinWidth();
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMinWidth;
     return FormattedNamedFunction.from(f, format, "all.agents.final.min.w").compose(beforeF);
   }
 
