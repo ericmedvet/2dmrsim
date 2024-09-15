@@ -66,8 +66,6 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <dependencies/>
-
   <properties>
     <jdk.version>21</jdk.version>
     <jnb.version>1.4.0</jnb.version>
@@ -76,15 +74,17 @@
     <revision>1.2.0</revision>
   </properties>
 
+  <dependencies/>
+
   <repositories>
     <repository>
-      <id>ossrh-snapshot</id>
       <releases>
         <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+      <id>ossrh-snapshot</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
   </repositories>
