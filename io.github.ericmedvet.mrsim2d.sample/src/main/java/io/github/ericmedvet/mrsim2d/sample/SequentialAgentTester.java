@@ -37,12 +37,10 @@ import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
-/**
- * @author "Eric Medvet" on 2024/03/23 for 2dmrsim
- */
+/** @author "Eric Medvet" on 2024/03/23 for 2dmrsim */
 public class SequentialAgentTester {
 
-  private static final Logger L = Logger.getLogger(AgentTester.class.getName());
+  private static final Logger L = Logger.getLogger(SequentialAgentTester.class.getName());
   private static final String TASK = "sim.task.locomotion(duration = 10; terrain = s.t.downhill(a = 5))";
   private static final List<String> AGENTS = List.of(
       "ball-vsr-reactive.txt",

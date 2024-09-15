@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 public record Point(double x, double y) implements Shape {
 
-  public static Point ORIGIN = new Point(0, 0);
+  public static final Point ORIGIN = new Point(0, 0);
 
   public Point(double direction) {
     this(Math.cos(direction), Math.sin(direction));

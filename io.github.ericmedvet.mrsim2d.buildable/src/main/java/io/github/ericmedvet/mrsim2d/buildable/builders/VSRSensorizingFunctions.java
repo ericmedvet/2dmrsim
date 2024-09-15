@@ -60,7 +60,7 @@ public class VSRSensorizingFunctions {
           .sorted(Comparator.comparingInt(e -> -e.key().x() - e.key().y()))
           .limit(1)
           .toList()
-          .get(0)
+          .getFirst()
           .key();
       List<Sensor<? super Voxel>> localSensors = new ArrayList<>();
       if (x == maxX) {

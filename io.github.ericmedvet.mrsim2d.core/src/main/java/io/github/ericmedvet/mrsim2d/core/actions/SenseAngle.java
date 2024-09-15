@@ -25,14 +25,13 @@ import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 
 public record SenseAngle(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 
   private static final DoubleRange RANGE = new DoubleRange(-Math.PI, Math.PI);
 
   @Override
-  public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
+  public Double perform(ActionPerformer performer, Agent agent) {
     double a = body.angle();
     if (a > Math.PI) {
       a = a - 2d * Math.PI;

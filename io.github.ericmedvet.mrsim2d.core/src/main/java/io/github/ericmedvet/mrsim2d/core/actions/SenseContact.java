@@ -25,14 +25,13 @@ import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import java.util.Collection;
 import java.util.List;
 
 public record SenseContact(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 
   @Override
-  public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
+  public Double perform(ActionPerformer performer, Agent agent) {
     Collection<Body> bodies = performer
         .perform(new FindInContactBodies(body), agent)
         .outcome()

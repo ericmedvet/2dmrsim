@@ -66,29 +66,6 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jdk.version>17</jdk.version>
-    <revision>1.1.1-SNAPSHOT</revision>
-    <jnb.version>1.3.1-SNAPSHOT</jnb.version>
-    <jsdynsym.version>1.0.1-SNAPSHOT</jsdynsym.version>
-  </properties>
-
-  <dependencies/>
-
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>ossrh-snapshot</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </repository>
-  </repositories>
-
   <build>
     <resources>
       <resource>
@@ -184,6 +161,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.43.0</version>
         <configuration>
           <java>
             <formatAnnotations/>
@@ -210,7 +188,6 @@
             </sortPom>
           </pom>
         </configuration>
-        <version>2.43.0</version>
         <executions>
           <execution>
             <id>format-check</id>
@@ -230,6 +207,29 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencies/>
+
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>ossrh-snapshot</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jdk.version>21</jdk.version>
+    <revision>1.1.1-SNAPSHOT</revision>
+    <jnb.version>1.3.1-SNAPSHOT</jnb.version>
+    <jsdynsym.version>1.0.1-SNAPSHOT</jsdynsym.version>
+  </properties>
 
   <profiles>
     <profile>

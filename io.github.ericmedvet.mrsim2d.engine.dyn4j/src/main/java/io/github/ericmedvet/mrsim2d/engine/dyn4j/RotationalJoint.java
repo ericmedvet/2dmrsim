@@ -216,7 +216,7 @@ public class RotationalJoint
     Point[] ps2 = polyFromBody(body2).vertexes();
     Point[] ps = new Point[10];
     for (int i = 0; i < 5; i++) {
-      ps[i] = ps1[polyIndexes.get(0).get(i)];
+      ps[i] = ps1[polyIndexes.getFirst().get(i)];
     }
     for (int i = 0; i < 5; i++) {
       ps[i + 5] = ps2[polyIndexes.get(1).get(i)];

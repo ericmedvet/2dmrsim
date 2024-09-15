@@ -24,7 +24,7 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -63,9 +63,8 @@ public class StackedMultipliedDrawer<T> implements Drawer {
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     // build list of seqs of snapshots
-    List<List<Snapshot>> multiplied =
-        snapshots.stream().map(multiplier::apply).toList();
-    int lastSize = multiplied.get(multiplied.size() - 1).size();
+    List<List<Snapshot>> multiplied = snapshots.stream().map(multiplier).toList();
+    int lastSize = multiplied.getLast().size();
     multiplied = multiplied.stream().filter(l -> l.size() == lastSize).toList();
     List<List<Snapshot>> lists = new ArrayList<>(lastSize);
     for (int i = 0; i < lastSize; i++) {

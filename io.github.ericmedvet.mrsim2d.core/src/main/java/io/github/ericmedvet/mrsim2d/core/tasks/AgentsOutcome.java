@@ -190,7 +190,7 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
       case TERRAIN_H -> {
         if (subject.equals(Subject.FIRST)) {
           yield observation.getFirstAgentCenter().y()
-              - observation.getAgents().get(0).terrainHeight();
+              - observation.getAgents().getFirst().terrainHeight();
         } else {
           yield observation.getAgents().stream()
               .mapToDouble(a -> Point.average(a.polies().stream()

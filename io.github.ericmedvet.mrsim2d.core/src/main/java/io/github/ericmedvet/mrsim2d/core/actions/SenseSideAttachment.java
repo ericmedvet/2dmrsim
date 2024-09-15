@@ -27,14 +27,13 @@ import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import java.util.Collection;
 import java.util.List;
 
 public record SenseSideAttachment(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
 
   @Override
-  public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
+  public Double perform(ActionPerformer performer, Agent agent) {
     // consider side anchors
     Collection<Anchor> anchors = body.anchorsOn(side);
     if (anchors.isEmpty()) {

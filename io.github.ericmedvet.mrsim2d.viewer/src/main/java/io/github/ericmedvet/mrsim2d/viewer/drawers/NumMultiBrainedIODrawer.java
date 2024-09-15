@@ -39,7 +39,7 @@ public class NumMultiBrainedIODrawer implements Drawer {
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     // get first agent of last snapshot
-    Snapshot lastSnapshot = snapshots.get(snapshots.size() - 1);
+    Snapshot lastSnapshot = snapshots.getLast();
     if (lastSnapshot.agents().isEmpty()) {
       return false;
     }
