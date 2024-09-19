@@ -51,6 +51,7 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
   private enum Metric {
     X,
     Y,
+    AVG_X,
     TERRAIN_H,
     BB_W,
     BB_H,
@@ -76,11 +77,15 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
     return get(Aggregate.AVERAGE, Metric.BB_W, Subject.ALL);
   }
 
-  public double allAgentsFinalAverageHeight() {
+  public double allAgentsFinalAverageWidth() {
+    return get(Aggregate.FINAL, Metric.AVG_X, Subject.ALL);
+  }
+
+  public double allAgentsFinalMidrangeHeight() {
     return get(Aggregate.FINAL, Metric.Y, Subject.ALL);
   }
 
-  public double allAgentsFinalAverageWidth() {
+  public double allAgentsFinalMidrangeWidth() {
     return get(Aggregate.FINAL, Metric.X, Subject.ALL);
   }
 
@@ -187,19 +192,31 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
       case Y -> subject.equals(Subject.FIRST)
           ? observation.getFirstAgentCenter().y()
           : observation.getAllBoundingBox().center().y();
+      case AVG_X -> {
+        if (subject.equals(Subject.FIRST)) {
+          yield observation.getFirstAgentCenter().x();
+        } else {
+          yield observation.getAgents().stream()
+                  .mapToDouble(a -> Point.average(a.polies().stream()
+                          .map(Poly::center)
+                          .toArray(Point[]::new)).x())
+                  .average()
+                  .orElse(0d);
+        }
+      }
       case TERRAIN_H -> {
         if (subject.equals(Subject.FIRST)) {
           yield observation.getFirstAgentCenter().y()
-              - observation.getAgents().get(0).terrainHeight();
+                  - observation.getAgents().get(0).terrainHeight();
         } else {
           yield observation.getAgents().stream()
-              .mapToDouble(a -> Point.average(a.polies().stream()
-                          .map(Poly::center)
-                          .toArray(Point[]::new))
-                      .y()
-                  - a.terrainHeight())
-              .average()
-              .orElse(0d);
+                  .mapToDouble(a -> Point.average(a.polies().stream()
+                                  .map(Poly::center)
+                                  .toArray(Point[]::new))
+                          .y()
+                          - a.terrainHeight())
+                  .average()
+                  .orElse(0d);
         }
       }
       case BB_AREA -> subject.equals(Subject.FIRST)

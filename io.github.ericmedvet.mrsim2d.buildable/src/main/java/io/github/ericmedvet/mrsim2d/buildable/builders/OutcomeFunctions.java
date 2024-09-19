@@ -53,19 +53,27 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static <X> Function<X, Double> aaFinalAvgH(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageHeight;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
+  public static <X> Function<X, Double> aaFinalAvgW(
+          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
-  public static <X> Function<X, Double> aaFinalAvgW(
+  public static <X> Function<X, Double> aaFinalMrH(
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
-    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageWidth;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.w").compose(beforeF);
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMrW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -73,7 +81,7 @@ public class OutcomeFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
     Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalHeight;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.avg.h").compose(beforeF);
+    return FormattedNamedFunction.from(f, format, "all.agents.final.h").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
