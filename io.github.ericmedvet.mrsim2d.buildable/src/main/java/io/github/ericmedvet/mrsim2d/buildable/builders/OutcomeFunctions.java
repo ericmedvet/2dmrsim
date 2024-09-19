@@ -54,8 +54,8 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalAvgW(
-          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
     Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalAverageWidth;
     return FormattedNamedFunction.from(f, format, "all.agents.final.avg.w").compose(beforeF);
   }

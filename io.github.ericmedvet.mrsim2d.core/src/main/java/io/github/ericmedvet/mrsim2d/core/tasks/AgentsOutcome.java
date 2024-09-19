@@ -197,26 +197,27 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
           yield observation.getFirstAgentCenter().x();
         } else {
           yield observation.getAgents().stream()
-                  .mapToDouble(a -> Point.average(a.polies().stream()
-                          .map(Poly::center)
-                          .toArray(Point[]::new)).x())
-                  .average()
-                  .orElse(0d);
+              .mapToDouble(a -> Point.average(a.polies().stream()
+                      .map(Poly::center)
+                      .toArray(Point[]::new))
+                  .x())
+              .average()
+              .orElse(0d);
         }
       }
       case TERRAIN_H -> {
         if (subject.equals(Subject.FIRST)) {
           yield observation.getFirstAgentCenter().y()
-                  - observation.getAgents().get(0).terrainHeight();
+              - observation.getAgents().get(0).terrainHeight();
         } else {
           yield observation.getAgents().stream()
-                  .mapToDouble(a -> Point.average(a.polies().stream()
-                                  .map(Poly::center)
-                                  .toArray(Point[]::new))
-                          .y()
-                          - a.terrainHeight())
-                  .average()
-                  .orElse(0d);
+              .mapToDouble(a -> Point.average(a.polies().stream()
+                          .map(Poly::center)
+                          .toArray(Point[]::new))
+                      .y()
+                  - a.terrainHeight())
+              .average()
+              .orElse(0d);
         }
       }
       case BB_AREA -> subject.equals(Subject.FIRST)
