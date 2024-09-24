@@ -26,13 +26,16 @@ import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
-import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 
 public record AttractAnchorable(Collection<Anchor> anchors, Anchorable anchorable, double magnitude)
     implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>> {
   @Override
-  public Collection<Pair<Anchor, Anchor>> perform(ActionPerformer performer, Agent agent) throws ActionException {
+  public Collection<Pair<Anchor, Anchor>> perform(ActionPerformer performer, Agent agent) {
     // discard already attached
     Collection<Anchor> srcAnchors = anchors.stream()
         .filter(a -> a.links().stream()

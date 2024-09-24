@@ -13,12 +13,12 @@ Add (at least) this to your `pom.xml`:
 <dependency>
     <groupId>io.github.ericmedvet</groupId>
     <artifactId>mrsim2d.core</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
 </dependency>
 <dependency>
     <groupId>io.github.ericmedvet</groupId>
     <artifactId>mrsim2d.engine.dyn4j</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
 </dependency>
 ```
 

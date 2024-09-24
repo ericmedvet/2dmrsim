@@ -25,7 +25,10 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.AtomicDouble;
 import io.github.ericmedvet.mrsim2d.core.util.Profiled;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -151,7 +154,7 @@ public interface Drawer {
           new Point(
               g.getClip().getBounds2D().getMaxX(),
               g.getClip().getBounds2D().getMaxY()));
-      Snapshot lastSnapshot = snapshots.get(snapshots.size() - 1);
+      Snapshot lastSnapshot = snapshots.getLast();
       BoundingBox worldFrame =
           framer.getFrame(lastSnapshot.t(), lastSnapshot, graphicsFrame.width() / graphicsFrame.height());
       // save original transform and stroke

@@ -31,7 +31,12 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -89,9 +94,9 @@ public class TerrainTester {
     L.info("Warming up");
     System.out.printf(
         "t=%5.3f with n=%d on %s%n",
-        profile(taskOn(nb, engineSupplier, nullConsumer, terrains.get(0)), warmUpNOfTimes),
+        profile(taskOn(nb, engineSupplier, nullConsumer, terrains.getFirst()), warmUpNOfTimes),
         warmUpNOfTimes,
-        terrains.get(0));
+        terrains.getFirst());
     // profile
     L.info("Testing");
     int testNOfTimes = 5;

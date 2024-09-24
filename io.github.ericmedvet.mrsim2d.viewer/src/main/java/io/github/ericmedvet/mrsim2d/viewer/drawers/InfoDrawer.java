@@ -24,7 +24,7 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.EngineSnapshot;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -81,7 +81,7 @@ public class InfoDrawer implements Drawer {
 
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
-    Snapshot snapshot = snapshots.get(snapshots.size() - 1);
+    Snapshot snapshot = snapshots.getLast();
     // prepare string
     StringBuilder sb = new StringBuilder();
     if (!string.isEmpty()) {

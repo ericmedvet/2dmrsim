@@ -78,11 +78,11 @@ public class AgentsObservation {
     return centers;
   }
 
-  public Point getFirstAgentCenter() {
-    if (firstAgentCenter == null && !getCenters().isEmpty()) {
-      firstAgentCenter = getCenters().get(0);
+  public BoundingBox getFirstAgentBoundingBox() {
+    if (firstAgentBoundingBox == null && !getBoundingBoxes().isEmpty()) {
+      firstAgentBoundingBox = boundingBoxes.getFirst();
     }
-    return firstAgentCenter;
+    return firstAgentBoundingBox;
   }
 
   public Point getMaxXAgentCenter() {
@@ -117,10 +117,10 @@ public class AgentsObservation {
     return minYAgentCenter;
   }
 
-  public BoundingBox getFirstAgentBoundingBox() {
-    if (firstAgentBoundingBox == null && !getBoundingBoxes().isEmpty()) {
-      firstAgentBoundingBox = boundingBoxes.get(0);
+  public Point getFirstAgentCenter() {
+    if (firstAgentCenter == null && !getCenters().isEmpty()) {
+      firstAgentCenter = getCenters().getFirst();
     }
-    return firstAgentBoundingBox;
+    return firstAgentCenter;
   }
 }

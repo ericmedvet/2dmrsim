@@ -26,13 +26,12 @@ import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.SoftBody;
-import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 
 public record SenseAreaRatio(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
   private static final DoubleRange RANGE = new DoubleRange(0.5, 1.5);
 
   @Override
-  public Double perform(ActionPerformer performer, Agent agent) throws ActionException {
+  public Double perform(ActionPerformer performer, Agent agent) {
     if (body instanceof SoftBody softBody) {
       return RANGE.clip(softBody.areaRatio());
     }

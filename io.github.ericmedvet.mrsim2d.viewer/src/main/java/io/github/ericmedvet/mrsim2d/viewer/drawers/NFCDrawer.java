@@ -24,7 +24,8 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.List;
 
 public class NFCDrawer implements Drawer {
@@ -53,7 +54,7 @@ public class NFCDrawer implements Drawer {
 
   @Override
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
-    for (NFCMessage message : snapshots.get(snapshots.size() - 1).nfcMessages()) {
+    for (NFCMessage message : snapshots.getLast().nfcMessages()) {
       g.setColor(colors[message.channel() % colors.length]);
       Point src = message.source();
       Point dst = src.sum(new Point(message.direction()).scale(maxLenght * Math.abs(message.value())));

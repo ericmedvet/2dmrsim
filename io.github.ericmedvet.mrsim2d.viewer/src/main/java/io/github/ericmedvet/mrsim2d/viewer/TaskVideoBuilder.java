@@ -25,7 +25,7 @@ import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +106,6 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
   public Video build(VideoInfo videoInfo, A a) {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
     task.run(a, engineSupplier.get(), collector);
-    return new Video(collector.images, frameRate, VideoUtils.EncoderFacility.DEFAULT);
+    return new Video(collector.images, frameRate, VideoUtils.defaultEncoder());
   }
 }
