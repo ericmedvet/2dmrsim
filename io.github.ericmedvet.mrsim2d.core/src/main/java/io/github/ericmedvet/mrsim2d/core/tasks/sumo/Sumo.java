@@ -74,22 +74,6 @@ public class Sumo implements Task<Supplier<EmbodiedAgent>, AgentsObservation, Ag
     engine.perform(new AddAgent(agent1));
     //    engine.perform(new AddAgent(agent2));
 
-    // create and place rigid body
-    Poly rigidBodyPoly = Poly.rectangle(3, 2);
-    double rigidBodyMass = 5;
-    double rigidBodyAnchorsDensity = 10;
-    BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
-    Point rigidBodyTranslation = new Point(
-        terrain.withinBordersXRange().min()
-            + initialXGap
-            + 10
-            - rigidBodyBB.min().x(),
-        terrain.maxHeightAt(rigidBodyBB.xRange())
-            + initialYGap
-            - rigidBodyBB.min().y());
-    engine.perform(new CreateAndTranslateRigidBody(
-        rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation));
-
     // place first agent
     BoundingBox agent1BB = agent1.boundingBox();
     engine.perform(new TranslateAgent(
@@ -97,12 +81,14 @@ public class Sumo implements Task<Supplier<EmbodiedAgent>, AgentsObservation, Ag
         new Point(
             terrain.withinBordersXRange().min()
                 + initialXGap
+                + 5
                 - agent1BB.min().x(),
             0)));
     agent1BB = agent1.boundingBox();
     double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
+    double Y1 = maxY1 + initialYGap - agent1BB.min().y();
     engine.perform(new TranslateAgent(
-        agent1, new Point(0, maxY1 + initialYGap - agent1BB.min().y())));
+        agent1, new Point(0, Y1)));
 
     // place second agent slightly ahead
     //    BoundingBox agent2BB = agent2.boundingBox();
@@ -118,6 +104,20 @@ public class Sumo implements Task<Supplier<EmbodiedAgent>, AgentsObservation, Ag
     //    engine.perform(new TranslateAgent(
     //            agent2, new Point(0, maxY2 + initialYGap - agent2BB.min().y())));
 
+    // create and place rigid body
+    Poly rigidBodyPoly = Poly.rectangle(3, 2);
+    double rigidBodyMass = 5;
+    double rigidBodyAnchorsDensity = 10;
+    BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
+    Point rigidBodyTranslation = new Point(
+        terrain.withinBordersXRange().min()
+            + initialXGap
+            + 10
+            - rigidBodyBB.min().x(),
+        Y1);
+    engine.perform(new CreateAndTranslateRigidBody(
+        rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation));
+
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
@@ -131,13 +131,12 @@ public class Sumo implements Task<Supplier<EmbodiedAgent>, AgentsObservation, Ag
                   PolyUtils.maxYAtX(
                       terrain.poly(),
                       agent1.boundingBox().center().x()))
-//                  ,
-//              new AgentsObservation.Agent(
-//                   agent2.bodyParts().stream().map(Body::poly).toList(),
-//                   PolyUtils.maxYAtX(
-//                       terrain.poly(), agent2.boundingBox().center().x()))
-          ))
-      );
+              //                  ,
+              //              new AgentsObservation.Agent(
+              //                   agent2.bodyParts().stream().map(Body::poly).toList(),
+              //                   PolyUtils.maxYAtX(
+              //                       terrain.poly(), agent2.boundingBox().center().x()))
+              )));
     }
 
     // return
