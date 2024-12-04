@@ -31,38 +31,38 @@ import java.util.Optional;
 
 public abstract class AbstractIndependentVoxel implements EmbodiedAgent {
 
-  protected static final double VOXEL_SIDE_LENGTH = 1d;
-  protected static final double VOXEL_MASS = 1d;
+    protected static final double VOXEL_SIDE_LENGTH = 1d;
+    protected static final double VOXEL_MASS = 1d;
 
-  private final Voxel.Material material;
-  private final double voxelSideLength;
-  private final double voxelMass;
+    private final Voxel.Material material;
+    private final double voxelSideLength;
+    private final double voxelMass;
 
-  protected Voxel voxel;
+    protected Voxel voxel;
 
-  public AbstractIndependentVoxel(Voxel.Material material, double voxelSideLength, double voxelMass) {
-    this.material = material;
-    this.voxelSideLength = voxelSideLength;
-    this.voxelMass = voxelMass;
-  }
-
-  @Override
-  public void assemble(ActionPerformer actionPerformer) throws ActionException {
-    CreateVoxel action = new CreateVoxel(voxelSideLength, voxelMass, material);
-    Optional<Voxel> optional = actionPerformer.perform(action, this).outcome();
-    if (optional.isPresent()) {
-      voxel = optional.get();
-    } else {
-      throw new ActionException(action, "Voxel creation failed");
+    public AbstractIndependentVoxel(Voxel.Material material, double voxelSideLength, double voxelMass) {
+        this.material = material;
+        this.voxelSideLength = voxelSideLength;
+        this.voxelMass = voxelMass;
     }
-  }
 
-  @Override
-  public List<Body> bodyParts() {
-    return List.of(voxel);
-  }
+    @Override
+    public void assemble(ActionPerformer actionPerformer) throws ActionException {
+        CreateVoxel action = new CreateVoxel(voxelSideLength, voxelMass, material);
+        Optional<Voxel> optional = actionPerformer.perform(action, this).outcome();
+        if (optional.isPresent()) {
+            voxel = optional.get();
+        } else {
+            throw new ActionException(action, "Voxel creation failed");
+        }
+    }
 
-  public Voxel voxel() {
-    return voxel;
-  }
+    @Override
+    public List<Body> bodyParts() {
+        return List.of(voxel);
+    }
+
+    public Voxel voxel() {
+        return voxel;
+    }
 }

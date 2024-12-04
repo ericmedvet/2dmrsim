@@ -35,83 +35,79 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-  private static final double FIRST_X_GAP = 10;
-  private static final double INITIAL_Y_GAP = 0.1;
-  private final double duration;
-  private final int nOfAgents;
-  private final double xGapRatio;
-  private final Terrain terrain;
-  private final double firstXGap;
-  private final double initialYGap;
+    private static final double FIRST_X_GAP = 10;
+    private static final double INITIAL_Y_GAP = 0.1;
+    private final double duration;
+    private final int nOfAgents;
+    private final double xGapRatio;
+    private final Terrain terrain;
+    private final double firstXGap;
+    private final double initialYGap;
 
-  public StandPiling(
-      double duration, int nOfAgents, double xGapRatio, Terrain terrain, double firstXGap, double initialYGap) {
-    this.duration = duration;
-    this.nOfAgents = nOfAgents;
-    this.xGapRatio = xGapRatio;
-    this.terrain = terrain;
-    this.firstXGap = firstXGap;
-    this.initialYGap = initialYGap;
-  }
-
-  public StandPiling(double duration, int nOfAgents, double xGapRatio, Terrain terrain) {
-    this(duration, nOfAgents, xGapRatio, terrain, FIRST_X_GAP, INITIAL_Y_GAP);
-  }
-
-  private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
-    double baseX = agents.stream()
-        .mapToDouble(a -> a.boundingBox().max().x())
-        .max()
-        .orElse(terrain.withinBordersXRange().min() + firstXGap);
-    BoundingBox agentBB = agent.boundingBox();
-    DoubleRange xRange = agentBB.xRange().delta(-agentBB.width() / 2d).delta(baseX + agentBB.width() * xGapRatio);
-    double y = terrain.maxHeightAt(xRange) + initialYGap;
-    engine.perform(new TranslateAgent(
-        agent,
-        new Point(
-            xRange.min() + xRange.extent() / 2d - agentBB.min().x(),
-            y - agentBB.min().y())));
-  }
-
-  @Override
-  public AgentsOutcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
-    // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
-    // place agents
-    List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);
-    while (agents.size() < nOfAgents) {
-      EmbodiedAgent agent = embodiedAgentSupplier.get();
-      engine.perform(new AddAgent(agent));
-      placeAgent(engine, agent, agents);
-      agents.add(agent);
+    public StandPiling(
+            double duration, int nOfAgents, double xGapRatio, Terrain terrain, double firstXGap, double initialYGap) {
+        this.duration = duration;
+        this.nOfAgents = nOfAgents;
+        this.xGapRatio = xGapRatio;
+        this.terrain = terrain;
+        this.firstXGap = firstXGap;
+        this.initialYGap = initialYGap;
     }
-    // run for defined time
-    Map<Double, AgentsObservation> observations = new HashMap<>();
-    while (engine.t() < duration) {
-      // tick
-      Snapshot snapshot = engine.tick();
-      snapshotConsumer.accept(snapshot);
-      observations.put(
-          engine.t(),
-          new AgentsObservation(agents.stream()
-              .map(a -> new AgentsObservation.Agent(
-                  a.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      a.boundingBox().center().x())))
-              .toList()));
+
+    public StandPiling(double duration, int nOfAgents, double xGapRatio, Terrain terrain) {
+        this(duration, nOfAgents, xGapRatio, terrain, FIRST_X_GAP, INITIAL_Y_GAP);
     }
-    return new AgentsOutcome<>(new TreeMap<>(observations));
-  }
+
+    private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
+        double baseX = agents.stream()
+                .mapToDouble(a -> a.boundingBox().max().x())
+                .max()
+                .orElse(terrain.withinBordersXRange().min() + firstXGap);
+        BoundingBox agentBB = agent.boundingBox();
+        DoubleRange xRange = agentBB.xRange().delta(-agentBB.width() / 2d).delta(baseX + agentBB.width() * xGapRatio);
+        double y = terrain.maxHeightAt(xRange) + initialYGap;
+        engine.perform(new TranslateAgent(
+                agent,
+                new Point(
+                        xRange.min() + xRange.extent() / 2d - agentBB.min().x(),
+                        y - agentBB.min().y())));
+    }
+
+    @Override
+    public AgentsOutcome<AgentsObservation> run(
+            Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+        // build world
+        engine.perform(new CreateUnmovableBody(terrain.poly()));
+        // place agents
+        List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);
+        while (agents.size() < nOfAgents) {
+            EmbodiedAgent agent = embodiedAgentSupplier.get();
+            engine.perform(new AddAgent(agent));
+            placeAgent(engine, agent, agents);
+            agents.add(agent);
+        }
+        // run for defined time
+        Map<Double, AgentsObservation> observations = new HashMap<>();
+        while (engine.t() < duration) {
+            // tick
+            Snapshot snapshot = engine.tick();
+            snapshotConsumer.accept(snapshot);
+            observations.put(
+                    engine.t(),
+                    new AgentsObservation(agents.stream()
+                            .map(a -> new AgentsObservation.Agent(
+                                    a.bodyParts().stream().map(Body::poly).toList(),
+                                    PolyUtils.maxYAtX(
+                                            terrain.poly(),
+                                            a.boundingBox().center().x())))
+                            .toList()));
+        }
+        return new AgentsOutcome<>(new TreeMap<>(observations));
+    }
 }

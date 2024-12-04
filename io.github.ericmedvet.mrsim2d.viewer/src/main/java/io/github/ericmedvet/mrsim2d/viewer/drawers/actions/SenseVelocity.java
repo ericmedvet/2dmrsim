@@ -26,31 +26,31 @@ import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import java.awt.*;
 
 public class SenseVelocity
-    extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity, Double> {
+        extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity, Double> {
 
-  private static final Color COLOR = Color.GREEN;
-  private static final double MULT = 1d;
+    private static final Color COLOR = Color.GREEN;
+    private static final double MULT = 1d;
 
-  private final Color color;
+    private final Color color;
 
-  public SenseVelocity(Color color) {
-    super(io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity.class);
-    this.color = color;
-  }
+    public SenseVelocity(Color color) {
+        super(io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity.class);
+        this.color = color;
+    }
 
-  public SenseVelocity() {
-    this(COLOR);
-  }
+    public SenseVelocity() {
+        this(COLOR);
+    }
 
-  @Override
-  protected boolean innerDraw(
-      double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity, Double> ao, Graphics2D g) {
-    // draw line
-    g.setColor(color);
-    Point src = ao.action().body().poly().center();
-    Point dst =
-        src.sum(new Point(ao.action().direction()).scale(ao.outcome().orElse(0d) * MULT));
-    DrawingUtils.drawLine(g, src, dst);
-    return true;
-  }
+    @Override
+    protected boolean innerDraw(
+            double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.SenseVelocity, Double> ao, Graphics2D g) {
+        // draw line
+        g.setColor(color);
+        Point src = ao.action().body().poly().center();
+        Point dst =
+                src.sum(new Point(ao.action().direction()).scale(ao.outcome().orElse(0d) * MULT));
+        DrawingUtils.drawLine(g, src, dst);
+        return true;
+    }
 }

@@ -28,22 +28,22 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 
 public record SenseAngle(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 
-  private static final DoubleRange RANGE = new DoubleRange(-Math.PI, Math.PI);
+    private static final DoubleRange RANGE = new DoubleRange(-Math.PI, Math.PI);
 
-  @Override
-  public Double perform(ActionPerformer performer, Agent agent) {
-    double a = body.angle();
-    if (a > Math.PI) {
-      a = a - 2d * Math.PI;
+    @Override
+    public Double perform(ActionPerformer performer, Agent agent) {
+        double a = body.angle();
+        if (a > Math.PI) {
+            a = a - 2d * Math.PI;
+        }
+        if (a < -Math.PI) {
+            a = a + 2d * Math.PI;
+        }
+        return a;
     }
-    if (a < -Math.PI) {
-      a = a + 2d * Math.PI;
-    }
-    return a;
-  }
 
-  @Override
-  public DoubleRange range() {
-    return RANGE;
-  }
+    @Override
+    public DoubleRange range() {
+        return RANGE;
+    }
 }

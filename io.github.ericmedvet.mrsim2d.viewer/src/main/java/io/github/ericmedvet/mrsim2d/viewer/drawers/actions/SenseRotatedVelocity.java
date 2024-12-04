@@ -26,34 +26,34 @@ import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
 import java.awt.*;
 
 public class SenseRotatedVelocity
-    extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity, Double> {
+        extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity, Double> {
 
-  private static final Color COLOR = Color.GREEN;
-  private static final double MULT = 1d;
+    private static final Color COLOR = Color.GREEN;
+    private static final double MULT = 1d;
 
-  private final Color color;
+    private final Color color;
 
-  public SenseRotatedVelocity(Color color) {
-    super(io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity.class);
-    this.color = color;
-  }
+    public SenseRotatedVelocity(Color color) {
+        super(io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity.class);
+        this.color = color;
+    }
 
-  public SenseRotatedVelocity() {
-    this(COLOR);
-  }
+    public SenseRotatedVelocity() {
+        this(COLOR);
+    }
 
-  @Override
-  protected boolean innerDraw(
-      double t,
-      ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity, Double> ao,
-      Graphics2D g) {
-    // draw line
-    g.setColor(color);
-    Point src = ao.action().body().poly().center();
-    Point dst =
-        src.sum(new Point(ao.action().direction() + ao.action().body().angle())
-            .scale(ao.outcome().orElse(0d) * MULT));
-    DrawingUtils.drawLine(g, src, dst);
-    return true;
-  }
+    @Override
+    protected boolean innerDraw(
+            double t,
+            ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.SenseRotatedVelocity, Double> ao,
+            Graphics2D g) {
+        // draw line
+        g.setColor(color);
+        Point src = ao.action().body().poly().center();
+        Point dst =
+                src.sum(new Point(ao.action().direction() + ao.action().body().angle())
+                        .scale(ao.outcome().orElse(0d) * MULT));
+        DrawingUtils.drawLine(g, src, dst);
+        return true;
+    }
 }

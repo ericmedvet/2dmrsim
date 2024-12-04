@@ -28,17 +28,17 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
 public record SenseVelocity(double direction, Body body) implements Sense<Body>, SelfDescribedAction<Double> {
-  private static final DoubleRange RANGE = new DoubleRange(-10, 10);
+    private static final DoubleRange RANGE = new DoubleRange(-10, 10);
 
-  @Override
-  public Double perform(ActionPerformer performer, Agent agent) {
-    Point v = body.centerLinearVelocity();
-    double a = v.direction() - direction;
-    return v.magnitude() * Math.cos(a);
-  }
+    @Override
+    public Double perform(ActionPerformer performer, Agent agent) {
+        Point v = body.centerLinearVelocity();
+        double a = v.direction() - direction;
+        return v.magnitude() * Math.cos(a);
+    }
 
-  @Override
-  public DoubleRange range() {
-    return RANGE;
-  }
+    @Override
+    public DoubleRange range() {
+        return RANGE;
+    }
 }

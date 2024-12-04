@@ -25,34 +25,34 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
 public interface RotationalJoint extends RigidBody, Anchorable {
 
-  record Motor(
-      double maxSpeed,
-      double maxTorque,
-      double controlP,
-      double controlI,
-      double controlD,
-      double angleTolerance) {
-    public static final double MAX_SPEED = 20;
-    public static final double MAX_TORQUE = 1000;
-    public static final double CONTROL_P = 10;
-    public static final double CONTROL_I = 2;
-    public static final double CONTROL_D = 2;
-    public static final double ANGLE_TOLERANCE = 0.000;
+    record Motor(
+            double maxSpeed,
+            double maxTorque,
+            double controlP,
+            double controlI,
+            double controlD,
+            double angleTolerance) {
+        public static final double MAX_SPEED = 20;
+        public static final double MAX_TORQUE = 1000;
+        public static final double CONTROL_P = 10;
+        public static final double CONTROL_I = 2;
+        public static final double CONTROL_D = 2;
+        public static final double ANGLE_TOLERANCE = 0.000;
 
-    public Motor() {
-      this(MAX_SPEED, MAX_TORQUE, CONTROL_P, CONTROL_I, CONTROL_D, ANGLE_TOLERANCE);
+        public Motor() {
+            this(MAX_SPEED, MAX_TORQUE, CONTROL_P, CONTROL_I, CONTROL_D, ANGLE_TOLERANCE);
+        }
     }
-  }
 
-  DoubleRange jointActiveAngleRange();
+    DoubleRange jointActiveAngleRange();
 
-  double jointAngle();
+    double jointAngle();
 
-  double jointLength();
+    double jointLength();
 
-  DoubleRange jointPassiveAngleRange();
+    DoubleRange jointPassiveAngleRange();
 
-  Point jointPoint();
+    Point jointPoint();
 
-  double jointTargetAngle();
+    double jointTargetAngle();
 }

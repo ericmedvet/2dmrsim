@@ -24,7 +24,7 @@ import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 
 public interface Actuate<B extends Body, O> extends Action<O> {
-  B body();
+    B body();
 
-  DoubleRange range();
+    DoubleRange range();
 }

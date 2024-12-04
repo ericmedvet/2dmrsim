@@ -28,14 +28,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 public record DetachAnchors(Collection<Anchor> anchors) implements SelfDescribedAction<Collection<Anchor.Link>> {
-  @Override
-  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) {
-    Collection<Anchor.Link> toRemoveLinks =
-        anchors.stream().map(Anchor::links).flatMap(Collection::stream).toList();
-    return toRemoveLinks.stream()
-        .map(l -> performer.perform(new RemoveLink(l), agent).outcome())
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .toList();
-  }
+    @Override
+    public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) {
+        Collection<Anchor.Link> toRemoveLinks =
+                anchors.stream().map(Anchor::links).flatMap(Collection::stream).toList();
+        return toRemoveLinks.stream()
+                .map(l -> performer.perform(new RemoveLink(l), agent).outcome())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
 }

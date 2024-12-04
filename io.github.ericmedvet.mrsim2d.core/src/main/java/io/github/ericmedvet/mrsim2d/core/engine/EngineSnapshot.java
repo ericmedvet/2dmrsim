@@ -29,26 +29,26 @@ import java.util.Collection;
 import java.util.Map;
 
 public record EngineSnapshot(
-    double t,
-    Collection<Body> bodies,
-    Collection<Agent> agents,
-    Collection<ActionOutcome<?, ?>> actionOutcomes,
-    Collection<NFCMessage> nfcMessages,
-    Map<TimeType, Double> times,
-    Map<CounterType, Integer> counters)
-    implements Snapshot {
-  public enum CounterType {
-    TICK,
-    ACTION,
-    ILLEGAL_ACTION,
-    UNSUPPORTED_ACTION
-  }
+        double t,
+        Collection<Body> bodies,
+        Collection<Agent> agents,
+        Collection<ActionOutcome<?, ?>> actionOutcomes,
+        Collection<NFCMessage> nfcMessages,
+        Map<TimeType, Double> times,
+        Map<CounterType, Integer> counters)
+        implements Snapshot {
+    public enum CounterType {
+        TICK,
+        ACTION,
+        ILLEGAL_ACTION,
+        UNSUPPORTED_ACTION
+    }
 
-  public enum TimeType {
-    ENVIRONMENT,
-    WALL,
-    TICK,
-    INNER_TICK,
-    PERFORM
-  }
+    public enum TimeType {
+        ENVIRONMENT,
+        WALL,
+        TICK,
+        INNER_TICK,
+        PERFORM
+    }
 }

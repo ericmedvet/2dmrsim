@@ -29,28 +29,28 @@ import java.util.function.BiPredicate;
 
 public abstract class AbstractLastingComponentDrawer implements ComponentDrawer {
 
-  private final List<Pair<BiPredicate<Double, Graphics2D>, Double>> tasks;
+    private final List<Pair<BiPredicate<Double, Graphics2D>, Double>> tasks;
 
-  public AbstractLastingComponentDrawer() {
-    this.tasks = new ArrayList<>();
-  }
-
-  protected abstract BiPredicate<Double, Graphics2D> buildTask(double t, Object o);
-
-  @Override
-  public boolean draw(double t, Object o, Graphics2D g) {
-    BiPredicate<Double, Graphics2D> newTask = buildTask(t, o);
-    if (newTask != null) {
-      tasks.add(new Pair<>(newTask, t));
+    public AbstractLastingComponentDrawer() {
+        this.tasks = new ArrayList<>();
     }
-    List<Pair<BiPredicate<Double, Graphics2D>, Double>> toRemoveTasks = new ArrayList<>();
-    for (Pair<BiPredicate<Double, Graphics2D>, Double> task : tasks) {
-      if (task.first().test(t - task.second(), g)) {
-        toRemoveTasks.add(task);
-      }
+
+    protected abstract BiPredicate<Double, Graphics2D> buildTask(double t, Object o);
+
+    @Override
+    public boolean draw(double t, Object o, Graphics2D g) {
+        BiPredicate<Double, Graphics2D> newTask = buildTask(t, o);
+        if (newTask != null) {
+            tasks.add(new Pair<>(newTask, t));
+        }
+        List<Pair<BiPredicate<Double, Graphics2D>, Double>> toRemoveTasks = new ArrayList<>();
+        for (Pair<BiPredicate<Double, Graphics2D>, Double> task : tasks) {
+            if (task.first().test(t - task.second(), g)) {
+                toRemoveTasks.add(task);
+            }
+        }
+        boolean drawn = !tasks.isEmpty();
+        tasks.removeAll(toRemoveTasks);
+        return drawn;
     }
-    boolean drawn = !tasks.isEmpty();
-    tasks.removeAll(toRemoveTasks);
-    return drawn;
-  }
 }

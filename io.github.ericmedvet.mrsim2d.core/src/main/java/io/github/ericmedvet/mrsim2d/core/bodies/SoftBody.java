@@ -21,9 +21,9 @@
 package io.github.ericmedvet.mrsim2d.core.bodies;
 
 public interface SoftBody extends Body {
-  double restArea();
+    double restArea();
 
-  default double areaRatio() {
-    return poly().area() / restArea();
-  }
+    default double areaRatio() {
+        return poly().area() / restArea();
+    }
 }

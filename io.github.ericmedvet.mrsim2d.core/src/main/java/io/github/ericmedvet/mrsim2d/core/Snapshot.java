@@ -24,13 +24,13 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import java.util.Collection;
 
 public interface Snapshot {
-  Collection<ActionOutcome<?, ?>> actionOutcomes();
+    Collection<ActionOutcome<?, ?>> actionOutcomes();
 
-  Collection<Agent> agents();
+    Collection<Agent> agents();
 
-  Collection<Body> bodies();
+    Collection<Body> bodies();
 
-  Collection<NFCMessage> nfcMessages();
+    Collection<NFCMessage> nfcMessages();
 
-  double t();
+    double t();
 }

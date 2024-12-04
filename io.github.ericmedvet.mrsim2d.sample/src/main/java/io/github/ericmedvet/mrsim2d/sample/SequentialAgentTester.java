@@ -40,63 +40,63 @@ import java.util.stream.Collectors;
 /** @author "Eric Medvet" on 2024/03/23 for 2dmrsim */
 public class SequentialAgentTester {
 
-  private static final Logger L = Logger.getLogger(SequentialAgentTester.class.getName());
-  private static final String TASK = "sim.task.locomotion(duration = 10; terrain = s.t.downhill(a = 5))";
-  private static final List<String> AGENTS = List.of(
-      "ball-vsr-reactive.txt",
-      "biped-vsr-centralized-drn.txt",
-      "biped-vsr-centralized-mlp.txt",
-      "biped-vsr-reactive.txt",
-      "hybrid-biped-vsr-centralized-mlp.txt",
-      "hybrid-tripod-vsr-distributed-mlp.txt",
-      "independent-voxel-all-mlp.txt",
-      "independent-voxel-noanchors-mlp.txt",
-      "legged-mlp.txt",
-      "legged-sin.txt",
-      "modular-legged-mlp.txt",
-      "modular-legged-sin.txt",
-      "trained-biped-vsr-centralized-mlp.txt",
-      "tripod-vsr-distributed-mlp.txt",
-      "worm-vsr-reactive.txt");
+    private static final Logger L = Logger.getLogger(SequentialAgentTester.class.getName());
+    private static final String TASK = "sim.task.locomotion(duration = 10; terrain = s.t.downhill(a = 5))";
+    private static final List<String> AGENTS = List.of(
+            "ball-vsr-reactive.txt",
+            "biped-vsr-centralized-drn.txt",
+            "biped-vsr-centralized-mlp.txt",
+            "biped-vsr-reactive.txt",
+            "hybrid-biped-vsr-centralized-mlp.txt",
+            "hybrid-tripod-vsr-distributed-mlp.txt",
+            "independent-voxel-all-mlp.txt",
+            "independent-voxel-noanchors-mlp.txt",
+            "legged-mlp.txt",
+            "legged-sin.txt",
+            "modular-legged-mlp.txt",
+            "modular-legged-sin.txt",
+            "trained-biped-vsr-centralized-mlp.txt",
+            "tripod-vsr-distributed-mlp.txt",
+            "worm-vsr-reactive.txt");
 
-  public static void main(String[] args) {
-    NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
-    // prepare task
-    @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK);
-    for (String agent : AGENTS) {
-      System.out.printf("Loading agent description \"%s\"%n", agent);
-      InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s".formatted(agent));
-      String agentDescription = null;
-      if (inputStream == null) {
-        L.severe("Cannot find agent description");
-      } else {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-          agentDescription = br.lines().collect(Collectors.joining());
-        } catch (IOException e) {
-          L.severe("Cannot read agent description: %s%n".formatted(e));
-          System.exit(-1);
+    public static void main(String[] args) {
+        NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
+        // prepare task
+        @SuppressWarnings("unchecked")
+        Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK);
+        for (String agent : AGENTS) {
+            System.out.printf("Loading agent description \"%s\"%n", agent);
+            InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s".formatted(agent));
+            String agentDescription = null;
+            if (inputStream == null) {
+                L.severe("Cannot find agent description");
+            } else {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+                    agentDescription = br.lines().collect(Collectors.joining());
+                } catch (IOException e) {
+                    L.severe("Cannot read agent description: %s%n".formatted(e));
+                    System.exit(-1);
+                }
+            }
+            System.out.println(task.simulate(getEmbodiedAgentSupplier(agentDescription, nb)));
         }
-      }
-      System.out.println(task.simulate(getEmbodiedAgentSupplier(agentDescription, nb)));
     }
-  }
 
-  private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {
-    RandomGenerator rg = new Random();
-    return () -> {
-      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-      // shuffle parameters
-      if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().stream()
-            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> {
-              System.out.printf(
-                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
-              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-            }));
-      }
-      return agent;
-    };
-  }
+    private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {
+        RandomGenerator rg = new Random();
+        return () -> {
+            EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+            // shuffle parameters
+            if (agent instanceof NumMultiBrained numMultiBrained) {
+                numMultiBrained.brains().stream()
+                        .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+                        .forEach(o -> o.ifPresent(np -> {
+                            System.out.printf(
+                                    "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                            np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+                        }));
+            }
+            return agent;
+        };
+    }
 }

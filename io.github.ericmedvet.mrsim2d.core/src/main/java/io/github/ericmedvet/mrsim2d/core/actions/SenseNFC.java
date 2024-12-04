@@ -24,13 +24,13 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
 public record SenseNFC(Body body, Point displacement, double direction, short channel) implements Sense<Body> {
-  @Override
-  public Body body() {
-    return body;
-  }
+    @Override
+    public Body body() {
+        return body;
+    }
 
-  @Override
-  public DoubleRange range() {
-    return DoubleRange.SYMMETRIC_UNIT;
-  }
+    @Override
+    public DoubleRange range() {
+        return DoubleRange.SYMMETRIC_UNIT;
+    }
 }

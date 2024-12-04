@@ -30,17 +30,17 @@ import java.util.List;
 
 public record SenseContact(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
 
-  @Override
-  public Double perform(ActionPerformer performer, Agent agent) {
-    Collection<Body> bodies = performer
-        .perform(new FindInContactBodies(body), agent)
-        .outcome()
-        .orElse(List.of());
-    return bodies.isEmpty() ? 0d : 1d;
-  }
+    @Override
+    public Double perform(ActionPerformer performer, Agent agent) {
+        Collection<Body> bodies = performer
+                .perform(new FindInContactBodies(body), agent)
+                .outcome()
+                .orElse(List.of());
+        return bodies.isEmpty() ? 0d : 1d;
+    }
 
-  @Override
-  public DoubleRange range() {
-    return DoubleRange.UNIT;
-  }
+    @Override
+    public DoubleRange range() {
+        return DoubleRange.UNIT;
+    }
 }

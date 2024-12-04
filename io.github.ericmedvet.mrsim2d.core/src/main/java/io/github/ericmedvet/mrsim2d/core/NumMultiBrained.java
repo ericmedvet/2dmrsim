@@ -26,11 +26,11 @@ import java.util.List;
 
 public interface NumMultiBrained {
 
-  record BrainIO(RangedValues input, RangedValues output) {}
+    record BrainIO(RangedValues input, RangedValues output) {}
 
-  record RangedValues(double[] values, DoubleRange range) {}
+    record RangedValues(double[] values, DoubleRange range) {}
 
-  List<BrainIO> brainIOs();
+    List<BrainIO> brainIOs();
 
-  List<NumericalDynamicalSystem<?>> brains();
+    List<NumericalDynamicalSystem<?>> brains();
 }

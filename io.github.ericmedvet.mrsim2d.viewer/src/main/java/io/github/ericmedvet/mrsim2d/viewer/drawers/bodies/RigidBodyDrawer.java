@@ -32,34 +32,34 @@ import java.awt.geom.Path2D;
 
 public class RigidBodyDrawer extends AbstractComponentDrawer<RigidBody> {
 
-  private static final Color FILL_COLOR = Color.GRAY;
-  private static final Color STROKE_COLOR = Color.BLACK;
+    private static final Color FILL_COLOR = Color.GRAY;
+    private static final Color STROKE_COLOR = Color.BLACK;
 
-  private final Color fillColor;
-  private final Color strokeColor;
+    private final Color fillColor;
+    private final Color strokeColor;
 
-  public RigidBodyDrawer(Color fillColor, Color strokeColor) {
-    super(RigidBody.class);
-    this.fillColor = fillColor;
-    this.strokeColor = strokeColor;
-  }
+    public RigidBodyDrawer(Color fillColor, Color strokeColor) {
+        super(RigidBody.class);
+        this.fillColor = fillColor;
+        this.strokeColor = strokeColor;
+    }
 
-  public RigidBodyDrawer() {
-    this(FILL_COLOR, STROKE_COLOR);
-  }
+    public RigidBodyDrawer() {
+        this(FILL_COLOR, STROKE_COLOR);
+    }
 
-  @Override
-  protected boolean innerDraw(double t, RigidBody body, Graphics2D g) {
-    Poly poly = body.poly();
-    Path2D path = DrawingUtils.toPath(poly, true);
-    g.setColor(fillColor);
-    g.fill(path);
-    g.setColor(strokeColor);
-    g.draw(path);
-    // plot angle
-    Point center = poly.center();
-    Point firstSideMeanPoint = poly.sides().getFirst().center();
-    g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
-    return true;
-  }
+    @Override
+    protected boolean innerDraw(double t, RigidBody body, Graphics2D g) {
+        Poly poly = body.poly();
+        Path2D path = DrawingUtils.toPath(poly, true);
+        g.setColor(fillColor);
+        g.fill(path);
+        g.setColor(strokeColor);
+        g.draw(path);
+        // plot angle
+        Point center = poly.center();
+        Point firstSideMeanPoint = poly.sides().getFirst().center();
+        g.draw(new Line2D.Double(center.x(), center.y(), firstSideMeanPoint.x(), firstSideMeanPoint.y()));
+        return true;
+    }
 }
