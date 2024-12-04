@@ -20,6 +20,14 @@
 
 package io.github.ericmedvet.mrsim2d.core.engine;
 
+import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.Environment;
+import java.util.function.UnaryOperator;
 
-public interface Engine extends Environment {}
+public interface Engine extends Environment {
+
+  <A extends Action<O>, O> void registerActionsFilter(Agent agent, UnaryOperator<A> operator);
+
+  void removeActionsFilter(Agent agent);
+}
