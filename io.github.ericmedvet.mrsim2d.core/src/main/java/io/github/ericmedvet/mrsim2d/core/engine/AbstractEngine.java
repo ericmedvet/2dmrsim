@@ -21,17 +21,44 @@
 package io.github.ericmedvet.mrsim2d.core.engine;
 
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.mrsim2d.core.*;
-import io.github.ericmedvet.mrsim2d.core.actions.*;
+import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
+import io.github.ericmedvet.mrsim2d.core.Agent;
+import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
+import io.github.ericmedvet.mrsim2d.core.NFCMessage;
+import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
+import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
+import io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor;
+import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkAnchor;
+import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkAnchorable;
+import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkClosestAnchorable;
+import io.github.ericmedvet.mrsim2d.core.actions.CreateLink;
+import io.github.ericmedvet.mrsim2d.core.actions.EmitNFCMessage;
+import io.github.ericmedvet.mrsim2d.core.actions.SenseNFC;
+import io.github.ericmedvet.mrsim2d.core.actions.SenseSinusoidal;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.util.*;
+import io.github.ericmedvet.mrsim2d.core.util.AtomicDouble;
+import io.github.ericmedvet.mrsim2d.core.util.HashSpatialMap;
+import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
+import io.github.ericmedvet.mrsim2d.core.util.Profiled;
+import io.github.ericmedvet.mrsim2d.core.util.SpatialMap;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +76,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private final EnumMap<EngineSnapshot.TimeType, AtomicDouble> times;
   private final EnumMap<EngineSnapshot.CounterType, AtomicInteger> counters;
   private final List<ActionOutcome<?, ?>> lastTickPerformedActions;
+  private final Map<Agent, UnaryOperator<? extends Action<?>>> agentActionsFilters;
   private SpatialMap<NFCMessage> lastNFCMessages;
   private SpatialMap<NFCMessage> newNFCMessages;
 
@@ -62,6 +90,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     lastNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     times = new EnumMap<>(EngineSnapshot.TimeType.class);
     counters = new EnumMap<>(EngineSnapshot.CounterType.class);
+    agentActionsFilters = new LinkedHashMap<>();
     Arrays.stream(EngineSnapshot.TimeType.values()).forEach(t -> times.put(t, new AtomicDouble(0d)));
     Arrays.stream(EngineSnapshot.CounterType.values()).forEach(t -> counters.put(t, new AtomicInteger(0)));
     startingInstant = Instant.now();
@@ -71,23 +100,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
   public AbstractEngine() {
     this(DEFAULT_CONFIGURATION);
   }
-
-  @FunctionalInterface
-  protected interface ActionSolver<A extends Action<O>, O> {
-    O solve(A action, Agent agent) throws ActionException;
-  }
-
-  public record Configuration(
-      double attractionRange,
-      double attractLinkRangeRatio,
-      double bodyFindRange,
-      double nfcDistanceRange,
-      double nfcAngleRange,
-      int nfcChannels) {}
-
-  protected abstract Collection<Body> getBodies();
-
-  protected abstract double innerTick();
 
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
     if (action.agent() instanceof EmbodiedAgent embodiedAgent) {
@@ -158,11 +170,21 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return message;
   }
 
+  protected abstract Collection<Body> getBodies();
+
+  protected abstract double innerTick();
+
   @SuppressWarnings("unchecked")
   @Override
   public <A extends Action<O>, O> ActionOutcome<A, O> perform(A action, Agent agent) {
     Instant performStartingInstant = Instant.now();
     counters.get(EngineSnapshot.CounterType.ACTION).incrementAndGet();
+    if (agent != null) {
+      UnaryOperator<Action<?>> filter = (UnaryOperator<Action<?>>) agentActionsFilters.get(agent);
+      if (filter != null) {
+        action = (A) filter.apply(action);
+      }
+    }
     ActionSolver<A, O> actionSolver = (ActionSolver<A, O>) actionSolvers.get(action.getClass());
     O o = null;
     if (actionSolver == null) {
@@ -221,6 +243,16 @@ public abstract class AbstractEngine implements Engine, Profiled {
     registerActionSolver(SenseSinusoidal.class, this::senseSinusoidal);
     registerActionSolver(EmitNFCMessage.class, this::emitNFCMessage);
     registerActionSolver(SenseNFC.class, this::senseNFC);
+  }
+
+  @Override
+  public <A extends Action<O>, O> void registerActionsFilter(Agent agent, UnaryOperator<A> operator) {
+    agentActionsFilters.put(agent, operator);
+  }
+
+  @Override
+  public void removeActionsFilter(Agent agent) {
+    agentActionsFilters.remove(agent);
   }
 
   protected Double senseNFC(SenseNFC action, Agent agent) {
@@ -299,4 +331,18 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .map(e -> Map.entry(e.getKey().toLowerCase(), e.getValue()))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
+
+  @FunctionalInterface
+  protected interface ActionSolver<A extends Action<O>, O> {
+
+    O solve(A action, Agent agent) throws ActionException;
+  }
+
+  public record Configuration(
+      double attractionRange,
+      double attractLinkRangeRatio,
+      double bodyFindRange,
+      double nfcDistanceRange,
+      double nfcAngleRange,
+      int nfcChannels) {}
 }
