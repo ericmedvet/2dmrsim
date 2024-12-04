@@ -27,7 +27,7 @@ import java.util.function.UnaryOperator;
 
 public interface Engine extends Environment {
 
-  <A extends Action<O>, O> void registerActionsFilter(Agent agent, UnaryOperator<A> operator);
+    <A extends Action<O>, O> void registerActionsFilter(Agent agent, UnaryOperator<A> operator);
 
-  void removeActionsFilter(Agent agent);
+    void removeActionsFilter(Agent agent);
 }
