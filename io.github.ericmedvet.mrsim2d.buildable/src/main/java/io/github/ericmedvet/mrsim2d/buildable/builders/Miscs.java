@@ -162,7 +162,7 @@ public class Miscs {
             @Param("task") Task<A, S, O> task,
             @Param("repetitions") int repetitions,
             @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
-        return a -> IntStream.range(0, 30).boxed().map(i ->task.run(a, engineSupplier.get())).toList();
+        return a -> IntStream.range(0, repetitions).boxed().map(i ->task.run(a, engineSupplier.get())).toList();
     }
 
     @SuppressWarnings("unused")
