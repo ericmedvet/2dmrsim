@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "sim|s")
 public class Miscs {
@@ -154,6 +155,14 @@ public class Miscs {
             @Param("minY") double minY,
             @Param("maxY") double maxY) {
         return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
+    }
+
+    @SuppressWarnings("unused")
+    public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
+            @Param("task") Task<A, S, O> task,
+            @Param("repetitions") int repetitions,
+            @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
+        return a -> IntStream.range(0, 30).boxed().map(i ->task.run(a, engineSupplier.get())).toList();
     }
 
     @SuppressWarnings("unused")
