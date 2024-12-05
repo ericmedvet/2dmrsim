@@ -59,9 +59,10 @@ public class AnchorableBodyDrawer extends AbstractComponentDrawer<Anchorable> {
       for (Anchor.Link link : anchor.links()) {
         switch (link.type()) {
           case RIGID -> g.draw(new Line2D.Double(
-              anchor.point().x(), anchor.point().y(),
+              anchor.point().x(),
+              anchor.point().y(),
               link.destination().point().x(),
-                  link.destination().point().y()));
+              link.destination().point().y()));
           case SOFT -> g.draw(DrawingUtils.toPath(PolyUtils.zigZag(
                   anchor.point(), link.destination().point(), SOFT_LINK_POINTS, SOFT_LINK_WIDTH)
               .points()));

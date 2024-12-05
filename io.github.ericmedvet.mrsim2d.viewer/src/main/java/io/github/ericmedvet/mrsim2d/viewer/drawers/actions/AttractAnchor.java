@@ -23,8 +23,7 @@ package io.github.ericmedvet.mrsim2d.viewer.drawers.actions;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 

@@ -29,25 +29,12 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawers;
-import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
-import io.github.ericmedvet.mrsim2d.viewer.Framer;
-import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.NFCDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.*;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.AnchorableBodyDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RigidBodyDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RotationalJointDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.SoftBodyDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.UnmovableBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.*;
 import io.github.ericmedvet.mrsim2d.viewer.framers.AllAgentsFramer;
 import io.github.ericmedvet.mrsim2d.viewer.framers.StaticFramer;
 import java.util.ArrayList;
@@ -56,6 +43,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "sim|s")
 public class Miscs {
@@ -167,6 +155,17 @@ public class Miscs {
       @Param("minY") double minY,
       @Param("maxY") double maxY) {
     return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
+  }
+
+  @SuppressWarnings("unused")
+  public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
+      @Param("task") Task<A, S, O> task,
+      @Param("repetitions") int repetitions,
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
+    return a -> IntStream.range(0, repetitions)
+        .boxed()
+        .map(i -> task.run(a, engineSupplier.get()))
+        .toList();
   }
 
   @SuppressWarnings("unused")

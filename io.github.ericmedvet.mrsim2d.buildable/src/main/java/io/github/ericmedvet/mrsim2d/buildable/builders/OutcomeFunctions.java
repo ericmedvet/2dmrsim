@@ -43,6 +43,26 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaAvgMaxH(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageMaxHeight();
+    return FormattedNamedFunction.from(f, format, "all.agents.avg.max.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaAvgMaxW(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).allAgentsAverageMaxWidth();
+    return FormattedNamedFunction.from(f, format, "all.agents.avg.max.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaAvgW(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,

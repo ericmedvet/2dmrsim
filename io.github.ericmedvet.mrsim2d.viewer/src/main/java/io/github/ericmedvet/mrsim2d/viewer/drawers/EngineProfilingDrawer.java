@@ -25,7 +25,7 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.engine.EngineSnapshot;
 import io.github.ericmedvet.mrsim2d.viewer.AbstractMemoryDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.DrawingUtils;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;

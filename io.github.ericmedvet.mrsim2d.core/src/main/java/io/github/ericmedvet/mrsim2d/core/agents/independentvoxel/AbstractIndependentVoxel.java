@@ -31,8 +31,8 @@ import java.util.Optional;
 
 public abstract class AbstractIndependentVoxel implements EmbodiedAgent {
 
-  protected static final double VOXEL_SIDE_LENGTH = 1d;
-  protected static final double VOXEL_MASS = 1d;
+  public static final double VOXEL_SIDE_LENGTH = 1d;
+  public static final double VOXEL_MASS = 1d;
 
   private final Voxel.Material material;
   private final double voxelSideLength;
