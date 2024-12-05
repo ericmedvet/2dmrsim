@@ -24,11 +24,11 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 
 public interface Body {
-    double angle();
+  double angle();
 
-    Point centerLinearVelocity();
+  Point centerLinearVelocity();
 
-    double mass();
+  double mass();
 
-    Poly poly();
+  Poly poly();
 }

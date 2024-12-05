@@ -35,77 +35,77 @@ import java.util.function.Supplier;
 
 public class TaskVideoBuilder<A> implements VideoBuilder<A> {
 
-    private final Task<A, ?, ?> task;
-    private final Function<String, Drawer> drawerBuilder;
-    private final Supplier<Engine> engineSupplier;
-    private final String title;
-    private final double startTime;
-    private final double endTime;
-    private final double frameRate;
+  private final Task<A, ?, ?> task;
+  private final Function<String, Drawer> drawerBuilder;
+  private final Supplier<Engine> engineSupplier;
+  private final String title;
+  private final double startTime;
+  private final double endTime;
+  private final double frameRate;
 
-    private class ImageCollector implements Consumer<Snapshot> {
-        private final List<BufferedImage> images = new ArrayList<>();
-        private final List<Snapshot> snapshots = new ArrayList<>();
-        private final List<Double> snapshotTs = new ArrayList<>();
-        private double lastDrawnT;
-        private double lastT;
-        private final int w;
-        private final int h;
-        private final Drawer drawer;
+  private class ImageCollector implements Consumer<Snapshot> {
+    private final List<BufferedImage> images = new ArrayList<>();
+    private final List<Snapshot> snapshots = new ArrayList<>();
+    private final List<Double> snapshotTs = new ArrayList<>();
+    private double lastDrawnT;
+    private double lastT;
+    private final int w;
+    private final int h;
+    private final Drawer drawer;
 
-        public ImageCollector(int w, int h) {
-            this.w = w;
-            this.h = h;
-            drawer = drawerBuilder.apply(title);
-        }
-
-        public void accept(Snapshot snapshot) {
-            if (!Double.isNaN(lastT)) {
-                snapshotTs.add(snapshot.t() - lastT);
-            }
-            lastT = snapshot.t();
-            if (snapshot.t() < startTime || snapshot.t() > endTime) {
-                return;
-            }
-            double tolerance = snapshotTs.stream().mapToDouble(t -> t).average().orElse(0d) / 2d;
-            snapshots.add(snapshot);
-            if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
-                lastDrawnT = snapshot.t();
-                // create image
-                BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
-                // draw
-                Graphics2D g = image.createGraphics();
-                g.setClip(0, 0, image.getWidth(), image.getHeight());
-                drawer.draw(snapshots, g);
-                g.dispose();
-                // add
-                images.add(image);
-                snapshots.clear();
-            }
-        }
+    public ImageCollector(int w, int h) {
+      this.w = w;
+      this.h = h;
+      drawer = drawerBuilder.apply(title);
     }
 
-    public TaskVideoBuilder(
-            Task<A, ?, ?> task,
-            Function<String, Drawer> drawerBuilder,
-            Supplier<Engine> engineSupplier,
-            String title,
-            double startTime,
-            double endTime,
-            double frameRate) {
-        this.task = task;
-        this.drawerBuilder = drawerBuilder;
-        this.engineSupplier = engineSupplier;
-        this.title = title;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.frameRate = frameRate;
+    public void accept(Snapshot snapshot) {
+      if (!Double.isNaN(lastT)) {
+        snapshotTs.add(snapshot.t() - lastT);
+      }
+      lastT = snapshot.t();
+      if (snapshot.t() < startTime || snapshot.t() > endTime) {
+        return;
+      }
+      double tolerance = snapshotTs.stream().mapToDouble(t -> t).average().orElse(0d) / 2d;
+      snapshots.add(snapshot);
+      if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
+        lastDrawnT = snapshot.t();
+        // create image
+        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+        // draw
+        Graphics2D g = image.createGraphics();
+        g.setClip(0, 0, image.getWidth(), image.getHeight());
+        drawer.draw(snapshots, g);
+        g.dispose();
+        // add
+        images.add(image);
+        snapshots.clear();
+      }
     }
+  }
 
-    @Override
-    public Video build(VideoInfo videoInfo, A a) {
-        ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
-        task.run(a, engineSupplier.get(), collector);
-        return new Video(collector.images, frameRate, VideoUtils.defaultEncoder());
-    }
+  public TaskVideoBuilder(
+      Task<A, ?, ?> task,
+      Function<String, Drawer> drawerBuilder,
+      Supplier<Engine> engineSupplier,
+      String title,
+      double startTime,
+      double endTime,
+      double frameRate) {
+    this.task = task;
+    this.drawerBuilder = drawerBuilder;
+    this.engineSupplier = engineSupplier;
+    this.title = title;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.frameRate = frameRate;
+  }
+
+  @Override
+  public Video build(VideoInfo videoInfo, A a) {
+    ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
+    task.run(a, engineSupplier.get(), collector);
+    return new Video(collector.images, frameRate, VideoUtils.defaultEncoder());
+  }
 }

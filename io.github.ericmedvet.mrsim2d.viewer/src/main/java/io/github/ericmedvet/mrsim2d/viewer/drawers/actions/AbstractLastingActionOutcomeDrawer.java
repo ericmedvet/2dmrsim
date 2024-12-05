@@ -27,27 +27,27 @@ import java.awt.*;
 import java.util.function.BiPredicate;
 
 public abstract class AbstractLastingActionOutcomeDrawer<A extends Action<O>, O>
-        extends AbstractLastingComponentDrawer {
+    extends AbstractLastingComponentDrawer {
 
-    protected static final double DURATION = 0.5;
-    protected final double duration;
-    private final Class<A> actionClass;
+  protected static final double DURATION = 0.5;
+  protected final double duration;
+  private final Class<A> actionClass;
 
-    public AbstractLastingActionOutcomeDrawer(Class<A> actionClass, double duration) {
-        this.actionClass = actionClass;
-        this.duration = duration;
+  public AbstractLastingActionOutcomeDrawer(Class<A> actionClass, double duration) {
+    this.actionClass = actionClass;
+    this.duration = duration;
+  }
+
+  protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(double t, ActionOutcome<A, O> o);
+
+  @SuppressWarnings("unchecked")
+  @Override
+  protected BiPredicate<Double, Graphics2D> buildTask(double t, Object o) {
+    if (o instanceof ActionOutcome<?, ?> actionOutcome) {
+      if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
+        return innerBuildTask(t, (ActionOutcome<A, O>) actionOutcome);
+      }
     }
-
-    protected abstract BiPredicate<Double, Graphics2D> innerBuildTask(double t, ActionOutcome<A, O> o);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected BiPredicate<Double, Graphics2D> buildTask(double t, Object o) {
-        if (o instanceof ActionOutcome<?, ?> actionOutcome) {
-            if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
-                return innerBuildTask(t, (ActionOutcome<A, O>) actionOutcome);
-            }
-        }
-        return null;
-    }
+    return null;
+  }
 }

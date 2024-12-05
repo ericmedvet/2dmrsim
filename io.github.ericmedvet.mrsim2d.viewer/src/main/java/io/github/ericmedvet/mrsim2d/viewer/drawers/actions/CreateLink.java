@@ -30,42 +30,42 @@ import java.awt.geom.Ellipse2D;
 import java.util.function.BiPredicate;
 
 public class CreateLink
-        extends AbstractLastingActionOutcomeDrawer<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> {
+    extends AbstractLastingActionOutcomeDrawer<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> {
 
-    private static final Color COLOR = Color.GREEN;
+  private static final Color COLOR = Color.GREEN;
 
-    private static final DoubleRange RADIUS = new DoubleRange(0, 0.15);
+  private static final DoubleRange RADIUS = new DoubleRange(0, 0.15);
 
-    private final Color color;
+  private final Color color;
 
-    public CreateLink(Color color, double duration) {
-        super(io.github.ericmedvet.mrsim2d.core.actions.CreateLink.class, duration);
-        this.color = color;
-    }
+  public CreateLink(Color color, double duration) {
+    super(io.github.ericmedvet.mrsim2d.core.actions.CreateLink.class, duration);
+    this.color = color;
+  }
 
-    public CreateLink() {
-        this(COLOR, DURATION);
-    }
+  public CreateLink() {
+    this(COLOR, DURATION);
+  }
 
-    @Override
-    protected BiPredicate<Double, Graphics2D> innerBuildTask(
-            double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> o) {
-        return (dT, g) -> {
-            if (o.outcome().isPresent()) {
-                g.setColor(color);
-                double r = RADIUS.max() - RADIUS.denormalize(dT / duration);
-                Anchor src = o.outcome().get().source();
-                Anchor dst = o.outcome().get().destination();
-                g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
-                g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
-                double a = src.point().diff(dst.point()).direction();
-                Point lSrc = src.point().diff(new Point(a).scale(r));
-                Point lDst = dst.point().sum(new Point(a).scale(r));
-                DrawingUtils.drawLine(g, lSrc, lDst);
-                return dT > duration;
-            } else {
-                return true;
-            }
-        };
-    }
+  @Override
+  protected BiPredicate<Double, Graphics2D> innerBuildTask(
+      double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.CreateLink, Anchor.Link> o) {
+    return (dT, g) -> {
+      if (o.outcome().isPresent()) {
+        g.setColor(color);
+        double r = RADIUS.max() - RADIUS.denormalize(dT / duration);
+        Anchor src = o.outcome().get().source();
+        Anchor dst = o.outcome().get().destination();
+        g.draw(new Ellipse2D.Double(src.point().x() - r, src.point().y() - r, r * 2d, r * 2d));
+        g.draw(new Ellipse2D.Double(dst.point().x() - r, dst.point().y() - r, r * 2d, r * 2d));
+        double a = src.point().diff(dst.point()).direction();
+        Point lSrc = src.point().diff(new Point(a).scale(r));
+        Point lDst = dst.point().sum(new Point(a).scale(r));
+        DrawingUtils.drawLine(g, lSrc, lDst);
+        return dT > duration;
+      } else {
+        return true;
+      }
+    };
+  }
 }

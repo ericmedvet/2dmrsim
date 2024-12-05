@@ -28,18 +28,18 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.SoftBody;
 
 public record SenseAreaRatio(Body body) implements Sense<Body>, SelfDescribedAction<Double> {
-    private static final DoubleRange RANGE = new DoubleRange(0.5, 1.5);
+  private static final DoubleRange RANGE = new DoubleRange(0.5, 1.5);
 
-    @Override
-    public Double perform(ActionPerformer performer, Agent agent) {
-        if (body instanceof SoftBody softBody) {
-            return RANGE.clip(softBody.areaRatio());
-        }
-        return 1d;
+  @Override
+  public Double perform(ActionPerformer performer, Agent agent) {
+    if (body instanceof SoftBody softBody) {
+      return RANGE.clip(softBody.areaRatio());
     }
+    return 1d;
+  }
 
-    @Override
-    public DoubleRange range() {
-        return RANGE;
-    }
+  @Override
+  public DoubleRange range() {
+    return RANGE;
+  }
 }

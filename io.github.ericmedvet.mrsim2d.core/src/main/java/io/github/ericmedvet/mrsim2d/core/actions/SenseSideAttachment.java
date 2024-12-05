@@ -32,31 +32,31 @@ import java.util.List;
 
 public record SenseSideAttachment(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
 
-    @Override
-    public Double perform(ActionPerformer performer, Agent agent) {
-        // consider side anchors
-        Collection<Anchor> anchors = body.anchorsOn(side);
-        if (anchors.isEmpty()) {
-            return 0d;
-        }
-        // find "most attached" other body
-        List<Anchorable> anchorables = anchors.stream()
-                .map(Anchor::attachedAnchorables)
-                .flatMap(Collection::stream)
-                .toList();
-        if (anchorables.isEmpty()) {
-            return 0d;
-        }
-        long maxAttachedAnchorsOfSameBody = anchorables.stream()
-                .mapToLong(b -> anchors.stream().filter(a -> a.isAnchoredTo(b)).count())
-                .max()
-                .orElse(0);
-        // return
-        return (double) maxAttachedAnchorsOfSameBody / (double) anchors.size();
+  @Override
+  public Double perform(ActionPerformer performer, Agent agent) {
+    // consider side anchors
+    Collection<Anchor> anchors = body.anchorsOn(side);
+    if (anchors.isEmpty()) {
+      return 0d;
     }
+    // find "most attached" other body
+    List<Anchorable> anchorables = anchors.stream()
+        .map(Anchor::attachedAnchorables)
+        .flatMap(Collection::stream)
+        .toList();
+    if (anchorables.isEmpty()) {
+      return 0d;
+    }
+    long maxAttachedAnchorsOfSameBody = anchorables.stream()
+        .mapToLong(b -> anchors.stream().filter(a -> a.isAnchoredTo(b)).count())
+        .max()
+        .orElse(0);
+    // return
+    return (double) maxAttachedAnchorsOfSameBody / (double) anchors.size();
+  }
 
-    @Override
-    public DoubleRange range() {
-        return DoubleRange.UNIT;
-    }
+  @Override
+  public DoubleRange range() {
+    return DoubleRange.UNIT;
+  }
 }

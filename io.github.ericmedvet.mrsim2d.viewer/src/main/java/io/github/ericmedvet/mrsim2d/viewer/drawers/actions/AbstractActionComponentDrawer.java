@@ -26,23 +26,23 @@ import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
 import java.awt.Graphics2D;
 
 public abstract class AbstractActionComponentDrawer<A extends Action<O>, O> implements ComponentDrawer {
-    private final Class<A> actionClass;
+  private final Class<A> actionClass;
 
-    public AbstractActionComponentDrawer(Class<A> actionClass) {
-        this.actionClass = actionClass;
+  public AbstractActionComponentDrawer(Class<A> actionClass) {
+    this.actionClass = actionClass;
+  }
+
+  @SuppressWarnings("SameReturnValue")
+  protected abstract boolean innerDraw(double t, ActionOutcome<A, O> actionOutcome, Graphics2D g);
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean draw(double t, Object component, Graphics2D g) {
+    if (component instanceof ActionOutcome<?, ?> actionOutcome) {
+      if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
+        return innerDraw(t, (ActionOutcome<A, O>) actionOutcome, g);
+      }
     }
-
-    @SuppressWarnings("SameReturnValue")
-    protected abstract boolean innerDraw(double t, ActionOutcome<A, O> actionOutcome, Graphics2D g);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean draw(double t, Object component, Graphics2D g) {
-        if (component instanceof ActionOutcome<?, ?> actionOutcome) {
-            if (actionClass.isAssignableFrom(actionOutcome.action().getClass())) {
-                return innerDraw(t, (ActionOutcome<A, O>) actionOutcome, g);
-            }
-        }
-        return false;
-    }
+    return false;
+  }
 }

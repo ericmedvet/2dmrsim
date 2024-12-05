@@ -29,41 +29,41 @@ import java.awt.Graphics2D;
 import java.util.List;
 
 public class NFCDrawer implements Drawer {
-    private static final Color[] COLORS = new Color[] {
-        DrawingUtils.alphaed(Color.PINK, 0.5f),
-        DrawingUtils.alphaed(Color.CYAN, 0.5f),
-        DrawingUtils.alphaed(Color.MAGENTA, 0.5f),
-        DrawingUtils.alphaed(Color.YELLOW, 0.5f),
-        DrawingUtils.alphaed(Color.ORANGE, 0.5f)
-    };
-    private static final double MAX_LENGTH = 0.5d;
-    private static final double ARROW_LENGTH = 0.1d;
-    private static final double ARROW_ANGLE = Math.PI / 6d;
+  private static final Color[] COLORS = new Color[] {
+    DrawingUtils.alphaed(Color.PINK, 0.5f),
+    DrawingUtils.alphaed(Color.CYAN, 0.5f),
+    DrawingUtils.alphaed(Color.MAGENTA, 0.5f),
+    DrawingUtils.alphaed(Color.YELLOW, 0.5f),
+    DrawingUtils.alphaed(Color.ORANGE, 0.5f)
+  };
+  private static final double MAX_LENGTH = 0.5d;
+  private static final double ARROW_LENGTH = 0.1d;
+  private static final double ARROW_ANGLE = Math.PI / 6d;
 
-    private final Color[] colors;
-    private final double maxLenght;
+  private final Color[] colors;
+  private final double maxLenght;
 
-    public NFCDrawer(Color[] colors, double maxLenght) {
-        this.colors = colors;
-        this.maxLenght = maxLenght;
+  public NFCDrawer(Color[] colors, double maxLenght) {
+    this.colors = colors;
+    this.maxLenght = maxLenght;
+  }
+
+  public NFCDrawer() {
+    this(COLORS, MAX_LENGTH);
+  }
+
+  @Override
+  public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
+    for (NFCMessage message : snapshots.getLast().nfcMessages()) {
+      g.setColor(colors[message.channel() % colors.length]);
+      Point src = message.source();
+      Point dst = src.sum(new Point(message.direction()).scale(maxLenght * Math.abs(message.value())));
+      DrawingUtils.drawLine(g, src, dst);
+      double dDirection = message.value() > 0d ? Math.PI : 0d;
+      Point arrowEnd1 = dst.sum(new Point(message.direction() + ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
+      Point arrowEnd2 = dst.sum(new Point(message.direction() - ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
+      DrawingUtils.fill(g, dst, arrowEnd1, arrowEnd2);
     }
-
-    public NFCDrawer() {
-        this(COLORS, MAX_LENGTH);
-    }
-
-    @Override
-    public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
-        for (NFCMessage message : snapshots.getLast().nfcMessages()) {
-            g.setColor(colors[message.channel() % colors.length]);
-            Point src = message.source();
-            Point dst = src.sum(new Point(message.direction()).scale(maxLenght * Math.abs(message.value())));
-            DrawingUtils.drawLine(g, src, dst);
-            double dDirection = message.value() > 0d ? Math.PI : 0d;
-            Point arrowEnd1 = dst.sum(new Point(message.direction() + ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
-            Point arrowEnd2 = dst.sum(new Point(message.direction() - ARROW_ANGLE + dDirection).scale(ARROW_LENGTH));
-            DrawingUtils.fill(g, dst, arrowEnd1, arrowEnd2);
-        }
-        return true;
-    }
+    return true;
+  }
 }

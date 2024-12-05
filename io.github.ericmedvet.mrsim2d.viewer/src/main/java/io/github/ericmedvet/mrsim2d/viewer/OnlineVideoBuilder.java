@@ -34,89 +34,89 @@ import java.util.logging.Logger;
 
 public class OnlineVideoBuilder implements Accumulator<File, Snapshot> {
 
-    private static final Logger L = Logger.getLogger(OnlineVideoBuilder.class.getName());
+  private static final Logger L = Logger.getLogger(OnlineVideoBuilder.class.getName());
 
-    private final int w;
-    private final int h;
-    private final double startTime;
-    private final double endTime;
-    private final double frameRate;
-    private final VideoUtils.EncoderFacility encoder;
-    private final File file;
-    private final Drawer drawer;
-    private final List<BufferedImage> images;
-    private final List<Snapshot> snapshots;
-    private final List<Double> snapshotTs;
-    private double lastDrawnT;
-    private double lastT;
+  private final int w;
+  private final int h;
+  private final double startTime;
+  private final double endTime;
+  private final double frameRate;
+  private final VideoUtils.EncoderFacility encoder;
+  private final File file;
+  private final Drawer drawer;
+  private final List<BufferedImage> images;
+  private final List<Snapshot> snapshots;
+  private final List<Double> snapshotTs;
+  private double lastDrawnT;
+  private double lastT;
 
-    public OnlineVideoBuilder(
-            int w,
-            int h,
-            double startTime,
-            double endTime,
-            double frameRate,
-            VideoUtils.EncoderFacility encoder,
-            File file,
-            Drawer drawer) {
-        this.w = w;
-        this.h = h;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.frameRate = frameRate;
-        this.encoder = encoder;
-        this.file = file;
-        this.drawer = drawer;
-        images = new ArrayList<>((int) Math.ceil((endTime - startTime) * frameRate));
-        snapshots = new ArrayList<>();
-        snapshotTs = new ArrayList<>();
-        lastT = Double.NaN;
+  public OnlineVideoBuilder(
+      int w,
+      int h,
+      double startTime,
+      double endTime,
+      double frameRate,
+      VideoUtils.EncoderFacility encoder,
+      File file,
+      Drawer drawer) {
+    this.w = w;
+    this.h = h;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.frameRate = frameRate;
+    this.encoder = encoder;
+    this.file = file;
+    this.drawer = drawer;
+    images = new ArrayList<>((int) Math.ceil((endTime - startTime) * frameRate));
+    snapshots = new ArrayList<>();
+    snapshotTs = new ArrayList<>();
+    lastT = Double.NaN;
+  }
+
+  @Override
+  public void accept(Snapshot snapshot) {
+    if (!Double.isNaN(lastT)) {
+      snapshotTs.add(snapshot.t() - lastT);
     }
-
-    @Override
-    public void accept(Snapshot snapshot) {
-        if (!Double.isNaN(lastT)) {
-            snapshotTs.add(snapshot.t() - lastT);
-        }
-        lastT = snapshot.t();
-        if (snapshot.t() < startTime || snapshot.t() > endTime) {
-            return;
-        }
-        double tolerance = snapshotTs.stream().mapToDouble(t -> t).average().orElse(0d) / 2d;
-        snapshots.add(snapshot);
-        if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
-            lastDrawnT = snapshot.t();
-            // create image
-            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
-            // draw
-            Graphics2D g = image.createGraphics();
-            g.setClip(0, 0, image.getWidth(), image.getHeight());
-            drawer.draw(snapshots, g);
-            g.dispose();
-            // add
-            images.add(image);
-            snapshots.clear();
-        }
+    lastT = snapshot.t();
+    if (snapshot.t() < startTime || snapshot.t() > endTime) {
+      return;
     }
-
-    @Override
-    public File get() {
-        if (images.isEmpty()) {
-            L.warning("No snapshot to save: abort");
-            return null;
-        }
-        L.fine(String.format("Saving video on %s", file));
-        try {
-            Instant encodingStartInstant = Instant.now();
-            VideoUtils.encodeAndSave(images, frameRate, file, encoder);
-            L.fine(String.format(
-                    "Video saved: %.1fMB written in %.2fs",
-                    Files.size(file.toPath()) / 1024f / 1024f,
-                    Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f));
-        } catch (IOException e) {
-            L.severe(String.format("Cannot save file due to %s", e));
-            return null;
-        }
-        return file;
+    double tolerance = snapshotTs.stream().mapToDouble(t -> t).average().orElse(0d) / 2d;
+    snapshots.add(snapshot);
+    if (snapshot.t() >= lastDrawnT + (1d / frameRate) - tolerance) {
+      lastDrawnT = snapshot.t();
+      // create image
+      BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+      // draw
+      Graphics2D g = image.createGraphics();
+      g.setClip(0, 0, image.getWidth(), image.getHeight());
+      drawer.draw(snapshots, g);
+      g.dispose();
+      // add
+      images.add(image);
+      snapshots.clear();
     }
+  }
+
+  @Override
+  public File get() {
+    if (images.isEmpty()) {
+      L.warning("No snapshot to save: abort");
+      return null;
+    }
+    L.fine(String.format("Saving video on %s", file));
+    try {
+      Instant encodingStartInstant = Instant.now();
+      VideoUtils.encodeAndSave(images, frameRate, file, encoder);
+      L.fine(String.format(
+          "Video saved: %.1fMB written in %.2fs",
+          Files.size(file.toPath()) / 1024f / 1024f,
+          Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f));
+    } catch (IOException e) {
+      L.severe(String.format("Cannot save file due to %s", e));
+      return null;
+    }
+    return file;
+  }
 }

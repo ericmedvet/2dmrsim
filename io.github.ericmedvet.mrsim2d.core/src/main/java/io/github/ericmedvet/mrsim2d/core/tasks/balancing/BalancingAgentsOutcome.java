@@ -24,26 +24,26 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import java.util.SortedMap;
 
 public class BalancingAgentsOutcome extends AgentsOutcome<BalancingObservation> {
-    public BalancingAgentsOutcome(SortedMap<Double, BalancingObservation> observations) {
-        super(observations);
-    }
+  public BalancingAgentsOutcome(SortedMap<Double, BalancingObservation> observations) {
+    super(observations);
+  }
 
-    public double avgSwingAngle() {
-        return snapshots().values().stream()
-                .mapToDouble(bo -> Math.abs(bo.getSwingAngle()))
-                .average()
-                .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));
-    }
+  public double avgSwingAngle() {
+    return snapshots().values().stream()
+        .mapToDouble(bo -> Math.abs(bo.getSwingAngle()))
+        .average()
+        .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));
+  }
 
-    public double avgSwingAngleWithMalus(double malus) {
-        return snapshots().values().stream()
-                .mapToDouble(bo -> Math.abs(bo.getSwingAngle()) + (bo.areAllAgentsOnSwing() ? 0 : malus))
-                .average()
-                .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));
-    }
+  public double avgSwingAngleWithMalus(double malus) {
+    return snapshots().values().stream()
+        .mapToDouble(bo -> Math.abs(bo.getSwingAngle()) + (bo.areAllAgentsOnSwing() ? 0 : malus))
+        .average()
+        .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));
+  }
 
-    @Override
-    public BalancingAgentsOutcome subOutcome(DoubleRange tRange) {
-        return new BalancingAgentsOutcome(super.subOutcome(tRange).snapshots());
-    }
+  @Override
+  public BalancingAgentsOutcome subOutcome(DoubleRange tRange) {
+    return new BalancingAgentsOutcome(super.subOutcome(tRange).snapshots());
+  }
 }

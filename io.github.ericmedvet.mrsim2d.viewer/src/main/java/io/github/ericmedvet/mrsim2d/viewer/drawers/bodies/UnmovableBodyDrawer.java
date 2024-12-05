@@ -29,42 +29,42 @@ import java.awt.image.BufferedImage;
 
 public class UnmovableBodyDrawer extends AbstractComponentDrawer<UnmovableBody> {
 
-    private static final Color TEXTURE_COLOR = Color.GRAY;
-    private static final Color STROKE_COLOR = Color.BLACK;
-    private static final int TEXTURE_SIZE = 2;
+  private static final Color TEXTURE_COLOR = Color.GRAY;
+  private static final Color STROKE_COLOR = Color.BLACK;
+  private static final int TEXTURE_SIZE = 2;
 
-    private final Color strokeColor;
-    private final TexturePaint texturePaint;
+  private final Color strokeColor;
+  private final TexturePaint texturePaint;
 
-    public UnmovableBodyDrawer(Color textureColor, Color strokeColor) {
-        super(UnmovableBody.class);
-        this.strokeColor = strokeColor;
-        texturePaint = createTexturePaint(textureColor);
-    }
+  public UnmovableBodyDrawer(Color textureColor, Color strokeColor) {
+    super(UnmovableBody.class);
+    this.strokeColor = strokeColor;
+    texturePaint = createTexturePaint(textureColor);
+  }
 
-    public UnmovableBodyDrawer() {
-        this(TEXTURE_COLOR, STROKE_COLOR);
-    }
+  public UnmovableBodyDrawer() {
+    this(TEXTURE_COLOR, STROKE_COLOR);
+  }
 
-    private static TexturePaint createTexturePaint(Color textureColor) {
-        BufferedImage texture = new BufferedImage(2, 2, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g = texture.createGraphics();
-        g.setColor(DrawingUtils.alphaed(textureColor, 0.25f));
-        g.fillRect(0, 0, 2, 2);
-        g.setColor(DrawingUtils.alphaed(textureColor, 0.5f));
-        g.fillRect(1, 0, 1, 1);
-        g.fillRect(0, 1, 1, 1);
-        g.dispose();
-        return new TexturePaint(texture, new Rectangle(0, 0, TEXTURE_SIZE, TEXTURE_SIZE));
-    }
+  private static TexturePaint createTexturePaint(Color textureColor) {
+    BufferedImage texture = new BufferedImage(2, 2, BufferedImage.TYPE_4BYTE_ABGR);
+    Graphics2D g = texture.createGraphics();
+    g.setColor(DrawingUtils.alphaed(textureColor, 0.25f));
+    g.fillRect(0, 0, 2, 2);
+    g.setColor(DrawingUtils.alphaed(textureColor, 0.5f));
+    g.fillRect(1, 0, 1, 1);
+    g.fillRect(0, 1, 1, 1);
+    g.dispose();
+    return new TexturePaint(texture, new Rectangle(0, 0, TEXTURE_SIZE, TEXTURE_SIZE));
+  }
 
-    @Override
-    protected boolean innerDraw(double t, UnmovableBody body, Graphics2D g) {
-        Path2D path = DrawingUtils.toPath(body.poly(), true);
-        g.setPaint(texturePaint);
-        g.fill(path);
-        g.setColor(strokeColor);
-        g.draw(path);
-        return true;
-    }
+  @Override
+  protected boolean innerDraw(double t, UnmovableBody body, Graphics2D g) {
+    Path2D path = DrawingUtils.toPath(body.poly(), true);
+    g.setPaint(texturePaint);
+    g.fill(path);
+    g.setColor(strokeColor);
+    g.draw(path);
+    return true;
+  }
 }

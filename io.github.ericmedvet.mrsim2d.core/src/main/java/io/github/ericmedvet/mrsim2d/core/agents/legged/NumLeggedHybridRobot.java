@@ -36,90 +36,90 @@ import java.util.stream.IntStream;
 
 public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements NumBrained {
 
-    private static final DoubleRange ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
-    private static final DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
-    private static final DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  private static final DoubleRange ANGLE_RANGE = new DoubleRange(Math.toRadians(-90), Math.toRadians(90));
+  private static final DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
+  private static final DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
-    private final NumericalDynamicalSystem<?> numericalDynamicalSystem;
-    private final List<Sensor<?>> headSensors;
+  private final NumericalDynamicalSystem<?> numericalDynamicalSystem;
+  private final List<Sensor<?>> headSensors;
 
-    private double[] inputs;
-    private double[] outputs;
+  private double[] inputs;
+  private double[] outputs;
 
-    public NumLeggedHybridRobot(
-            List<Leg> legs,
-            double trunkLength,
-            double trunkWidth,
-            double trunkMass,
-            double headMass,
-            List<Sensor<?>> headSensors,
-            NumericalDynamicalSystem<?> numericalDynamicalSystem) {
-        super(legs, trunkLength, trunkWidth, trunkMass, headMass);
-        this.numericalDynamicalSystem = numericalDynamicalSystem;
-        this.headSensors = headSensors;
+  public NumLeggedHybridRobot(
+      List<Leg> legs,
+      double trunkLength,
+      double trunkWidth,
+      double trunkMass,
+      double headMass,
+      List<Sensor<?>> headSensors,
+      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+    super(legs, trunkLength, trunkWidth, trunkMass, headMass);
+    this.numericalDynamicalSystem = numericalDynamicalSystem;
+    this.headSensors = headSensors;
+  }
+
+  public static int nOfInputs(List<Leg> legs, List<Sensor<?>> headSensors) {
+    return headSensors.size()
+        + legs.stream()
+            .mapToInt(l -> l.legChunks().stream()
+                    .mapToInt(lc -> lc.jointSensors().size())
+                    .sum()
+                + l.downConnectorSensors().size())
+            .sum();
+  }
+
+  public static int nOfOutputs(List<Leg> legs) {
+    return legs.stream().mapToInt(m -> m.legChunks().size()).sum();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
+    // read inputs from last request
+    inputs = previousActionOutcomes.stream()
+        .filter(ao -> ao.action() instanceof Sense)
+        .mapToDouble(ao -> {
+          @SuppressWarnings("unchecked")
+          ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
+          return INPUT_RANGE.denormalize(
+              so.action().range().normalize(so.outcome().orElse(0d)));
+        })
+        .toArray();
+    if (inputs.length == 0) {
+      inputs = new double[numericalDynamicalSystem.nOfInputs()];
     }
-
-    public static int nOfInputs(List<Leg> legs, List<Sensor<?>> headSensors) {
-        return headSensors.size()
-                + legs.stream()
-                        .mapToInt(l -> l.legChunks().stream()
-                                        .mapToInt(lc -> lc.jointSensors().size())
-                                        .sum()
-                                + l.downConnectorSensors().size())
-                        .sum();
+    // compute actuation
+    outputs = Arrays.stream(numericalDynamicalSystem.step(t, inputs))
+        .map(OUTPUT_RANGE::clip)
+        .toArray();
+    // generate next sense actions
+    List<Action<?>> actions = new ArrayList<>();
+    for (int il = 0; il < legs.size(); il = il + 1) {
+      Leg leg = legs.get(il);
+      LegBody legBody = legBodies.get(il);
+      leg.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legBody.downConnector())));
+      for (int ic = 0; ic < leg.legChunks().size(); ic = ic + 1) {
+        LegChunk legChunk = leg.legChunks().get(ic);
+        LegChunkBody legChunkBody = legBody.legChunks().get(ic);
+        legChunk.jointSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legChunkBody.joint())));
+      }
     }
+    headSensors.forEach(s -> actions.add(((Sensor<Body>) s).apply(head)));
+    // generate actuation actions
+    IntStream.range(0, outputs.length)
+        .forEach(i -> actions.add(new ActuateRotationalJoint(
+            rotationalJoints.get(i), ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i])))));
+    return actions;
+  }
 
-    public static int nOfOutputs(List<Leg> legs) {
-        return legs.stream().mapToInt(m -> m.legChunks().size()).sum();
-    }
+  @Override
+  public NumericalDynamicalSystem<?> brain() {
+    return numericalDynamicalSystem;
+  }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<? extends Action<?>> act(double t, List<ActionOutcome<?, ?>> previousActionOutcomes) {
-        // read inputs from last request
-        inputs = previousActionOutcomes.stream()
-                .filter(ao -> ao.action() instanceof Sense)
-                .mapToDouble(ao -> {
-                    @SuppressWarnings("unchecked")
-                    ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
-                    return INPUT_RANGE.denormalize(
-                            so.action().range().normalize(so.outcome().orElse(0d)));
-                })
-                .toArray();
-        if (inputs.length == 0) {
-            inputs = new double[numericalDynamicalSystem.nOfInputs()];
-        }
-        // compute actuation
-        outputs = Arrays.stream(numericalDynamicalSystem.step(t, inputs))
-                .map(OUTPUT_RANGE::clip)
-                .toArray();
-        // generate next sense actions
-        List<Action<?>> actions = new ArrayList<>();
-        for (int il = 0; il < legs.size(); il = il + 1) {
-            Leg leg = legs.get(il);
-            LegBody legBody = legBodies.get(il);
-            leg.downConnectorSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legBody.downConnector())));
-            for (int ic = 0; ic < leg.legChunks().size(); ic = ic + 1) {
-                LegChunk legChunk = leg.legChunks().get(ic);
-                LegChunkBody legChunkBody = legBody.legChunks().get(ic);
-                legChunk.jointSensors().forEach(s -> actions.add(((Sensor<Body>) s).apply(legChunkBody.joint())));
-            }
-        }
-        headSensors.forEach(s -> actions.add(((Sensor<Body>) s).apply(head)));
-        // generate actuation actions
-        IntStream.range(0, outputs.length)
-                .forEach(i -> actions.add(new ActuateRotationalJoint(
-                        rotationalJoints.get(i), ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i])))));
-        return actions;
-    }
-
-    @Override
-    public NumericalDynamicalSystem<?> brain() {
-        return numericalDynamicalSystem;
-    }
-
-    @Override
-    public BrainIO brainIO() {
-        return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
-    }
+  @Override
+  public BrainIO brainIO() {
+    return new BrainIO(new RangedValues(inputs, INPUT_RANGE), new RangedValues(outputs, OUTPUT_RANGE));
+  }
 }

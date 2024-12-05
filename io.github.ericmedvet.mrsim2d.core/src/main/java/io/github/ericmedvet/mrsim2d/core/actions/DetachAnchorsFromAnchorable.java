@@ -29,16 +29,16 @@ import java.util.Collection;
 import java.util.Optional;
 
 public record DetachAnchorsFromAnchorable(Anchorable sourceAnchorable, Anchorable targetAnchorable)
-        implements SelfDescribedAction<Collection<Anchor.Link>> {
+    implements SelfDescribedAction<Collection<Anchor.Link>> {
 
-    @Override
-    public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) {
-        return sourceAnchorable.anchors().stream()
-                .map(a -> performer
-                        .perform(new DetachAnchorFromAnchorable(a, targetAnchorable), agent)
-                        .outcome())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
+  @Override
+  public Collection<Anchor.Link> perform(ActionPerformer performer, Agent agent) {
+    return sourceAnchorable.anchors().stream()
+        .map(a -> performer
+            .perform(new DetachAnchorFromAnchorable(a, targetAnchorable), agent)
+            .outcome())
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
+  }
 }

@@ -25,17 +25,17 @@ import java.util.List;
 
 public interface NumBrained extends NumMultiBrained {
 
-    NumericalDynamicalSystem<?> brain();
+  NumericalDynamicalSystem<?> brain();
 
-    BrainIO brainIO();
+  BrainIO brainIO();
 
-    @Override
-    default List<BrainIO> brainIOs() {
-        return List.of(brainIO());
-    }
+  @Override
+  default List<BrainIO> brainIOs() {
+    return List.of(brainIO());
+  }
 
-    @Override
-    default List<NumericalDynamicalSystem<?>> brains() {
-        return List.of(brain());
-    }
+  @Override
+  default List<NumericalDynamicalSystem<?>> brains() {
+    return List.of(brain());
+  }
 }

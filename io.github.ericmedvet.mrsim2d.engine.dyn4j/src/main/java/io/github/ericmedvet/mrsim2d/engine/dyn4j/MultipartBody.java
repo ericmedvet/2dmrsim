@@ -25,7 +25,7 @@ import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.joint.Joint;
 
 public interface MultipartBody {
-    Collection<Body> getBodies();
+  Collection<Body> getBodies();
 
-    Collection<Joint<Body>> getJoints();
+  Collection<Joint<Body>> getJoints();
 }

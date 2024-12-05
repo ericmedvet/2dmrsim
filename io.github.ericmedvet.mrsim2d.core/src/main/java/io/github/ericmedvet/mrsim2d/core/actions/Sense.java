@@ -25,7 +25,7 @@ import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 
 public interface Sense<B extends Body> extends Action<Double> {
-    B body();
+  B body();
 
-    DoubleRange range();
+  DoubleRange range();
 }

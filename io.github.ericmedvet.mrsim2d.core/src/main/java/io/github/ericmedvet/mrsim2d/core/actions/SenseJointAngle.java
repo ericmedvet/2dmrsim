@@ -28,13 +28,13 @@ import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 
 public record SenseJointAngle(RotationalJoint body) implements Sense<RotationalJoint>, SelfDescribedAction<Double> {
 
-    @Override
-    public Double perform(ActionPerformer performer, Agent agent) {
-        return range().clip(body.jointAngle());
-    }
+  @Override
+  public Double perform(ActionPerformer performer, Agent agent) {
+    return range().clip(body.jointAngle());
+  }
 
-    @Override
-    public DoubleRange range() {
-        return body.jointPassiveAngleRange();
-    }
+  @Override
+  public DoubleRange range() {
+    return body.jointPassiveAngleRange();
+  }
 }

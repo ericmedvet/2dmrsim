@@ -24,5 +24,5 @@ import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 
 public record CreateRotationalJoint(
-        double length, double width, double mass, RotationalJoint.Motor motor, DoubleRange activeAngleRange)
-        implements Action<RotationalJoint> {}
+    double length, double width, double mass, RotationalJoint.Motor motor, DoubleRange activeAngleRange)
+    implements Action<RotationalJoint> {}

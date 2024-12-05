@@ -18,15 +18,15 @@
  * =========================LICENSE_END==================================
  */
 module io.github.ericmedvet.mrsim2d.sample {
-    requires java.logging;
+  requires java.logging;
 
-    uses io.github.ericmedvet.mrsim2d.core.engine.Engine;
+  uses io.github.ericmedvet.mrsim2d.core.engine.Engine;
 
-    requires io.github.ericmedvet.mrsim2d.core;
-    requires io.github.ericmedvet.mrsim2d.viewer;
-    requires io.github.ericmedvet.jnb.core;
-    requires io.github.ericmedvet.jnb.datastructure;
-    requires io.github.ericmedvet.jsdynsym.core;
+  requires io.github.ericmedvet.mrsim2d.core;
+  requires io.github.ericmedvet.mrsim2d.viewer;
+  requires io.github.ericmedvet.jnb.core;
+  requires io.github.ericmedvet.jnb.datastructure;
+  requires io.github.ericmedvet.jsdynsym.core;
 
-    exports io.github.ericmedvet.mrsim2d.sample;
+  exports io.github.ericmedvet.mrsim2d.sample;
 }

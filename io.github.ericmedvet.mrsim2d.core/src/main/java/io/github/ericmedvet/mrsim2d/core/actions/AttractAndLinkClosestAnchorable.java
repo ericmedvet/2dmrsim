@@ -27,4 +27,4 @@ import java.util.Collection;
 import java.util.Map;
 
 public record AttractAndLinkClosestAnchorable(Collection<Anchor> anchors, double magnitude, Anchor.Link.Type type)
-        implements Action<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {}
+    implements Action<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {}

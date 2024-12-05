@@ -36,59 +36,59 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
-    private static final Color COLOR = Color.BLACK;
+  private static final Color COLOR = Color.BLACK;
 
-    private final Color drawColor;
-    private final Color fillColor;
+  private final Color drawColor;
+  private final Color fillColor;
 
-    public VoxelDrawer(Color color) {
-        super(Voxel.class);
-        this.drawColor = color;
-        this.fillColor = DrawingUtils.alphaed(color, 0.1f);
-    }
+  public VoxelDrawer(Color color) {
+    super(Voxel.class);
+    this.drawColor = color;
+    this.fillColor = DrawingUtils.alphaed(color, 0.1f);
+  }
 
-    public VoxelDrawer() {
-        this(COLOR);
-    }
+  public VoxelDrawer() {
+    this(COLOR);
+  }
 
-    @Override
-    protected boolean innerDraw(double t, Voxel v, Graphics2D g) {
-        if (v instanceof io.github.ericmedvet.mrsim2d.engine.dyn4j.Voxel voxel) {
-            for (Body body : voxel.getBodies()) {
-                Transform trans = body.getTransform();
-                for (Fixture fixture : body.getFixtures()) {
-                    if (fixture.getShape() instanceof Polygon polygon) {
-                        Path2D path = new Path2D.Double();
-                        for (int i = 0; i < polygon.getVertices().length; i++) {
-                            Vector2 tV = polygon.getVertices()[i].copy();
-                            trans.transform(tV);
-                            if (i == 0) {
-                                path.moveTo(tV.x, tV.y);
-                            } else {
-                                path.lineTo(tV.x, tV.y);
-                            }
-                        }
-                        path.closePath();
-                        g.draw(path);
-                    } else if (fixture.getShape() instanceof Circle circle) {
-                        double r = circle.getRadius();
-                        Vector2 c = circle.getCenter().copy();
-                        trans.transform(c);
-                        Shape s = new Ellipse2D.Double(c.x - r, c.y - r, 2d * r, 2d * r);
-                        g.setColor(fillColor);
-                        g.fill(s);
-                        g.setColor(drawColor);
-                        g.draw(s);
-                    }
-                }
+  @Override
+  protected boolean innerDraw(double t, Voxel v, Graphics2D g) {
+    if (v instanceof io.github.ericmedvet.mrsim2d.engine.dyn4j.Voxel voxel) {
+      for (Body body : voxel.getBodies()) {
+        Transform trans = body.getTransform();
+        for (Fixture fixture : body.getFixtures()) {
+          if (fixture.getShape() instanceof Polygon polygon) {
+            Path2D path = new Path2D.Double();
+            for (int i = 0; i < polygon.getVertices().length; i++) {
+              Vector2 tV = polygon.getVertices()[i].copy();
+              trans.transform(tV);
+              if (i == 0) {
+                path.moveTo(tV.x, tV.y);
+              } else {
+                path.lineTo(tV.x, tV.y);
+              }
             }
+            path.closePath();
+            g.draw(path);
+          } else if (fixture.getShape() instanceof Circle circle) {
+            double r = circle.getRadius();
+            Vector2 c = circle.getCenter().copy();
+            trans.transform(c);
+            Shape s = new Ellipse2D.Double(c.x - r, c.y - r, 2d * r, 2d * r);
+            g.setColor(fillColor);
+            g.fill(s);
             g.setColor(drawColor);
-            for (Joint<Body> joint : voxel.getJoints()) {
-                g.draw(new Line2D.Double(
-                        joint.getAnchor1().x, joint.getAnchor1().y, joint.getAnchor2().x, joint.getAnchor2().y));
-            }
-            return true;
+            g.draw(s);
+          }
         }
-        return false;
+      }
+      g.setColor(drawColor);
+      for (Joint<Body> joint : voxel.getJoints()) {
+        g.draw(new Line2D.Double(
+            joint.getAnchor1().x, joint.getAnchor1().y, joint.getAnchor2().x, joint.getAnchor2().y));
+      }
+      return true;
     }
+    return false;
+  }
 }

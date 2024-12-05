@@ -28,14 +28,14 @@ import java.util.function.Consumer;
 
 public interface Task<A, S extends AgentsObservation, O extends AgentsOutcome<S>> extends Simulation<A, S, O> {
 
-    O run(A a, Engine engine, Consumer<Snapshot> snapshotConsumer);
+  O run(A a, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
-    default O run(A a, Engine engine) {
-        return run(a, engine, snapshot -> {});
-    }
+  default O run(A a, Engine engine) {
+    return run(a, engine, snapshot -> {});
+  }
 
-    @Override
-    default O simulate(A a) {
-        return run(a, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
-    }
+  @Override
+  default O simulate(A a) {
+    return run(a, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
+  }
 }
