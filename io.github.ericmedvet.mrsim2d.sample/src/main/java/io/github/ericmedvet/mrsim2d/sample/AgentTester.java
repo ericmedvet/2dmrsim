@@ -29,10 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.FramesImageBuilder;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +41,6 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
-import javax.swing.*;
 
 public class AgentTester {
 
@@ -54,25 +50,18 @@ public class AgentTester {
   private static final String TASK_JUMPING = "sim.task.jumping()";
   private static final String TASK_BALANCING =
       "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
-  private static final String TASK_SUMO =
-      "sim.task.sumo(duration = 10; terrain = s.t.sumoArena(h = 20; borderW = 10; borderH = 20; flatW = 5; flatH = 5))";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build(
-            "sim.drawer(framer = sim.staticFramer(minX = 10.0; maxX = 35.0; minY = 1.0; maxY = 15.0))"))
+    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true; nfc=true; enlargement = 5)"))
         .apply("test");
-
-//    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
-    FramesImageBuilder framesBuilder =
-        new FramesImageBuilder(300, 500, 3, 1, 0, FramesImageBuilder.Direction.HORIZONTAL, true, drawer);
-
+    RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // prepare task
     @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_SUMO);
+    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_LOCOMOTION);
     // read agent resource
     String agentName = args.length >= 1 ? args[0] : "biped-vsr-centralized-mlp";
     L.info("Loading agent description \"%s\"".formatted(agentName));
@@ -89,17 +78,7 @@ public class AgentTester {
       }
     }
     // do task
-//    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
-
-    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, framesBuilder);
-    BufferedImage finalImage = framesBuilder.get();
-    JFrame frame = new JFrame();
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(finalImage.getWidth(), finalImage.getHeight());
-    JLabel label = new JLabel(new ImageIcon(finalImage));
-    frame.add(label);
-    frame.pack();
-    frame.setVisible(true);
+    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
   }
 
   private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {

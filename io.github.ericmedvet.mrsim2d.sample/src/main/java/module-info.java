@@ -27,7 +27,7 @@ module io.github.ericmedvet.mrsim2d.sample {
   requires io.github.ericmedvet.jnb.core;
   requires io.github.ericmedvet.jnb.datastructure;
   requires io.github.ericmedvet.jsdynsym.core;
-    requires java.desktop;
+  requires java.desktop;
 
-    exports io.github.ericmedvet.mrsim2d.sample;
+  exports io.github.ericmedvet.mrsim2d.sample;
 }
