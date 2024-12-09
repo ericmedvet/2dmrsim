@@ -35,8 +35,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
 
     @Override
     public A apply(A action) {
-        if (action instanceof TranslateBody) {
-            TranslateBody translateAction = (TranslateBody) action;
+        if (action instanceof TranslateBody translateAction) {
             Body body = translateAction.body();
             Point translation = translateAction.translation();
             Point modifiedTranslation = new Point(-translation.x(), translation.y());
@@ -44,8 +43,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
             //noinspection unchecked
             return (A) modifiedAction;
         }
-        if (action instanceof SenseDistanceToBody) {
-            SenseDistanceToBody senseAction = (SenseDistanceToBody) action;
+        if (action instanceof SenseDistanceToBody senseAction) {
             double direction = senseAction.direction();
             double distanceRange = senseAction.distanceRange();
             Body body = senseAction.body();
@@ -54,8 +52,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
             //noinspection unchecked
             return (A) modifiedAction;
         }
-        if (action instanceof SenseVelocity) {
-            SenseVelocity senseAction = (SenseVelocity) action;
+        if (action instanceof SenseVelocity senseAction) {
             double direction = senseAction.direction();
             Body body = senseAction.body();
             double modifiedDirection = direction > 0 ? -direction - Math.PI : -direction + Math.PI;
@@ -63,8 +60,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
             //noinspection unchecked
             return (A) modifiedAction;
         }
-        if (action instanceof SenseRotatedVelocity) {
-            SenseRotatedVelocity senseAction = (SenseRotatedVelocity) action;
+        if (action instanceof SenseRotatedVelocity senseAction) {
             double direction = senseAction.direction();
             Body body = senseAction.body();
             double modifiedDirection = direction > 0 ? -direction - Math.PI : -direction + Math.PI;
@@ -72,16 +68,17 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
             //noinspection unchecked
             return (A) modifiedAction;
         }
-        if (action instanceof SenseSinusoidal) {
-            SenseSinusoidal senseAction = (SenseSinusoidal) action;
-            double f = senseAction.f();
-            double phi = senseAction.phi();
-            Body body = senseAction.body();
-            double modifiedPhi = -phi;
-            SenseSinusoidal modifiedAction = new SenseSinusoidal(f, modifiedPhi, body);
+        if (action instanceof RotateBody rotateAction) {
+            Body body = rotateAction.body();
+            Point point = rotateAction.point();
+            double angle = rotateAction.angle();
+            double modifiedAngle = angle > 0 ? -angle + Math.PI : -angle - Math.PI;
+            RotateBody modifiedAction = new RotateBody(body, point, modifiedAngle);
             //noinspection unchecked
             return (A) modifiedAction;
         }
+
+        //TODO mirroring missing actions
 //        if (action instanceof SenseNFC) {
 //            SenseNFC senseAction = (SenseNFC) action;
 //            Point displacement = senseAction.displacement();
@@ -92,16 +89,6 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
 //            //noinspection unchecked
 //            return (A) modifiedAction;
 //        }
-        if (action instanceof RotateBody) {
-            RotateBody rotateAction = (RotateBody) action;
-            Body body = rotateAction.body();
-            Point point = rotateAction.point();
-            double angle = rotateAction.angle();
-            double modifiedAngle = angle > 0 ? -angle + Math.PI : -angle - Math.PI;
-            RotateBody modifiedAction = new RotateBody(body, point, modifiedAngle);
-            //noinspection unchecked
-            return (A) modifiedAction;
-        }
 //        if (action instanceof EmitNFCMessage) {
 //            EmitNFCMessage emitAction = (EmitNFCMessage) action;
 //            Body body = emitAction.body();
