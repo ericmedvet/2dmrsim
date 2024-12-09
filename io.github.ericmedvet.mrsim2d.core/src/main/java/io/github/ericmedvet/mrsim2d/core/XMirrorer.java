@@ -31,6 +31,7 @@ import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 import java.util.EnumMap;
 import java.util.Map;
 
+@SuppressWarnings("DeconstructionCanBeUsed")
 public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
 
     @Override
@@ -47,7 +48,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
             double direction = senseAction.direction();
             double distanceRange = senseAction.distanceRange();
             Body body = senseAction.body();
-            double modifiedDirection = direction > 0 ? -direction - Math.PI : -direction + Math.PI;
+            double modifiedDirection = direction > 0 ? -direction + Math.PI : -direction - Math.PI;
             SenseDistanceToBody modifiedAction = new SenseDistanceToBody(modifiedDirection, distanceRange, body);
             //noinspection unchecked
             return (A) modifiedAction;
@@ -55,7 +56,7 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
         if (action instanceof SenseVelocity senseAction) {
             double direction = senseAction.direction();
             Body body = senseAction.body();
-            double modifiedDirection = direction > 0 ? -direction - Math.PI : -direction + Math.PI;
+            double modifiedDirection = direction > 0 ? -direction + Math.PI : -direction - Math.PI;
             SenseVelocity modifiedAction = new SenseVelocity(modifiedDirection, body);
             //noinspection unchecked
             return (A) modifiedAction;
@@ -63,20 +64,20 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
         if (action instanceof SenseRotatedVelocity senseAction) {
             double direction = senseAction.direction();
             Body body = senseAction.body();
-            double modifiedDirection = direction > 0 ? -direction - Math.PI : -direction + Math.PI;
+            double modifiedDirection = direction > 0 ? -direction + Math.PI : -direction - Math.PI;
             SenseRotatedVelocity modifiedAction = new SenseRotatedVelocity(modifiedDirection, body);
             //noinspection unchecked
             return (A) modifiedAction;
         }
-        if (action instanceof RotateBody rotateAction) {
-            Body body = rotateAction.body();
-            Point point = rotateAction.point();
-            double angle = rotateAction.angle();
-            double modifiedAngle = angle > 0 ? -angle + Math.PI : -angle - Math.PI;
-            RotateBody modifiedAction = new RotateBody(body, point, modifiedAngle);
-            //noinspection unchecked
-            return (A) modifiedAction;
-        }
+
+//        if (action instanceof SenseSideCompression senseSideCompression) {
+//            Voxel.Side side = senseSideCompression.side();
+//            Voxel body = senseSideCompression.body();
+//            Voxel.Side modifiedSide = side == Voxel.Side.E ? Voxel.Side.W : Voxel.Side.E;
+//            SenseSideCompression modifiedAction = new SenseSideCompression(modifiedSide, body);
+//            //noinspection unchecked
+//            return (A) modifiedAction;
+//        }
 
         //TODO mirroring missing actions
 //        if (action instanceof SenseNFC) {
@@ -99,6 +100,15 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
 //            Point modifiedDisplacement = new Point(-displacement.x(), displacement.y());
 //            double modifiedDirection = direction > 0 ? -direction + Math.PI : -direction - Math.PI;
 //            EmitNFCMessage modifiedAction = new EmitNFCMessage(body, modifiedDisplacement, modifiedDirection, channel, value);
+//            //noinspection unchecked
+//            return (A) modifiedAction;
+//        }
+//        if (action instanceof RotateBody rotateAction) {
+//            Body body = rotateAction.body();
+//            Point point = rotateAction.point();
+//            double angle = rotateAction.angle();
+//            double modifiedAngle = angle > 0 ? -angle + Math.PI : -angle - Math.PI;
+//            RotateBody modifiedAction = new RotateBody(body, point, modifiedAngle);
 //            //noinspection unchecked
 //            return (A) modifiedAction;
 //        }
