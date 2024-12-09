@@ -73,6 +73,14 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
     return get(Aggregate.AVERAGE, Metric.BB_H, Subject.ALL);
   }
 
+  public double allAgentsAverageMaxHeight() {
+    return get(Aggregate.AVERAGE, Metric.BB_MAX_Y, Subject.ALL);
+  }
+
+  public double allAgentsAverageMaxWidth() {
+    return get(Aggregate.AVERAGE, Metric.BB_MAX_X, Subject.ALL);
+  }
+
   public double allAgentsAverageWidth() {
     return get(Aggregate.AVERAGE, Metric.BB_W, Subject.ALL);
   }
