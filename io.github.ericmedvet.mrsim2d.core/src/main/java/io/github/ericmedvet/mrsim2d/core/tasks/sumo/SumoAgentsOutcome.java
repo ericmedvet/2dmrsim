@@ -23,6 +23,7 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import java.util.SortedMap;
 
 public class SumoAgentsOutcome extends AgentsOutcome<SumoObservation> {
+
   public SumoAgentsOutcome(SortedMap<Double, SumoObservation> observations) {
     super(observations);
   }
