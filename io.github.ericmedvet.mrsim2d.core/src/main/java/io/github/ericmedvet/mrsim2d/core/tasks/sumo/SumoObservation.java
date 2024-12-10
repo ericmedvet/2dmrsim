@@ -24,8 +24,7 @@ import java.util.List;
 
 public class SumoObservation extends AgentsObservation {
 
-  public SumoObservation(
-          List<Agent> agents) {
+  public SumoObservation(List<Agent> agents) {
     super(agents);
   }
 }

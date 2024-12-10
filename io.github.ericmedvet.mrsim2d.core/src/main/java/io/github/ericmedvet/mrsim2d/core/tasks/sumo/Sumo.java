@@ -100,7 +100,7 @@ public class Sumo
         new Point(
             terrain.withinBordersXRange().min()
                 + initialXGap
-                + 11
+                + 10.5
                 - agent2BB.min().x(),
             0)));
     agent2BB = agent2.boundingBox();

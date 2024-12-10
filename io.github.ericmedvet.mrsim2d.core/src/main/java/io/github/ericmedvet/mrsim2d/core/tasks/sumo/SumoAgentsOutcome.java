@@ -19,7 +19,6 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import java.util.SortedMap;
 
