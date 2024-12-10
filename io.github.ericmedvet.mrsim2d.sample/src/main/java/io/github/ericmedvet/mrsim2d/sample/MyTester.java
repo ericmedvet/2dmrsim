@@ -177,42 +177,42 @@ public class MyTester {
     Supplier<EmbodiedAgent> agentSupplier1 = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription1);
 
-//      if (agent instanceof NumMultiBrained numMultiBrained) {
-//        //noinspection unchecked
-//        numMultiBrained.brains().stream()
-//            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-//            .forEach(o -> o.ifPresent(np -> np.setParams(
-//                params1.stream().mapToDouble(d -> d).toArray())));
-//      }
+      //      if (agent instanceof NumMultiBrained numMultiBrained) {
+      //        //noinspection unchecked
+      //        numMultiBrained.brains().stream()
+      //            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+      //            .forEach(o -> o.ifPresent(np -> np.setParams(
+      //                params1.stream().mapToDouble(d -> d).toArray())));
+      //      }
       if (agent instanceof NumMultiBrained numMultiBrained) {
         numMultiBrained.brains().stream()
-                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-                .forEach(o -> o.ifPresent(np -> {
-                  System.out.printf(
-                          "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
-                  np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-                }));
+            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+            .forEach(o -> o.ifPresent(np -> {
+              System.out.printf(
+                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+            }));
       }
       return agent;
     };
     Supplier<EmbodiedAgent> agentSupplier2 = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription2);
 
-//      if (agent instanceof NumMultiBrained numMultiBrained) {
-//        //noinspection unchecked
-//        numMultiBrained.brains().stream()
-//            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-//            .forEach(o -> o.ifPresent(np -> np.setParams(
-//                params2.stream().mapToDouble(d -> d).toArray())));
-//      }
+      //      if (agent instanceof NumMultiBrained numMultiBrained) {
+      //        //noinspection unchecked
+      //        numMultiBrained.brains().stream()
+      //            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+      //            .forEach(o -> o.ifPresent(np -> np.setParams(
+      //                params2.stream().mapToDouble(d -> d).toArray())));
+      //      }
       if (agent instanceof NumMultiBrained numMultiBrained) {
         numMultiBrained.brains().stream()
-                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-                .forEach(o -> o.ifPresent(np -> {
-                  System.out.printf(
-                          "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
-                  np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-                }));
+            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+            .forEach(o -> o.ifPresent(np -> {
+              System.out.printf(
+                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+            }));
       }
       return agent;
     };
