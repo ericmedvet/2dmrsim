@@ -45,7 +45,7 @@ public class Sumo
     implements SymmetricCompetitiveTask<
         Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-  private static final double INITIAL_X_GAP = 5.25;
+  private static final double INITIAL_X_GAP = 8;
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
@@ -100,7 +100,7 @@ public class Sumo
         new Point(
             terrain.withinBordersXRange().min()
                 + initialXGap
-                + 5
+                + 4
                 - agent2BB.min().x(),
             0)));
     agent2BB = agent2.boundingBox();
