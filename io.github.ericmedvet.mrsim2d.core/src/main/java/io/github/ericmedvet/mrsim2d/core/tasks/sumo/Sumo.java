@@ -45,7 +45,7 @@ public class Sumo
     implements SymmetricCompetitiveTask<
         Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-  private static final double INITIAL_X_GAP = 5.25;
+  private static final double INITIAL_X_GAP = 5;
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
@@ -100,16 +100,13 @@ public class Sumo
         new Point(
             terrain.withinBordersXRange().min()
                 + initialXGap
-                + 10
+                + 11
                 - agent2BB.min().x(),
             0)));
     agent2BB = agent2.boundingBox();
     double maxY3 = terrain.maxHeightAt(agent2BB.xRange());
     double y3 = maxY3 + initialYGap - agent2BB.min().y();
     engine.perform(new TranslateAgent(agent2, new Point(0, y3)));
-
-    double agent1InitialX = agent1.boundingBox().center().x();
-    double agent2InitialX = agent2.boundingBox().center().x();
 
     //    // create and place rigid body
     //    Poly rigidBodyPoly = Poly.rectangle(3, 2);
@@ -126,57 +123,24 @@ public class Sumo
     //        rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation));
 
     // run for defined time
-    Map<Double, SumoObservation> observations = new HashMap<>();
+    Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
-      double agent1CurrentX = agent1.boundingBox().center().x();
-      double agent2CurrentX = agent2.boundingBox().center().x();
-      double agent1Distance = Math.abs(agent1CurrentX - agent1InitialX);
-      double agent2Distance = Math.abs(agent2InitialX - agent2CurrentX);
       observations.put(
           engine.t(),
-          new SumoObservation(
-              List.of(
-                  new AgentsObservation.Agent(
-                      agent1.bodyParts().stream()
-                          .map(Body::poly)
-                          .toList(),
-                      PolyUtils.maxYAtX(
-                          terrain.poly(),
-                          agent1.boundingBox()
-                              .center()
-                              .x())),
-                  new AgentsObservation.Agent(
-                      agent2.bodyParts().stream()
-                          .map(Body::poly)
-                          .toList(),
-                      PolyUtils.maxYAtX(
-                          terrain.poly(),
-                          agent2.boundingBox()
-                              .center()
-                              .x()))),
-              agent1Distance,
-              agent2Distance,
-              agent1InitialX,
-              agent1CurrentX,
-              agent2InitialX,
-              agent2CurrentX));
+          new AgentsObservation(List.of(
+              new AgentsObservation.Agent(
+                  agent1.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(
+                      terrain.poly(),
+                      agent1.boundingBox().center().x())),
+              new AgentsObservation.Agent(
+                  agent2.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(
+                      terrain.poly(),
+                      agent2.boundingBox().center().x())))));
     }
-    double agent1FinalX = agent1.boundingBox().center().x();
-    double agent2FinalX = agent2.boundingBox().center().x();
-    double agent1FinalDistance = Math.abs(agent1FinalX - agent1InitialX);
-    double agent2FinalDistance = Math.abs(agent2FinalX - agent2InitialX);
-
-    SumoObservation finalObservation = new SumoObservation(
-        observations.get(engine.t()).getAgents(),
-        agent1FinalDistance,
-        agent2FinalDistance,
-        agent1InitialX,
-        agent1FinalX,
-        agent2InitialX,
-        agent2FinalX);
-    observations.put(engine.t(), finalObservation);
 
     // return
     return new AgentsOutcome<>(new TreeMap<>(observations));

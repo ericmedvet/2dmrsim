@@ -23,51 +23,9 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import java.util.List;
 
 public class SumoObservation extends AgentsObservation {
-  private final double agent1Distance;
-  private final double agent2Distance;
-  private final double agent1InitialPosition;
-  private final double agent2InitialPosition;
-  private final double agent1FinalPosition;
-  private final double agent2FinalPosition;
 
   public SumoObservation(
-      List<Agent> agents,
-      double agent1Distance,
-      double agent2Distance,
-      double agent1InitialPosition,
-      double agent1FinalPosition,
-      double agent2InitialPosition,
-      double agent2FinalPosition) {
+          List<Agent> agents) {
     super(agents);
-    this.agent1Distance = agent1Distance;
-    this.agent2Distance = agent2Distance;
-    this.agent1InitialPosition = agent1InitialPosition;
-    this.agent1FinalPosition = agent1FinalPosition;
-    this.agent2InitialPosition = agent2InitialPosition;
-    this.agent2FinalPosition = agent2FinalPosition;
-  }
-
-  public double getAgent1Distance() {
-    return agent1Distance;
-  }
-
-  public double getAgent2Distance() {
-    return agent2Distance;
-  }
-
-  public double getAgent1InitialPosition() {
-    return agent1InitialPosition;
-  }
-
-  public double getAgent1FinalPosition() {
-    return agent1FinalPosition;
-  }
-
-  public double getAgent2InitialPosition() {
-    return agent2InitialPosition;
-  }
-
-  public double getAgent2FinalPosition() {
-    return agent2FinalPosition;
   }
 }
