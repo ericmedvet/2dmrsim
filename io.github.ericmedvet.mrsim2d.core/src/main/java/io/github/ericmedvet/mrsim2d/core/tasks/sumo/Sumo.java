@@ -65,12 +65,6 @@ public class Sumo
 
   @Override
   public AgentsOutcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> a, Engine engine, Consumer<Snapshot> snapshotConsumer) {
-    return null;
-  }
-
-  @Override
-  public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier1,
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
       Engine engine,
@@ -146,7 +140,9 @@ public class Sumo
                   agent2.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(
                       terrain.poly(),
-                      agent2.boundingBox().center().x())))));
+                      agent2.boundingBox().center().x()))
+          ))
+      );
     }
 
     // return
