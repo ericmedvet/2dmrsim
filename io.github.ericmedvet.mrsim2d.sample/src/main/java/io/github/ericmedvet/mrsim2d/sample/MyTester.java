@@ -21,6 +21,7 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
@@ -36,11 +37,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -74,9 +77,10 @@ public class MyTester {
             engineSupplier,
             new RealtimeViewer(30, drawer),
             //            "s.t.sumoArena()")
-            "s.t.flat()")
+            "s.t.sumoArena()")
         .run();
     System.exit(0);
+
     //        OnlineVideoBuilder onlineVideoBuilder = new OnlineVideoBuilder(300, 200, 0, 10, 20,
     // VideoUtils.EncoderFacility.JCODEC, new File("video.mp4"), drawer);
     //        taskOn(
@@ -166,28 +170,49 @@ public class MyTester {
       L.severe("Cannot deserialize params: %s%n".formatted(e));
       throw new RuntimeException(e);
     }
+
+    RandomGenerator rg = new Random();
+
     // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier1 = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription1);
 
+//      if (agent instanceof NumMultiBrained numMultiBrained) {
+//        //noinspection unchecked
+//        numMultiBrained.brains().stream()
+//            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+//            .forEach(o -> o.ifPresent(np -> np.setParams(
+//                params1.stream().mapToDouble(d -> d).toArray())));
+//      }
       if (agent instanceof NumMultiBrained numMultiBrained) {
-        //noinspection unchecked
         numMultiBrained.brains().stream()
-            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> np.setParams(
-                params1.stream().mapToDouble(d -> d).toArray())));
+                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+                .forEach(o -> o.ifPresent(np -> {
+                  System.out.printf(
+                          "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                  np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+                }));
       }
       return agent;
     };
     Supplier<EmbodiedAgent> agentSupplier2 = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription2);
 
+//      if (agent instanceof NumMultiBrained numMultiBrained) {
+//        //noinspection unchecked
+//        numMultiBrained.brains().stream()
+//            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+//            .forEach(o -> o.ifPresent(np -> np.setParams(
+//                params2.stream().mapToDouble(d -> d).toArray())));
+//      }
       if (agent instanceof NumMultiBrained numMultiBrained) {
-        //noinspection unchecked
         numMultiBrained.brains().stream()
-            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> np.setParams(
-                params2.stream().mapToDouble(d -> d).toArray())));
+                .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+                .forEach(o -> o.ifPresent(np -> {
+                  System.out.printf(
+                          "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                  np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+                }));
       }
       return agent;
     };
