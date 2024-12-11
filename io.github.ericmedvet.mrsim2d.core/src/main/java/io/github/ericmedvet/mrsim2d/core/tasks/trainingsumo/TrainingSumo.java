@@ -21,7 +21,6 @@ package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.XMirrorer;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateAndTranslateRigidBody;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
@@ -34,10 +33,8 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
-import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,83 +42,79 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class TrainingSumo implements Task<
-        Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
+public class TrainingSumo
+    implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-    private static final double INITIAL_X_GAP = 8;
-    private static final double INITIAL_Y_GAP = 0.25;
-    private final double duration;
-    private final Terrain terrain;
-    private final double initialXGap;
-    private final double initialYGap;
+  private static final double INITIAL_X_GAP = 8;
+  private static final double INITIAL_Y_GAP = 0.25;
+  private final double duration;
+  private final Terrain terrain;
+  private final double initialXGap;
+  private final double initialYGap;
 
-    public TrainingSumo(double duration, Terrain terrain, double initialXGap, double initialYGap) {
-        this.duration = duration;
-        this.terrain = terrain;
-        this.initialXGap = initialXGap;
-        this.initialYGap = initialYGap;
+  public TrainingSumo(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+    this.duration = duration;
+    this.terrain = terrain;
+    this.initialXGap = initialXGap;
+    this.initialYGap = initialYGap;
+  }
+
+  public TrainingSumo(double duration, Terrain terrain) {
+    this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
+  }
+
+  @Override
+  public AgentsOutcome<AgentsObservation> run(
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+    // create agent
+    EmbodiedAgent agent = embodiedAgentSupplier.get();
+
+    // build world
+    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new AddAgent(agent));
+
+    // place first agent
+    BoundingBox agent1BB = agent.boundingBox();
+    engine.perform(new TranslateAgent(
+        agent,
+        new Point(
+            terrain.withinBordersXRange().min()
+                + initialXGap
+                - agent1BB.min().x(),
+            0)));
+    agent1BB = agent.boundingBox();
+    double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
+    double y1 = maxY1 + initialYGap - agent1BB.min().y();
+    engine.perform(new TranslateAgent(agent, new Point(0, y1)));
+
+    // create and place rigid body
+    Poly rigidBodyPoly = Poly.rectangle(2, 3);
+    double rigidBodyMass = 5;
+    double rigidBodyAnchorsDensity = 10;
+    BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
+    Point rigidBodyTranslation = new Point(
+        terrain.withinBordersXRange().min()
+            + initialXGap
+            + 5
+            - rigidBodyBB.min().x(),
+        y1);
+    engine.perform(new CreateAndTranslateRigidBody(
+        rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation));
+
+    // run for defined time
+    Map<Double, AgentsObservation> observations = new HashMap<>();
+    while (engine.t() < duration) {
+      Snapshot snapshot = engine.tick();
+      snapshotConsumer.accept(snapshot);
+      observations.put(
+          engine.t(),
+          new AgentsObservation(List.of(new AgentsObservation.Agent(
+              agent.bodyParts().stream().map(Body::poly).toList(),
+              PolyUtils.maxYAtX(
+                  terrain.poly(), agent.boundingBox().center().x())))));
     }
 
-    public TrainingSumo(double duration, Terrain terrain) {
-        this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
-    }
-
-    @Override
-    public AgentsOutcome<AgentsObservation> run(
-            Supplier<EmbodiedAgent> embodiedAgentSupplier,
-            Engine engine,
-            Consumer<Snapshot> snapshotConsumer) {
-        // create agent
-        EmbodiedAgent agent = embodiedAgentSupplier.get();
-
-        // build world
-        engine.perform(new CreateUnmovableBody(terrain.poly()));
-        engine.perform(new AddAgent(agent));
-
-        // place first agent
-        BoundingBox agent1BB = agent.boundingBox();
-        engine.perform(new TranslateAgent(
-                agent,
-                new Point(
-                        terrain.withinBordersXRange().min()
-                                + initialXGap
-                                - agent1BB.min().x(),
-                        0)));
-        agent1BB = agent.boundingBox();
-        double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
-        double y1 = maxY1 + initialYGap - agent1BB.min().y();
-        engine.perform(new TranslateAgent(agent, new Point(0, y1)));
-
-        // create and place rigid body
-        Poly rigidBodyPoly = Poly.rectangle(2, 3);
-        double rigidBodyMass = 5;
-        double rigidBodyAnchorsDensity = 10;
-        BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
-        Point rigidBodyTranslation = new Point(
-                terrain.withinBordersXRange().min()
-                        + initialXGap
-                        + 5
-                        - rigidBodyBB.min().x(),
-                y1);
-        engine.perform(new CreateAndTranslateRigidBody(
-                rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation));
-
-        // run for defined time
-        Map<Double, AgentsObservation> observations = new HashMap<>();
-        while (engine.t() < duration) {
-            Snapshot snapshot = engine.tick();
-            snapshotConsumer.accept(snapshot);
-            observations.put(
-                    engine.t(),
-                    new AgentsObservation(List.of(
-                            new AgentsObservation.Agent(
-                                    agent.bodyParts().stream().map(Body::poly).toList(),
-                                    PolyUtils.maxYAtX(
-                                            terrain.poly(),
-                                            agent.boundingBox().center().x())))));
-        }
-
-        // return
-        return new AgentsOutcome<>(new TreeMap<>(observations));
-    }
+    // return
+    return new AgentsOutcome<>(new TreeMap<>(observations));
+  }
 }
