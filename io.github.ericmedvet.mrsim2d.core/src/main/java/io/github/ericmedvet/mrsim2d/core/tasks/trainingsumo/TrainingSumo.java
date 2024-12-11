@@ -87,7 +87,7 @@ public class TrainingSumo
     engine.perform(new TranslateAgent(agent, new Point(0, y1)));
 
     // create and place rigid body
-    //TODO parametrics
+    //TODO parameterize w and h of the rigid body
     Poly rigidBodyPoly = Poly.rectangle(2, 3);
     double rigidBodyMass = 5;
     double rigidBodyAnchorsDensity = 10;
