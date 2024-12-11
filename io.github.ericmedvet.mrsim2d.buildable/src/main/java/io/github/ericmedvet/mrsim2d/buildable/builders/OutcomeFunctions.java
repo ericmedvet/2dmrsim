@@ -279,4 +279,24 @@ public class OutcomeFunctions {
         o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXVelocity();
     return FormattedNamedFunction.from(f, format, "first.agent.velocity.x").compose(beforeF);
   }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> scoreSumoAgent1(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXVelocity();
+    return FormattedNamedFunction.from(f, format, "first.agent.velocity.x").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> scoreSumoAgent2(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+    Function<AgentsOutcome<?>, Double> f =
+            o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXVelocity();
+    return FormattedNamedFunction.from(f, format, "first.agent.velocity.x").compose(beforeF);
+  }
 }

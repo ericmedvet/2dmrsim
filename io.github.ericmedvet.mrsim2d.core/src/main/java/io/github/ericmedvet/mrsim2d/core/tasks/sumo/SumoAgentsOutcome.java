@@ -19,12 +19,42 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 
-public class SumoAgentsOutcome extends AgentsOutcome<SumoObservation> {
+public class SumoAgentsOutcome extends AgentsOutcome<AgentsObservation> {
 
-  public SumoAgentsOutcome(SortedMap<Double, SumoObservation> observations) {
+  public SumoAgentsOutcome(SortedMap<Double, AgentsObservation> observations) {
     super(observations);
+  }
+
+  public List<AgentsObservation.Agent> getAgent1Outcome() {
+    List<AgentsObservation.Agent> agent1Observations = new ArrayList<>();
+
+    for (AgentsObservation observation : observations.values()) {
+      List<AgentsObservation.Agent> agents = observation.getAgents();
+      if (agents != null && !agents.isEmpty()) {
+        agent1Observations.add(agents.getFirst());
+      }
+    }
+
+    return agent1Observations;
+  }
+
+  public List<AgentsObservation.Agent> getAgent2Outcome() {
+    List<AgentsObservation.Agent> agent2Observations = new ArrayList<>();
+
+    for (AgentsObservation observation : observations.values()) {
+      List<AgentsObservation.Agent> agents = observation.getAgents();
+      if (agents != null && agents.size() > 1) {
+        agent2Observations.add(agents.get(1));
+      }
+    }
+
+    return agent2Observations;
   }
 }

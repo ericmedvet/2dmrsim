@@ -47,9 +47,9 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class MyTester {
+public class SumoTester {
 
-  private static final Logger L = Logger.getLogger(MyTester.class.getName());
+  private static final Logger L = Logger.getLogger(SumoTester.class.getName());
 
   private static Object fromBase64(String content) throws IOException {
     try (ByteArrayInputStream bais =

@@ -41,4 +41,5 @@ module io.github.ericmedvet.mrsim2d.core {
   exports io.github.ericmedvet.mrsim2d.core.tasks.piling;
   exports io.github.ericmedvet.mrsim2d.core.tasks.sumo;
   exports io.github.ericmedvet.mrsim2d.core.util;
+    exports io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 }
