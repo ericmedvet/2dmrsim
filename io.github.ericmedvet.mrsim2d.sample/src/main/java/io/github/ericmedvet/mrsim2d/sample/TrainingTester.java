@@ -32,6 +32,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
+
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -49,110 +50,117 @@ import java.util.stream.IntStream;
 
 public class TrainingTester {
 
-  private static final Logger L = Logger.getLogger(TrainingTester.class.getName());
+    private static final Logger L = Logger.getLogger(TrainingTester.class.getName());
 
-  private static Object fromBase64(String content) throws IOException {
-    try (ByteArrayInputStream bais =
-            new ByteArrayInputStream(Base64.getDecoder().decode(content));
-        ObjectInputStream ois = new ObjectInputStream(bais)) {
-      return ois.readObject();
-    } catch (Throwable t) {
-      throw new IOException(t);
-    }
-  }
-
-  public static void main(String[] args) {
-    NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
-    // prepare engine
-    Supplier<Engine> engineSupplier =
-        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    // do single task
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>)
-            nb.build(
-                "sim.drawer(framer = sim.staticFramer(minX = 10.0; maxX = 35.0; minY = 1.0; maxY = 15.0); actions = true)"))
-        .apply("test");
-    taskOn(
-            nb,
-            engineSupplier,
-            new RealtimeViewer(30, drawer),
-            //            "s.t.sumoArena()")
-            "s.t.sumoArena()")
-        .run();
-    System.exit(0);
-  }
-
-  private static double profile(Runnable runnable, int nOfTimes) {
-    return IntStream.range(0, nOfTimes)
-            .mapToDouble(i -> {
-              Instant startingInstant = Instant.now();
-              runnable.run();
-              return Duration.between(startingInstant, Instant.now())
-                  .toMillis();
-            })
-            .average()
-            .orElse(Double.NaN)
-        / 1000d;
-  }
-
-  private static String readResource(String resourcePath) throws IOException {
-    InputStream inputStream = TerrainTester.class.getResourceAsStream(resourcePath);
-    String content;
-    if (inputStream == null) {
-      throw new IOException("Cannot find resource %s".formatted(resourcePath));
-    } else {
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-        content = br.lines().collect(Collectors.joining());
-      }
-    }
-    return content;
-  }
-
-  private static Runnable taskOn(
-      NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
-    // prepare task
-    TrainingSumo trainingSumo = new TrainingSumo(30, (Terrain) nb.build(terrain));
-    // read agent resource
-    String agentDescription;
-    try {
-      agentDescription = readResource("/agents/biped-vsr-centralized-mlp.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read agent description: %s%n".formatted(e));
-      throw new RuntimeException(e);
-    }
-    // load weights
-    String serializedWeights;
-    try {
-      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read serialized params: %s%n".formatted(e));
-      throw new RuntimeException(e);
-    }
-    List<Double> params;
-    try {
-      //noinspection unchecked
-      params = (List<Double>) fromBase64(serializedWeights);
-    } catch (IOException e) {
-      L.severe("Cannot deserialize params: %s%n".formatted(e));
-      throw new RuntimeException(e);
+    private static Object fromBase64(String content) throws IOException {
+        try (ByteArrayInputStream bais =
+                     new ByteArrayInputStream(Base64.getDecoder().decode(content));
+             ObjectInputStream ois = new ObjectInputStream(bais)) {
+            return ois.readObject();
+        } catch (Throwable t) {
+            throw new IOException(t);
+        }
     }
 
-    RandomGenerator rg = new Random();
-    // prepare supplier
-    Supplier<EmbodiedAgent> agentSupplier = () -> {
-      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+    public static void main(String[] args) {
+        NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
+        // prepare engine
+        Supplier<Engine> engineSupplier =
+                () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+        // do single task
+        @SuppressWarnings("unchecked")
+        Drawer drawer = ((Function<String, Drawer>)
+                nb.build(
+                        "sim.drawer(framer = sim.staticFramer(minX = 10.0; maxX = 35.0; minY = 1.0; maxY = 15.0); actions = true)"))
+                .apply("test");
+        taskOn(
+                nb,
+                engineSupplier,
+                new RealtimeViewer(30, drawer),
+                //            "s.t.sumoArena()")
+                "s.t.sumoArena()")
+                .run();
+        System.exit(0);
+    }
 
-      if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().stream()
-            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> {
-              System.out.printf(
-                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
-              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-            }));
-      }
-      return agent;
-    };
-    return () -> trainingSumo.run(agentSupplier, engineSupplier.get(), consumer);
-  }
+    private static double profile(Runnable runnable, int nOfTimes) {
+        return IntStream.range(0, nOfTimes)
+                .mapToDouble(i -> {
+                    Instant startingInstant = Instant.now();
+                    runnable.run();
+                    return Duration.between(startingInstant, Instant.now())
+                            .toMillis();
+                })
+                .average()
+                .orElse(Double.NaN)
+                / 1000d;
+    }
+
+    private static String readResource(String resourcePath) throws IOException {
+        InputStream inputStream = TerrainTester.class.getResourceAsStream(resourcePath);
+        String content;
+        if (inputStream == null) {
+            throw new IOException("Cannot find resource %s".formatted(resourcePath));
+        } else {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+                content = br.lines().collect(Collectors.joining());
+            }
+        }
+        return content;
+    }
+
+    private static Runnable taskOn(
+            NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
+        // prepare task
+        TrainingSumo trainingSumo = new TrainingSumo(30, (Terrain) nb.build(terrain));
+        // read agent resource
+        String agentDescription;
+        try {
+            agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
+        } catch (IOException e) {
+            L.severe("Cannot read agent description: %s%n".formatted(e));
+            throw new RuntimeException(e);
+        }
+        // load weights
+        String serializedWeights;
+        try {
+            serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
+        } catch (IOException e) {
+            L.severe("Cannot read serialized params: %s%n".formatted(e));
+            throw new RuntimeException(e);
+        }
+        List<Double> params;
+        try {
+            //noinspection unchecked
+            params = (List<Double>) fromBase64(serializedWeights);
+        } catch (IOException e) {
+            L.severe("Cannot deserialize params: %s%n".formatted(e));
+            throw new RuntimeException(e);
+        }
+
+        RandomGenerator rg = new Random();
+        // prepare supplier
+        Supplier<EmbodiedAgent> agentSupplier = () -> {
+            EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+
+            if (agent instanceof NumMultiBrained numMultiBrained) {
+                numMultiBrained.brains().stream()
+                        .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+                        .forEach(o -> o.ifPresent(np -> {
+                            System.out.printf(
+                                    "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                            np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+                        }));
+            }
+//            if (agent instanceof NumMultiBrained numMultiBrained) {
+//                //noinspection unchecked
+//                numMultiBrained.brains().stream()
+//                        .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+//                        .forEach(o -> o.ifPresent(np -> np.setParams(
+//                                params.stream().mapToDouble(d -> d).toArray())));
+//            }
+            return agent;
+        };
+        return () -> trainingSumo.run(agentSupplier, engineSupplier.get(), consumer);
+    }
 }
