@@ -36,7 +36,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -66,7 +65,7 @@ public class TrainingSumo
 
   @Override
   public AgentsOutcome<AgentsObservation> run(
-          Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent agent = embodiedAgentSupplier.get();
 
@@ -77,30 +76,33 @@ public class TrainingSumo
     // place first agent
     BoundingBox agent1BB = agent.boundingBox();
     engine.perform(new TranslateAgent(
-            agent,
-            new Point(
-                    terrain.withinBordersXRange().min()
-                            + initialXGap
-                            - agent1BB.min().x(),
-                    0)));
+        agent,
+        new Point(
+            terrain.withinBordersXRange().min()
+                + initialXGap
+                - agent1BB.min().x(),
+            0)));
     agent1BB = agent.boundingBox();
     double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
     double y1 = maxY1 + initialYGap - agent1BB.min().y();
     engine.perform(new TranslateAgent(agent, new Point(0, y1)));
 
     // create and place rigid body
+    //TODO parametrics
     Poly rigidBodyPoly = Poly.rectangle(2, 3);
     double rigidBodyMass = 5;
     double rigidBodyAnchorsDensity = 10;
     BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
     Point rigidBodyTranslation = new Point(
-            terrain.withinBordersXRange().min()
-                    + initialXGap
-                    + 5
-                    - rigidBodyBB.min().x(),
-            y1);
-    RigidBody rigidBody = engine.perform(
-            new CreateAndTranslateRigidBody(rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation)).outcome().orElseThrow();
+        terrain.withinBordersXRange().min()
+            + initialXGap
+            + 5
+            - rigidBodyBB.min().x(),
+        y1);
+    RigidBody rigidBody = engine.perform(new CreateAndTranslateRigidBody(
+            rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation))
+        .outcome()
+        .orElseThrow();
 
     // run for defined time
     SortedMap<Double, TrainingSumoObservation> observations = new TreeMap<>();
@@ -108,14 +110,14 @@ public class TrainingSumo
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
-              engine.t(),
-              new TrainingSumoObservation(List.of(
-                      new AgentsObservation.Agent(
-                              agent.bodyParts().stream().map(Body::poly).toList(),
-                              PolyUtils.maxYAtX(
-                                      terrain.poly(),
-                                      agent.boundingBox().center().x()))
-              ), rigidBody));
+          engine.t(),
+          new TrainingSumoObservation(
+              List.of(new AgentsObservation.Agent(
+                  agent.bodyParts().stream().map(Body::poly).toList(),
+                  PolyUtils.maxYAtX(
+                      terrain.poly(),
+                      agent.boundingBox().center().x()))),
+              rigidBody));
     }
 
     return new AgentsOutcome<>(new TreeMap<>(observations));

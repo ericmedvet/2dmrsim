@@ -19,17 +19,16 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
-import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
-
 import java.util.List;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 
-public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservation> {
+public class
+TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservation> {
 
   public TrainingSumoAgentOutcome(SortedMap<Double, TrainingSumoObservation> observations) {
     super(observations);
@@ -37,15 +36,15 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
 
   public AgentsObservation.Agent getAgentOutcome() {
     return snapshots().values().stream()
-            .findFirst()
-            .map(observation -> observation.getAgents().getFirst())
-            .orElseThrow(() -> new IllegalArgumentException("No agents observed in the simulation"));
+        .findFirst()
+        .map(observation -> observation.getAgents().getFirst())
+        .orElseThrow(() -> new IllegalArgumentException("No agents observed in the simulation"));
   }
 
   public List<Point> getBoxPositions() {
     return snapshots().values().stream()
-            .map(TrainingSumoObservation::getRigidBodyPosition)
-            .collect(Collectors.toList());
+        .map(TrainingSumoObservation::getRigidBodyPosition)
+        .collect(Collectors.toList());
   }
 
   @Override

@@ -24,14 +24,11 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.balancing.BalancingAgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumoAgentOutcome;
-
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Discoverable(prefixTemplate = "sim|s.function|f.outcome|o")
 public class OutcomeFunctions {
@@ -288,9 +285,9 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> scoreSumoAgent(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
 
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
       // Filtra le osservazioni in base al transientTime
@@ -298,8 +295,8 @@ public class OutcomeFunctions {
 
       // Calcola la distanza percorsa dall'agente
       List<Point> agentPositions = subOutcome.snapshots().values().stream()
-              .map(observation -> observation.getCenters().getFirst())
-              .toList();
+          .map(observation -> observation.getCenters().getFirst())
+          .toList();
       Point initialAgentPosition = agentPositions.getFirst();
       Point finalAgentPosition = agentPositions.getLast();
       double agentDistance = finalAgentPosition.x() - initialAgentPosition.x();
@@ -317,11 +314,9 @@ public class OutcomeFunctions {
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
-
-
-//  @SuppressWarnings("unused")
-//  public static <X> Function<X, Double> scoreSumoAgent2(
-//
-//    return ;
-//  }
+  //  @SuppressWarnings("unused")
+  //  public static <X> Function<X, Double> scoreSumoAgent2(
+  //
+  //    return ;
+  //  }
 }
