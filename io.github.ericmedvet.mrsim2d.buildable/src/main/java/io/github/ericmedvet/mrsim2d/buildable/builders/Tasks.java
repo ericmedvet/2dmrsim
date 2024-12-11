@@ -32,6 +32,7 @@ import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLoc
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.StandPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
+import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "sim|s.task")
@@ -43,6 +44,13 @@ public class Tasks {
       @Param(value = "duration", dD = 60) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
     return new Sumo(duration, terrain);
+  }
+
+  @SuppressWarnings("unused")
+  public static TrainingSumo trainingsumo(
+          @Param(value = "duration", dD = 60) double duration,
+          @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+    return new TrainingSumo(duration, terrain);
   }
 
   @SuppressWarnings("unused")
