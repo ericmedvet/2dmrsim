@@ -25,7 +25,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import java.util.List;
 
 public class TrainingSumoObservation extends AgentsObservation {
-
   private final Point rigidBodyPosition;
 
   public TrainingSumoObservation(List<Agent> agents, RigidBody rigidBody) {

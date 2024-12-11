@@ -36,14 +36,13 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class TrainingSumo
-    implements Task<Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
+    implements Task<Supplier<EmbodiedAgent>, TrainingSumoObservation, TrainingSumoAgentOutcome> {
 
   private static final double INITIAL_X_GAP = 8;
   private static final double INITIAL_Y_GAP = 0.25;
@@ -64,7 +63,7 @@ public class TrainingSumo
   }
 
   @Override
-  public AgentsOutcome<AgentsObservation> run(
+  public TrainingSumoAgentOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
     // create agent
     EmbodiedAgent agent = embodiedAgentSupplier.get();
@@ -105,7 +104,7 @@ public class TrainingSumo
         .orElseThrow();
 
     // run for defined time
-    SortedMap<Double, TrainingSumoObservation> observations = new TreeMap<>();
+    Map<Double, TrainingSumoObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
@@ -120,6 +119,6 @@ public class TrainingSumo
               rigidBody));
     }
 
-    return new AgentsOutcome<>(new TreeMap<>(observations));
+    return new TrainingSumoAgentOutcome(new TreeMap<>(observations));
   }
 }
