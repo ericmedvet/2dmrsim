@@ -32,7 +32,7 @@ public class SumoAgentsOutcome extends AgentsOutcome<AgentsObservation> {
   }
 
   public List<AgentsObservation.Agent> getAgent1Outcome() {
-    //TODO change to stream
+    // TODO change to stream
     List<AgentsObservation.Agent> agent1Observations = new ArrayList<>();
 
     for (AgentsObservation observation : observations.values()) {

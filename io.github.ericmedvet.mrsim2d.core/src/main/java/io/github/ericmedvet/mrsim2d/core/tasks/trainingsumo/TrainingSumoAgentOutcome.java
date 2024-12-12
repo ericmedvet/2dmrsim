@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 
-public class
-TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservation> {
+public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservation> {
 
   public TrainingSumoAgentOutcome(SortedMap<Double, TrainingSumoObservation> observations) {
     super(observations);

@@ -284,38 +284,52 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static <X> Function<X, Double> scoreSumoAgent(
+  public static <X> Function<X, Double> scoreSumoAgentvsBox(
       @Param(value = "transientTime", dD = 5.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
       @Param(value = "format", dS = "%.1f") String format) {
 
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
-      // Filtra le osservazioni in base al transientTime
+      // Filtra le osbs dopo il transientT
       TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
 
-      // Calcola la distanza percorsa dall'agente
+      // Estraiamo le obs dell agent
       List<Point> agentPositions = subOutcome.snapshots().values().stream()
           .map(observation -> observation.getCenters().getFirst())
           .toList();
+
+      // Calcolo distanza percorsa
       Point initialAgentPosition = agentPositions.getFirst();
       Point finalAgentPosition = agentPositions.getLast();
       double agentDistance = finalAgentPosition.x() - initialAgentPosition.x();
 
-      // Calcola se la scatola si è spostata
+      // Estraiamo obs scatola
       List<Point> boxPositions = subOutcome.getBoxPositions();
+
+      // Calcolo distanza fatta dalla box
       Point initialBoxPosition = boxPositions.getFirst();
       Point finalBoxPosition = boxPositions.getLast();
-      boolean boxMoved = !initialBoxPosition.equals(finalBoxPosition);
+      double boxDistance = finalBoxPosition.x() - initialBoxPosition.x();
 
-      // Punteggio basato sui criteri
-      return agentDistance + (boxMoved ? 100 : 0); // Esempio di punteggio
+      // Distanza tot
+      return agentDistance + boxDistance;
     };
 
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
   //  @SuppressWarnings("unused")
-  //  public static <X> Function<X, Double> scoreSumoAgent2(
+  //  public static <X> Function<X, Double> scoreSumoAgent1vs2(
+  //      @Param(value = "transientTime", dD = 5.0) double transientTime,
+  //      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+  //      @Param(value = "format", dS = "%.1f") String format) {
+  //    Function<AgentsOutcome<?>, Double> f =
+  //        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXDistance();
+  //    return FormattedNamedFunction.from(f, format, "first.agent.distance.x").compose(beforeF);
+  //  }
+
+  //  @SuppressWarnings("unused")
+  //  public static <X> Function<X, Double> scoreSumoAgent2vs1(
   //
   //    return ;
   //  }

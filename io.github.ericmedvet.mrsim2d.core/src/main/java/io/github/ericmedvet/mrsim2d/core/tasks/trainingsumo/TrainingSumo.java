@@ -33,18 +33,15 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class TrainingSumo
-    implements Task<Supplier<EmbodiedAgent>, TrainingSumoObservation, TrainingSumoAgentOutcome> {
+public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoObservation, TrainingSumoAgentOutcome> {
 
-  private static final double INITIAL_X_GAP = 8;
+  private static final double INITIAL_X_GAP = 7;
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
@@ -87,10 +84,10 @@ public class TrainingSumo
     engine.perform(new TranslateAgent(agent, new Point(0, y1)));
 
     // create and place rigid body
-    //TODO parameterize w and h of the rigid body
+    // TODO parameterize w and h of the rigid body
     Poly rigidBodyPoly = Poly.rectangle(2, 3);
     double rigidBodyMass = 5;
-    double rigidBodyAnchorsDensity = 10;
+    double rigidBodyAnchorsDensity = 0;
     BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
     Point rigidBodyTranslation = new Point(
         terrain.withinBordersXRange().min()
