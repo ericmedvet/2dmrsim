@@ -26,6 +26,7 @@ import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.balancing.BalancingAgentsOutcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.sumo.SumoAgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumoAgentOutcome;
 import java.util.List;
 import java.util.function.Function;
@@ -285,52 +286,76 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> scoreSumoAgentvsBox(
-      @Param(value = "transientTime", dD = 5.0) double transientTime,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
 
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
-      // Filtra le osbs dopo il transientT
+
       TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
 
-      // Estraiamo le obs dell agent
-      List<Point> agentPositions = subOutcome.snapshots().values().stream()
-          .map(observation -> observation.getCenters().getFirst())
-          .toList();
+      double agentDistance = subOutcome.firstAgentXDistance();
 
-      // Calcolo distanza percorsa
-      Point initialAgentPosition = agentPositions.getFirst();
-      Point finalAgentPosition = agentPositions.getLast();
-      double agentDistance = finalAgentPosition.x() - initialAgentPosition.x();
+      double boxDistance = subOutcome.getBoxPositions().getLast().x() -
+              subOutcome.getBoxPositions().getFirst().x();
 
-      // Estraiamo obs scatola
-      List<Point> boxPositions = subOutcome.getBoxPositions();
-
-      // Calcolo distanza fatta dalla box
-      Point initialBoxPosition = boxPositions.getFirst();
-      Point finalBoxPosition = boxPositions.getLast();
-      double boxDistance = finalBoxPosition.x() - initialBoxPosition.x();
-
-      // Distanza tot
       return agentDistance + boxDistance;
     };
 
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
-  //  @SuppressWarnings("unused")
-  //  public static <X> Function<X, Double> scoreSumoAgent1vs2(
-  //      @Param(value = "transientTime", dD = 5.0) double transientTime,
-  //      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-  //      @Param(value = "format", dS = "%.1f") String format) {
-  //    Function<AgentsOutcome<?>, Double> f =
-  //        o -> o.subOutcome(new DoubleRange(transientTime, o.duration())).firstAgentXDistance();
-  //    return FormattedNamedFunction.from(f, format, "first.agent.distance.x").compose(beforeF);
-  //  }
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> scoreSumoAgent1vs2(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
 
-  //  @SuppressWarnings("unused")
-  //  public static <X> Function<X, Double> scoreSumoAgent2vs1(
-  //
-  //    return ;
-  //  }
+    Function<SumoAgentsOutcome, Double> f = o -> {
+      SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
+
+      List<Point> agent1Positions = subOutcome.getAgent1Positions();
+      List<Point> agent2Positions = subOutcome.getAgent2Positions();
+
+      double agent1Distance = agent1Positions.getLast().x() - agent1Positions.getFirst().x();
+
+      double agent2Distance = agent2Positions.getLast().x() - agent2Positions.getFirst().x();
+
+      //Scenari:
+      // 1 avanza (->), 2 arretra (->): punteggio "molto" positivo
+      // 1 avanza (->), 2 avanza (<-): puntegio basso in valore assoluto
+      // 1 arretra (<-), 2 arretra (->): punteggio basso in valore assoltuo
+      // 1 arretra (<-), 2 avanza (<-): punteggio "molto" negativo
+      return agent1Distance + agent2Distance;
+    };
+
+    return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> scoreSumoAgent2vs1(
+          @Param(value = "transientTime", dD = 5.0) double transientTime,
+          @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+          @Param(value = "format", dS = "%.1f") String format) {
+
+    Function<SumoAgentsOutcome, Double> f = o -> {
+      SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
+
+      List<Point> agent1Positions = subOutcome.getAgent1Positions();
+      List<Point> agent2Positions = subOutcome.getAgent2Positions();
+
+      double agent1Distance = agent1Positions.getLast().x() - agent1Positions.getFirst().x();
+
+      double agent2Distance = agent2Positions.getLast().x() - agent2Positions.getFirst().x();
+
+      //Scenari:
+      // 1 avanza (->), 2 arretra (->): punteggio "molto" negativo
+      // 1 avanza (->), 2 avanza (<-): puntegio basso in valore assoluto
+      // 1 arretra (<-), 2 arretra (->): punteggio basso in valore assoltuo
+      // 1 arretra (<-), 2 avanza (<-): punteggio "molto" positivo
+      return -(agent1Distance + agent2Distance);
+    };
+
+    return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
+  }
 }

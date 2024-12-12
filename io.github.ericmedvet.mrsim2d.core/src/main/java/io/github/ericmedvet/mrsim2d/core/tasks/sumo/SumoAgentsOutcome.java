@@ -19,42 +19,36 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumoAgentOutcome;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 
 public class SumoAgentsOutcome extends AgentsOutcome<AgentsObservation> {
 
-  public SumoAgentsOutcome(SortedMap<Double, AgentsObservation> observations) {
-    super(observations);
-  }
-
-  public List<AgentsObservation.Agent> getAgent1Outcome() {
-    // TODO change to stream
-    List<AgentsObservation.Agent> agent1Observations = new ArrayList<>();
-
-    for (AgentsObservation observation : observations.values()) {
-      List<AgentsObservation.Agent> agents = observation.getAgents();
-      if (agents != null && !agents.isEmpty()) {
-        agent1Observations.add(agents.getFirst());
-      }
+    public SumoAgentsOutcome(SortedMap<Double, AgentsObservation> observations) {
+        super(observations);
     }
 
-    return agent1Observations;
-  }
-
-  public List<AgentsObservation.Agent> getAgent2Outcome() {
-    List<AgentsObservation.Agent> agent2Observations = new ArrayList<>();
-
-    for (AgentsObservation observation : observations.values()) {
-      List<AgentsObservation.Agent> agents = observation.getAgents();
-      if (agents != null && agents.size() > 1) {
-        agent2Observations.add(agents.get(1));
-      }
+    public List<Point> getAgent1Positions() {
+        return snapshots().values().stream()
+                .map(observation -> observation.getCenters().get(0))  // Assumendo che l'agente 1 sia il primo nella lista
+                .toList();
     }
 
-    return agent2Observations;
-  }
+    public List<Point> getAgent2Positions() {
+        return snapshots().values().stream()
+                .map(observation -> observation.getCenters().get(1))  // Assumendo che l'agente 2 sia il secondo nella lista
+                .toList();
+    }
+
+    @Override
+    public SumoAgentsOutcome subOutcome(DoubleRange tRange) {
+        return new SumoAgentsOutcome(super.subOutcome(tRange).snapshots());
+    }
 }

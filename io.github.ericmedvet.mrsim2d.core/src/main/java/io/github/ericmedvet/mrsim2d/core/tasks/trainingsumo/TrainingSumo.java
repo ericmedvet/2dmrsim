@@ -92,7 +92,7 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
     Point rigidBodyTranslation = new Point(
         terrain.withinBordersXRange().min()
             + initialXGap
-            + 5
+            + 8
             - rigidBodyBB.min().x(),
         y1);
     RigidBody rigidBody = engine.perform(new CreateAndTranslateRigidBody(

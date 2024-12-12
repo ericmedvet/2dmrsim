@@ -64,7 +64,7 @@ public class Sumo
   }
 
   @Override
-  public AgentsOutcome<AgentsObservation> run(
+  public SumoAgentsOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier1,
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
       Engine engine,
@@ -129,6 +129,6 @@ public class Sumo
     }
 
     // return
-    return new AgentsOutcome<>(new TreeMap<>(observations));
+    return new SumoAgentsOutcome(new TreeMap<>(observations));
   }
 }
