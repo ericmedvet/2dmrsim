@@ -49,7 +49,7 @@ import org.dyn4j.world.result.RaycastResult;
 public class Dyn4JEngine extends AbstractEngine {
 
   private static final Configuration DEFAULT_CONFIGURATION = new Configuration(
-          //TODO put again on 1 rigidBodyFriction and voxelFriction
+      // TODO put again on 1 rigidBodyFriction and voxelFriction
       getDefaultSettings(),
       0.5,
       0.5,
