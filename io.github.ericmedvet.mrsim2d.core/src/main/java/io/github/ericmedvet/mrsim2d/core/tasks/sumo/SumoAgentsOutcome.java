@@ -23,32 +23,45 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumoAgentOutcome;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 
 public class SumoAgentsOutcome extends AgentsOutcome<AgentsObservation> {
 
-    public SumoAgentsOutcome(SortedMap<Double, AgentsObservation> observations) {
-        super(observations);
-    }
+  public SumoAgentsOutcome(SortedMap<Double, AgentsObservation> observations) {
+    super(observations);
+  }
 
-    public List<Point> getAgent1Positions() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getCenters().get(0))  // Assumendo che l'agente 1 sia il primo nella lista
-                .toList();
-    }
+  public List<Point> getAgent1Positions() {
+    return snapshots().values().stream()
+        .map(observation -> observation.getCenters().getFirst()) // Assumendo agent1 primo nella list
+        .toList();
+  }
 
-    public List<Point> getAgent2Positions() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getCenters().get(1))  // Assumendo che l'agente 2 sia il secondo nella lista
-                .toList();
-    }
+  public List<Point> getAgent2Positions() {
+    return snapshots().values().stream()
+        .map(observation -> observation.getCenters().getLast()) // Asumendo agent2 secondo nella lits
+        .toList();
+  }
 
-    @Override
-    public SumoAgentsOutcome subOutcome(DoubleRange tRange) {
-        return new SumoAgentsOutcome(super.subOutcome(tRange).snapshots());
-    }
+  public double getTotalDistance() {
+    double distanceAgent1 = getAgent1Positions().getLast().x()
+        - getAgent1Positions().getFirst().x();
+    double distanceAgent2 = getAgent2Positions().getLast().x()
+        - getAgent2Positions().getFirst().x();
+    return distanceAgent1 + distanceAgent2;
+  }
+
+  public double getHigherAgent() {
+    double yAgent1 = getAgent1Positions().getLast().y()
+        - getAgent1Positions().getFirst().y();
+    double yAgent2 = getAgent2Positions().getLast().y()
+        - getAgent2Positions().getFirst().y();
+    return yAgent1 + yAgent2;
+  }
+
+  @Override
+  public SumoAgentsOutcome subOutcome(DoubleRange tRange) {
+    return new SumoAgentsOutcome(super.subOutcome(tRange).snapshots());
+  }
 }

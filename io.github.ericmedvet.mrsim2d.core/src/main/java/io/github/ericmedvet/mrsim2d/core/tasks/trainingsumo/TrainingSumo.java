@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
@@ -86,15 +87,11 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
     // create and place rigid body
     // TODO parameterize w and h of the rigid body
     Poly rigidBodyPoly = Poly.rectangle(2, 3);
-    double rigidBodyMass = 5;
+    // TODO change rigidBodyMass (instead of Friction, already put again at 1)
+    double rigidBodyMass = 3;
     double rigidBodyAnchorsDensity = 0;
     BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
-    Point rigidBodyTranslation = new Point(
-        terrain.withinBordersXRange().min()
-            + initialXGap
-            + 8
-            - rigidBodyBB.min().x(),
-        y1);
+    Point rigidBodyTranslation = new Point(terrain.withinBordersXRange().min() + initialXGap * 2, maxY1);
     RigidBody rigidBody = engine.perform(new CreateAndTranslateRigidBody(
             rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation))
         .outcome()
@@ -105,6 +102,13 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
+      double boxX = rigidBody.poly().boundingBox().center().x();
+
+      if (rigidBody.poly().boundingBox().max().y() < terrain.maxHeightAt(new DoubleRange(boxX, boxX))) {
+        System.out.println("Well done agent!");
+        break;
+      }
+
       observations.put(
           engine.t(),
           new TrainingSumoObservation(

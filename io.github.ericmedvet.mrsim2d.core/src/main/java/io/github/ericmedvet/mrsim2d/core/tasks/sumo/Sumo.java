@@ -45,22 +45,26 @@ public class Sumo
     implements BiTask<
         Supplier<EmbodiedAgent>, Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-  private static final double INITIAL_X_GAP = 8;
+  // TODO parameterize AGENT1_INITIAL_X and AGENT1_INITIAL_X in function of sumoArena central platform
+  private static final double AGENT1_INITIAL_X = 6;
+  private static final double AGENT2_INITIAL_X = 14.5;
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
-  private final double initialXGap;
+  private final double agent1InitialX;
+  private final double agent2InitialX;
   private final double initialYGap;
 
-  public Sumo(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+  public Sumo(double duration, Terrain terrain, double agent1InitialX, double agent2InitialX, double initialYGap) {
     this.duration = duration;
     this.terrain = terrain;
-    this.initialXGap = initialXGap;
+    this.agent1InitialX = agent1InitialX;
+    this.agent2InitialX = agent2InitialX;
     this.initialYGap = initialYGap;
   }
 
   public Sumo(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
+    this(duration, terrain, AGENT1_INITIAL_X, AGENT2_INITIAL_X, INITIAL_Y_GAP);
   }
 
   @Override
@@ -85,7 +89,7 @@ public class Sumo
         agent1,
         new Point(
             terrain.withinBordersXRange().min()
-                + initialXGap
+                + agent1InitialX
                 - agent1BB.min().x(),
             0)));
     agent1BB = agent1.boundingBox();
@@ -99,8 +103,7 @@ public class Sumo
         agent2,
         new Point(
             terrain.withinBordersXRange().min()
-                + initialXGap
-                + 4.5
+                + agent2InitialX
                 - agent2BB.min().x(),
             0)));
     agent2BB = agent2.boundingBox();
@@ -113,6 +116,9 @@ public class Sumo
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
+
+      // TODO: checking if agent/agents fall outside the platform
+
       observations.put(
           engine.t(),
           new AgentsObservation(List.of(
