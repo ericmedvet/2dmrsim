@@ -44,21 +44,21 @@ public class SumoAgentsOutcome extends AgentsOutcome<AgentsObservation> {
         .toList();
   }
 
-  public double getTotalDistance() {
-    double distanceAgent1 = getAgent1Positions().getLast().x()
-        - getAgent1Positions().getFirst().x();
-    double distanceAgent2 = getAgent2Positions().getLast().x()
-        - getAgent2Positions().getFirst().x();
-    return distanceAgent1 + distanceAgent2;
-  }
-
-  public double getHigherAgent() {
-    double yAgent1 = getAgent1Positions().getLast().y()
-        - getAgent1Positions().getFirst().y();
-    double yAgent2 = getAgent2Positions().getLast().y()
-        - getAgent2Positions().getFirst().y();
-    return yAgent1 + yAgent2;
-  }
+  //  public double getTotalDistance() {
+  //    double distanceAgent1 = getAgent1Positions().getLast().x()
+  //        - getAgent1Positions().getFirst().x();
+  //    double distanceAgent2 = getAgent2Positions().getLast().x()
+  //        - getAgent2Positions().getFirst().x();
+  //    return distanceAgent1 + distanceAgent2;
+  //  }
+  //
+  //  public double getHigherAgent() {
+  //    double yAgent1 = getAgent1Positions().getLast().y()
+  //        - getAgent1Positions().getFirst().y();
+  //    double yAgent2 = getAgent2Positions().getLast().y()
+  //        - getAgent2Positions().getFirst().y();
+  //    return yAgent1 + yAgent2;
+  //  }
 
   @Override
   public SumoAgentsOutcome subOutcome(DoubleRange tRange) {

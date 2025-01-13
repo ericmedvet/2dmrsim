@@ -86,9 +86,9 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
 
     // create and place rigid body
     // TODO parameterize w and h of the rigid body
-    Poly rigidBodyPoly = Poly.rectangle(2, 3);
+    Poly rigidBodyPoly = Poly.rectangle(3, 3);
     // TODO change rigidBodyMass (instead of Friction, already put again at 1)
-    double rigidBodyMass = 3;
+    double rigidBodyMass = 2;
     double rigidBodyAnchorsDensity = 0;
     BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
     Point rigidBodyTranslation = new Point(terrain.withinBordersXRange().min() + initialXGap * 2, maxY1);
