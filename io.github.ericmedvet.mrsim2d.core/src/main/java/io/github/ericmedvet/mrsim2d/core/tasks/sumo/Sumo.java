@@ -117,7 +117,7 @@ public class Sumo
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
-      // TODO: checking if agent/agents fall outside the platform
+      // TODO: add check if agent/agents fall outside the platform to stop simulation
 
       observations.put(
           engine.t(),

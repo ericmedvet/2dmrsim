@@ -286,18 +286,17 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> scoreSumoAgentvsBox(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
 
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
-
       TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
 
       double agentDistance = subOutcome.firstAgentXDistance();
 
-      double boxDistance = subOutcome.getBoxPositions().getLast().x() -
-              subOutcome.getBoxPositions().getFirst().x();
+      double boxDistance = subOutcome.getBoxPositions().getLast().x()
+          - subOutcome.getBoxPositions().getFirst().x();
 
       return agentDistance + boxDistance;
     };
@@ -307,9 +306,9 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> scoreSumoAgent1vs2(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
 
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
@@ -317,16 +316,19 @@ public class OutcomeFunctions {
       List<Point> agent1Positions = subOutcome.getAgent1Positions();
       List<Point> agent2Positions = subOutcome.getAgent2Positions();
 
-      double agent1Distance = agent1Positions.getLast().x() - agent1Positions.getFirst().x();
+      double agent1Distance =
+          agent1Positions.getLast().x() - agent1Positions.getFirst().x();
 
-      double agent2Distance = agent2Positions.getLast().x() - agent2Positions.getFirst().x();
+      double agent2Distance =
+          agent2Positions.getLast().x() - agent2Positions.getFirst().x();
 
-      //Scenari:
-      // 1 avanza (->), 2 arretra (->): punteggio "molto" positivo
-      // 1 avanza (->), 2 avanza (<-): puntegio basso in valore assoluto
-      // 1 arretra (<-), 2 arretra (->): punteggio basso in valore assoltuo
-      // 1 arretra (<-), 2 avanza (<-): punteggio "molto" negativo
       return agent1Distance + agent2Distance;
+      // Scenari:
+      // 1 avanza (->), 2 arretra (->): punteggio "molto" positivo (ma se agent2 arretra senza essere spinto?)
+      // 1 avanza (->), 2 avanza (<-): punteggio basso in valore assoluto (se si scavalcano e avanzano oppure si
+      // bloccano a vicenda sarà sempre punteggio basso, forse serve soglia proporzionale all'ampiezza dell'arena)
+      // 1 arretra (<-), 2 arretra (->): punteggio basso in valore assoluto
+      // 1 arretra (<-), 2 avanza (<-): punteggio "molto" negativo (se spinto o arretra da solo rimane comunque scarso)
     };
 
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
@@ -334,9 +336,9 @@ public class OutcomeFunctions {
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Double> scoreSumoAgent2vs1(
-          @Param(value = "transientTime", dD = 5.0) double transientTime,
-          @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
-          @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format) {
 
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
@@ -344,16 +346,14 @@ public class OutcomeFunctions {
       List<Point> agent1Positions = subOutcome.getAgent1Positions();
       List<Point> agent2Positions = subOutcome.getAgent2Positions();
 
-      double agent1Distance = agent1Positions.getLast().x() - agent1Positions.getFirst().x();
+      double agent1Distance =
+          agent1Positions.getLast().x() - agent1Positions.getFirst().x();
 
-      double agent2Distance = agent2Positions.getLast().x() - agent2Positions.getFirst().x();
+      double agent2Distance =
+          agent2Positions.getLast().x() - agent2Positions.getFirst().x();
 
-      //Scenari:
-      // 1 avanza (->), 2 arretra (->): punteggio "molto" negativo
-      // 1 avanza (->), 2 avanza (<-): puntegio basso in valore assoluto
-      // 1 arretra (<-), 2 arretra (->): punteggio basso in valore assoltuo
-      // 1 arretra (<-), 2 avanza (<-): punteggio "molto" positivo
       return -(agent1Distance + agent2Distance);
+      // Semplice cambio segno in modo che "agent1 bravo --> agent2 scarso" e viceversa ecc
     };
 
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
