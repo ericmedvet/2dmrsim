@@ -43,14 +43,24 @@ public class TrainingFightAgentOutcome extends AgentsOutcome<TrainingFightObserv
 
     public List<Point> getAgent1Positions() {
         return snapshots().values().stream()
-                .map(observation -> observation.getCenters().getFirst()) // Assumendo agent1 primo nella list
+                .map(observation -> observation.getCenters().getFirst())
                 .toList();
     }
 
     public List<Point> getAgent2Positions() {
         return snapshots().values().stream()
-                .map(observation -> observation.getCenters().getLast()) // Assumendo agent2 secondo nella list
+                .map(observation -> observation.getCenters().getLast())
                 .toList();
+    }
+
+    public List<Double> getAgent1MaxY() {
+        return snapshots().values().stream()
+                .map(observation -> observation.getBoundingBoxes().getFirst().max().y()).toList();
+    }
+
+    public List<Double> getAgent2MaxY() {
+        return snapshots().values().stream()
+                .map(observation -> observation.getBoundingBoxes().getLast().max().y()).toList();
     }
 
     @Override

@@ -375,6 +375,9 @@ public class OutcomeFunctions {
             List<Point> agent1Positions = subOutcome.getAgent1Positions();
             List<Point> agent2Positions = subOutcome.getAgent2Positions();
 
+            List<Double> agent1MaxY = subOutcome.getAgent1MaxY();
+            List<Double> agent2MaxY = subOutcome.getAgent2MaxY();
+
             // componente fitness basata sulla x:
             double agent1Distance =
                     agent1Positions.getLast().x() - agent1Positions.getFirst().x();
@@ -383,31 +386,26 @@ public class OutcomeFunctions {
                     agent2Positions.getLast().x() - agent2Positions.getFirst().x();
 
             // componente fitness basata sulla y:
-            double s;
+            double agent1Fallen = 0;
+            double agent2Fallen = 0;
 
-            //Da aggiungere anche a scoreAgent1vs2 e scoreAgent2vs1 ma con valori opposti
-            double y12Diff = agent1Positions.getLast().y() - agent2Positions.getLast().y();
-            if (agent1Positions.getLast().y() > agent2Positions.getLast().y()) { // agent1 più in alto di agent2
-                if (agent2Positions.getLast().y() < o.getMaxYTerrain()) { // agent2 caduto
-                    if ((agent1Positions.getFirst().y() * 0.9 < agent1Positions.getLast().y())
-                            && (agent1Positions.getLast().y() < agent1Positions.getFirst().y() * 1.1)) {
-                        s = 1.5; // agent1 ha buttato giù il 2 ed è rimasto sulla piattaforma
-                    } else {
-                        s = 0.7; // l'agent1 forse ha saltato
-                    }
+            if (agent1MaxY.getLast() < o.getMaxYTerrain()) {
+                if (agent1Positions.getLast().x() < agent1Positions.getFirst().x()) {
+                    agent1Fallen = -1.0;
                 } else {
-                    s = 0.5; // agent1 non ha buttato giù agent2
+                    agent1Fallen = 1.0;
                 }
-            } else {
-                s = -1.0; // agent1 è caduto mentre agent2 no
             }
-            // NOTE: se entrambi sono caduti, indipendentemente se autonomamente o per spinta reciproca,
-            // allora viene penalizzato quello caduto "più in basso", siccome caduti non si traduce in una y specifica,
-            // ma dipende da come sono caduti, o per la differenza nel loro body. Da correggere? Scalando le y finali?
 
-          double yFactor = y12Diff * s;
+            if (agent2MaxY.getLast() < o.getMaxYTerrain()) {
+                if (agent2Positions.getFirst().x() < agent2Positions.getLast().x()) {
+                    agent2Fallen = -1.0;
+                } else {
+                    agent2Fallen = 1.0;
+                }
+            }
 
-            return (agent1Distance + agent2Distance) + yFactor;
+            return (agent1Distance + agent2Distance)*(1 + (agent1Fallen - agent2Fallen));
         };
 
         return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
