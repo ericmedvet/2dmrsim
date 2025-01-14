@@ -33,17 +33,42 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
     super(observations);
   }
 
-  public AgentsObservation.Agent getAgentOutcome() {
-    return snapshots().values().stream()
-        .findFirst()
-        .map(observation -> observation.getAgents().getFirst())
-        .orElseThrow(() -> new IllegalArgumentException("No agents observed in the simulation"));
+  public double getMaxYTerrain() {
+    return observations.values().stream()
+            .flatMap(obs -> obs.getAgents().stream())
+            .mapToDouble(AgentsObservation.Agent::terrainHeight)
+            .max()
+            .orElse(Double.NaN);
+  }
+
+  public List<Point> getAgentPositions() {
+    TrainingSumoObservation firstObservation = observations.firstEntry().getValue();
+    TrainingSumoObservation lastObservation = observations.lastEntry().getValue();
+    Point firstPosition = firstObservation.getCenters().getFirst();
+    Point lastPosition = lastObservation.getCenters().getFirst();
+    return List.of(firstPosition, lastPosition);
+  }
+
+  public List<Double> getAgentMaxY() {
+    Double firstMaxY = observations.firstEntry().getValue().getBoundingBoxes().getFirst().max().y();
+    Double lastMaxY = observations.lastEntry().getValue().getBoundingBoxes().getFirst().max().y();
+    return List.of(firstMaxY, lastMaxY);
   }
 
   public List<Point> getBoxPositions() {
-    return snapshots().values().stream()
-        .map(TrainingSumoObservation::getRigidBodyPosition)
-        .collect(Collectors.toList());
+    TrainingSumoObservation firstObservation = observations.firstEntry().getValue();
+    TrainingSumoObservation lastObservation = observations.lastEntry().getValue();
+    Point firstPosition = firstObservation.getRigidBodyPosition();
+    Point lastPosition = lastObservation.getRigidBodyPosition();
+    return List.of(firstPosition, lastPosition);
+  }
+
+  public double getMaxYBox() {
+    List<Point> boxPositions = getBoxPositions();
+    if (boxPositions.isEmpty()) {
+      return Double.NaN;
+    }
+    return boxPositions.stream().mapToDouble(Point::y).max().orElse(Double.NaN);
   }
 
   @Override

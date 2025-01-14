@@ -21,18 +21,33 @@ package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
 import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import java.util.Arrays;
 import java.util.List;
 
 public class TrainingSumoObservation extends AgentsObservation {
   private final Point rigidBodyPosition;
+  private final Poly rigidBodyPoly;
 
   public TrainingSumoObservation(List<Agent> agents, RigidBody rigidBody) {
     super(agents);
     this.rigidBodyPosition = rigidBody.poly().center();
+    this.rigidBodyPoly = rigidBody.poly();
   }
 
   public Point getRigidBodyPosition() {
     return rigidBodyPosition;
+  }
+
+  public double getRigidBodyMaxY() {
+    return getMaxY(rigidBodyPoly);
+  }
+
+  private double getMaxY(Poly poly) {
+    return Arrays.stream(poly.vertexes())
+        .mapToDouble(Point::y)
+        .max()
+        .orElse(Double.NaN); // o un altro valore di default adeguato
   }
 }

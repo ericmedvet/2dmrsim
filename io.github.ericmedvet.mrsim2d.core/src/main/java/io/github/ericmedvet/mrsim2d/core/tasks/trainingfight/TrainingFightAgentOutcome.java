@@ -23,48 +23,53 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
-
 import java.util.List;
 import java.util.SortedMap;
 
 public class TrainingFightAgentOutcome extends AgentsOutcome<TrainingFightObservation> {
 
-    public TrainingFightAgentOutcome(SortedMap<Double, TrainingFightObservation> observations) {
-        super(observations);
-    }
+  public TrainingFightAgentOutcome(SortedMap<Double, TrainingFightObservation> observations) {
+    super(observations);
+  }
 
-    public double getMaxYTerrain() {
-        return observations.values().stream()
-                .flatMap(obs -> obs.getAgents().stream())
-                .mapToDouble(AgentsObservation.Agent::terrainHeight)
-                .max()
-                .orElse(Double.NaN);
-    }
+  public double getMaxYTerrain() {
+    return observations.values().stream()
+            .flatMap(obs -> obs.getAgents().stream())
+            .mapToDouble(AgentsObservation.Agent::terrainHeight)
+            .max()
+            .orElse(Double.NaN);
+  }
 
-    public List<Point> getAgent1Positions() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getCenters().getFirst())
-                .toList();
-    }
+  public List<Point> getAgent1Positions() {
+    TrainingFightObservation firstObservation = observations.firstEntry().getValue();
+    TrainingFightObservation lastObservation = observations.lastEntry().getValue();
+    Point firstPosition = firstObservation.getCenters().getFirst();
+    Point lastPosition = lastObservation.getCenters().getFirst();
+    return List.of(firstPosition, lastPosition);
+  }
 
-    public List<Point> getAgent2Positions() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getCenters().getLast())
-                .toList();
-    }
+  public List<Point> getAgent2Positions() {
+    TrainingFightObservation firstObservation = observations.firstEntry().getValue();
+    TrainingFightObservation lastObservation = observations.lastEntry().getValue();
+    Point firstPosition = firstObservation.getCenters().getLast();
+    Point lastPosition = lastObservation.getCenters().getLast();
+    return List.of(firstPosition, lastPosition);
+  }
 
-    public List<Double> getAgent1MaxY() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getBoundingBoxes().getFirst().max().y()).toList();
-    }
+  public List<Double> getAgent1MaxY() {
+    Double firstMaxY = observations.firstEntry().getValue().getBoundingBoxes().getFirst().max().y();
+    Double lastMaxY = observations.lastEntry().getValue().getBoundingBoxes().getFirst().max().y();
+    return List.of(firstMaxY, lastMaxY);
+  }
 
-    public List<Double> getAgent2MaxY() {
-        return snapshots().values().stream()
-                .map(observation -> observation.getBoundingBoxes().getLast().max().y()).toList();
-    }
+  public List<Double> getAgent2MaxY() {
+    Double firstMaxY = observations.firstEntry().getValue().getBoundingBoxes().getLast().max().y();
+    Double lastMaxY = observations.lastEntry().getValue().getBoundingBoxes().getLast().max().y();
+    return List.of(firstMaxY, lastMaxY);
+  }
 
-    @Override
-    public TrainingFightAgentOutcome subOutcome(DoubleRange tRange) {
-        return new TrainingFightAgentOutcome(super.subOutcome(tRange).snapshots());
-    }
+  @Override
+  public TrainingFightAgentOutcome subOutcome(DoubleRange tRange) {
+    return new TrainingFightAgentOutcome(super.subOutcome(tRange).snapshots());
+  }
 }
