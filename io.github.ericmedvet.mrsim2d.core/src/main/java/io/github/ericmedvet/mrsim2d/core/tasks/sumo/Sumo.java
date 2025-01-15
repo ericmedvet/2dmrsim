@@ -31,7 +31,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.HashMap;
@@ -42,8 +41,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Sumo
-    implements BiTask<
-        Supplier<EmbodiedAgent>, Supplier<EmbodiedAgent>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
+    implements BiTask<Supplier<EmbodiedAgent>, Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
   // TODO parameterize AGENT1_INITIAL_X and AGENT1_INITIAL_X in function of sumoArena central platform
   private static final double AGENT1_INITIAL_X = 6;
@@ -107,21 +105,21 @@ public class Sumo
                 - agent2BB.min().x(),
             0)));
     agent2BB = agent2.boundingBox();
-    double maxY3 = terrain.maxHeightAt(agent2BB.xRange());
-    double y3 = maxY3 + initialYGap - agent2BB.min().y();
-    engine.perform(new TranslateAgent(agent2, new Point(0, y3)));
+    double maxY2 = terrain.maxHeightAt(agent2BB.xRange());
+    double y2 = maxY2 + initialYGap - agent2BB.min().y();
+    engine.perform(new TranslateAgent(agent2, new Point(0, y2)));
 
     // run for defined time
-    Map<Double, AgentsObservation> observations = new HashMap<>();
-    while (engine.t() < duration) {
+    Map<Double, SumoAgentsObservation> observations = new HashMap<>();
+    while ((engine.t() < duration)
+        && (agent1BB.max().y() > maxY1)
+        && (agent2BB.max().y() > maxY2)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
-      // TODO: add check if agent/agents fall outside the platform to stop simulation
-
       observations.put(
           engine.t(),
-          new AgentsObservation(List.of(
+          new SumoAgentsObservation(List.of(
               new AgentsObservation.Agent(
                   agent1.bodyParts().stream().map(Body::poly).toList(),
                   PolyUtils.maxYAtX(

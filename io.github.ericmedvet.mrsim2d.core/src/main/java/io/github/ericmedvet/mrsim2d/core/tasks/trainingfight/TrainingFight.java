@@ -88,7 +88,7 @@ public class TrainingFight
                 + agent1InitialX
                 - agent1BB.min().x(),
             0)));
-//    agent1BB = agent1.boundingBox();
+    agent1BB = agent1.boundingBox();
     double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
     double y1 = maxY1 + initialYGap - agent1BB.min().y();
     engine.perform(new TranslateAgent(agent1, new Point(0, y1)));
@@ -102,18 +102,18 @@ public class TrainingFight
                 + agent2InitialX
                 - agent2BB.min().x(),
             0)));
-//    agent2BB = agent2.boundingBox();
+    agent2BB = agent2.boundingBox();
     double maxY2 = terrain.maxHeightAt(agent2BB.xRange());
     double y2 = maxY2 + initialYGap - agent2BB.min().y();
     engine.perform(new TranslateAgent(agent2, new Point(0, y2)));
 
     // run for defined time
     Map<Double, TrainingFightObservation> observations = new HashMap<>();
-    while ((engine.t() < duration) && (agent1BB.max().y() > maxY1) && (agent2BB.max().y() > maxY2)) {
+    while ((engine.t() < duration)
+        && (agent1.boundingBox().max().y() > maxY1)
+        && (agent2.boundingBox().max().y() > maxY1)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
-
-      // TODO: add check if agent/agents fall outside the platform to stop simulation
 
       observations.put(
           engine.t(),

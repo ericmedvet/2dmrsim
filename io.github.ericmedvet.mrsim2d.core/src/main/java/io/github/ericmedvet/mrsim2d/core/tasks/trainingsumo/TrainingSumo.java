@@ -99,15 +99,12 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
 
     // run for defined time
     Map<Double, TrainingSumoObservation> observations = new HashMap<>();
-    while (engine.t() < duration) {
+    double boxX = rigidBody.poly().boundingBox().center().x();
+    while ((engine.t() < duration)
+        && (rigidBody.poly().boundingBox().max().y() > terrain.maxHeightAt(new DoubleRange(boxX, boxX)))
+        && (agent.boundingBox().max().y() > maxY1)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
-      double boxX = rigidBody.poly().boundingBox().center().x();
-
-      if (rigidBody.poly().boundingBox().max().y() < terrain.maxHeightAt(new DoubleRange(boxX, boxX))) {
-        System.out.println("Well done agent!");
-        break;
-      }
 
       observations.put(
           engine.t(),

@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * mrsim2d-core
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,14 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
+package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
-import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
-import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import java.util.List;
 
-public class TrainingSumoObservation extends AgentsObservation {
-  private final Poly rigidBodyPoly;
+public class SumoAgentsObservation extends AgentsObservation {
 
-  public TrainingSumoObservation(List<Agent> agents, RigidBody rigidBody) {
+  public SumoAgentsObservation(List<Agent> agents) {
     super(agents);
-    this.rigidBodyPoly = rigidBody.poly();
-  }
-
-  public Poly getRigidBodyPoly() {
-    return rigidBodyPoly;
   }
 }

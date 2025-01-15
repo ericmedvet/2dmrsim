@@ -23,9 +23,9 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.stream.Collectors;
 
 public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservation> {
 
@@ -33,42 +33,44 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
     super(observations);
   }
 
-  public double getMaxYTerrain() {
-    return observations.values().stream()
-            .flatMap(obs -> obs.getAgents().stream())
-            .mapToDouble(AgentsObservation.Agent::terrainHeight)
-            .max()
-            .orElse(Double.NaN);
-  }
-
   public List<Point> getAgentPositions() {
-    TrainingSumoObservation firstObservation = observations.firstEntry().getValue();
-    TrainingSumoObservation lastObservation = observations.lastEntry().getValue();
-    Point firstPosition = firstObservation.getCenters().getFirst();
-    Point lastPosition = lastObservation.getCenters().getFirst();
-    return List.of(firstPosition, lastPosition);
-  }
-
-  public List<Double> getAgentMaxY() {
-    Double firstMaxY = observations.firstEntry().getValue().getBoundingBoxes().getFirst().max().y();
-    Double lastMaxY = observations.lastEntry().getValue().getBoundingBoxes().getFirst().max().y();
-    return List.of(firstMaxY, lastMaxY);
+    return List.of(
+        snapshots().firstEntry().getValue().getCenters().getFirst(),
+        snapshots().lastEntry().getValue().getCenters().getFirst());
   }
 
   public List<Point> getBoxPositions() {
-    TrainingSumoObservation firstObservation = observations.firstEntry().getValue();
-    TrainingSumoObservation lastObservation = observations.lastEntry().getValue();
-    Point firstPosition = firstObservation.getRigidBodyPosition();
-    Point lastPosition = lastObservation.getRigidBodyPosition();
-    return List.of(firstPosition, lastPosition);
+    return List.of(
+        snapshots()
+            .firstEntry()
+            .getValue()
+            .getRigidBodyPoly()
+            .boundingBox()
+            .center(),
+        snapshots()
+            .lastEntry()
+            .getValue()
+            .getRigidBodyPoly()
+            .boundingBox()
+            .center());
+  }
+
+  public double getMaxYTerrain() {
+    return observations.values().stream()
+        .flatMap(obs -> obs.getAgents().stream())
+        .mapToDouble(AgentsObservation.Agent::terrainHeight)
+        .max()
+        .orElse(Double.NaN);
   }
 
   public double getMaxYBox() {
-    List<Point> boxPositions = getBoxPositions();
-    if (boxPositions.isEmpty()) {
-      return Double.NaN;
-    }
-    return boxPositions.stream().mapToDouble(Point::y).max().orElse(Double.NaN);
+    return snapshots().values().stream()
+        .mapToDouble(obs -> Arrays.stream(obs.getRigidBodyPoly().vertexes())
+            .mapToDouble(Point::y)
+            .max()
+            .orElse(Double.NaN))
+        .max()
+        .orElse(Double.NaN);
   }
 
   @Override
