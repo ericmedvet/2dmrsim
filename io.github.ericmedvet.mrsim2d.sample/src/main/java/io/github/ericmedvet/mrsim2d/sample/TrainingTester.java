@@ -70,7 +70,7 @@ public class TrainingTester {
     @SuppressWarnings("unchecked")
     Drawer drawer = ((Function<String, Drawer>)
             nb.build(
-                "sim.drawer(framer = sim.staticFramer(minX = 10.0; maxX = 35.0; minY = 1.0; maxY = 15.0); actions = true)"))
+                "sim.drawer(framer = sim.staticFramer(minX = 15.0; maxX = 45.0; minY = 10.0; maxY = 25.0); actions = true)"))
         .apply("test");
     taskOn(
             nb,
@@ -146,8 +146,9 @@ public class TrainingTester {
         numMultiBrained.brains().stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np -> {
-              System.out.printf(
-                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+              //              System.out.printf(
+              //                  "Shuffling %d parameters of brain %s %n", ((double[])
+              // np.getParams()).length, np);
               np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
             }));
       }

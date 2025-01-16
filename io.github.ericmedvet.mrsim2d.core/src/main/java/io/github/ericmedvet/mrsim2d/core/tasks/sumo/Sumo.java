@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.XMirrorer;
@@ -43,26 +44,19 @@ import java.util.function.Supplier;
 public class Sumo
     implements BiTask<Supplier<EmbodiedAgent>, Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
-  // TODO parameterize AGENT1_INITIAL_X and AGENT1_INITIAL_X in function of sumoArena central platform
-  private static final double AGENT1_INITIAL_X = 6;
-  private static final double AGENT2_INITIAL_X = 14.5;
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
-  private final double agent1InitialX;
-  private final double agent2InitialX;
   private final double initialYGap;
 
-  public Sumo(double duration, Terrain terrain, double agent1InitialX, double agent2InitialX, double initialYGap) {
+  public Sumo(double duration, Terrain terrain, double initialYGap) {
     this.duration = duration;
     this.terrain = terrain;
-    this.agent1InitialX = agent1InitialX;
-    this.agent2InitialX = agent2InitialX;
     this.initialYGap = initialYGap;
   }
 
   public Sumo(double duration, Terrain terrain) {
-    this(duration, terrain, AGENT1_INITIAL_X, AGENT2_INITIAL_X, INITIAL_Y_GAP);
+    this(duration, terrain, INITIAL_Y_GAP);
   }
 
   @Override
@@ -71,49 +65,41 @@ public class Sumo
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer) {
-    // create agents
+
+    double flatW = (terrain.withinBordersXRange().max()
+            - terrain.withinBordersXRange().min())
+        / 4;
+
+    double centerX = ((terrain.withinBordersXRange().min() + flatW)
+            + (terrain.withinBordersXRange().max() - flatW))
+        / 2;
+    double centerY = terrain.maxHeightAt(new DoubleRange(centerX, centerX));
+
+    double agent1InitialX = centerX - (flatW - 1);
+    double agent2InitialX = centerX + (flatW - 1);
+
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
     EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
     engine.registerActionsFilter(agent2, new XMirrorer<>());
 
-    // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(agent1));
     engine.perform(new AddAgent(agent2));
 
-    // place first agent
+    engine.perform(new TranslateAgent(agent1, new Point(agent1InitialX, 0)));
     BoundingBox agent1BB = agent1.boundingBox();
-    engine.perform(new TranslateAgent(
-        agent1,
-        new Point(
-            terrain.withinBordersXRange().min()
-                + agent1InitialX
-                - agent1BB.min().x(),
-            0)));
-    agent1BB = agent1.boundingBox();
-    double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
-    double y1 = maxY1 + initialYGap - agent1BB.min().y();
+    double y1 = centerY + initialYGap - agent1BB.min().y();
     engine.perform(new TranslateAgent(agent1, new Point(0, y1)));
 
-    // place second agent
+    engine.perform(new TranslateAgent(agent2, new Point(agent2InitialX, 0)));
     BoundingBox agent2BB = agent2.boundingBox();
-    engine.perform(new TranslateAgent(
-        agent2,
-        new Point(
-            terrain.withinBordersXRange().min()
-                + agent2InitialX
-                - agent2BB.min().x(),
-            0)));
-    agent2BB = agent2.boundingBox();
-    double maxY2 = terrain.maxHeightAt(agent2BB.xRange());
-    double y2 = maxY2 + initialYGap - agent2BB.min().y();
+    double y2 = centerY + initialYGap - agent2BB.min().y();
     engine.perform(new TranslateAgent(agent2, new Point(0, y2)));
 
-    // run for defined time
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
     while ((engine.t() < duration)
-        && (agent1.boundingBox().max().y() > maxY1)
-        && (agent2.boundingBox().max().y() > maxY2)) {
+        && (agent1.boundingBox().max().y() > centerY)
+        && (agent2.boundingBox().max().y() > centerY)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
@@ -132,7 +118,6 @@ public class Sumo
                       agent2.boundingBox().center().x())))));
     }
 
-    // return
     return new SumoAgentsOutcome(new TreeMap<>(observations));
   }
 }

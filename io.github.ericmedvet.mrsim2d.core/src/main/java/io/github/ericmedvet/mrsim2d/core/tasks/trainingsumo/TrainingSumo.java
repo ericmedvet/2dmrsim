@@ -63,46 +63,42 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
   @Override
   public TrainingSumoAgentOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
-    // create agent
-    EmbodiedAgent agent = embodiedAgentSupplier.get();
 
-    // build world
+    double flatW = (terrain.withinBordersXRange().max()
+            - terrain.withinBordersXRange().min())
+        / 4;
+
+    double centerX = ((terrain.withinBordersXRange().min() + flatW)
+            + (terrain.withinBordersXRange().max() - flatW))
+        / 2;
+    double centerY = terrain.maxHeightAt(new DoubleRange(centerX, centerX));
+
+    double agentInitialX = centerX - (flatW - 1);
+    double boxInitialX = centerX + (flatW / 3);
+
+    EmbodiedAgent agent = embodiedAgentSupplier.get();
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(agent));
 
-    // place first agent
-    BoundingBox agent1BB = agent.boundingBox();
-    engine.perform(new TranslateAgent(
-        agent,
-        new Point(
-            terrain.withinBordersXRange().min()
-                + initialXGap
-                - agent1BB.min().x(),
-            0)));
-    agent1BB = agent.boundingBox();
-    double maxY1 = terrain.maxHeightAt(agent1BB.xRange());
-    double y1 = maxY1 + initialYGap - agent1BB.min().y();
-    engine.perform(new TranslateAgent(agent, new Point(0, y1)));
+    engine.perform(new TranslateAgent(agent, new Point(agentInitialX, 0)));
+    BoundingBox agentBB = agent.boundingBox();
+    double y = centerY + initialYGap - agentBB.min().y();
+    engine.perform(new TranslateAgent(agent, new Point(0, y)));
 
-    // create and place rigid body
-    // TODO parameterize w and h of the rigid body
     Poly rigidBodyPoly = Poly.rectangle(3, 3);
-    // TODO change rigidBodyMass (instead of Friction, already put again at 1)
-    double rigidBodyMass = 2;
+    double rigidBodyMass = 3;
     double rigidBodyAnchorsDensity = 0;
-    BoundingBox rigidBodyBB = rigidBodyPoly.boundingBox();
-    Point rigidBodyTranslation = new Point(terrain.withinBordersXRange().min() + initialXGap * 2, maxY1);
+    Point rigidBodyTranslation = new Point(boxInitialX, centerY);
     RigidBody rigidBody = engine.perform(new CreateAndTranslateRigidBody(
             rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation))
         .outcome()
         .orElseThrow();
 
-    // run for defined time
     Map<Double, TrainingSumoObservation> observations = new HashMap<>();
     double boxX = rigidBody.poly().boundingBox().center().x();
     while ((engine.t() < duration)
         && (rigidBody.poly().boundingBox().max().y() > terrain.maxHeightAt(new DoubleRange(boxX, boxX)))
-        && (agent.boundingBox().max().y() > maxY1)) {
+        && (agent.boundingBox().max().y() > centerY)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
