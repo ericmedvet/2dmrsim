@@ -112,8 +112,8 @@ public class Sumo
     // run for defined time
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
     while ((engine.t() < duration)
-        && (agent1BB.max().y() > maxY1)
-        && (agent2BB.max().y() > maxY2)) {
+        && (agent1.boundingBox().max().y() > maxY1)
+        && (agent2.boundingBox().max().y() > maxY2)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 

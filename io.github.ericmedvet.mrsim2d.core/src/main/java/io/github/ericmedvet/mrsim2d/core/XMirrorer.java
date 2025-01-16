@@ -63,6 +63,8 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
       return (A) modifiedAction;
     }
 
+    // TODO mirroring missing actions
+
     //        if (action instanceof SenseSideCompression senseSideCompression) {
     //            Voxel.Side side = senseSideCompression.side();
     //            Voxel body = senseSideCompression.body();
@@ -72,7 +74,6 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
     //            return (A) modifiedAction;
     //        }
 
-    // TODO mirroring missing actions
     //        if (action instanceof SenseNFC) {
     //            SenseNFC senseAction = (SenseNFC) action;
     //            Point displacement = senseAction.displacement();
