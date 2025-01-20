@@ -20,4 +20,6 @@
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
 public interface HomogeneousBiTask<A, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends BiTask<A, A, S, O> {}
+    extends BiTask<A, A, S, O> {
+
+}

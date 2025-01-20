@@ -33,16 +33,14 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
+import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Sumo
-    implements BiTask<Supplier<EmbodiedAgent>, Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
+    implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
@@ -120,4 +118,5 @@ public class Sumo
 
     return new SumoAgentsOutcome(new TreeMap<>(observations));
   }
+
 }
