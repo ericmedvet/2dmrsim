@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * mrsim2d-core
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,5 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
-import io.github.ericmedvet.jsdynsym.control.BiSimulation;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import java.util.ServiceLoader;
-import java.util.function.Consumer;
-
-public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends BiSimulation<A1, A2, S, O> {
-
-  O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
-
-  default O run(A1 a1, A2 a2, Engine engine) {
-    return run(a1, a2, engine, snapshot -> {});
-  }
-
-  @Override
-  default O simulate(A1 a1, A2 a2) {
-    return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
-  }
-}
+public interface HomogeneousBiTask<A, S extends AgentsObservation, O extends AgentsOutcome<S>>
+    extends BiTask<A, A, S, O> {}
