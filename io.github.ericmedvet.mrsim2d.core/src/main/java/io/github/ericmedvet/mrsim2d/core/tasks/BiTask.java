@@ -20,25 +20,22 @@
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
 import io.github.ericmedvet.jsdynsym.control.BiSimulation;
-import io.github.ericmedvet.jsdynsym.control.HomogeneousBiSimulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>>
-        extends BiSimulation<A1, A2, S, O> {
+    extends BiSimulation<A1, A2, S, O> {
 
-    O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
+  O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
-    default O run(A1 a1, A2 a2, Engine engine) {
-        return run(a1, a2, engine, snapshot -> {
-        });
-    }
+  default O run(A1 a1, A2 a2, Engine engine) {
+    return run(a1, a2, engine, snapshot -> {});
+  }
 
-    @Override
-    default O simulate(A1 a1, A2 a2) {
-        return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
-    }
+  @Override
+  default O simulate(A1 a1, A2 a2) {
+    return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
+  }
 }

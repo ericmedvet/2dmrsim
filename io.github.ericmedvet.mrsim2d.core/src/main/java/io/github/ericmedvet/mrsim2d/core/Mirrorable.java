@@ -17,9 +17,8 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package io.github.ericmedvet.mrsim2d.core.tasks;
+package io.github.ericmedvet.mrsim2d.core;
 
-import io.github.ericmedvet.jsdynsym.control.HomogeneousBiSimulation;
-
-public interface HomogeneousBiTask<A, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends BiTask<A, A, S, O>, HomogeneousBiSimulation<A, S, O> {}
+public interface Mirrorable {
+  void mirror();
+}

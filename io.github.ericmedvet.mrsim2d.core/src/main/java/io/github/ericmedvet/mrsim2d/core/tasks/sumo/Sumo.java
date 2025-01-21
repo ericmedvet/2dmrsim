@@ -21,6 +21,7 @@ package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
+import io.github.ericmedvet.mrsim2d.core.Mirrorable;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.XMirrorer;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
@@ -32,15 +33,13 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Sumo
-    implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
+public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
@@ -78,6 +77,9 @@ public class Sumo
 
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
     EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
+    if (agent2 instanceof Mirrorable mirrorable) {
+      mirrorable.mirror();
+    }
     engine.registerActionsFilter(agent2, new XMirrorer<>());
 
     engine.perform(new CreateUnmovableBody(terrain.poly()));
@@ -118,5 +120,4 @@ public class Sumo
 
     return new SumoAgentsOutcome(new TreeMap<>(observations));
   }
-
 }
