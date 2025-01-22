@@ -30,6 +30,7 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
+import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
 import java.io.*;
@@ -111,11 +112,11 @@ public class TrainingTester {
   private static Runnable taskOn(
       NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
     // prepare task
-    TrainingSumo trainingSumo = new TrainingSumo(30, (Terrain) nb.build(terrain));
+    Sumo sumo = new Sumo(30, (Terrain) nb.build(terrain));
     // read agent resource
     String agentDescription;
     try {
-      agentDescription = readResource("/agents/trained-biped-vsr-centralized-mlp.txt");
+      agentDescription = readResource("/agents/worm2-SP.txt");
     } catch (IOException e) {
       L.severe("Cannot read agent description: %s%n".formatted(e));
       throw new RuntimeException(e);
@@ -128,39 +129,25 @@ public class TrainingTester {
       L.severe("Cannot read serialized params: %s%n".formatted(e));
       throw new RuntimeException(e);
     }
-    List<Double> params;
-    try {
-      //noinspection unchecked
-      params = (List<Double>) fromBase64(serializedWeights);
-    } catch (IOException e) {
-      L.severe("Cannot deserialize params: %s%n".formatted(e));
-      throw new RuntimeException(e);
-    }
 
-    RandomGenerator rg = new Random();
+    RandomGenerator rg = new Random(1);
+    double[] ws13 = new double[] {
+            0d, 1d, 0d, 0d,
+            0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d
+    };
+    double[] ws38 = IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
     // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
 
       if (agent instanceof NumMultiBrained numMultiBrained) {
+
         numMultiBrained.brains().stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> {
-              //              System.out.printf(
-              //                  "Shuffling %d parameters of brain %s %n", ((double[])
-              // np.getParams()).length, np);
-              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-            }));
+            .forEach(o -> o.ifPresent(np -> np.setParams(ws38)));
       }
-      //            if (agent instanceof NumMultiBrained numMultiBrained) {
-      //                //noinspection unchecked
-      //                numMultiBrained.brains().stream()
-      //                        .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-      //                        .forEach(o -> o.ifPresent(np -> np.setParams(
-      //                                params.stream().mapToDouble(d -> d).toArray())));
-      //            }
       return agent;
     };
-    return () -> trainingSumo.run(agentSupplier, engineSupplier.get(), consumer);
+    return () -> sumo.run(agentSupplier, agentSupplier, engineSupplier.get(), consumer);
   }
 }

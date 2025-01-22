@@ -1,0 +1,8 @@
+s.a.centralizedNumGridVSR(
+  body = s.a.vsr.gridBody(
+    shape = s.a.vsr.s.worm(w = 3; h = 1);
+    sensorizingFunction = s.a.vsr.sf.directional(
+      headSensors = [s.s.sin(f = 1)]
+  ));
+  function = ds.num.mlp()
+)
