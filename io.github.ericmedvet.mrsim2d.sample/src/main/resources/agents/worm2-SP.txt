@@ -1,7 +1,7 @@
 s.a.distributedNumGridVSR(
   body = s.a.vsr.gridBody(
-    shape = s.a.vsr.s.worm(w = 3; h = 1);
-    sensorizingFunction = s.a.vsr.sf.uniform(sensors = [s.s.sin(f = 0)])
+    shape = s.a.vsr.s.worm(w = 4; h = 2);
+    sensorizingFunction = s.a.vsr.sf.uniform(sensors = [s.s.sin(f = 2)])
   );
   function = ds.num.mlp();
   nOfSignals = 1;

@@ -21,7 +21,6 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
@@ -29,7 +28,6 @@ import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
@@ -37,7 +35,6 @@ import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.List;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -131,11 +128,9 @@ public class TrainingTester {
     }
 
     RandomGenerator rg = new Random(1);
-    double[] ws13 = new double[] {
-            0d, 1d, 0d, 0d,
-            0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d
-    };
-    double[] ws38 = IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
+    double[] ws13 = new double[] {0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
+    double[] ws38 =
+        IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
     // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);

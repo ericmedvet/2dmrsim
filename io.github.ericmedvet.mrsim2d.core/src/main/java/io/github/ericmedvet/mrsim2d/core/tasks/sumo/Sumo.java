@@ -77,6 +77,7 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
 
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
     EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
+    // TODO: move actions-filter to NumGridVSR
     if (agent2 instanceof Mirrorable mirrorable) {
       mirrorable.mirror();
     }

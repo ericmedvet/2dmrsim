@@ -121,12 +121,17 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       }
       double[] sensoryInputs = inputsGrid.get(key);
       double[] signals0 = getLastSignals(key.x(), key.y() + 1, 0);
-      //double[] signals1 = getLastSignals(mirrored ? key.x() - 1 : key.x() + 1, key.y(), 1);
-      double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
+      double[] signals1 = getLastSignals(mirrored ? key.x() - 1 : key.x() + 1, key.y(), 1);
+      //      double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
       double[] signals2 = getLastSignals(key.x(), key.y() - 1, 2);
-      //double[] signals3 = getLastSignals(mirrored ? key.x() + 1 : key.x() - 1, key.y(), 3);
-      double[] signals3 = getLastSignals(key.x() - 1, key.y(), 3);
-      double[] fullInputs = Stream.of(sensoryInputs, signals0, signals1, signals2, signals3)
+      double[] signals3 = getLastSignals(mirrored ? key.x() + 1 : key.x() - 1, key.y(), 3);
+      //      double[] signals3 = getLastSignals(key.x() - 1, key.y(), 3);
+      double[] fullInputs = Stream.of(
+              sensoryInputs,
+              signals0,
+              mirrored ? signals3 : signals1,
+              signals2,
+              mirrored ? signals1 : signals3)
           .flatMapToDouble(Arrays::stream)
           .toArray();
       fullInputsGrid.set(key, fullInputs);
