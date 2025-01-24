@@ -122,10 +122,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       double[] sensoryInputs = inputsGrid.get(key);
       double[] signals0 = getLastSignals(key.x(), key.y() + 1, 0);
       double[] signals1 = getLastSignals(mirrored ? key.x() - 1 : key.x() + 1, key.y(), 1);
-      //      double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
       double[] signals2 = getLastSignals(key.x(), key.y() - 1, 2);
       double[] signals3 = getLastSignals(mirrored ? key.x() + 1 : key.x() - 1, key.y(), 3);
-      //      double[] signals3 = getLastSignals(key.x() - 1, key.y(), 3);
       double[] fullInputs = Stream.of(
               sensoryInputs,
               signals0,

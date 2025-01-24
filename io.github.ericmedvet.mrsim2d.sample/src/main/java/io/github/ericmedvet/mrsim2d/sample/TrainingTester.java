@@ -21,6 +21,7 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
@@ -113,7 +114,7 @@ public class TrainingTester {
     // read agent resource
     String agentDescription;
     try {
-      agentDescription = readResource("/agents/worm2-SP.txt");
+      agentDescription = readResource("/agents/worm1-SP.txt");
     } catch (IOException e) {
       L.severe("Cannot read agent description: %s%n".formatted(e));
       throw new RuntimeException(e);
@@ -126,20 +127,37 @@ public class TrainingTester {
       L.severe("Cannot read serialized params: %s%n".formatted(e));
       throw new RuntimeException(e);
     }
+    //
+    //    RandomGenerator rg = new Random(1);
+    //    double[] ws13 = new double[] {0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
+    //    double[] ws38 =
+    //        IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
+    //    // prepare supplier
+    //    Supplier<EmbodiedAgent> agentSupplier = () -> {
+    //      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
+    //
+    //      if (agent instanceof NumMultiBrained numMultiBrained) {
+    //
+    //        numMultiBrained.brains().stream()
+    //            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
+    //            .forEach(o -> o.ifPresent(np -> np.setParams(ws38)));
+    //      }
+    //      return agent;
+    //    };
+    //    return () -> sumo.run(agentSupplier, agentSupplier, engineSupplier.get(), consumer);
+    //  }
+    // }
 
-    RandomGenerator rg = new Random(1);
-    double[] ws13 = new double[] {0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
-    double[] ws38 =
-        IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
-    // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-
+      RandomGenerator rg = new Random(1);
+      // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
-
         numMultiBrained.brains().stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np -> np.setParams(ws38)));
+            .forEach(o -> o.ifPresent(np -> {
+              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
+            }));
       }
       return agent;
     };

@@ -25,6 +25,7 @@ module io.github.ericmedvet.mrsim2d.core {
   requires io.github.ericmedvet.jsdynsym.core;
   requires io.github.ericmedvet.jsdynsym.control;
   requires io.github.ericmedvet.jnb.datastructure;
+  requires jcodec;
 
   exports io.github.ericmedvet.mrsim2d.core;
   exports io.github.ericmedvet.mrsim2d.core.actions;
