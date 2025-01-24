@@ -36,6 +36,7 @@ import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
@@ -71,12 +72,7 @@ public class TrainingTester {
             nb.build(
                 "sim.drawer(framer = sim.staticFramer(minX = 15.0; maxX = 45.0; minY = 10.0; maxY = 25.0); actions = true)"))
         .apply("test");
-    taskOn(
-            nb,
-            engineSupplier,
-            new RealtimeViewer(30, drawer),
-            //            "s.t.sumoArena()")
-            "s.t.sumoArena()")
+    taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.sumoArena()")
         .run();
     System.exit(0);
   }
@@ -112,21 +108,21 @@ public class TrainingTester {
     // prepare task
     Sumo sumo = new Sumo(30, (Terrain) nb.build(terrain));
     // read agent resource
-    String agentDescription;
-    try {
-      agentDescription = readResource("/agents/worm1-SP.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read agent description: %s%n".formatted(e));
-      throw new RuntimeException(e);
-    }
-    // load weights
-    String serializedWeights;
-    try {
-      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
-    } catch (IOException e) {
-      L.severe("Cannot read serialized params: %s%n".formatted(e));
-      throw new RuntimeException(e);
-    }
+    //    String agentDescription;
+    //    try {
+    //      agentDescription = readResource("/agents/worm2-SP.txt");
+    //    } catch (IOException e) {
+    //      L.severe("Cannot read agent description: %s%n".formatted(e));
+    //      throw new RuntimeException(e);
+    //    }
+    //    // load weights
+    //    String serializedWeights;
+    //    try {
+    //      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
+    //    } catch (IOException e) {
+    //      L.severe("Cannot read serialized params: %s%n".formatted(e));
+    //      throw new RuntimeException(e);
+    //    }
     //
     //    RandomGenerator rg = new Random(1);
     //    double[] ws13 = new double[] {0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
@@ -147,10 +143,34 @@ public class TrainingTester {
     //    return () -> sumo.run(agentSupplier, agentSupplier, engineSupplier.get(), consumer);
     //  }
     // }
-
+    String agentDescription;
+    try {
+      agentDescription = readResource("/agents/worm2-SP.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read agent description: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    // load weights
+    String serializedWeights;
+    try {
+      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
+    } catch (IOException e) {
+      L.severe("Cannot read serialized params: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    List<Double> params;
+    try {
+      //noinspection unchecked
+      params = (List<Double>) fromBase64(serializedWeights);
+    } catch (IOException e) {
+      L.severe("Cannot deserialize params: %s%n".formatted(e));
+      throw new RuntimeException(e);
+    }
+    // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
-      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       RandomGenerator rg = new Random(1);
+
+      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
         numMultiBrained.brains().stream()
