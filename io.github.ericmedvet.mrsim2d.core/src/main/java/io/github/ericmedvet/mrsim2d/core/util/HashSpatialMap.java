@@ -45,7 +45,8 @@ public class HashSpatialMap<T> implements SpatialMap<T> {
 
   @Override
   public Collection<T> all() {
-    return map.values().stream()
+    return map.values()
+        .stream()
         .filter(Objects::nonNull)
         .flatMap(List::stream)
         .map(PositionedT::t)

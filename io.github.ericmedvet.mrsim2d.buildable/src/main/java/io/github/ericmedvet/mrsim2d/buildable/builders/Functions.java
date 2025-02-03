@@ -30,13 +30,15 @@ import java.util.function.Function;
 @Discoverable(prefixTemplate = "sim|s.function|f")
 public class Functions {
 
-  private Functions() {}
+  private Functions() {
+  }
 
   @SuppressWarnings("unused")
   public static <X> Function<X, Grid<GridBody.VoxelType>> vsrBody(
       @Param(value = "of", dNPM = "f.identity()") Function<X, AbstractGridVSR> beforeF,
       @Param(value = "nullify", dB = true) boolean nullifyNone,
-      @Param(value = "format", dS = "%s") String format) {
+      @Param(value = "format", dS = "%s") String format
+  ) {
     Function<AbstractGridVSR, Grid<GridBody.VoxelType>> f = vsr -> vsr.getElementGrid()
         .map(GridBody.Element::type)
         .map(t -> nullifyNone ? (t.equals(GridBody.VoxelType.NONE) ? null : t) : t);

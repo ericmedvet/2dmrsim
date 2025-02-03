@@ -61,7 +61,8 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       RandomGenerator randomGenerator,
       Terrain terrain,
       double yGapRatio,
-      double xGap) {
+      double xGap
+  ) {
     this.duration = duration;
     this.fallInterval = fallInterval;
     this.nOfAgents = nOfAgents;
@@ -79,7 +80,8 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       double xSigmaRatio,
       RandomGenerator randomGenerator,
       Terrain terrain,
-      double yGapRatio) {
+      double yGapRatio
+  ) {
     this(duration, fallInterval, nOfAgents, xSigmaRatio, randomGenerator, terrain, yGapRatio, X_GAP);
   }
 
@@ -93,26 +95,32 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     } else {
       baseY = agents.stream()
           .map(EmbodiedAgent::boundingBox)
-          .filter(b ->
-              xRange.overlaps(new DoubleRange(b.min().x(), b.max().x())))
+          .filter(b -> xRange.overlaps(new DoubleRange(b.min().x(), b.max().x())))
           .mapToDouble(b -> b.max().y())
           .max()
           .orElse(0d);
     }
     baseY = baseY + agentBB.height() * yGapRatio;
-    engine.perform(new TranslateAgent(
-        agent,
-        new Point(
-            xRange.min()
-                + xRange.extent() / 2d
-                + randomGenerator.nextGaussian(0d, xSigmaRatio * agentBB.width())
-                - agentBB.min().x(),
-            baseY - agentBB.min().y())));
+    engine.perform(
+        new TranslateAgent(
+            agent,
+            new Point(
+                xRange.min() + xRange.extent() / 2d + randomGenerator.nextGaussian(
+                    0d,
+                    xSigmaRatio * agentBB.width()
+                ) - agentBB.min().x(),
+                baseY - agentBB.min().y()
+            )
+        )
+    );
   }
 
   @Override
   public AgentsOutcome<AgentsObservation> run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      Engine engine,
+      Consumer<Snapshot> snapshotConsumer
+  ) {
     // build world
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // run for defined time
@@ -131,13 +139,20 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       snapshotConsumer.accept(snapshot);
       observations.put(
           engine.t(),
-          new AgentsObservation(agents.stream()
-              .map(a -> new AgentsObservation.Agent(
-                  a.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      a.boundingBox().center().x())))
-              .toList()));
+          new AgentsObservation(
+              agents.stream()
+                  .map(
+                      a -> new AgentsObservation.Agent(
+                          a.bodyParts().stream().map(Body::poly).toList(),
+                          PolyUtils.maxYAtX(
+                              terrain.poly(),
+                              a.boundingBox().center().x()
+                          )
+                      )
+                  )
+                  .toList()
+          )
+      );
     }
     return new AgentsOutcome<>(new TreeMap<>(observations));
   }

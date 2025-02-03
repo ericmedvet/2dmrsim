@@ -33,11 +33,19 @@ public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) imple
   public ActuateVoxel(Voxel voxel, double nValue, double eValue, double sValue, double wValue) {
     this(
         voxel,
-        new EnumMap<>(Map.of(
-            Voxel.Side.N, nValue,
-            Voxel.Side.E, eValue,
-            Voxel.Side.S, sValue,
-            Voxel.Side.W, wValue)));
+        new EnumMap<>(
+            Map.of(
+                Voxel.Side.N,
+                nValue,
+                Voxel.Side.E,
+                eValue,
+                Voxel.Side.S,
+                sValue,
+                Voxel.Side.W,
+                wValue
+            )
+        )
+    );
   }
 
   @Override

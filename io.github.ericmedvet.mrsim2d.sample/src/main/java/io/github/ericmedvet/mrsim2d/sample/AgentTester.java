@@ -48,20 +48,20 @@ public class AgentTester {
 
   private static final String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
   private static final String TASK_JUMPING = "sim.task.jumping()";
-  private static final String TASK_BALANCING =
-      "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
+  private static final String TASK_BALANCING = "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions=true; nfc=true; enlargement = 5)"))
+    @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(
+        "sim.drawer(actions=true; nfc=true; enlargement = 5)"
+    ))
         .apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
     Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // prepare task
-    @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK_LOCOMOTION);
+    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb
+        .build(TASK_LOCOMOTION);
     // read agent resource
     String agentName = args.length >= 1 ? args[0] : "biped-vsr-centralized-mlp";
     L.info("Loading agent description \"%s\"".formatted(agentName));
@@ -87,11 +87,15 @@ public class AgentTester {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().stream()
+        numMultiBrained.brains()
+            .stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np -> {
               System.out.printf(
-                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                  "Shuffling %d parameters of brain %s %n",
+                  ((double[]) np.getParams()).length,
+                  np
+              );
               np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
             }));
       }

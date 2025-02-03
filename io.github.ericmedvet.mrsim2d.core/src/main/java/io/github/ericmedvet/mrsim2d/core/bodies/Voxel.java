@@ -30,10 +30,12 @@ public interface Voxel extends SoftBody, Anchorable {
   Material DEFAULT_MATERIAL = new Material();
 
   enum Side {
-    N(Vertex.NE, Vertex.NW, Math.PI / 2d),
-    E(Vertex.NE, Vertex.SE, 0d),
-    W(Vertex.NW, Vertex.SW, Math.PI),
-    S(Vertex.SE, Vertex.SW, -Math.PI / 2d);
+    N(Vertex.NE, Vertex.NW, Math.PI / 2d), E(Vertex.NE, Vertex.SE, 0d), W(Vertex.NW, Vertex.SW, Math.PI), S(
+        Vertex.SE,
+        Vertex.SW,
+        -Math.PI / 2d
+    );
+
     private final Vertex vertex1;
     private final Vertex vertex2;
     private final double normalAngle;
@@ -58,13 +60,11 @@ public interface Voxel extends SoftBody, Anchorable {
   }
 
   enum Vertex {
-    NW,
-    NE,
-    SE,
-    SW
+    NW, NE, SE, SW
   }
 
   record Material(double softness, DoubleRange areaRatioRange) {
+
     public static final double SOFTNESS = 0.75d;
     public static final double DEFAULT_AREA_RATIO = .2;
 

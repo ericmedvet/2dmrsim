@@ -27,8 +27,9 @@ import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record TranslateAgentAt(EmbodiedAgent agent, BoundingBox.Anchor anchor, Point destination)
-    implements SelfDescribedAction<EmbodiedAgent> {
+public record TranslateAgentAt(
+    EmbodiedAgent agent, BoundingBox.Anchor anchor, Point destination
+) implements SelfDescribedAction<EmbodiedAgent> {
   @Override
   public EmbodiedAgent perform(ActionPerformer performer, Agent agent) {
     Point anchorPoint = agent().boundingBox().anchor(anchor);

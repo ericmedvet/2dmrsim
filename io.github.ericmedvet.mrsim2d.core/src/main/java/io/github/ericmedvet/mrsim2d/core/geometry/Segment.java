@@ -27,7 +27,8 @@ public record Segment(Point p1, Point p2) implements Shape {
   public BoundingBox boundingBox() {
     return new BoundingBox(
         new Point(Math.min(p1.x(), p2().x()), Math.min(p1.y(), p2().y())),
-        new Point(Math.max(p1.x(), p2().x()), Math.max(p1.y(), p2().y())));
+        new Point(Math.max(p1.x(), p2().x()), Math.max(p1.y(), p2().y()))
+    );
   }
 
   @Override

@@ -48,18 +48,18 @@ import java.util.stream.IntStream;
 @Discoverable(prefixTemplate = "sim|s")
 public class Miscs {
 
-  private Miscs() {}
+  private Miscs() {
+  }
 
   public enum MiniAgentInfo {
-    NONE,
-    VELOCITY,
-    BRAINS
+    NONE, VELOCITY, BRAINS
   }
 
   @SuppressWarnings("unused")
   public static Framer<Snapshot> allAgentsFramer(
       @Param(value = "enlargement", dD = 1.5) double enlargement,
-      @Param(value = "followTime", dD = 2) double followTime) {
+      @Param(value = "followTime", dD = 2) double followTime
+  ) {
     return new AllAgentsFramer(enlargement).largest(followTime);
   }
 
@@ -70,14 +70,13 @@ public class Miscs {
       @Param(value = "miniWorldEnlargement", dD = 10) double miniWorldEnlargement,
       @Param(value = "miniWorld") boolean miniWorld,
       @Param(
-              value = "components",
-              dSs = {"unmovable_bodies", "soft_bodies", "rigid_bodies", "rotational_joints"})
-          List<Drawers.Component> components,
+          value = "components", dSs = {"unmovable_bodies", "soft_bodies", "rigid_bodies", "rotational_joints"}) List<Drawers.Component> components,
       @Param(value = "miniAgents", dS = "brains") MiniAgentInfo miniAgentInfo,
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions,
       @Param(value = "info", dB = true) boolean info,
-      @Param(value = "nfc") boolean nfc) {
+      @Param(value = "nfc") boolean nfc
+  ) {
     return s -> {
       List<ComponentDrawer> componentDrawers = components.stream()
           .map(c -> switch (c) {
@@ -91,7 +90,8 @@ public class Miscs {
       Drawer nfcDrawer = new NFCDrawer();
       Drawer actionsDrawer = new ComponentsDrawer(
           List.of(new AttractAnchor(), new SenseDistanceToBody(), new SenseRotatedVelocity()),
-          Snapshot::actionOutcomes);
+          Snapshot::actionOutcomes
+      );
       List<Drawer> thingsDrawers = new ArrayList<>();
       thingsDrawers.add(baseDrawer);
       if (actions) {
@@ -103,38 +103,55 @@ public class Miscs {
       Drawer worldDrawer = Drawer.transform(framer, Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
-        drawers.add(new StackedMultipliedDrawer<>(
-            switch (miniAgentInfo) {
-              case BRAINS -> Drawers::simpleAgentWithBrainsIO;
-              case VELOCITY -> Drawers::simpleAgentWithVelocities;
-              default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
-            },
-            new EmbodiedAgentsExtractor(),
-            0.25,
-            0.05,
-            StackedMultipliedDrawer.Direction.VERTICAL,
-            Drawer.VerticalPosition.TOP,
-            Drawer.HorizontalPosition.RIGHT));
+        drawers.add(
+            new StackedMultipliedDrawer<>(
+                switch (miniAgentInfo) {
+                  case BRAINS -> Drawers::simpleAgentWithBrainsIO;
+                  case VELOCITY -> Drawers::simpleAgentWithVelocities;
+                  default -> throw new IllegalStateException("Unexpected value: " + miniAgentInfo);
+                },
+                new EmbodiedAgentsExtractor(),
+                0.25,
+                0.05,
+                StackedMultipliedDrawer.Direction.VERTICAL,
+                Drawer.VerticalPosition.TOP,
+                Drawer.HorizontalPosition.RIGHT
+            )
+        );
       }
       if (miniWorld) {
-        drawers.add(Drawer.clip(
-            new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
-            Drawer.of(
-                Drawer.clear(),
-                Drawer.transform(
-                    new AllAgentsFramer(miniWorldEnlargement).largest(2),
-                    Drawer.of(new ComponentsDrawer(
-                            List.of(
-                                new UnmovableBodyDrawer(),
-                                new RotationalJointDrawer(),
-                                new SoftBodyDrawer(),
-                                new RigidBodyDrawer()),
-                            Snapshot::bodies)
-                        .onLastSnapshot())))));
+        drawers.add(
+            Drawer.clip(
+                new BoundingBox(new Point(0.5d, 0.85d), new Point(0.99d, 0.99d)),
+                Drawer.of(
+                    Drawer.clear(),
+                    Drawer.transform(
+                        new AllAgentsFramer(miniWorldEnlargement).largest(2),
+                        Drawer.of(
+                            new ComponentsDrawer(
+                                List.of(
+                                    new UnmovableBodyDrawer(),
+                                    new RotationalJointDrawer(),
+                                    new SoftBodyDrawer(),
+                                    new RigidBodyDrawer()
+                                ),
+                                Snapshot::bodies
+                            )
+                                .onLastSnapshot()
+                        )
+                    )
+                )
+            )
+        );
       }
       if (engineProfiling) {
-        drawers.add(new EngineProfilingDrawer(
-            profilingTime, Drawer.VerticalPosition.BOTTOM, Drawer.HorizontalPosition.LEFT));
+        drawers.add(
+            new EngineProfilingDrawer(
+                profilingTime,
+                Drawer.VerticalPosition.BOTTOM,
+                Drawer.HorizontalPosition.LEFT
+            )
+        );
       }
       if (info) {
         drawers.add(new InfoDrawer(s));
@@ -153,7 +170,8 @@ public class Miscs {
       @Param("minX") double minX,
       @Param("maxX") double maxX,
       @Param("minY") double minY,
-      @Param("maxY") double maxY) {
+      @Param("maxY") double maxY
+  ) {
     return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
   }
 
@@ -161,7 +179,8 @@ public class Miscs {
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
       @Param("task") Task<A, S, O> task,
       @Param("repetitions") int repetitions,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
+  ) {
     return a -> IntStream.range(0, repetitions)
         .boxed()
         .map(i -> task.run(a, engineSupplier.get()))
@@ -171,7 +190,8 @@ public class Miscs {
   @SuppressWarnings("unused")
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
       @Param("task") Task<A, S, O> task,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier) {
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
+  ) {
     return a -> task.run(a, engineSupplier.get());
   }
 
@@ -183,7 +203,8 @@ public class Miscs {
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
       @Param(value = "startTime", dD = 0) double startTime,
       @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
-      @Param(value = "frameRate", dD = 30) double frameRate) {
+      @Param(value = "frameRate", dD = 30) double frameRate
+  ) {
     return new TaskVideoBuilder<>(task, drawerBuilder, engineSupplier, title, startTime, endTime, frameRate);
   }
 }

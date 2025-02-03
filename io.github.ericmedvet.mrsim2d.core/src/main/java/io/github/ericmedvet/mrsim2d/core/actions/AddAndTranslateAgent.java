@@ -27,8 +27,9 @@ import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record AddAndTranslateAgent(EmbodiedAgent agent, Point translation)
-    implements SelfDescribedAction<EmbodiedAgent> {
+public record AddAndTranslateAgent(
+    EmbodiedAgent agent, Point translation
+) implements SelfDescribedAction<EmbodiedAgent> {
   @Override
   public EmbodiedAgent perform(ActionPerformer performer, Agent agent) throws ActionException {
     EmbodiedAgent embodiedAgent = (EmbodiedAgent) performer

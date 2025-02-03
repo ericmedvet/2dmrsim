@@ -32,9 +32,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 
-public class EngineProfilingDrawer
-    extends AbstractMemoryDrawer<
-        Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>> {
+public class EngineProfilingDrawer extends AbstractMemoryDrawer<Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>> {
   public static final String TICK_PS_FORMAT = "t/w=%3.0f%%";
   public static final String INNER_TICK_RATE_FORMAT = "it/t=%3.0f%%";
   public static final String ACTION_COUNT_FORMAT = "#a=%4.0f";
@@ -48,7 +46,10 @@ public class EngineProfilingDrawer
   private final Map<EngineSnapshot.CounterType, Integer> maxCounterValues;
 
   public EngineProfilingDrawer(
-      double windowT, VerticalPosition verticalPosition, HorizontalPosition horizontalPosition) {
+      double windowT,
+      VerticalPosition verticalPosition,
+      HorizontalPosition horizontalPosition
+  ) {
     super(
         snapshot -> {
           if (snapshot instanceof EngineSnapshot engineSnapshot) {
@@ -58,7 +59,8 @@ public class EngineProfilingDrawer
           }
         },
         windowT,
-        WindowType.WALL_TIME);
+        WindowType.WALL_TIME
+    );
     maxCounterValues = new EnumMap<>(EngineSnapshot.CounterType.class);
     Arrays.stream(EngineSnapshot.CounterType.values()).forEach(k -> maxCounterValues.put(k, 0));
     this.verticalPosition = verticalPosition;
@@ -71,24 +73,28 @@ public class EngineProfilingDrawer
 
   @Override
   protected boolean innerDraw(
-      SortedMap<Double, Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>>
-          memory,
-      Graphics2D g) {
+      SortedMap<Double, Pair<Map<EngineSnapshot.TimeType, Double>, Map<EngineSnapshot.CounterType, Integer>>> memory,
+      Graphics2D g
+  ) {
     // check if empty
     if (memory.get(memory.firstKey()).first().isEmpty()) {
       return false;
     }
     // obtain relative data
     Map<EngineSnapshot.TimeType, Double> relTimes = Arrays.stream(EngineSnapshot.TimeType.values())
-        .collect(Collectors.toMap(
-            k -> k,
-            k -> memory.get(memory.lastKey()).first().get(k)
-                - memory.get(memory.firstKey()).first().get(k)));
+        .collect(
+            Collectors.toMap(
+                k -> k,
+                k -> memory.get(memory.lastKey()).first().get(k) - memory.get(memory.firstKey()).first().get(k)
+            )
+        );
     Map<EngineSnapshot.CounterType, Integer> relCounters = Arrays.stream(EngineSnapshot.CounterType.values())
-        .collect(Collectors.toMap(
-            k -> k,
-            k -> memory.get(memory.lastKey()).second().get(k)
-                - memory.get(memory.firstKey()).second().get(k)));
+        .collect(
+            Collectors.toMap(
+                k -> k,
+                k -> memory.get(memory.lastKey()).second().get(k) - memory.get(memory.firstKey()).second().get(k)
+            )
+        );
     // update bounds
     DoubleRange percRange = new DoubleRange(0, 100);
     Arrays.stream(EngineSnapshot.CounterType.values())
@@ -97,38 +103,37 @@ public class EngineProfilingDrawer
     double bbW = 0d;
     bbW = Math.max(
         bbW,
-        BAR_W
-            + g.getFontMetrics().charWidth('x')
-            + g.getFontMetrics()
-                .stringWidth(TICK_PS_FORMAT.formatted(100
-                    * relTimes.get(EngineSnapshot.TimeType.TICK)
-                    / relTimes.get(EngineSnapshot.TimeType.WALL))));
+        BAR_W + g.getFontMetrics().charWidth('x') + g.getFontMetrics()
+            .stringWidth(
+                TICK_PS_FORMAT.formatted(
+                    100 * relTimes.get(EngineSnapshot.TimeType.TICK) / relTimes.get(EngineSnapshot.TimeType.WALL)
+                )
+            )
+    );
     bbW = Math.max(
         bbW,
-        BAR_W
-            + g.getFontMetrics().charWidth('x')
-            + g.getFontMetrics()
-                .stringWidth(INNER_TICK_RATE_FORMAT.formatted(100
-                    * relTimes.get(EngineSnapshot.TimeType.INNER_TICK)
-                    / relTimes.get(EngineSnapshot.TimeType.TICK))));
+        BAR_W + g.getFontMetrics().charWidth('x') + g.getFontMetrics()
+            .stringWidth(
+                INNER_TICK_RATE_FORMAT.formatted(
+                    100 * relTimes.get(EngineSnapshot.TimeType.INNER_TICK) / relTimes.get(EngineSnapshot.TimeType.TICK)
+                )
+            )
+    );
     bbW = Math.max(
         bbW,
-        BAR_W
-            + g.getFontMetrics().charWidth('x')
-            + g.getFontMetrics().stringWidth(ACTION_COUNT_FORMAT.formatted((float)
-                relCounters.get(EngineSnapshot.CounterType.ACTION))));
+        BAR_W + g.getFontMetrics().charWidth('x') + g.getFontMetrics()
+            .stringWidth(ACTION_COUNT_FORMAT.formatted((float) relCounters.get(EngineSnapshot.CounterType.ACTION)))
+    );
     double bbH = 3 * g.getFontMetrics().getHeight();
     // draw
-    double x =
-        switch (horizontalPosition) {
-          case LEFT -> MARGIN;
-          case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
-        };
-    double y =
-        switch (verticalPosition) {
-          case TOP -> MARGIN;
-          case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
-        };
+    double x = switch (horizontalPosition) {
+      case LEFT -> MARGIN;
+      case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
+    };
+    double y = switch (verticalPosition) {
+      case TOP -> MARGIN;
+      case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
+    };
     g.setFont(DrawingUtils.FONT);
     DrawingUtils.drawFilledBar(
         x,
@@ -138,7 +143,8 @@ public class EngineProfilingDrawer
         100 * relTimes.get(EngineSnapshot.TimeType.TICK) / relTimes.get(EngineSnapshot.TimeType.WALL),
         percRange,
         TICK_PS_FORMAT,
-        g);
+        g
+    );
     y = y + g.getFontMetrics().getHeight();
     DrawingUtils.drawFilledBar(
         x,
@@ -148,7 +154,8 @@ public class EngineProfilingDrawer
         100 * relTimes.get(EngineSnapshot.TimeType.INNER_TICK) / relTimes.get(EngineSnapshot.TimeType.TICK),
         percRange,
         INNER_TICK_RATE_FORMAT,
-        g);
+        g
+    );
     y = y + g.getFontMetrics().getHeight();
     DrawingUtils.drawFilledBar(
         x,
@@ -158,7 +165,8 @@ public class EngineProfilingDrawer
         relCounters.get(EngineSnapshot.CounterType.ACTION),
         new DoubleRange(0, maxCounterValues.get(EngineSnapshot.CounterType.ACTION)),
         ACTION_COUNT_FORMAT,
-        g);
+        g
+    );
     return true;
   }
 }

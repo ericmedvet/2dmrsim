@@ -29,12 +29,13 @@ import java.awt.Graphics2D;
 import java.util.List;
 
 public class NFCDrawer implements Drawer {
-  private static final Color[] COLORS = new Color[] {
-    DrawingUtils.alphaed(Color.PINK, 0.5f),
-    DrawingUtils.alphaed(Color.CYAN, 0.5f),
-    DrawingUtils.alphaed(Color.MAGENTA, 0.5f),
-    DrawingUtils.alphaed(Color.YELLOW, 0.5f),
-    DrawingUtils.alphaed(Color.ORANGE, 0.5f)
+  private static final Color[] COLORS = new Color[]{DrawingUtils.alphaed(Color.PINK, 0.5f), DrawingUtils.alphaed(
+      Color.CYAN,
+      0.5f
+  ), DrawingUtils.alphaed(Color.MAGENTA, 0.5f), DrawingUtils.alphaed(Color.YELLOW, 0.5f), DrawingUtils.alphaed(
+      Color.ORANGE,
+      0.5f
+  )
   };
   private static final double MAX_LENGTH = 0.5d;
   private static final double ARROW_LENGTH = 0.1d;

@@ -31,7 +31,8 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 @Discoverable(prefixTemplate = "sim|s.sensors|s")
 public class Sensors {
 
-  private Sensors() {}
+  private Sensors() {
+  }
 
   @SuppressWarnings("unused")
   public static Sensor<Body> a() {

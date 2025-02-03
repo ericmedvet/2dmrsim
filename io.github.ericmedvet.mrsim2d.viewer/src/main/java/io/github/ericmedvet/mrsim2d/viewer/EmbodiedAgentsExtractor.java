@@ -39,8 +39,8 @@ public class EmbodiedAgentsExtractor implements Function<Snapshot, List<Snapshot
       Collection<Agent> agents,
       Collection<Body> bodies,
       Collection<NFCMessage> nfcMessages,
-      double t)
-      implements Snapshot {}
+      double t
+  ) implements Snapshot {}
 
   private static EmbodiedAgentSnapshot from(EmbodiedAgent a, Snapshot s) {
     return new EmbodiedAgentSnapshot(
@@ -48,13 +48,15 @@ public class EmbodiedAgentsExtractor implements Function<Snapshot, List<Snapshot
         List.of(a),
         s.bodies().stream().filter(b -> a.bodyParts().contains(b)).toList(),
         s.nfcMessages(),
-        s.t());
+        s.t()
+    );
   }
 
   @Override
   public List<Snapshot> apply(Snapshot snapshot) {
     // update agents memory
-    snapshot.agents().stream()
+    snapshot.agents()
+        .stream()
         .filter(a -> a instanceof EmbodiedAgent)
         .filter(a -> !agents.contains(a))
         .forEach(a -> agents.add((EmbodiedAgent) a));

@@ -33,12 +33,11 @@ public class DrawingUtils {
 
   public static final Font FONT = new Font("Monospaced", Font.PLAIN, 12);
 
-  private DrawingUtils() {}
+  private DrawingUtils() {
+  }
 
   public enum Alignment {
-    LEFT,
-    CENTER,
-    RIGHT
+    LEFT, CENTER, RIGHT
   }
 
   public static class Colors {
@@ -53,7 +52,11 @@ public class DrawingUtils {
 
   public static Color alphaed(Color color, float alpha) {
     return new Color(
-        (float) color.getRed() / 255f, (float) color.getGreen() / 255f, (float) color.getBlue() / 255f, alpha);
+        (float) color.getRed() / 255f,
+        (float) color.getGreen() / 255f,
+        (float) color.getBlue() / 255f,
+        alpha
+    );
   }
 
   public static void drawFilledBar(
@@ -67,7 +70,8 @@ public class DrawingUtils {
       Graphics2D g,
       Color lineColor,
       Color fillColor,
-      Color bgColor) {
+      Color bgColor
+  ) {
     if (bgColor != null) {
       g.setColor(bgColor);
       g.fill(new Rectangle2D.Double(x, y, w, h));
@@ -84,7 +88,15 @@ public class DrawingUtils {
   }
 
   public static void drawFilledBar(
-      double x, double y, double w, double h, double value, DoubleRange range, String format, Graphics2D g) {
+      double x,
+      double y,
+      double w,
+      double h,
+      double value,
+      DoubleRange range,
+      String format,
+      Graphics2D g
+  ) {
     drawFilledBar(x, y, w, h, value, range, format, g, Colors.AXES, Colors.DATA, Colors.DATA_BACKGROUND);
   }
 
@@ -99,7 +111,8 @@ public class DrawingUtils {
   public static BoundingBox getBoundingBox(Graphics2D g) {
     return new BoundingBox(
         new Point(g.getClipBounds().getMinX(), g.getClipBounds().getMinY()),
-        new Point(g.getClipBounds().getMaxX(), g.getClipBounds().getMaxY()));
+        new Point(g.getClipBounds().getMaxX(), g.getClipBounds().getMaxY())
+    );
   }
 
   public static Stroke getScaleIndependentStroke(float thickness, float scale) {

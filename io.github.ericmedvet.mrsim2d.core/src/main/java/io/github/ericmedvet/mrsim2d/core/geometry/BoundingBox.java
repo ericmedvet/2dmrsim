@@ -26,15 +26,7 @@ import java.util.Arrays;
 public record BoundingBox(Point min, Point max) implements Shape {
 
   public enum Anchor {
-    LL,
-    CL,
-    UL,
-    LC,
-    CC,
-    UC,
-    LU,
-    CU,
-    UU
+    LL, CL, UL, LC, CC, UC, LU, CU, UU
   }
 
   public static BoundingBox enclosing(BoundingBox... boxes) {

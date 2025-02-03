@@ -43,13 +43,18 @@ public class LinePlotter extends AbstractMemoryDrawer<Double> {
     DoubleRange tRange = new DoubleRange(memory.lastKey() - getWindowT(), memory.lastKey());
     DoubleRange vRange = new DoubleRange(
         Math.min(0, memory.values().stream().mapToDouble(d -> d).min().orElse(0d)),
-        Math.max(0, memory.values().stream().mapToDouble(d -> d).max().orElse(0d)));
+        Math.max(0, memory.values().stream().mapToDouble(d -> d).max().orElse(0d))
+    );
     BoundingBox gBB = DrawingUtils.getBoundingBox(g);
     // prepare points
-    Point[] drawPoints = memory.entrySet().stream()
-        .map(e -> new Point(
-            gBB.xRange().denormalize(tRange.normalize(e.getKey())),
-            gBB.yRange().denormalize(1 - vRange.normalize(e.getValue()))))
+    Point[] drawPoints = memory.entrySet()
+        .stream()
+        .map(
+            e -> new Point(
+                gBB.xRange().denormalize(tRange.normalize(e.getKey())),
+                gBB.yRange().denormalize(1 - vRange.normalize(e.getValue()))
+            )
+        )
         .toArray(Point[]::new);
     Point[] fillPoints = new Point[drawPoints.length + 2];
     fillPoints[0] = new Point(drawPoints[0].x(), gBB.max().y());
@@ -65,8 +70,11 @@ public class LinePlotter extends AbstractMemoryDrawer<Double> {
       String s = format.formatted(memory.get(memory.lastKey()));
       double sW = g.getFontMetrics().stringWidth(s);
       g.setColor(DrawingUtils.Colors.TEXT);
-      g.drawString(s, (float) (gBB.center().x() - sW / 2d), (float)
-          (gBB.center().y() + g.getFontMetrics().getHeight() / 2d));
+      g.drawString(
+          s,
+          (float) (gBB.center().x() - sW / 2d),
+          (float) (gBB.center().y() + g.getFontMetrics().getHeight() / 2d)
+      );
     }
     return true;
   }

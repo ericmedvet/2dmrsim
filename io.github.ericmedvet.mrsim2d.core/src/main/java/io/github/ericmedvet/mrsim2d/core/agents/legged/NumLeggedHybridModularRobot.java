@@ -53,12 +53,13 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
 
   public static int nOfInputs(List<Module> modules) {
     return modules.stream()
-        .mapToInt(m -> m.trunkSensors().size()
-            + m.downConnectorSensors().size()
-            + m.rightConnectorSensors().size()
-            + m.legChunks().stream()
+        .mapToInt(
+            m -> m.trunkSensors().size() + m.downConnectorSensors().size() + m.rightConnectorSensors().size() + m
+                .legChunks()
+                .stream()
                 .mapToInt(c -> c.jointSensors().size())
-                .sum())
+                .sum()
+        )
         .sum();
   }
 
@@ -73,10 +74,10 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
     inputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
-          @SuppressWarnings("unchecked")
-          ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
+          @SuppressWarnings("unchecked") ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
           return INPUT_RANGE.denormalize(
-              so.action().range().normalize(so.outcome().orElse(0d)));
+              so.action().range().normalize(so.outcome().orElse(0d))
+          );
         })
         .toArray();
     if (inputs.length == 0) {
@@ -104,8 +105,14 @@ public class NumLeggedHybridModularRobot extends AbstractLeggedHybridModularRobo
     }
     // generate actuation actions
     IntStream.range(0, outputs.length)
-        .forEach(i -> actions.add(new ActuateRotationalJoint(
-            rotationalJoints.get(i), ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i])))));
+        .forEach(
+            i -> actions.add(
+                new ActuateRotationalJoint(
+                    rotationalJoints.get(i),
+                    ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i]))
+                )
+            )
+        );
     return actions;
   }
 

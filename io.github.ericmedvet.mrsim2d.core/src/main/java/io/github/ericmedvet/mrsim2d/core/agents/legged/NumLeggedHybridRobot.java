@@ -53,20 +53,22 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
       double trunkMass,
       double headMass,
       List<Sensor<?>> headSensors,
-      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
+  ) {
     super(legs, trunkLength, trunkWidth, trunkMass, headMass);
     this.numericalDynamicalSystem = numericalDynamicalSystem;
     this.headSensors = headSensors;
   }
 
   public static int nOfInputs(List<Leg> legs, List<Sensor<?>> headSensors) {
-    return headSensors.size()
-        + legs.stream()
-            .mapToInt(l -> l.legChunks().stream()
-                    .mapToInt(lc -> lc.jointSensors().size())
-                    .sum()
-                + l.downConnectorSensors().size())
-            .sum();
+    return headSensors.size() + legs.stream()
+        .mapToInt(
+            l -> l.legChunks()
+                .stream()
+                .mapToInt(lc -> lc.jointSensors().size())
+                .sum() + l.downConnectorSensors().size()
+        )
+        .sum();
   }
 
   public static int nOfOutputs(List<Leg> legs) {
@@ -80,10 +82,10 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
     inputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
-          @SuppressWarnings("unchecked")
-          ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
+          @SuppressWarnings("unchecked") ActionOutcome<Sense<?>, Double> so = (ActionOutcome<Sense<?>, Double>) ao;
           return INPUT_RANGE.denormalize(
-              so.action().range().normalize(so.outcome().orElse(0d)));
+              so.action().range().normalize(so.outcome().orElse(0d))
+          );
         })
         .toArray();
     if (inputs.length == 0) {
@@ -108,8 +110,14 @@ public class NumLeggedHybridRobot extends AbstractLeggedHybridRobot implements N
     headSensors.forEach(s -> actions.add(((Sensor<Body>) s).apply(head)));
     // generate actuation actions
     IntStream.range(0, outputs.length)
-        .forEach(i -> actions.add(new ActuateRotationalJoint(
-            rotationalJoints.get(i), ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i])))));
+        .forEach(
+            i -> actions.add(
+                new ActuateRotationalJoint(
+                    rotationalJoints.get(i),
+                    ANGLE_RANGE.denormalize(OUTPUT_RANGE.normalize(outputs[i]))
+                )
+            )
+        );
     return actions;
   }
 

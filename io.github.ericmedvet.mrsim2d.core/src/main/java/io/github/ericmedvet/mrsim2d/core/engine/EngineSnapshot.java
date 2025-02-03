@@ -35,20 +35,13 @@ public record EngineSnapshot(
     Collection<ActionOutcome<?, ?>> actionOutcomes,
     Collection<NFCMessage> nfcMessages,
     Map<TimeType, Double> times,
-    Map<CounterType, Integer> counters)
-    implements Snapshot {
+    Map<CounterType, Integer> counters
+) implements Snapshot {
   public enum CounterType {
-    TICK,
-    ACTION,
-    ILLEGAL_ACTION,
-    UNSUPPORTED_ACTION
+    TICK, ACTION, ILLEGAL_ACTION, UNSUPPORTED_ACTION
   }
 
   public enum TimeType {
-    ENVIRONMENT,
-    WALL,
-    TICK,
-    INNER_TICK,
-    PERFORM
+    ENVIRONMENT, WALL, TICK, INNER_TICK, PERFORM
   }
 }

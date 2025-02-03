@@ -66,7 +66,8 @@ public class Dyn4JEngine extends AbstractEngine {
       0.3d,
       0.5d,
       10,
-      0.1);
+      0.1
+  );
   private final Configuration configuration;
   private final World<org.dyn4j.dynamics.Body> world;
 
@@ -98,7 +99,8 @@ public class Dyn4JEngine extends AbstractEngine {
       double softLinkSpringD,
       double softLinkRestDistanceRatio,
       double attractionMaxMagnitude,
-      double anchorSideDistance) {}
+      double anchorSideDistance
+  ) {}
 
   private static Settings getDefaultSettings() {
     Settings settings = new Settings();
@@ -108,18 +110,25 @@ public class Dyn4JEngine extends AbstractEngine {
     return settings;
   }
 
-  private RotationalJoint actuateRotationalJoint(ActuateRotationalJoint action, Agent agent)
-      throws IllegalActionException {
+  private RotationalJoint actuateRotationalJoint(
+      ActuateRotationalJoint action,
+      Agent agent
+  ) throws IllegalActionException {
     if (action.body() instanceof RotationalJoint rotationalJoint) {
-      rotationalJoint.setJointTargetAngle(rotationalJoint
-          .jointActiveAngleRange()
-          .denormalize(action.range().normalize(action.value())));
+      rotationalJoint.setJointTargetAngle(
+          rotationalJoint
+              .jointActiveAngleRange()
+              .denormalize(action.range().normalize(action.value()))
+      );
       return rotationalJoint;
     }
     throw new IllegalActionException(
         action,
         String.format(
-            "Unsupported body type %s", action.body().getClass().getSimpleName()));
+            "Unsupported body type %s",
+            action.body().getClass().getSimpleName()
+        )
+    );
   }
 
   private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
@@ -130,15 +139,17 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format(
-            "Unsupported voxel type %s", action.body().getClass().getSimpleName()));
+            "Unsupported voxel type %s",
+            action.body().getClass().getSimpleName()
+        )
+    );
   }
 
   private Double attractAnchor(AttractAnchor action, Agent agent) throws IllegalActionException {
     if (action.source().anchorable() == action.destination().anchorable()) {
       throw new IllegalActionException(action, "Cannot attract an anchor of the same body");
     }
-    if (action.source().point().distance(action.destination().point())
-        < super.configuration().attractionRange()) {
+    if (action.source().point().distance(action.destination().point()) < super.configuration().attractionRange()) {
       if (action.source() instanceof BodyAnchor src) {
         if (action.destination() instanceof BodyAnchor dst) {
           double f = new DoubleRange(0, configuration.attractionMaxMagnitude).denormalize(action.magnitude());
@@ -156,13 +167,16 @@ public class Dyn4JEngine extends AbstractEngine {
         String.format(
             "Unsupported anchor types: src=%s, dst=%s ",
             action.source().getClass().getSimpleName(),
-            action.destination().getClass().getSimpleName()));
+            action.destination().getClass().getSimpleName()
+        )
+    );
   }
 
   private Anchor.Link createLink(CreateLink action, Agent agent) throws IllegalActionException {
-    if (action.source().links().stream()
-        .anyMatch(l ->
-            l.destination().anchorable().equals(action.destination().anchorable()))) {
+    if (action.source()
+        .links()
+        .stream()
+        .anyMatch(l -> l.destination().anchorable().equals(action.destination().anchorable()))) {
       // this anchor is already attached to dst anchorable: ignore
       return null;
     }
@@ -173,12 +187,19 @@ public class Dyn4JEngine extends AbstractEngine {
           joint = new WeldJoint<>(
               src.getBody(),
               dst.getBody(),
-              new Vector2(src.point().x(), src.point().y()));
+              new Vector2(src.point().x(), src.point().y())
+          );
         } else if (Anchor.Link.Type.SOFT.equals(action.type())) {
-          double d = PolyUtils.minAnchorDistance(action.source(), action.destination())
-              * configuration.softLinkRestDistanceRatio;
+          double d = PolyUtils.minAnchorDistance(
+              action.source(),
+              action.destination()
+          ) * configuration.softLinkRestDistanceRatio;
           DistanceJoint<org.dyn4j.dynamics.Body> springJoint = new DistanceJoint<>(
-              src.getBody(), dst.getBody(), Utils.point(src.point()), Utils.point(dst.point()));
+              src.getBody(),
+              dst.getBody(),
+              Utils.point(src.point()),
+              Utils.point(dst.point())
+          );
           springJoint.setRestDistance(d);
           springJoint.setCollisionAllowed(true);
           springJoint.setFrequency(configuration.softLinkSpringF);
@@ -199,7 +220,9 @@ public class Dyn4JEngine extends AbstractEngine {
         String.format(
             "Unsupported anchor types: src=%s, dst=%s ",
             action.source().getClass().getSimpleName(),
-            action.destination().getClass().getSimpleName()));
+            action.destination().getClass().getSimpleName()
+        )
+    );
   }
 
   private RigidBody createRigidBody(CreateRigidBody action, Agent agent) {
@@ -211,7 +234,8 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
         configuration.rigidBodyAngularDamping,
-        configuration.anchorSideDistance);
+        configuration.anchorSideDistance
+    );
     rigidBody.getBodies().forEach(world::addBody);
     bodies.add(rigidBody);
     return rigidBody;
@@ -228,7 +252,8 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.rigidBodyRestitution,
         configuration.rigidBodyLinearDamping,
         configuration.rigidBodyAngularDamping,
-        configuration.anchorSideDistance);
+        configuration.anchorSideDistance
+    );
     rotationalJoint.getBodies().forEach(world::addBody);
     rotationalJoint.getJoints().forEach(world::addJoint);
     bodies.add(rotationalJoint);
@@ -241,7 +266,8 @@ public class Dyn4JEngine extends AbstractEngine {
         action.anchorsDensity(),
         configuration.unmovableBodyFriction,
         configuration.unmovableBodyRestitution,
-        configuration.anchorSideDistance);
+        configuration.anchorSideDistance
+    );
     unmovableBody.getBodies().forEach(world::addBody);
     bodies.add(unmovableBody);
     return unmovableBody;
@@ -258,29 +284,33 @@ public class Dyn4JEngine extends AbstractEngine {
         configuration.voxelAngularDamping,
         configuration.voxelVertexMassSideLengthRatio,
         action.material().areaRatioRange(),
-        configuration.voxelSpringScaffoldings);
+        configuration.voxelSpringScaffoldings
+    );
     voxel.getBodies().forEach(world::addBody);
     voxel.getJoints().forEach(world::addJoint);
     bodies.add(voxel);
     return voxel;
   }
 
-  private Collection<Body> findInContactBodies(FindInContactBodies action, Agent agent)
-      throws IllegalActionException {
+  private Collection<Body> findInContactBodies(FindInContactBodies action, Agent agent) throws IllegalActionException {
     if (action.body() instanceof MultipartBody multipartBody) {
-      return multipartBody.getBodies().stream()
+      return multipartBody.getBodies()
+          .stream()
           .map(b -> world.getInContactBodies(b, false))
           .flatMap(Collection::stream)
-          .filter(b -> !multipartBody.getBodies().contains(b)
-              && b.getUserData() != null
-              && b.getUserData() instanceof Body)
+          .filter(
+              b -> !multipartBody.getBodies().contains(b) && b.getUserData() != null && b.getUserData() instanceof Body
+          )
           .map(b -> (Body) b.getUserData())
           .collect(Collectors.toList());
     }
     throw new IllegalActionException(
         action,
         String.format(
-            "Unsupported body type %s", action.body().getClass().getSimpleName()));
+            "Unsupported body type %s",
+            action.body().getClass().getSimpleName()
+        )
+    );
   }
 
   @Override
@@ -335,7 +365,10 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format(
-            "Unsupported body type %s", action.body().getClass().getSimpleName()));
+            "Unsupported body type %s",
+            action.body().getClass().getSimpleName()
+        )
+    );
   }
 
   private Anchor.Link removeLink(RemoveLink action, Agent agent) throws IllegalActionException {
@@ -354,29 +387,43 @@ public class Dyn4JEngine extends AbstractEngine {
         String.format(
             "Unsupported anchor types: src=%s, dst=%s ",
             action.link().source().getClass().getSimpleName(),
-            action.link().destination().getClass().getSimpleName()));
+            action.link().destination().getClass().getSimpleName()
+        )
+    );
   }
 
   private Body rotateBody(RotateBody action, Agent agent) throws IllegalActionException {
     if (action.body() instanceof MultipartBody multipartBody) {
       multipartBody
           .getBodies()
-          .forEach(b -> b.rotate(
-              action.angle(), action.point().x(), action.point().y()));
+          .forEach(
+              b -> b.rotate(
+                  action.angle(),
+                  action.point().x(),
+                  action.point().y()
+              )
+          );
       return action.body();
     }
     throw new IllegalActionException(
         action,
         String.format(
-            "Untranslatable body type: %s", action.body().getClass().getName()));
+            "Untranslatable body type: %s",
+            action.body().getClass().getName()
+        )
+    );
   }
 
   private Double senseDistanceToBody(SenseDistanceToBody action, Agent agent) {
     Ray ray = new Ray(
         Utils.point(action.body().poly().center()),
-        action.direction() + action.body().angle());
+        action.direction() + action.body().angle()
+    );
     List<RaycastResult<org.dyn4j.dynamics.Body, BodyFixture>> results = world.raycast(
-        ray, action.distanceRange(), new DetectFilter<>(true, true, new BodyOwnerFilter(action.body())));
+        ray,
+        action.distanceRange(),
+        new DetectFilter<>(true, true, new BodyOwnerFilter(action.body()))
+    );
     return results.stream()
         .mapToDouble(r -> r.getRaycast().getDistance())
         .min()
@@ -392,6 +439,9 @@ public class Dyn4JEngine extends AbstractEngine {
     throw new IllegalActionException(
         action,
         String.format(
-            "Untranslatable body type: %s", action.body().getClass().getName()));
+            "Untranslatable body type: %s",
+            action.body().getClass().getName()
+        )
+    );
   }
 }

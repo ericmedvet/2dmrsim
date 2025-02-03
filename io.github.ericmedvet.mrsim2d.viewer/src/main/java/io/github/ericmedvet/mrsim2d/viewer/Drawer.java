@@ -40,18 +40,15 @@ import java.util.Map;
 public interface Drawer {
 
   enum Direction {
-    HORIZONTAL,
-    VERTICAL
+    HORIZONTAL, VERTICAL
   }
 
   enum HorizontalPosition {
-    LEFT,
-    RIGHT
+    LEFT, RIGHT
   }
 
   enum VerticalPosition {
-    TOP,
-    BOTTOM
+    TOP, BOTTOM
   }
 
   interface ProfiledDrawer extends Drawer, Profiled {}
@@ -77,11 +74,14 @@ public interface Drawer {
       double clipY = shape.getBounds2D().getY();
       double clipW = shape.getBounds2D().getWidth();
       double clipH = shape.getBounds2D().getHeight();
-      g.clip(new Rectangle2D.Double(
-          clipX + boundingBox.min().x() * clipW,
-          clipY + boundingBox.min().y() * clipH,
-          clipW * boundingBox.width(),
-          clipH * boundingBox.height()));
+      g.clip(
+          new Rectangle2D.Double(
+              clipX + boundingBox.min().x() * clipW,
+              clipY + boundingBox.min().y() * clipH,
+              clipW * boundingBox.width(),
+              clipH * boundingBox.height()
+          )
+      );
       // draw
       boolean drawn = drawer.draw(snapshots, g);
       // restore clip and transform
@@ -95,10 +95,22 @@ public interface Drawer {
       BoundingBox gBB = DrawingUtils.getBoundingBox(g);
       g.setColor(DrawingUtils.Colors.AXES);
       g.draw(new Rectangle2D.Double(gBB.min().x(), gBB.min().y(), gBB.width(), gBB.height()));
-      g.draw(new Line2D.Double(
-          gBB.min().x(), gBB.min().y(), gBB.max().x(), gBB.max().y()));
-      g.draw(new Line2D.Double(
-          gBB.min().x(), gBB.max().y(), gBB.max().x(), gBB.min().y()));
+      g.draw(
+          new Line2D.Double(
+              gBB.min().x(),
+              gBB.min().y(),
+              gBB.max().x(),
+              gBB.max().y()
+          )
+      );
+      g.draw(
+          new Line2D.Double(
+              gBB.min().x(),
+              gBB.max().y(),
+              gBB.max().x(),
+              gBB.min().y()
+          )
+      );
       return true;
     };
   }
@@ -132,15 +144,12 @@ public interface Drawer {
           string,
           switch (alignment) {
             case LEFT -> g.getClipBounds().x + 1;
-            case CENTER -> g.getClipBounds().x
-                + g.getClipBounds().width / 2
-                - g.getFontMetrics().stringWidth(string) / 2;
-            case RIGHT -> g.getClipBounds().x
-                + g.getClipBounds().width
-                - 1
-                - g.getFontMetrics().stringWidth(string);
+            case CENTER -> g.getClipBounds().x + g.getClipBounds().width / 2 - g.getFontMetrics()
+                .stringWidth(string) / 2;
+            case RIGHT -> g.getClipBounds().x + g.getClipBounds().width - 1 - g.getFontMetrics().stringWidth(string);
           },
-          g.getClipBounds().y + 1 + g.getFontMetrics().getMaxAscent());
+          g.getClipBounds().y + 1 + g.getFontMetrics().getMaxAscent()
+      );
       return string.isEmpty();
     };
   }
@@ -150,13 +159,19 @@ public interface Drawer {
       BoundingBox graphicsFrame = new BoundingBox(
           new Point(
               g.getClip().getBounds2D().getX(),
-              g.getClip().getBounds2D().getY()),
+              g.getClip().getBounds2D().getY()
+          ),
           new Point(
               g.getClip().getBounds2D().getMaxX(),
-              g.getClip().getBounds2D().getMaxY()));
+              g.getClip().getBounds2D().getMaxY()
+          )
+      );
       Snapshot lastSnapshot = snapshots.getLast();
-      BoundingBox worldFrame =
-          framer.getFrame(lastSnapshot.t(), lastSnapshot, graphicsFrame.width() / graphicsFrame.height());
+      BoundingBox worldFrame = framer.getFrame(
+          lastSnapshot.t(),
+          lastSnapshot,
+          graphicsFrame.width() / graphicsFrame.height()
+      );
       // save original transform and stroke
       AffineTransform oAt = g.getTransform();
       Stroke oStroke = g.getStroke();

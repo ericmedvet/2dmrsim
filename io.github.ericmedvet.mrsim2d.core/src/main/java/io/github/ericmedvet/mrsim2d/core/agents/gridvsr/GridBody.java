@@ -30,23 +30,25 @@ import java.util.function.Function;
 public record GridBody(Grid<SensorizedElement> grid) {
 
   public GridBody(
-      Grid<VoxelType> shape, Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction) {
-    this(Grid.create(
-        shape.w(),
-        shape.h(),
-        k -> new SensorizedElement(
-            new Element(shape.get(k), Voxel.DEFAULT_MATERIAL),
-            !shape.get(k).equals(VoxelType.NONE)
-                ? sensorizingFunction
+      Grid<VoxelType> shape,
+      Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction
+  ) {
+    this(
+        Grid.create(
+            shape.w(),
+            shape.h(),
+            k -> new SensorizedElement(
+                new Element(shape.get(k), Voxel.DEFAULT_MATERIAL),
+                !shape.get(k).equals(VoxelType.NONE) ? sensorizingFunction
                     .apply(shape.map(t -> !t.equals(VoxelType.NONE)))
-                    .get(k)
-                : List.of())));
+                    .get(k) : List.of()
+            )
+        )
+    );
   }
 
   public enum VoxelType {
-    NONE,
-    SOFT,
-    RIGID
+    NONE, SOFT, RIGID
   }
 
   public record Element(VoxelType type, Voxel.Material material) {}

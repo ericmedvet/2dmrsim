@@ -30,7 +30,8 @@ public class AllBodiesFramer extends AbstractFramer<Snapshot> {
 
   @Override
   protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
-    return snapshot.bodies().stream()
+    return snapshot.bodies()
+        .stream()
         .map(b -> b.poly().boundingBox())
         .reduce(BoundingBox::enclosing)
         .orElse(DEFAULT_BOUNDING_BOX);

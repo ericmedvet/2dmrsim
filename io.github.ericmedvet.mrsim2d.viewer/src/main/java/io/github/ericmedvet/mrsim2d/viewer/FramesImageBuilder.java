@@ -47,7 +47,8 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       double startTime,
       Direction direction,
       boolean justLastSnapshot,
-      Drawer drawer) {
+      Drawer drawer
+  ) {
     this.nOfFrames = nOfFrames;
     this.deltaT = deltaT;
     this.direction = direction;
@@ -68,8 +69,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
   }
 
   public enum Direction {
-    HORIZONTAL,
-    VERTICAL
+    HORIZONTAL, VERTICAL
   }
 
   @Override
@@ -85,11 +85,13 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       if (direction.equals(Direction.HORIZONTAL)) {
         imageFrame = new BoundingBox(
             new Point((double) frameCount / (double) nOfFrames, 0),
-            new Point((double) (frameCount + 1) / (double) nOfFrames, 1d));
+            new Point((double) (frameCount + 1) / (double) nOfFrames, 1d)
+        );
       } else {
         imageFrame = new BoundingBox(
             new Point(0d, (double) frameCount / (double) nOfFrames),
-            new Point(1d, (double) (frameCount + 1) / (double) nOfFrames));
+            new Point(1d, (double) (frameCount + 1) / (double) nOfFrames)
+        );
       }
       frameCount = frameCount + 1;
       // draw

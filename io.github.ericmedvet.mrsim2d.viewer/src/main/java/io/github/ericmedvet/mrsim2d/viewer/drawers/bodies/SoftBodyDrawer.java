@@ -49,7 +49,8 @@ public class SoftBodyDrawer extends AbstractComponentDrawer<SoftBody> {
       Color restColor,
       Color expandedColor,
       Color borderColor,
-      DoubleRange areaRatioRange) {
+      DoubleRange areaRatioRange
+  ) {
     super(SoftBody.class);
     this.contractedColor = contractedColor;
     this.restColor = restColor;
@@ -66,14 +67,17 @@ public class SoftBodyDrawer extends AbstractComponentDrawer<SoftBody> {
   protected boolean innerDraw(double t, SoftBody body, Graphics2D g) {
     Poly poly = body.poly();
     Path2D path = DrawingUtils.toPath(poly, true);
-    g.setColor(DrawingUtils.linear(
-        contractedColor,
-        restColor,
-        expandedColor,
-        (float) areaRatioRange.min(),
-        1,
-        (float) areaRatioRange.max(),
-        (float) body.areaRatio()));
+    g.setColor(
+        DrawingUtils.linear(
+            contractedColor,
+            restColor,
+            expandedColor,
+            (float) areaRatioRange.min(),
+            1,
+            (float) areaRatioRange.max(),
+            (float) body.areaRatio()
+        )
+    );
     g.fill(path);
     g.setColor(borderColor);
     g.draw(path);
