@@ -334,7 +334,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
 
   @FunctionalInterface
   protected interface ActionSolver<A extends Action<O>, O> {
-
     O solve(A action, Agent agent) throws ActionException;
   }
 

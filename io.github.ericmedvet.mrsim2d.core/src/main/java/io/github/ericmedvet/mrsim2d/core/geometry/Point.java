@@ -101,6 +101,6 @@ public record Point(double x, double y) implements Shape {
 
   @Override
   public String toString() {
-    return String.format("(%.1f;%.1f)", x, y);
+    return String.format("(%.2f;%.2f)", x, y);
   }
 }

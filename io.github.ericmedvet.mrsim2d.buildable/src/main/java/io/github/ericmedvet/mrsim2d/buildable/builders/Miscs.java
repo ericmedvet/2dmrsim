@@ -29,6 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
+import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
@@ -77,7 +78,8 @@ public class Miscs {
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions,
       @Param(value = "info", dB = true) boolean info,
-      @Param(value = "nfc") boolean nfc) {
+      @Param(value = "nfc") boolean nfc,
+      @Param(value = "parts") boolean parts) {
     return s -> {
       List<ComponentDrawer> componentDrawers = components.stream()
           .map(c -> switch (c) {
@@ -99,6 +101,9 @@ public class Miscs {
       }
       if (nfc) {
         thingsDrawers.add(nfcDrawer);
+      }
+      if (parts) {
+        thingsDrawers.add(new ComponentsDrawer(List.of(new MultipartBodyDrawer()), Snapshot::bodies));
       }
       Drawer worldDrawer = Drawer.transform(framer, Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));

@@ -41,10 +41,8 @@ public class Tasks {
   private Tasks() {}
 
   @SuppressWarnings("unused")
-  public static Sumo sumo(
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
-    return new Sumo(duration, terrain);
+  public static Sumo sumo(@Param(value = "duration", dD = 60) double duration) {
+    return new Sumo(duration);
   }
 
   @SuppressWarnings("unused")

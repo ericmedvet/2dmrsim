@@ -27,7 +27,6 @@ import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
@@ -70,8 +69,7 @@ public class TrainingTester {
             nb.build(
                 "sim.drawer(framer = sim.staticFramer(minX = 15.0; maxX = 45.0; minY = 10.0; maxY = 25.0); actions = true)"))
         .apply("test");
-    taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.sumoArena()")
-        .run();
+    taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer)).run();
     System.exit(0);
   }
 
@@ -101,10 +99,9 @@ public class TrainingTester {
     return content;
   }
 
-  private static Runnable taskOn(
-      NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
+  private static Runnable taskOn(NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer) {
     // prepare task
-    Sumo sumo = new Sumo(30, (Terrain) nb.build(terrain));
+    Sumo sumo = new Sumo(30);
     // read agent resource
     String agentDescription;
     try {

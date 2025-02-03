@@ -26,10 +26,11 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.XMirrorer;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
-import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
+import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgentAt;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
+import io.github.ericmedvet.mrsim2d.core.geometry.Path;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
@@ -41,19 +42,20 @@ import java.util.function.Supplier;
 
 public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
-  private static final double INITIAL_Y_GAP = 0.25;
+  private static final double INITIAL_Y_GAP = 0.1;
+  private static final double HOLE_W = 10;
+  private static final double HOLE_H = 15;
+  private static final double FLAT_W = 15;
   private final double duration;
-  private final Terrain terrain;
   private final double initialYGap;
 
-  public Sumo(double duration, Terrain terrain, double initialYGap) {
+  public Sumo(double duration, double initialYGap) {
     this.duration = duration;
-    this.terrain = terrain;
     this.initialYGap = initialYGap;
   }
 
-  public Sumo(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_Y_GAP);
+  public Sumo(double duration) {
+    this(duration, INITIAL_Y_GAP);
   }
 
   @Override
@@ -62,45 +64,42 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer) {
-
-    double flatW = (terrain.withinBordersXRange().max()
-            - terrain.withinBordersXRange().min())
-        / 4;
-
-    double centerX = ((terrain.withinBordersXRange().min() + flatW)
-            + (terrain.withinBordersXRange().max() - flatW))
-        / 2;
-    double centerY = terrain.maxHeightAt(new DoubleRange(centerX, centerX));
-
-    double agent1InitialX = centerX - (flatW - 1);
-    double agent2InitialX = centerX + (flatW - 1);
-
+    Terrain terrain = new Terrain(
+        new Path(Point.ORIGIN)
+            .moveBy(HOLE_W, 0)
+            .moveBy(0, HOLE_H)
+            .moveBy(FLAT_W, 0)
+            .moveBy(0, -HOLE_H)
+            .moveBy(HOLE_W, 0)
+            .moveBy(0, -HOLE_H)
+            .moveBy(-2 * HOLE_W - FLAT_W, 0)
+            .toPoly(),
+        new DoubleRange(HOLE_W, HOLE_W + FLAT_W));
+    System.out.println(terrain);
+    double groundH = HOLE_H;
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
     EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
     // TODO: move actions-filter to NumGridVSR
     if (agent2 instanceof Mirrorable mirrorable) {
       mirrorable.mirror();
     }
+    engine.registerActionsFilter(agent1, new XMirrorer<>());
     engine.registerActionsFilter(agent2, new XMirrorer<>());
-
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(agent1));
     engine.perform(new AddAgent(agent2));
-
-    engine.perform(new TranslateAgent(agent1, new Point(agent1InitialX, 0)));
-    BoundingBox agent1BB = agent1.boundingBox();
-    double y1 = centerY + initialYGap - agent1BB.min().y();
-    engine.perform(new TranslateAgent(agent1, new Point(0, y1)));
-
-    engine.perform(new TranslateAgent(agent2, new Point(agent2InitialX, 0)));
-    BoundingBox agent2BB = agent2.boundingBox();
-    double y2 = centerY + initialYGap - agent2BB.min().y();
-    engine.perform(new TranslateAgent(agent2, new Point(0, y2)));
-
+    engine.perform(new TranslateAgentAt(
+        agent1,
+        BoundingBox.Anchor.LL,
+        new Point(terrain.withinBordersXRange().min(), groundH + initialYGap)));
+    engine.perform(new TranslateAgentAt(
+        agent2,
+        BoundingBox.Anchor.UL,
+        new Point(terrain.withinBordersXRange().max(), groundH + initialYGap)));
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
     while ((engine.t() < duration)
-        && (agent1.boundingBox().max().y() > centerY)
-        && (agent2.boundingBox().max().y() > centerY)) {
+        && (agent1.boundingBox().max().y() > groundH)
+        && (agent2.boundingBox().max().y() > groundH)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 

@@ -113,12 +113,13 @@ public class Terrains {
   @SuppressWarnings("unused")
   public static Terrain sumoArena(
       @Param(value = "h", dD = 20) Double h,
-      @Param(value = "borderW", dD = 10) Double borderW,
-      @Param(value = "borderH", dD = 15) Double borderH,
-      @Param(value = "flatW", dD = 10) Double flatW,
+      @Param(value = "borderW", dD = 1) Double borderW,
+      @Param(value = "borderH", dD = 25) Double borderH,
+      @Param(value = "holeW", dD = 20) Double holeW,
+      @Param(value = "flatW", dD = 20) Double flatW,
       @Param(value = "flatH", dD = 15) Double flatH) {
-    Path p = new Path(new Point(flatW, 0));
-    p = p.moveBy(0, flatH).moveBy(2 * flatW, 0).moveBy(0, -flatH).moveBy(flatW, 0);
+    Path p = new Path(new Point(holeW, 0));
+    p = p.moveBy(0, flatH).moveBy(flatW, 0).moveBy(0, -flatH).moveBy(holeW, 0);
     return Terrain.fromPath(p, h, borderW, borderH);
   }
 
