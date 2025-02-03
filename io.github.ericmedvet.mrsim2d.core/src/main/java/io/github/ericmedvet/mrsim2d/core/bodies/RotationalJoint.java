@@ -31,7 +31,9 @@ public interface RotationalJoint extends RigidBody, Anchorable {
       double controlP,
       double controlI,
       double controlD,
-      double angleTolerance) {
+      double angleTolerance
+  ) {
+
     public static final double MAX_SPEED = 20;
     public static final double MAX_TORQUE = 1000;
     public static final double CONTROL_P = 10;

@@ -43,7 +43,8 @@ public class InfoDrawer implements Drawer {
       String string,
       Set<EngineInfo> engineInfos,
       VerticalPosition verticalPosition,
-      HorizontalPosition horizontalPosition) {
+      HorizontalPosition horizontalPosition
+  ) {
     this.string = string;
     this.engineInfos = EnumSet.noneOf(EngineInfo.class);
     this.engineInfos.addAll(engineInfos);
@@ -56,7 +57,8 @@ public class InfoDrawer implements Drawer {
         string,
         EnumSet.of(EngineInfo.N_OF_BODIES, EngineInfo.N_OF_AGENTS),
         VerticalPosition.TOP,
-        HorizontalPosition.LEFT);
+        HorizontalPosition.LEFT
+    );
   }
 
   public InfoDrawer() {
@@ -64,9 +66,10 @@ public class InfoDrawer implements Drawer {
   }
 
   public enum EngineInfo implements Function<EngineSnapshot, String> {
-    N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())),
-    N_OF_AGENTS(s -> String.format("#agents=%d", s.agents().size())),
-    N_OF_ACTIONS(s -> String.format("#actions=%d", s.actionOutcomes().size()));
+    N_OF_BODIES(s -> String.format("#bodies=%d", s.bodies().size())), N_OF_AGENTS(
+        s -> String.format("#agents=%d", s.agents().size())
+    ), N_OF_ACTIONS(s -> String.format("#actions=%d", s.actionOutcomes().size()));
+
     private final Function<EngineSnapshot, String> function;
 
     EngineInfo(Function<EngineSnapshot, String> function) {
@@ -103,16 +106,14 @@ public class InfoDrawer implements Drawer {
         .max()
         .orElse(0d);
     double bbH = lines.length * g.getFontMetrics().getHeight();
-    double x =
-        switch (horizontalPosition) {
-          case LEFT -> g.getClipBounds().getMinX() + MARGIN;
-          case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
-        };
-    double y =
-        switch (verticalPosition) {
-          case TOP -> g.getClipBounds().getMinY() + MARGIN;
-          case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
-        };
+    double x = switch (horizontalPosition) {
+      case LEFT -> g.getClipBounds().getMinX() + MARGIN;
+      case RIGHT -> g.getClipBounds().getMaxX() - bbW - MARGIN;
+    };
+    double y = switch (verticalPosition) {
+      case TOP -> g.getClipBounds().getMinY() + MARGIN;
+      case BOTTOM -> g.getClipBounds().getMaxY() - bbH - MARGIN;
+    };
     g.setColor(DrawingUtils.Colors.TEXT);
     for (String line : lines) {
       g.drawString(line, (float) x, (float) (y + g.getFontMetrics().getHeight()));

@@ -47,7 +47,8 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
       double restitution,
       double linearDamping,
       double angularDamping,
-      double anchorSideDistance) {
+      double anchorSideDistance
+  ) {
     this.mass = mass;
     body = new Body();
     body.addFixture(Utils.poly(convexPoly), mass / convexPoly.area(), friction, restitution);
@@ -96,13 +97,15 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
   @Override
   public Poly poly() {
     Transform t = body.getTransform();
-    return new Poly(Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
-        .map(v -> {
-          Vector2 cv = v.copy();
-          t.transform(cv);
-          return Utils.point(cv);
-        })
-        .toArray(Point[]::new));
+    return new Poly(
+        Arrays.stream(((Polygon) body.getFixture(0).getShape()).getVertices())
+            .map(v -> {
+              Vector2 cv = v.copy();
+              t.transform(cv);
+              return Utils.point(cv);
+            })
+            .toArray(Point[]::new)
+    );
   }
 
   @Override
@@ -118,7 +121,9 @@ public class RigidBody implements io.github.ericmedvet.mrsim2d.core.bodies.Rigid
   private Vector2 getFirstSideDirection() {
     Poly poly = poly();
     return new Vector2(
-        poly.vertexes()[1].x() - poly.vertexes()[0].x(), poly.vertexes()[1].y() - poly.vertexes()[0].y());
+        poly.vertexes()[1].x() - poly.vertexes()[0].x(),
+        poly.vertexes()[1].y() - poly.vertexes()[0].y()
+    );
   }
 
   @Override

@@ -91,8 +91,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
     if (snapshot.t() - lastDrawnT >= 1d / frameRate) {
       // wait
       while (true) {
-        double currentWallTime =
-            Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
+        double currentWallTime = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
         if (isPaused || snapshot.t() > currentWallTime - lastDrawingMillis / 1000d - WAIT_MILLIS / 1000d) {
           try {
             Thread.sleep(WAIT_MILLIS);
@@ -116,8 +115,7 @@ public class RealtimeViewer extends JFrame implements Consumer<Snapshot> {
         strategy.show();
       }
       Toolkit.getDefaultToolkit().sync();
-      lastDrawingMillis =
-          Duration.between(drawingTimeStart, Instant.now()).toMillis();
+      lastDrawingMillis = Duration.between(drawingTimeStart, Instant.now()).toMillis();
       // update time
       lastDrawnT = snapshot.t();
       snapshots.clear();

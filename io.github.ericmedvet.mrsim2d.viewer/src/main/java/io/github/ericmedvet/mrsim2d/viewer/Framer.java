@@ -37,23 +37,26 @@ public interface Framer<K> {
       BoundingBox currentBB = thisFramer.getFrame(t, k, ratio);
       // update memory
       memory.put(t, currentBB);
-      List<Double> toRemoveKeys =
-          memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
+      List<Double> toRemoveKeys = memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
       toRemoveKeys.forEach(memory::remove);
       // average bounding box
-      double x = memory.values().stream()
+      double x = memory.values()
+          .stream()
           .mapToDouble(bb -> bb.center().x())
           .average()
           .orElse(currentBB.center().x());
-      double y = memory.values().stream()
+      double y = memory.values()
+          .stream()
           .mapToDouble(bb -> bb.center().y())
           .average()
           .orElse(currentBB.center().y());
-      double w = memory.values().stream()
+      double w = memory.values()
+          .stream()
           .mapToDouble(BoundingBox::width)
           .average()
           .orElse(currentBB.width());
-      double h = memory.values().stream()
+      double h = memory.values()
+          .stream()
           .mapToDouble(BoundingBox::height)
           .average()
           .orElse(currentBB.height());
@@ -68,8 +71,7 @@ public interface Framer<K> {
       BoundingBox currentBB = thisFramer.getFrame(t, k, ratio);
       // update memory
       memory.put(t, currentBB);
-      List<Double> toRemoveKeys =
-          memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
+      List<Double> toRemoveKeys = memory.keySet().stream().filter(ot -> ot < t - windowT).toList();
       toRemoveKeys.forEach(memory::remove);
       // take largest bounding box
       return memory.values().stream().reduce(BoundingBox::enclosing).orElse(currentBB);

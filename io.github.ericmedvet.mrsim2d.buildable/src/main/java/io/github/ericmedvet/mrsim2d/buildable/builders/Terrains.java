@@ -46,7 +46,8 @@ public class Terrains {
   public static final double FLAT_W = 5d;
   public static final double FLAT_H = 5d;
 
-  private Terrains() {}
+  private Terrains() {
+  }
 
   @SuppressWarnings("unused")
   public static Terrain downhill(
@@ -54,7 +55,8 @@ public class Terrains {
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
-      @Param(value = "a", dD = ANGLE) Double a) {
+      @Param(value = "a", dD = ANGLE) Double a
+  ) {
     return Terrain.fromPath(new Path(new Point(w, -w * Math.toRadians(a))), h, borderW, borderH);
   }
 
@@ -63,7 +65,8 @@ public class Terrains {
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
-      @Param(value = "borderH", dD = BORDER_H) Double borderH) {
+      @Param(value = "borderH", dD = BORDER_H) Double borderH
+  ) {
     return Terrain.fromPath(new Path(new Point(w, 0)), h, borderW, borderH);
   }
 
@@ -75,7 +78,8 @@ public class Terrains {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "chunkW", dD = CHUNK_W) Double chunkW,
       @Param(value = "chunkH", dD = CHUNK_H) Double chunkH,
-      @Param(value = "seed", dI = 1) Integer seed) {
+      @Param(value = "seed", dI = 1) Integer seed
+  ) {
     RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(chunkW, 0));
     double dW = 0d;
@@ -93,13 +97,12 @@ public class Terrains {
       @Param(value = "startW", dD = START_W) double startW,
       @Param(value = "holeH", dD = HOLE_H) double holeH,
       @Param(
-              value = "holeWs",
-              dDs = {HOLE_W})
-          List<Double> holeWs,
+          value = "holeWs", dDs = {HOLE_W}) List<Double> holeWs,
       @Param(value = "holeDisW", dD = HOLE_DIS_W) double holeDisW,
       @Param(value = "endW", dD = END_W) double endW,
       @Param(value = "borderW", dD = BORDER_W) double borderW,
-      @Param(value = "borderH", dD = BORDER_H) double borderH) {
+      @Param(value = "borderH", dD = BORDER_H) double borderH
+  ) {
 
     Path p = new Path(new Point(startW, 0));
     for (double holeW : holeWs) {
@@ -131,7 +134,8 @@ public class Terrains {
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
       @Param(value = "chunkW", dD = CHUNK_W) Double chunkW,
       @Param(value = "chunkH", dD = CHUNK_H) Double chunkH,
-      @Param(value = "seed", dI = 1) Integer seed) {
+      @Param(value = "seed", dI = 1) Integer seed
+  ) {
     RandomGenerator random = new Random(seed);
     Path path = new Path(new Point(chunkW, 0));
     double dW = 0d;
@@ -150,7 +154,8 @@ public class Terrains {
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
       @Param(value = "borderH", dD = BORDER_H) Double borderH,
-      @Param(value = "a", dD = ANGLE) Double a) {
+      @Param(value = "a", dD = ANGLE) Double a
+  ) {
     return Terrain.fromPath(new Path(new Point(w, w * Math.toRadians(a))), h, borderW, borderH);
   }
 }

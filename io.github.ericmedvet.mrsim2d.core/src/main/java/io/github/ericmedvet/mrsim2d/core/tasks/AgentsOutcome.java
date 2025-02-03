@@ -41,30 +41,15 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
   }
 
   private enum Aggregate {
-    INITIAL,
-    FINAL,
-    AVERAGE,
-    MIN,
-    MAX
+    INITIAL, FINAL, AVERAGE, MIN, MAX
   }
 
   private enum Metric {
-    X,
-    Y,
-    AVG_X,
-    TERRAIN_H,
-    BB_W,
-    BB_H,
-    BB_AREA,
-    BB_MAX_X,
-    BB_MAX_Y,
-    BB_MIN_X,
-    BB_MIN_Y
+    X, Y, AVG_X, TERRAIN_H, BB_W, BB_H, BB_AREA, BB_MAX_X, BB_MAX_Y, BB_MIN_X, BB_MIN_Y
   }
 
   private enum Subject {
-    FIRST,
-    ALL
+    FIRST, ALL
   }
 
   private record Key(Metric metric, Aggregate aggregate, Subject subject) {}
@@ -175,18 +160,22 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
       value = switch (aggregate) {
         case FINAL -> get(metric, subject, observations.get(observations.lastKey()));
         case INITIAL -> get(metric, subject, observations.get(observations.firstKey()));
-        case AVERAGE -> observations.values().stream()
+        case AVERAGE -> observations.values()
+            .stream()
             .mapToDouble(o -> get(metric, subject, o))
             .average()
             .orElse(0d);
-        case MIN -> observations.values().stream()
+        case MIN -> observations.values()
+            .stream()
             .mapToDouble(o -> get(metric, subject, o))
             .min()
             .orElse(0d);
-        case MAX -> observations.values().stream()
+        case MAX -> observations.values()
+            .stream()
             .mapToDouble(o -> get(metric, subject, o))
             .max()
-            .orElse(0d);};
+            .orElse(0d);
+      };
       metricMap.put(new Key(metric, aggregate, subject), value);
     }
     return value;
@@ -194,61 +183,75 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
 
   private double get(Metric metric, Subject subject, AgentsObservation observation) {
     return switch (metric) {
-      case X -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentCenter().x()
-          : observation.getAllBoundingBox().center().x();
-      case Y -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentCenter().y()
-          : observation.getAllBoundingBox().center().y();
+      case X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentCenter().x() : observation.getAllBoundingBox()
+          .center()
+          .x();
+      case Y -> subject.equals(Subject.FIRST) ? observation.getFirstAgentCenter().y() : observation.getAllBoundingBox()
+          .center()
+          .y();
       case AVG_X -> {
         if (subject.equals(Subject.FIRST)) {
           yield observation.getFirstAgentCenter().x();
         } else {
-          yield observation.getAgents().stream()
-              .mapToDouble(a -> Point.average(a.polies().stream()
-                      .map(Poly::center)
-                      .toArray(Point[]::new))
-                  .x())
+          yield observation.getAgents()
+              .stream()
+              .mapToDouble(
+                  a -> Point.average(
+                      a.polies()
+                          .stream()
+                          .map(Poly::center)
+                          .toArray(Point[]::new)
+                  )
+                      .x()
+              )
               .average()
               .orElse(0d);
         }
       }
       case TERRAIN_H -> {
         if (subject.equals(Subject.FIRST)) {
-          yield observation.getFirstAgentCenter().y()
-              - observation.getAgents().getFirst().terrainHeight();
+          yield observation.getFirstAgentCenter().y() - observation.getAgents().getFirst().terrainHeight();
         } else {
-          yield observation.getAgents().stream()
-              .mapToDouble(a -> Point.average(a.polies().stream()
+          yield observation.getAgents()
+              .stream()
+              .mapToDouble(
+                  a -> Point.average(
+                      a.polies()
+                          .stream()
                           .map(Poly::center)
-                          .toArray(Point[]::new))
-                      .y()
-                  - a.terrainHeight())
+                          .toArray(Point[]::new)
+                  )
+                      .y() - a.terrainHeight()
+              )
               .average()
               .orElse(0d);
         }
       }
-      case BB_AREA -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().area()
-          : observation.getAllBoundingBox().area();
-      case BB_W -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().width()
-          : observation.getAllBoundingBox().width();
-      case BB_H -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().height()
-          : observation.getAllBoundingBox().height();
-      case BB_MIN_Y -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().min().y()
-          : observation.getAllBoundingBox().min().y();
-      case BB_MAX_Y -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().max().y()
-          : observation.getAllBoundingBox().max().y();
-      case BB_MIN_X -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().min().x()
-          : observation.getAllBoundingBox().min().x();
-      case BB_MAX_X -> subject.equals(Subject.FIRST)
-          ? observation.getFirstAgentBoundingBox().max().x()
-          : observation.getAllBoundingBox().max().x();
+      case BB_AREA -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().area() : observation
+          .getAllBoundingBox()
+          .area();
+      case BB_W -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().width() : observation
+          .getAllBoundingBox()
+          .width();
+      case BB_H -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().height() : observation
+          .getAllBoundingBox()
+          .height();
+      case BB_MIN_Y -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().min().y() : observation
+          .getAllBoundingBox()
+          .min()
+          .y();
+      case BB_MAX_Y -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().max().y() : observation
+          .getAllBoundingBox()
+          .max()
+          .y();
+      case BB_MIN_X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().min().x() : observation
+          .getAllBoundingBox()
+          .min()
+          .x();
+      case BB_MAX_X -> subject.equals(Subject.FIRST) ? observation.getFirstAgentBoundingBox().max().x() : observation
+          .getAllBoundingBox()
+          .max()
+          .x();
     };
   }
 

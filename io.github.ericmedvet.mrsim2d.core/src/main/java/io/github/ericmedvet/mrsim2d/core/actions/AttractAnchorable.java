@@ -32,17 +32,21 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-public record AttractAnchorable(Collection<Anchor> anchors, Anchorable anchorable, double magnitude)
-    implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>> {
+public record AttractAnchorable(
+    Collection<Anchor> anchors, Anchorable anchorable, double magnitude
+) implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>> {
   @Override
   public Collection<Pair<Anchor, Anchor>> perform(ActionPerformer performer, Agent agent) {
     // discard already attached
     Collection<Anchor> srcAnchors = anchors.stream()
-        .filter(a -> a.links().stream()
-            .map(l -> l.destination().anchorable())
-            .filter(dst -> dst == anchorable)
-            .toList()
-            .isEmpty())
+        .filter(
+            a -> a.links()
+                .stream()
+                .map(l -> l.destination().anchorable())
+                .filter(dst -> dst == anchorable)
+                .toList()
+                .isEmpty()
+        )
         .toList();
     // match anchor pairs
     Collection<Anchor> dstAnchors = new LinkedHashSet<>(anchorable.anchors());

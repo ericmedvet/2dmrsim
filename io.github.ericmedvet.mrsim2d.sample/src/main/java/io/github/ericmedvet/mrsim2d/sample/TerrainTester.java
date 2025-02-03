@@ -54,9 +54,9 @@ public class TerrainTester {
   private static final Logger L = Logger.getLogger(TerrainTester.class.getName());
 
   private static Object fromBase64(String content) throws IOException {
-    try (ByteArrayInputStream bais =
-            new ByteArrayInputStream(Base64.getDecoder().decode(content));
-        ObjectInputStream ois = new ObjectInputStream(bais)) {
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(
+        Base64.getDecoder().decode(content)
+    ); ObjectInputStream ois = new ObjectInputStream(bais)) {
       return ois.readObject();
     } catch (Throwable t) {
       throw new IOException(t);
@@ -66,12 +66,12 @@ public class TerrainTester {
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare engine
-    Supplier<Engine> engineSupplier =
-        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // do single task
     if (true) {
-      @SuppressWarnings("unchecked")
-      Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply("test");
+      @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply(
+          "test"
+      );
       taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")
           .run();
       System.exit(0);
@@ -87,7 +87,8 @@ public class TerrainTester {
         "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 500)",
         "s.t.hilly(chunkW = 0.5; chunkH = 0.1; w = 1500)",
         "s.t.steppy(chunkW = 0.5; chunkH = 0.1; w = 1500)",
-        "s.t.steppy(chunkW = 0.5; chunkH = 0.1)");
+        "s.t.steppy(chunkW = 0.5; chunkH = 0.1)"
+    );
     Consumer<Snapshot> nullConsumer = s -> {};
     // warm up
     int warmUpNOfTimes = 10;
@@ -96,28 +97,31 @@ public class TerrainTester {
         "t=%5.3f with n=%d on %s%n",
         profile(taskOn(nb, engineSupplier, nullConsumer, terrains.getFirst()), warmUpNOfTimes),
         warmUpNOfTimes,
-        terrains.getFirst());
+        terrains.getFirst()
+    );
     // profile
     L.info("Testing");
     int testNOfTimes = 5;
     for (String terrain : terrains) {
       System.out.printf(
           "t=%5.3f with n=%d on %s%n",
-          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes), testNOfTimes, terrain);
+          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes),
+          testNOfTimes,
+          terrain
+      );
     }
   }
 
   private static double profile(Runnable runnable, int nOfTimes) {
     return IntStream.range(0, nOfTimes)
-            .mapToDouble(i -> {
-              Instant startingInstant = Instant.now();
-              runnable.run();
-              return Duration.between(startingInstant, Instant.now())
-                  .toMillis();
-            })
-            .average()
-            .orElse(Double.NaN)
-        / 1000d;
+        .mapToDouble(i -> {
+          Instant startingInstant = Instant.now();
+          runnable.run();
+          return Duration.between(startingInstant, Instant.now())
+              .toMillis();
+        })
+        .average()
+        .orElse(Double.NaN) / 1000d;
   }
 
   private static String readResource(String resourcePath) throws IOException {
@@ -134,7 +138,11 @@ public class TerrainTester {
   }
 
   private static Runnable taskOn(
-      NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer, String terrain) {
+      NamedBuilder<?> nb,
+      Supplier<Engine> engineSupplier,
+      Consumer<Snapshot> consumer,
+      String terrain
+  ) {
     // prepare task
     Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
     // read agent resource
@@ -167,10 +175,10 @@ public class TerrainTester {
       // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
         //noinspection unchecked
-        numMultiBrained.brains().stream()
+        numMultiBrained.brains()
+            .stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-            .forEach(o -> o.ifPresent(np ->
-                np.setParams(params.stream().mapToDouble(d -> d).toArray())));
+            .forEach(o -> o.ifPresent(np -> np.setParams(params.stream().mapToDouble(d -> d).toArray())));
       }
       return agent;
     };

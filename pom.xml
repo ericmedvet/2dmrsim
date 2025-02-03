@@ -187,23 +187,15 @@
         <version>2.43.0</version>
         <configuration>
           <java>
-            <formatAnnotations/>
+            <toggleOffOn/>
             <importOrder/>
             <trimTrailingWhitespace/>
             <removeUnusedImports/>
-            <palantirJavaFormat>
-              <formatJavadoc>true</formatJavadoc>
-              <version>2.39.0</version>
-            </palantirJavaFormat>
-            <toggleOffOn/>
-            <indent>
-              <tabs>true</tabs>
-              <spacesPerTab>4</spacesPerTab>
-            </indent>
-            <indent>
-              <spaces>true</spaces>
-              <spacesPerTab>2</spacesPerTab>
-            </indent>
+            <eclipse>
+              <version>4.26</version>
+              <file>${maven.multiModuleProjectDirectory}/code-style.xml</file>
+            </eclipse>
+            <formatAnnotations/>
           </java>
           <pom>
             <sortPom>
@@ -252,10 +244,20 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.8.0</version>
+            <version>3.11.2</version>
             <configuration>
+              <top><![CDATA[
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
+                <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" onload="
+                  renderMathInElement(document.body, {delimiters: [
+                    {left: '$', right: '$', display: false}
+                  ]});
+                "></script>
+              ]]></top>
               <additionalOptions>
                 <additionalOption>-Xdoclint:none</additionalOption>
+                <additionalOption>--allow-script-in-comments</additionalOption>
               </additionalOptions>
             </configuration>
             <executions>
@@ -270,7 +272,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.3</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

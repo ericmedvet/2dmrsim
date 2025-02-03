@@ -57,13 +57,14 @@ public class SequentialAgentTester {
       "modular-legged-sin.txt",
       "trained-biped-vsr-centralized-mlp.txt",
       "tripod-vsr-distributed-mlp.txt",
-      "worm-vsr-reactive.txt");
+      "worm-vsr-reactive.txt"
+  );
 
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare task
-    @SuppressWarnings("unchecked")
-    Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb.build(TASK);
+    @SuppressWarnings("unchecked") Task<Supplier<EmbodiedAgent>, ?, ?> task = (Task<Supplier<EmbodiedAgent>, ?, ?>) nb
+        .build(TASK);
     for (String agent : AGENTS) {
       System.out.printf("Loading agent description \"%s\"%n", agent);
       InputStream inputStream = AgentTester.class.getResourceAsStream("/agents/%s".formatted(agent));
@@ -88,11 +89,15 @@ public class SequentialAgentTester {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
       // shuffle parameters
       if (agent instanceof NumMultiBrained numMultiBrained) {
-        numMultiBrained.brains().stream()
+        numMultiBrained.brains()
+            .stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np -> {
               System.out.printf(
-                  "Shuffling %d parameters of brain %s %n", ((double[]) np.getParams()).length, np);
+                  "Shuffling %d parameters of brain %s %n",
+                  ((double[]) np.getParams()).length,
+                  np
+              );
               np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
             }));
       }

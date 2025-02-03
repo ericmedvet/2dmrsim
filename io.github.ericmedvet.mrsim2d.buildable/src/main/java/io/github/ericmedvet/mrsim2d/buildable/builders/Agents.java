@@ -42,17 +42,21 @@ import java.util.List;
 @Discoverable(prefixTemplate = "sim|s.agent|a")
 public class Agents {
 
-  private Agents() {}
+  private Agents() {
+  }
 
   @SuppressWarnings("unused")
   public static CentralizedNumGridVSR centralizedNumGridVSR(
       @Param("body") GridBody body,
-      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder) {
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
+  ) {
     return new CentralizedNumGridVSR(
         body,
         numericalDynamicalSystemBuilder.apply(
             MultivariateRealFunction.varNames("x", CentralizedNumGridVSR.nOfInputs(body)),
-            MultivariateRealFunction.varNames("y", CentralizedNumGridVSR.nOfOutputs(body))));
+            MultivariateRealFunction.varNames("y", CentralizedNumGridVSR.nOfOutputs(body))
+        )
+    );
   }
 
   @SuppressWarnings("unused")
@@ -60,22 +64,31 @@ public class Agents {
       @Param("body") GridBody body,
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder,
       @Param("nOfSignals") int nOfSignals,
-      @Param("directional") boolean directional) {
+      @Param("directional") boolean directional
+  ) {
     return new DistributedNumGridVSR(
         body,
         Grid.create(
             body.grid().w(),
             body.grid().h(),
-            k -> body.grid().get(k).element().type().equals(GridBody.VoxelType.NONE)
-                ? null
-                : numericalDynamicalSystemBuilder.apply(
+            k -> body.grid()
+                .get(k)
+                .element()
+                .type()
+                .equals(GridBody.VoxelType.NONE) ? null : numericalDynamicalSystemBuilder.apply(
                     MultivariateRealFunction.varNames(
-                        "x", DistributedNumGridVSR.nOfInputs(body, k, nOfSignals, directional)),
+                        "x",
+                        DistributedNumGridVSR.nOfInputs(body, k, nOfSignals, directional)
+                    ),
                     MultivariateRealFunction.varNames(
                         "y",
-                        DistributedNumGridVSR.nOfOutputs(body, k, nOfSignals, directional)))),
+                        DistributedNumGridVSR.nOfOutputs(body, k, nOfSignals, directional)
+                    )
+                )
+        ),
         nOfSignals,
-        directional);
+        directional
+    );
   }
 
   @SuppressWarnings("unused")
@@ -84,7 +97,8 @@ public class Agents {
       @Param(value = "areaActuation", dS = "sides") NumIndependentVoxel.AreaActuation areaActuation,
       @Param(value = "attachActuation", dB = true) boolean attachActuation,
       @Param(value = "nOfNFCChannels", dI = 1) int nOfNFCChannels,
-      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder) {
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
+  ) {
     return new NumIndependentVoxel(
         sensors,
         areaActuation,
@@ -93,18 +107,25 @@ public class Agents {
         numericalDynamicalSystemBuilder.apply(
             MultivariateRealFunction.varNames("x", NumIndependentVoxel.nOfInputs(sensors, nOfNFCChannels)),
             MultivariateRealFunction.varNames(
-                "y", NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels))));
+                "y",
+                NumIndependentVoxel.nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
+            )
+        )
+    );
   }
 
   @SuppressWarnings("unused")
   public static NumLeggedHybridModularRobot numLeggedHybridModularRobot(
       @Param("modules") List<AbstractLeggedHybridModularRobot.Module> modules,
-      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder) {
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
+  ) {
     return new NumLeggedHybridModularRobot(
         modules,
         numericalDynamicalSystemBuilder.apply(
             MultivariateRealFunction.varNames("x", NumLeggedHybridModularRobot.nOfInputs(modules)),
-            MultivariateRealFunction.varNames("y", NumLeggedHybridModularRobot.nOfOutputs(modules))));
+            MultivariateRealFunction.varNames("y", NumLeggedHybridModularRobot.nOfOutputs(modules))
+        )
+    );
   }
 
   @SuppressWarnings("unused")
@@ -113,10 +134,10 @@ public class Agents {
       @Param(value = "trunkLength", dD = 4 * LeggedMisc.TRUNK_LENGTH) double trunkLength,
       @Param(value = "trunkWidth", dD = LeggedMisc.TRUNK_WIDTH) double trunkWidth,
       @Param(value = "trunkMass", dD = 4 * LeggedMisc.TRUNK_MASS) double trunkMass,
-      @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY)
-          double headMass,
+      @Param(value = "headMass", dD = LeggedMisc.TRUNK_WIDTH * LeggedMisc.TRUNK_WIDTH * LeggedMisc.RIGID_DENSITY) double headMass,
       @Param("headSensors") List<Sensor<?>> headSensors,
-      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder) {
+      @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder
+  ) {
     return new NumLeggedHybridRobot(
         legs,
         trunkLength,
@@ -126,7 +147,9 @@ public class Agents {
         headSensors,
         numericalDynamicalSystemBuilder.apply(
             MultivariateRealFunction.varNames("x", NumLeggedHybridRobot.nOfInputs(legs, headSensors)),
-            MultivariateRealFunction.varNames("y", NumLeggedHybridRobot.nOfOutputs(legs))));
+            MultivariateRealFunction.varNames("y", NumLeggedHybridRobot.nOfOutputs(legs))
+        )
+    );
   }
 
   @SuppressWarnings("unused")

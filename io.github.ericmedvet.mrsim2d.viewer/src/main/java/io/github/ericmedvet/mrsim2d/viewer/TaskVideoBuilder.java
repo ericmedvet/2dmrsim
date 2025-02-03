@@ -92,7 +92,8 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
       String title,
       double startTime,
       double endTime,
-      double frameRate) {
+      double frameRate
+  ) {
     this.task = task;
     this.drawerBuilder = drawerBuilder;
     this.engineSupplier = engineSupplier;

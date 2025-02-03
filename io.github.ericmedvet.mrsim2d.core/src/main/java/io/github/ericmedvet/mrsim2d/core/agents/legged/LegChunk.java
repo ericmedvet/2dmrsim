@@ -32,4 +32,5 @@ public record LegChunk(
     RotationalJoint.Motor motor,
     DoubleRange activeAngleRange,
     ConnectorType upConnector,
-    List<Sensor<?>> jointSensors) {}
+    List<Sensor<?>> jointSensors
+) {}

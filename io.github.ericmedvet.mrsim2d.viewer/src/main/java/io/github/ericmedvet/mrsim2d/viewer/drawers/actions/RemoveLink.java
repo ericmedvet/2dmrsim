@@ -29,8 +29,7 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.util.function.BiPredicate;
 
-public class RemoveLink
-    extends AbstractLastingActionOutcomeDrawer<io.github.ericmedvet.mrsim2d.core.actions.RemoveLink, Anchor.Link> {
+public class RemoveLink extends AbstractLastingActionOutcomeDrawer<io.github.ericmedvet.mrsim2d.core.actions.RemoveLink, Anchor.Link> {
 
   private static final Color COLOR = Color.RED;
 
@@ -49,7 +48,9 @@ public class RemoveLink
 
   @Override
   protected BiPredicate<Double, Graphics2D> innerBuildTask(
-      double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.RemoveLink, Anchor.Link> o) {
+      double t,
+      ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.RemoveLink, Anchor.Link> o
+  ) {
     return (dT, g) -> {
       if (o.outcome().isPresent()) {
         g.setColor(color);

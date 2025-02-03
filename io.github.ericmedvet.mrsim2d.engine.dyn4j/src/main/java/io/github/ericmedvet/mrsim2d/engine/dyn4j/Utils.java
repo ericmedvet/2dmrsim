@@ -37,13 +37,13 @@ public class Utils {
   private static final double NATIVE_THRESHOLD = 100;
   private static final HullGenerator HULL_GENERATOR = new GrahamScan();
 
-  private Utils() {}
+  private Utils() {
+  }
 
   public enum DecomposeMethod {
-    NATIVE_SWEEP_LINE(SweepLine::new),
-    NATIVE_BAYAZIT(Bayazit::new),
-    NATIVE_EAR_CLIPPING(EarClipping::new),
-    Y_SECTION(null);
+    NATIVE_SWEEP_LINE(SweepLine::new), NATIVE_BAYAZIT(Bayazit::new), NATIVE_EAR_CLIPPING(EarClipping::new), Y_SECTION(
+        null
+    );
 
     private final Supplier<Decomposer> decomposer;
 
@@ -72,10 +72,14 @@ public class Utils {
       if (method.getDecomposer().get() instanceof Triangulator triangulator) {
         return triangulator
             .triangulate(
-                Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new))
+                Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)
+            )
             .stream()
-            .map(t -> new Poly(
-                Arrays.stream(t.getVertices()).map(Utils::point).toArray(Point[]::new)))
+            .map(
+                t -> new Poly(
+                    Arrays.stream(t.getVertices()).map(Utils::point).toArray(Point[]::new)
+                )
+            )
             .toList();
       }
       return method
@@ -87,10 +91,13 @@ public class Utils {
             if (c instanceof Polygon polygon) {
               Vector2[] vertices = polygon.getVertices();
               return new Poly(
-                  Arrays.stream(vertices).map(Utils::point).toArray(Point[]::new));
+                  Arrays.stream(vertices).map(Utils::point).toArray(Point[]::new)
+              );
             }
-            throw new IllegalArgumentException("Unsupported convex type %s"
-                .formatted(c.getClass().getSimpleName()));
+            throw new IllegalArgumentException(
+                "Unsupported convex type %s"
+                    .formatted(c.getClass().getSimpleName())
+            );
           })
           .toList();
     }
@@ -100,8 +107,7 @@ public class Utils {
           .distinct()
           .sorted(Comparator.comparingDouble(x -> x))
           .toList();
-      List<Segment> nonVerticalSides =
-          poly.sides().stream().filter(s -> s.p1().x() != s.p2().x()).toList();
+      List<Segment> nonVerticalSides = poly.sides().stream().filter(s -> s.p1().x() != s.p2().x()).toList();
       List<Poly> polies = new ArrayList<>();
       for (int i = 1; i < xs.size(); i = i + 1) {
         double x1 = xs.get(i - 1);
@@ -123,38 +129,46 @@ public class Utils {
         // check number (>2 <5)
         if (ys1.size() + ys2.size() <= 2) {
           throw new IllegalArgumentException(
-              "Unsupported poly type: 0 thickness at [%.3f,%3f]".formatted(x1, x2));
+              "Unsupported poly type: 0 thickness at [%.3f,%3f]".formatted(x1, x2)
+          );
         }
         if (ys1.size() > 4) {
           throw new IllegalArgumentException(
-              "Unsupported poly type: %d>4 intersections at %.3f".formatted(ys1.size(), x1));
+              "Unsupported poly type: %d>4 intersections at %.3f".formatted(ys1.size(), x1)
+          );
         }
         if (ys2.size() > 4) {
           throw new IllegalArgumentException(
-              "Unsupported poly type: %d>4 intersections at %.3f".formatted(ys2.size(), x2));
+              "Unsupported poly type: %d>4 intersections at %.3f".formatted(ys2.size(), x2)
+          );
         }
         // build poly
         List<Point> points = Stream.of(
-                new Point(
-                    x1,
-                    ys1.stream()
-                        .min(Comparator.comparingDouble(v -> v))
-                        .orElseThrow()),
-                new Point(
-                    x2,
-                    ys2.stream()
-                        .min(Comparator.comparingDouble(v -> v))
-                        .orElseThrow()),
-                new Point(
-                    x2,
-                    ys2.stream()
-                        .max(Comparator.comparingDouble(v -> v))
-                        .orElseThrow()),
-                new Point(
-                    x1,
-                    ys1.stream()
-                        .max(Comparator.comparingDouble(v -> v))
-                        .orElseThrow()))
+            new Point(
+                x1,
+                ys1.stream()
+                    .min(Comparator.comparingDouble(v -> v))
+                    .orElseThrow()
+            ),
+            new Point(
+                x2,
+                ys2.stream()
+                    .min(Comparator.comparingDouble(v -> v))
+                    .orElseThrow()
+            ),
+            new Point(
+                x2,
+                ys2.stream()
+                    .max(Comparator.comparingDouble(v -> v))
+                    .orElseThrow()
+            ),
+            new Point(
+                x1,
+                ys1.stream()
+                    .max(Comparator.comparingDouble(v -> v))
+                    .orElseThrow()
+            )
+        )
             .distinct()
             .toList();
         polies.add(new Poly(points.toArray(Point[]::new)));
@@ -173,8 +187,11 @@ public class Utils {
   }
 
   public static Polygon poly(Poly poly) {
-    return new Polygon(HULL_GENERATOR.generate(
-        Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)));
+    return new Polygon(
+        HULL_GENERATOR.generate(
+            Arrays.stream(poly.vertexes()).map(Utils::point).toArray(Vector2[]::new)
+        )
+    );
   }
 
   private static Poly poly(Polygon polygon) {

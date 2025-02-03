@@ -49,12 +49,11 @@ public class VideoUtils {
   private static final EncoderFacility DEFAULT_ENCODER = EncoderFacility.JCODEC;
   private static final Logger L = Logger.getLogger(VideoUtils.class.getName());
 
-  private VideoUtils() {}
+  private VideoUtils() {
+  }
 
   public enum EncoderFacility {
-    JCODEC,
-    FFMPEG_LARGE,
-    FFMPEG_SMALL
+    JCODEC, FFMPEG_LARGE, FFMPEG_SMALL
   }
 
   public static void bufImgToPicture(BufferedImage src, Picture dst) {
@@ -78,8 +77,12 @@ public class VideoUtils {
     }
   }
 
-  public static void encodeAndSave(List<BufferedImage> images, double frameRate, File file, EncoderFacility encoder)
-      throws IOException {
+  public static void encodeAndSave(
+      List<BufferedImage> images,
+      double frameRate,
+      File file,
+      EncoderFacility encoder
+  ) throws IOException {
     switch (encoder) {
       case JCODEC -> encodeAndSaveWithJCodec(images, frameRate, file);
       case FFMPEG_LARGE -> encodeAndSaveWithFFMpeg(images, frameRate, file, 18);
@@ -92,7 +95,11 @@ public class VideoUtils {
   }
 
   private static void encodeAndSaveWithFFMpeg(
-      List<BufferedImage> images, double frameRate, File file, int compression) throws IOException {
+      List<BufferedImage> images,
+      double frameRate,
+      File file,
+      int compression
+  ) throws IOException {
     // save all files
     String workingDirName = file.getAbsoluteFile().getParentFile().getPath();
     String imagesDirName = workingDirName + File.separator + "imgs." + System.currentTimeMillis();
@@ -108,7 +115,11 @@ public class VideoUtils {
     // invoke ffmpeg
     String command = String.format(
         "ffmpeg -y -r %d -i %s/frame%%06d.jpg -vcodec libx264 -crf %d -pix_fmt yuv420p %s",
-        (int) Math.round(frameRate), imagesDirName, compression, file.getPath());
+        (int) Math.round(frameRate),
+        imagesDirName,
+        compression,
+        file.getPath()
+    );
     L.fine(String.format("Running: %s", command));
     ProcessBuilder pb = new ProcessBuilder(command.split(" "));
     pb.directory(new File(workingDirName));
@@ -140,11 +151,19 @@ public class VideoUtils {
     }
   }
 
-  private static void encodeAndSaveWithJCodec(List<BufferedImage> images, double frameRate, File file)
-      throws IOException {
+  private static void encodeAndSaveWithJCodec(
+      List<BufferedImage> images,
+      double frameRate,
+      File file
+  ) throws IOException {
     SeekableByteChannel channel = NIOUtils.writableChannel(file);
     SequenceEncoder encoder = new SequenceEncoder(
-        channel, Rational.R((int) Math.round(frameRate), 1), Format.MOV, org.jcodec.common.Codec.H264, null);
+        channel,
+        Rational.R((int) Math.round(frameRate), 1),
+        Format.MOV,
+        org.jcodec.common.Codec.H264,
+        null
+    );
     // encode
     try {
       for (BufferedImage image : images) {

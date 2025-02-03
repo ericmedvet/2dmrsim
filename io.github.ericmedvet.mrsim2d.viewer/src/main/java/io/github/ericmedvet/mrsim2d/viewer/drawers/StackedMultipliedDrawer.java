@@ -49,7 +49,8 @@ public class StackedMultipliedDrawer<T> implements Drawer {
       double heightRatio,
       Direction direction,
       VerticalPosition verticalPosition,
-      HorizontalPosition horizontalPosition) {
+      HorizontalPosition horizontalPosition
+  ) {
     this.innerDrawerSupplier = innerDrawerSupplier;
     this.multiplier = multiplier;
     this.widthRatio = widthRatio;
@@ -78,26 +79,22 @@ public class StackedMultipliedDrawer<T> implements Drawer {
     }
     // prepare bounding boxes
     double nOfChildren = lists.size();
-    double bbW =
-        switch (direction) {
-          case VERTICAL -> widthRatio;
-          case HORIZONTAL -> widthRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
-        };
-    double bbH =
-        switch (direction) {
-          case VERTICAL -> heightRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
-          case HORIZONTAL -> heightRatio;
-        };
-    double x =
-        switch (horizontalPosition) {
-          case LEFT -> MARGIN_RATIO;
-          case RIGHT -> 1d - bbW - MARGIN_RATIO;
-        };
-    double y =
-        switch (verticalPosition) {
-          case TOP -> MARGIN_RATIO;
-          case BOTTOM -> 1d - bbH - MARGIN_RATIO;
-        };
+    double bbW = switch (direction) {
+      case VERTICAL -> widthRatio;
+      case HORIZONTAL -> widthRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
+    };
+    double bbH = switch (direction) {
+      case VERTICAL -> heightRatio * nOfChildren + MARGIN_RATIO * (nOfChildren - 1);
+      case HORIZONTAL -> heightRatio;
+    };
+    double x = switch (horizontalPosition) {
+      case LEFT -> MARGIN_RATIO;
+      case RIGHT -> 1d - bbW - MARGIN_RATIO;
+    };
+    double y = switch (verticalPosition) {
+      case TOP -> MARGIN_RATIO;
+      case BOTTOM -> 1d - bbH - MARGIN_RATIO;
+    };
     // iterate
     boolean drawn = false;
     for (int i = 0; i < lists.size(); i++) {

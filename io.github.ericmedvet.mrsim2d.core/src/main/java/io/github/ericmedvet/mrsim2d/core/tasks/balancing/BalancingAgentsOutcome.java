@@ -29,14 +29,16 @@ public class BalancingAgentsOutcome extends AgentsOutcome<BalancingObservation> 
   }
 
   public double avgSwingAngle() {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .mapToDouble(bo -> Math.abs(bo.getSwingAngle()))
         .average()
         .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));
   }
 
   public double avgSwingAngleWithMalus(double malus) {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .mapToDouble(bo -> Math.abs(bo.getSwingAngle()) + (bo.areAllAgentsOnSwing() ? 0 : malus))
         .average()
         .orElseThrow(() -> new IllegalArgumentException("No observations: cannot compute average angle"));

@@ -39,7 +39,8 @@ public record Point(double x, double y) implements Shape {
         Arrays.stream(points)
             .mapToDouble(Point::y)
             .average()
-            .orElseThrow(() -> new IllegalArgumentException("There has to be at least one point")));
+            .orElseThrow(() -> new IllegalArgumentException("There has to be at least one point"))
+    );
   }
 
   public static Point max(Point... points) {

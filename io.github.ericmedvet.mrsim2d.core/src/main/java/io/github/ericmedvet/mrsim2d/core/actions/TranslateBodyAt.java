@@ -28,8 +28,9 @@ import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record TranslateBodyAt(Body body, BoundingBox.Anchor anchor, Point destination)
-    implements SelfDescribedAction<Body> {
+public record TranslateBodyAt(
+    Body body, BoundingBox.Anchor anchor, Point destination
+) implements SelfDescribedAction<Body> {
   @Override
   public Body perform(ActionPerformer performer, Agent agent) throws ActionException {
     Point anchorPoint = body.poly().boundingBox().anchor(anchor);
