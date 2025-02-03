@@ -25,13 +25,17 @@ import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.Action;
 import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
+import io.github.ericmedvet.mrsim2d.core.XMirrorer;
 import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public abstract class NumGridVSR extends AbstractGridVSR {
+
+  private static final UnaryOperator<Action<Object>> X_MIRRORING_FILTER = new XMirrorer<Action<Object>, Object>();
 
   protected static final DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   protected static final DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
@@ -124,7 +128,8 @@ public abstract class NumGridVSR extends AbstractGridVSR {
             .map(e -> new ActuateVoxel((Voxel) e.value(), sideMap(outputGrid.get(e.key()))))
             .toList()
     );
-    return actions;
+    //noinspection unchecked
+    return xMirrored ? actions.stream().map(a -> X_MIRRORING_FILTER.apply((Action<Object>) a)).toList() : actions;
   }
 
   public GridBody getBody() {

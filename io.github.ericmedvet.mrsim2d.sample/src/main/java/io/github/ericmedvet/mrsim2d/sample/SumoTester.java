@@ -20,6 +20,7 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
@@ -42,7 +43,7 @@ public class SumoTester {
   private static final String CENTRALIZED_BIPED = """
       s.a.centralizedNumGridVSR(
         body = s.a.vsr.gridBody(
-          shape = s.a.vsr.s.free(s="srss-sr..");
+          shape = s.a.vsr.s.free(s="rss-sss-s.r");
           sensorizingFunction = s.a.vsr.sf.directional(
             headSensors = [s.s.d(a = -15; r = 5)]
           )
@@ -51,12 +52,30 @@ public class SumoTester {
       )
       """;
 
+  private static final String DISTRIBUTED_BIPED = """
+      s.a.distributedNumGridVSR(
+        body = s.a.vsr.gridBody(
+          shape = s.a.vsr.s.free(s="rss-sss-s.r");
+          sensorizingFunction = s.a.vsr.sf.directional(
+            headSensors = [s.s.d(a = -15; r = 5)];
+            sSensors = [s.s.sin()];
+            sensors = [s.s.ar()]
+          )
+        );
+        nOfSignals = 1;
+        function = ds.num.mlp()
+      )
+      """;
+
   public static void main(String[] args) {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER_STRING)).apply("test");
     Sumo sumo = new Sumo(30);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Supplier<EmbodiedAgent> eas1 = () -> reparametrize((EmbodiedAgent) nb.build(CENTRALIZED_BIPED), i -> 0.5d);
+    Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
+        (EmbodiedAgent) nb.build(DISTRIBUTED_BIPED),
+        i -> DoubleRange.SYMMETRIC_UNIT.points(5).toArray()[i % 5]
+    );
     sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
   }
 

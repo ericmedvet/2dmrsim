@@ -20,19 +20,12 @@
 package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
-import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
-import io.github.ericmedvet.mrsim2d.core.Mirrorable;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.XMirrorer;
-import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
-import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
-import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgentAt;
+import io.github.ericmedvet.mrsim2d.core.*;
+import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
-import io.github.ericmedvet.mrsim2d.core.geometry.Path;
-import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
+import io.github.ericmedvet.mrsim2d.core.geometry.*;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
@@ -77,19 +70,17 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
             .toPoly(),
         new DoubleRange(HOLE_W, HOLE_W + FLAT_W)
     );
-    System.out.println(terrain);
     double groundH = HOLE_H;
-    EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
-    EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
-    // TODO: move actions-filter to NumGridVSR
-    if (agent2 instanceof Mirrorable mirrorable) {
-      mirrorable.mirror();
-    }
-    engine.registerActionsFilter(agent1, new XMirrorer<>());
-    engine.registerActionsFilter(agent2, new XMirrorer<>());
+
+    RigidBody box4 = engine.perform(new CreateRigidBody(Poly.regular(1, 4), 1)).outcome().orElseThrow();
+    RigidBody box6 = engine.perform(new CreateRigidBody(Poly.regular(1, 6), 1)).outcome().orElseThrow();
+    engine.perform(new TranslateBody(box4, new Point(terrain.withinBordersXRange().center(), groundH + 3)));
+    engine.perform(new TranslateBody(box6, new Point(terrain.withinBordersXRange().center(), groundH + 6)));
+
     engine.perform(new CreateUnmovableBody(terrain.poly()));
+    // put agent 1 on left
+    EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
     engine.perform(new AddAgent(agent1));
-    engine.perform(new AddAgent(agent2));
     engine.perform(
         new TranslateAgentAt(
             agent1,
@@ -97,6 +88,14 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
             new Point(terrain.withinBordersXRange().min(), groundH + initialYGap)
         )
     );
+    // put agent 2 on right
+    EmbodiedAgent agent2 = embodiedAgentSupplier2.get();
+    if (agent2 instanceof XMirrorable xMirrorable) {
+      xMirrorable.mirror();
+    } else {
+      throw new IllegalArgumentException("Agent2 must be XMirrorable");
+    }
+    engine.perform(new AddAgent(agent2));
     engine.perform(
         new TranslateAgentAt(
             agent2,

@@ -41,7 +41,8 @@ public class VSRSensorizingFunctions {
       @Param(value = "eSensors") List<Sensor<? super Voxel>> eSensors,
       @Param(value = "sSensors") List<Sensor<? super Voxel>> sSensors,
       @Param(value = "wSensors") List<Sensor<? super Voxel>> wSensors,
-      @Param(value = "headSensors") List<Sensor<? super Voxel>> headSensors
+      @Param(value = "headSensors") List<Sensor<? super Voxel>> headSensors,
+      @Param(value = "sensors") List<Sensor<? super Voxel>> sensors
   ) {
     return shape -> Grid.create(shape.w(), shape.h(), (Integer x, Integer y) -> {
       if (!shape.get(x, y)) {
@@ -67,7 +68,7 @@ public class VSRSensorizingFunctions {
           .toList()
           .getFirst()
           .key();
-      List<Sensor<? super Voxel>> localSensors = new ArrayList<>();
+      List<Sensor<? super Voxel>> localSensors = new ArrayList<>(sensors);
       if (x == maxX) {
         localSensors.addAll(eSensors);
       }

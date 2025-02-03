@@ -19,6 +19,6 @@
  */
 package io.github.ericmedvet.mrsim2d.core;
 
-public interface Mirrorable {
+public interface XMirrorable {
   void mirror();
 }
