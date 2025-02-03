@@ -46,7 +46,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       GridBody body,
       Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid,
       int nOfSignals,
-      boolean directional) {
+      boolean directional
+  ) {
     super(body);
     int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
     body.grid().entries().forEach(e -> {
@@ -59,7 +60,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
             .get(e.key())
             .checkDimension(
                 nOfInputs(body, e.key(), nOfSignals, directional),
-                nOfOutputs(body, e.key(), nOfSignals, directional));
+                nOfOutputs(body, e.key(), nOfSignals, directional)
+            );
       }
     });
     this.nOfSignals = nOfSignals;
@@ -67,9 +69,15 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     this.numericalDynamicalSystemGrid = numericalDynamicalSystemGrid;
     signalsGrid = bodyGrid.map(v -> v != null ? new double[communicationSize] : null);
     fullInputsGrid = Grid.create(
-        body.grid().w(), body.grid().h(), k -> new double[nOfInputs(body, k, nOfSignals, directional)]);
+        body.grid().w(),
+        body.grid().h(),
+        k -> new double[nOfInputs(body, k, nOfSignals, directional)]
+    );
     fullOutputsGrid = Grid.create(
-        body.grid().w(), body.grid().h(), k -> new double[nOfOutputs(body, k, nOfSignals, directional)]);
+        body.grid().w(),
+        body.grid().h(),
+        k -> new double[nOfOutputs(body, k, nOfSignals, directional)]
+    );
     mirrored = false;
   }
 
@@ -97,17 +105,22 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
 
   @Override
   public List<BrainIO> brainIOs() {
-    return getBody().grid().stream()
+    return getBody().grid()
+        .stream()
         .filter(e -> !e.value().element().type().equals(GridBody.VoxelType.NONE))
-        .map(e -> new BrainIO(
-            new RangedValues(fullInputsGrid.get(e.key()), INPUT_RANGE),
-            new RangedValues(fullOutputsGrid.get(e.key()), OUTPUT_RANGE)))
+        .map(
+            e -> new BrainIO(
+                new RangedValues(fullInputsGrid.get(e.key()), INPUT_RANGE),
+                new RangedValues(fullOutputsGrid.get(e.key()), OUTPUT_RANGE)
+            )
+        )
         .toList();
   }
 
   @Override
   public List<NumericalDynamicalSystem<?>> brains() {
-    return numericalDynamicalSystemGrid.values().stream()
+    return numericalDynamicalSystemGrid.values()
+        .stream()
         .filter(Objects::nonNull)
         .toList();
   }
@@ -125,11 +138,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       double[] signals2 = getLastSignals(key.x(), key.y() - 1, 2);
       double[] signals3 = getLastSignals(mirrored ? key.x() + 1 : key.x() - 1, key.y(), 3);
       double[] fullInputs = Stream.of(
-              sensoryInputs,
-              signals0,
-              mirrored ? signals3 : signals1,
-              signals2,
-              mirrored ? signals1 : signals3)
+          sensoryInputs,
+          signals0,
+          mirrored ? signals3 : signals1,
+          signals2,
+          mirrored ? signals1 : signals3
+      )
           .flatMapToDouble(Arrays::stream)
           .toArray();
       fullInputsGrid.set(key, fullInputs);
@@ -141,9 +155,15 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       }
       double[] inputs = fullInputsGrid.get(key);
       if (inputs.length != numericalDynamicalSystemGrid.get(key).nOfInputs()) {
-        throw new IllegalArgumentException(String.format(
-            "Wrong number of inputs in position (%d,%d): %d expected, %d found",
-            key.x(), key.y(), numericalDynamicalSystemGrid.get(key).nOfInputs(), inputs.length));
+        throw new IllegalArgumentException(
+            String.format(
+                "Wrong number of inputs in position (%d,%d): %d expected, %d found",
+                key.x(),
+                key.y(),
+                numericalDynamicalSystemGrid.get(key).nOfInputs(),
+                inputs.length
+            )
+        );
       }
       fullOutputsGrid.set(key, numericalDynamicalSystemGrid.get(key).step(t, inputs));
     }
@@ -156,8 +176,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       double[] fullOutputs = fullOutputsGrid.get(key);
       double actuationValue = fullOutputs[0];
       double[] signals = Arrays.stream(fullOutputs, 1, fullOutputs.length).toArray();
-      outputsGrid.set(key, new double[] {actuationValue, actuationValue, actuationValue, actuationValue});
-      signals = mirrored ? new double[] {signals[0], signals[3], signals[2], signals[1]} : signals;
+      outputsGrid.set(key, new double[]{actuationValue, actuationValue, actuationValue, actuationValue});
+      signals = mirrored ? new double[]{signals[0], signals[3], signals[2], signals[1]} : signals;
 
       signalsGrid.set(key, signals);
     }
@@ -169,9 +189,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       return new double[nOfSignals];
     }
     double[] allSignals = signalsGrid.get(x, y);
-    return directional
-        ? Arrays.stream(allSignals, c * nOfSignals, (c + 1) * nOfSignals)
-            .toArray()
-        : allSignals;
+    return directional ? Arrays.stream(allSignals, c * nOfSignals, (c + 1) * nOfSignals)
+        .toArray() : allSignals;
   }
 }

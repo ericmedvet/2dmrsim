@@ -49,9 +49,9 @@ public class TrainingTester {
   private static final Logger L = Logger.getLogger(TrainingTester.class.getName());
 
   private static Object fromBase64(String content) throws IOException {
-    try (ByteArrayInputStream bais =
-            new ByteArrayInputStream(Base64.getDecoder().decode(content));
-        ObjectInputStream ois = new ObjectInputStream(bais)) {
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(
+        Base64.getDecoder().decode(content)
+    ); ObjectInputStream ois = new ObjectInputStream(bais)) {
       return ois.readObject();
     } catch (Throwable t) {
       throw new IOException(t);
@@ -61,13 +61,11 @@ public class TrainingTester {
   public static void main(String[] args) {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare engine
-    Supplier<Engine> engineSupplier =
-        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // do single task
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>)
-            nb.build(
-                "sim.drawer(framer = sim.staticFramer(minX = 15.0; maxX = 45.0; minY = 10.0; maxY = 25.0); actions = true)"))
+    @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(
+        "sim.drawer(framer = sim.staticFramer(minX = 15.0; maxX = 45.0; minY = 10.0; maxY = 25.0); actions = true)"
+    ))
         .apply("test");
     taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer)).run();
     System.exit(0);
@@ -75,15 +73,14 @@ public class TrainingTester {
 
   private static double profile(Runnable runnable, int nOfTimes) {
     return IntStream.range(0, nOfTimes)
-            .mapToDouble(i -> {
-              Instant startingInstant = Instant.now();
-              runnable.run();
-              return Duration.between(startingInstant, Instant.now())
-                  .toMillis();
-            })
-            .average()
-            .orElse(Double.NaN)
-        / 1000d;
+        .mapToDouble(i -> {
+          Instant startingInstant = Instant.now();
+          runnable.run();
+          return Duration.between(startingInstant, Instant.now())
+              .toMillis();
+        })
+        .average()
+        .orElse(Double.NaN) / 1000d;
   }
 
   private static String readResource(String resourcePath) throws IOException {
@@ -120,16 +117,16 @@ public class TrainingTester {
     }
 
     RandomGenerator rg = new Random(1);
-    double[] ws13 = new double[] {0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
-    double[] ws38 =
-        IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
+    double[] ws13 = new double[]{0d, 1d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 0d, 0d, 0d};
+    double[] ws38 = IntStream.range(0, 38).mapToDouble(i -> 10 * rg.nextGaussian()).toArray();
     // prepare supplier
     Supplier<EmbodiedAgent> agentSupplier = () -> {
       EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
 
       if (agent instanceof NumMultiBrained numMultiBrained) {
 
-        numMultiBrained.brains().stream()
+        numMultiBrained.brains()
+            .stream()
             .map(b -> Composed.shallowest(b, NumericalParametrized.class))
             .forEach(o -> o.ifPresent(np -> np.setParams(ws38)));
       }

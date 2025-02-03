@@ -36,7 +36,8 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
   public List<Point> getAgentPositions() {
     return List.of(
         snapshots().firstEntry().getValue().getCenters().getFirst(),
-        snapshots().lastEntry().getValue().getCenters().getFirst());
+        snapshots().lastEntry().getValue().getCenters().getFirst()
+    );
   }
 
   public List<Point> getBoxPositions() {
@@ -52,11 +53,13 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
             .getValue()
             .getRigidBodyPoly()
             .boundingBox()
-            .center());
+            .center()
+    );
   }
 
   public double getMaxYTerrain() {
-    return observations.values().stream()
+    return observations.values()
+        .stream()
         .flatMap(obs -> obs.getAgents().stream())
         .mapToDouble(AgentsObservation.Agent::terrainHeight)
         .max()
@@ -64,11 +67,14 @@ public class TrainingSumoAgentOutcome extends AgentsOutcome<TrainingSumoObservat
   }
 
   public double getMaxYBox() {
-    return snapshots().values().stream()
-        .mapToDouble(obs -> Arrays.stream(obs.getRigidBodyPoly().vertexes())
-            .mapToDouble(Point::y)
-            .max()
-            .orElse(Double.NaN))
+    return snapshots().values()
+        .stream()
+        .mapToDouble(
+            obs -> Arrays.stream(obs.getRigidBodyPoly().vertexes())
+                .mapToDouble(Point::y)
+                .max()
+                .orElse(Double.NaN)
+        )
         .max()
         .orElse(Double.NaN);
   }

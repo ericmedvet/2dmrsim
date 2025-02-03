@@ -32,7 +32,8 @@ public class TrainingFightAgentOutcome extends AgentsOutcome<TrainingFightObserv
   }
 
   public double getMaxYTerrain() {
-    return observations.values().stream()
+    return observations.values()
+        .stream()
         .flatMap(obs -> obs.getAgents().stream())
         .mapToDouble(AgentsObservation.Agent::terrainHeight)
         .max()
@@ -40,61 +41,65 @@ public class TrainingFightAgentOutcome extends AgentsOutcome<TrainingFightObserv
   }
 
   public Point getAgent1InitialPosition() {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .map(observation -> observation.getCenters().getFirst())
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Point getAgent2InitialPosition() {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .map(observation -> observation.getCenters().getLast())
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Point getAgent1FinalPosition() {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .map(observation -> observation.getCenters().getFirst())
         .reduce((first, second) -> second)
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Point getAgent2FinalPosition() {
-    return snapshots().values().stream()
+    return snapshots().values()
+        .stream()
         .map(observation -> observation.getCenters().getLast())
         .reduce((first, second) -> second)
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Double getAgent1InitialMaxY() {
-    return snapshots().values().stream()
-        .map(observation ->
-            observation.getBoundingBoxes().getFirst().max().y())
+    return snapshots().values()
+        .stream()
+        .map(observation -> observation.getBoundingBoxes().getFirst().max().y())
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Double getAgent2InitialMaxY() {
-    return snapshots().values().stream()
-        .map(observation ->
-            observation.getBoundingBoxes().getLast().max().y())
+    return snapshots().values()
+        .stream()
+        .map(observation -> observation.getBoundingBoxes().getLast().max().y())
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Double getAgent1FinalMaxY() {
-    return snapshots().values().stream()
-        .map(observation ->
-            observation.getBoundingBoxes().getFirst().max().y())
+    return snapshots().values()
+        .stream()
+        .map(observation -> observation.getBoundingBoxes().getFirst().max().y())
         .reduce((first, second) -> second)
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }
 
   public Double getAgent2FinalMaxY() {
-    return snapshots().values().stream()
-        .map(observation ->
-            observation.getBoundingBoxes().getLast().max().y())
+    return snapshots().values()
+        .stream()
+        .map(observation -> observation.getBoundingBoxes().getLast().max().y())
         .reduce((first, second) -> second)
         .orElseThrow(() -> new IllegalStateException("No observations available"));
   }

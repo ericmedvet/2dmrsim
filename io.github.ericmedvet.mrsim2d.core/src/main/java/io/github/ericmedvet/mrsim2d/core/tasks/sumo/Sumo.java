@@ -63,7 +63,8 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
       Supplier<EmbodiedAgent> embodiedAgentSupplier1,
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
       Engine engine,
-      Consumer<Snapshot> snapshotConsumer) {
+      Consumer<Snapshot> snapshotConsumer
+  ) {
     Terrain terrain = new Terrain(
         new Path(Point.ORIGIN)
             .moveBy(HOLE_W, 0)
@@ -74,7 +75,8 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
             .moveBy(0, -HOLE_H)
             .moveBy(-2 * HOLE_W - FLAT_W, 0)
             .toPoly(),
-        new DoubleRange(HOLE_W, HOLE_W + FLAT_W));
+        new DoubleRange(HOLE_W, HOLE_W + FLAT_W)
+    );
     System.out.println(terrain);
     double groundH = HOLE_H;
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
@@ -88,34 +90,48 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(agent1));
     engine.perform(new AddAgent(agent2));
-    engine.perform(new TranslateAgentAt(
-        agent1,
-        BoundingBox.Anchor.LL,
-        new Point(terrain.withinBordersXRange().min(), groundH + initialYGap)));
-    engine.perform(new TranslateAgentAt(
-        agent2,
-        BoundingBox.Anchor.UL,
-        new Point(terrain.withinBordersXRange().max(), groundH + initialYGap)));
+    engine.perform(
+        new TranslateAgentAt(
+            agent1,
+            BoundingBox.Anchor.LL,
+            new Point(terrain.withinBordersXRange().min(), groundH + initialYGap)
+        )
+    );
+    engine.perform(
+        new TranslateAgentAt(
+            agent2,
+            BoundingBox.Anchor.UL,
+            new Point(terrain.withinBordersXRange().max(), groundH + initialYGap)
+        )
+    );
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
-    while ((engine.t() < duration)
-        && (agent1.boundingBox().max().y() > groundH)
-        && (agent2.boundingBox().max().y() > groundH)) {
+    while ((engine.t() < duration) && (agent1.boundingBox().max().y() > groundH) && (agent2.boundingBox()
+        .max()
+        .y() > groundH)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
       observations.put(
           engine.t(),
-          new SumoAgentsObservation(List.of(
-              new AgentsObservation.Agent(
-                  agent1.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      agent1.boundingBox().center().x())),
-              new AgentsObservation.Agent(
-                  agent2.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      agent2.boundingBox().center().x())))));
+          new SumoAgentsObservation(
+              List.of(
+                  new AgentsObservation.Agent(
+                      agent1.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          agent1.boundingBox().center().x()
+                      )
+                  ),
+                  new AgentsObservation.Agent(
+                      agent2.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          agent2.boundingBox().center().x()
+                      )
+                  )
+              )
+          )
+      );
     }
 
     return new SumoAgentsOutcome(new TreeMap<>(observations));

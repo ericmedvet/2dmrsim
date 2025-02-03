@@ -35,44 +35,43 @@ import java.util.stream.IntStream;
 
 public class SumoTester {
 
-  private static final String DRAWER_STRING =
-      """
-sim.drawer(framer = sim.staticFramer(minX = 9.0; maxX = 26.0; minY = 13.0; maxY = 17.0); actions = true)
-""";
+  private static final String DRAWER_STRING = """
+      sim.drawer(framer = sim.staticFramer(minX = 9.0; maxX = 26.0; minY = 13.0; maxY = 17.0); actions = true)
+      """;
 
-  private static final String CENTRALIZED_BIPED =
-      """
-s.a.centralizedNumGridVSR(
-body = s.a.vsr.gridBody(
-shape = s.a.vsr.s.free(s="srss-sr..");
-sensorizingFunction = s.a.vsr.sf.directional(
-headSensors = [s.s.d(a = -15; r = 5)]
-)
-);
-function = ds.num.sin()
-)
-""";
+  private static final String CENTRALIZED_BIPED = """
+      s.a.centralizedNumGridVSR(
+        body = s.a.vsr.gridBody(
+          shape = s.a.vsr.s.free(s="srss-sr..");
+          sensorizingFunction = s.a.vsr.sf.directional(
+            headSensors = [s.s.d(a = -15; r = 5)]
+          )
+        );
+        function = ds.num.sin()
+      )
+      """;
 
   public static void main(String[] args) {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    @SuppressWarnings("unchecked")
-    Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER_STRING)).apply("test");
+    @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER_STRING)).apply("test");
     Sumo sumo = new Sumo(30);
-    Supplier<Engine> engineSupplier =
-        () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reparametrize((EmbodiedAgent) nb.build(CENTRALIZED_BIPED), i -> 0.5d);
     sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
   }
 
   private static EmbodiedAgent reparametrize(EmbodiedAgent agent, Function<Integer, Double> f) {
     if (agent instanceof NumMultiBrained numMultiBrained) {
-      numMultiBrained.brains().stream()
+      numMultiBrained.brains()
+          .stream()
           .map(b -> Composed.shallowest(b, NumericalParametrized.class))
           .forEach(o -> o.ifPresent(v -> {
             NumericalParametrized<?> np = (NumericalParametrized<?>) v;
-            np.setParams(IntStream.range(0, np.getParams().length)
-                .mapToDouble(f::apply)
-                .toArray());
+            np.setParams(
+                IntStream.range(0, np.getParams().length)
+                    .mapToDouble(f::apply)
+                    .toArray()
+            );
           }));
     }
     return agent;

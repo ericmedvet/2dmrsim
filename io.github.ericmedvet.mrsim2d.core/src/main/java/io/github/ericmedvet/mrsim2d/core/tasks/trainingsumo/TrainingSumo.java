@@ -62,15 +62,15 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
 
   @Override
   public TrainingSumoAgentOutcome run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      Engine engine,
+      Consumer<Snapshot> snapshotConsumer
+  ) {
 
-    double flatW = (terrain.withinBordersXRange().max()
-            - terrain.withinBordersXRange().min())
-        / 4;
+    double flatW = (terrain.withinBordersXRange().max() - terrain.withinBordersXRange().min()) / 4;
 
-    double centerX = ((terrain.withinBordersXRange().min() + flatW)
-            + (terrain.withinBordersXRange().max() - flatW))
-        / 2;
+    double centerX = ((terrain.withinBordersXRange().min() + flatW) + (terrain.withinBordersXRange()
+        .max() - flatW)) / 2;
     double centerY = terrain.maxHeightAt(new DoubleRange(centerX, centerX));
 
     double agentInitialX = centerX - (flatW - 1);
@@ -89,28 +89,40 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
     double rigidBodyMass = 3;
     double rigidBodyAnchorsDensity = 0;
     Point rigidBodyTranslation = new Point(boxInitialX, centerY);
-    RigidBody rigidBody = engine.perform(new CreateAndTranslateRigidBody(
-            rigidBodyPoly, rigidBodyMass, rigidBodyAnchorsDensity, rigidBodyTranslation))
+    RigidBody rigidBody = engine.perform(
+        new CreateAndTranslateRigidBody(
+            rigidBodyPoly,
+            rigidBodyMass,
+            rigidBodyAnchorsDensity,
+            rigidBodyTranslation
+        )
+    )
         .outcome()
         .orElseThrow();
 
     Map<Double, TrainingSumoObservation> observations = new HashMap<>();
     double boxX = rigidBody.poly().boundingBox().center().x();
-    while ((engine.t() < duration)
-        && (rigidBody.poly().boundingBox().max().y() > terrain.maxHeightAt(new DoubleRange(boxX, boxX)))
-        && (agent.boundingBox().max().y() > centerY)) {
+    while ((engine.t() < duration) && (rigidBody.poly().boundingBox().max().y() > terrain.maxHeightAt(
+        new DoubleRange(boxX, boxX)
+    )) && (agent.boundingBox().max().y() > centerY)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
       observations.put(
           engine.t(),
           new TrainingSumoObservation(
-              List.of(new AgentsObservation.Agent(
-                  agent.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      agent.boundingBox().center().x()))),
-              rigidBody));
+              List.of(
+                  new AgentsObservation.Agent(
+                      agent.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          agent.boundingBox().center().x()
+                      )
+                  )
+              ),
+              rigidBody
+          )
+      );
     }
 
     return new TrainingSumoAgentOutcome(new TreeMap<>(observations));

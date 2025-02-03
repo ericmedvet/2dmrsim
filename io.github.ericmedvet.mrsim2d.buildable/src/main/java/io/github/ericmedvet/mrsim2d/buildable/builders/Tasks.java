@@ -49,14 +49,16 @@ public class Tasks {
   @SuppressWarnings("unused")
   public static TrainingSumo trainingSumo(
       @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+  ) {
     return new TrainingSumo(duration, terrain);
   }
 
   @SuppressWarnings("unused")
   public static TrainingFight trainingFight(
       @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+  ) {
     return new TrainingFight(duration, terrain);
   }
 

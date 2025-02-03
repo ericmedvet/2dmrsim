@@ -42,8 +42,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class TrainingFight
-    implements Task<Supplier<EmbodiedAgent>, TrainingFightObservation, TrainingFightAgentOutcome> {
+public class TrainingFight implements Task<Supplier<EmbodiedAgent>, TrainingFightObservation, TrainingFightAgentOutcome> {
 
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
@@ -62,15 +61,15 @@ public class TrainingFight
 
   @Override
   public TrainingFightAgentOutcome run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      Engine engine,
+      Consumer<Snapshot> snapshotConsumer
+  ) {
 
-    double flatW = (terrain.withinBordersXRange().max()
-            - terrain.withinBordersXRange().min())
-        / 4;
+    double flatW = (terrain.withinBordersXRange().max() - terrain.withinBordersXRange().min()) / 4;
 
-    double centerX = ((terrain.withinBordersXRange().min() + flatW)
-            + (terrain.withinBordersXRange().max() - flatW))
-        / 2;
+    double centerX = ((terrain.withinBordersXRange().min() + flatW) + (terrain.withinBordersXRange()
+        .max() - flatW)) / 2;
     double centerY = terrain.maxHeightAt(new DoubleRange(centerX, centerX));
 
     double agent1InitialX = centerX - (flatW - 1);
@@ -99,25 +98,33 @@ public class TrainingFight
     engine.perform(new TranslateAgent(agent2, new Point(0, y2)));
 
     Map<Double, TrainingFightObservation> observations = new HashMap<>();
-    while ((engine.t() < duration)
-        && (agent1.boundingBox().max().y() > centerY)
-        && (agent2.boundingBox().max().y() > centerY)) {
+    while ((engine.t() < duration) && (agent1.boundingBox().max().y() > centerY) && (agent2.boundingBox()
+        .max()
+        .y() > centerY)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 
       observations.put(
           engine.t(),
-          new TrainingFightObservation(List.of(
-              new AgentsObservation.Agent(
-                  agent1.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      agent1.boundingBox().center().x())),
-              new AgentsObservation.Agent(
-                  agent2.bodyParts().stream().map(Body::poly).toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      agent2.boundingBox().center().x())))));
+          new TrainingFightObservation(
+              List.of(
+                  new AgentsObservation.Agent(
+                      agent1.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          agent1.boundingBox().center().x()
+                      )
+                  ),
+                  new AgentsObservation.Agent(
+                      agent2.bodyParts().stream().map(Body::poly).toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          agent2.boundingBox().center().x()
+                      )
+                  )
+              )
+          )
+      );
     }
     return new TrainingFightAgentOutcome(new TreeMap<>(observations));
   }

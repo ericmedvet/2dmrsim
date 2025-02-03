@@ -25,8 +25,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
-public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends BiSimulation<A1, A2, S, O> {
+public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>> extends BiSimulation<A1, A2, S, O> {
 
   O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
 

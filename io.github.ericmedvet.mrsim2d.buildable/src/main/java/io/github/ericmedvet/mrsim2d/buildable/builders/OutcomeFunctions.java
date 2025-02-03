@@ -316,7 +316,8 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> scoreSumoAgentvsBox(
       @Param(value = "transientTime", dD = 0.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
 
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
       TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
@@ -326,8 +327,7 @@ public class OutcomeFunctions {
 
       // Componente fitness basata sulla x:
       double boxDistance = boxPositions.get(1).x() - boxPositions.get(0).x();
-      double agentDistance =
-          agentPositions.get(1).x() - agentPositions.get(0).x();
+      double agentDistance = agentPositions.get(1).x() - agentPositions.get(0).x();
 
       // Componente fitness basata sulla y:
       double agentFallen = 0;
@@ -356,7 +356,8 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> scoreSumoAgent1vs1(
       @Param(value = "transientTime", dD = 0.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingFightAgentOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
 
     Function<TrainingFightAgentOutcome, Double> f = o -> {
       TrainingFightAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
@@ -408,7 +409,8 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> scoreSumoAgent1vs2(
       @Param(value = "transientTime", dD = 0.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
 
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
@@ -459,7 +461,8 @@ public class OutcomeFunctions {
   public static <X> Function<X, Double> scoreSumoAgent2vs1(
       @Param(value = "transientTime", dD = 0.0) double transientTime,
       @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format) {
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
 
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));

@@ -56,11 +56,9 @@ public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) imple
 
   @Override
   public String toString() {
-    return "ActuateVoxel[" + "body="
-        + body + ", values={"
-        + values.entrySet().stream()
-            .map(e -> "%s=%.3f".formatted(e.getKey(), e.getValue()))
-            .collect(Collectors.joining(";"))
-        + "}]";
+    return "ActuateVoxel[" + "body=" + body + ", values={" + values.entrySet()
+        .stream()
+        .map(e -> "%s=%.3f".formatted(e.getKey(), e.getValue()))
+        .collect(Collectors.joining(";")) + "}]";
   }
 }
