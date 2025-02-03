@@ -31,11 +31,35 @@ import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLocomotion;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.StandPiling;
+import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
+import io.github.ericmedvet.mrsim2d.core.tasks.trainingfight.TrainingFight;
+import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "sim|s.task")
 public class Tasks {
   private Tasks() {}
+
+  @SuppressWarnings("unused")
+  public static Sumo sumo(
+      @Param(value = "duration", dD = 60) double duration,
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+    return new Sumo(duration, terrain);
+  }
+
+  @SuppressWarnings("unused")
+  public static TrainingSumo trainingSumo(
+      @Param(value = "duration", dD = 60) double duration,
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+    return new TrainingSumo(duration, terrain);
+  }
+
+  @SuppressWarnings("unused")
+  public static TrainingFight trainingFight(
+      @Param(value = "duration", dD = 60) double duration,
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain) {
+    return new TrainingFight(duration, terrain);
+  }
 
   @SuppressWarnings("unused")
   public static FallPiling fallPiling(

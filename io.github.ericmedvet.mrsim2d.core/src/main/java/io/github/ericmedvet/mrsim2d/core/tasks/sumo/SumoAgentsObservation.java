@@ -1,8 +1,8 @@
 /*-
  * ========================LICENSE_START=================================
- * mrsim2d-sample
+ * mrsim2d-core
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-module io.github.ericmedvet.mrsim2d.sample {
-  requires java.logging;
+package io.github.ericmedvet.mrsim2d.core.tasks.sumo;
 
-  uses io.github.ericmedvet.mrsim2d.core.engine.Engine;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import java.util.List;
 
-  requires io.github.ericmedvet.mrsim2d.core;
-  requires io.github.ericmedvet.mrsim2d.viewer;
-  requires io.github.ericmedvet.jnb.core;
-  requires io.github.ericmedvet.jnb.datastructure;
-  requires io.github.ericmedvet.jsdynsym.core;
-  requires java.desktop;
+public class SumoAgentsObservation extends AgentsObservation {
 
-  exports io.github.ericmedvet.mrsim2d.sample;
+  public SumoAgentsObservation(List<Agent> agents) {
+    super(agents);
+  }
 }

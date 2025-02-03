@@ -43,6 +43,8 @@ public class Terrains {
   public static final double HOLE_W = 5d;
   public static final double END_W = 30d;
   public static final double HOLE_DIS_W = 9d;
+  public static final double FLAT_W = 5d;
+  public static final double FLAT_H = 5d;
 
   private Terrains() {}
 
@@ -106,6 +108,18 @@ public class Terrains {
     p = p.moveBy(endW, 0);
 
     return Terrain.fromPath(p, H, borderW, borderH);
+  }
+
+  @SuppressWarnings("unused")
+  public static Terrain sumoArena(
+      @Param(value = "h", dD = 20) Double h,
+      @Param(value = "borderW", dD = 10) Double borderW,
+      @Param(value = "borderH", dD = 15) Double borderH,
+      @Param(value = "flatW", dD = 10) Double flatW,
+      @Param(value = "flatH", dD = 15) Double flatH) {
+    Path p = new Path(new Point(flatW, 0));
+    p = p.moveBy(0, flatH).moveBy(2 * flatW, 0).moveBy(0, -flatH).moveBy(flatW, 0);
+    return Terrain.fromPath(p, h, borderW, borderH);
   }
 
   @SuppressWarnings("unused")

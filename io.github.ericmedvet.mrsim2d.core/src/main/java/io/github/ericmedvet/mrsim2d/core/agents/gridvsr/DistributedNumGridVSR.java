@@ -22,6 +22,7 @@ package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import io.github.ericmedvet.mrsim2d.core.Mirrorable;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
+public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained, Mirrorable {
 
   private final Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid;
   private final int nOfSignals;
@@ -39,6 +40,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
 
   private final Grid<double[]> fullInputsGrid;
   private final Grid<double[]> fullOutputsGrid;
+  private boolean mirrored;
 
   public DistributedNumGridVSR(
       GridBody body,
@@ -68,6 +70,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
         body.grid().w(), body.grid().h(), k -> new double[nOfInputs(body, k, nOfSignals, directional)]);
     fullOutputsGrid = Grid.create(
         body.grid().w(), body.grid().h(), k -> new double[nOfOutputs(body, k, nOfSignals, directional)]);
+    mirrored = false;
+  }
+
+  @Override
+  public void mirror() {
+    mirrored = !mirrored;
   }
 
   public static int nOfInputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
@@ -113,10 +121,15 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       }
       double[] sensoryInputs = inputsGrid.get(key);
       double[] signals0 = getLastSignals(key.x(), key.y() + 1, 0);
-      double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
+      double[] signals1 = getLastSignals(mirrored ? key.x() - 1 : key.x() + 1, key.y(), 1);
       double[] signals2 = getLastSignals(key.x(), key.y() - 1, 2);
-      double[] signals3 = getLastSignals(key.x() - 1, key.y(), 3);
-      double[] fullInputs = Stream.of(sensoryInputs, signals0, signals1, signals2, signals3)
+      double[] signals3 = getLastSignals(mirrored ? key.x() + 1 : key.x() - 1, key.y(), 3);
+      double[] fullInputs = Stream.of(
+              sensoryInputs,
+              signals0,
+              mirrored ? signals3 : signals1,
+              signals2,
+              mirrored ? signals1 : signals3)
           .flatMapToDouble(Arrays::stream)
           .toArray();
       fullInputsGrid.set(key, fullInputs);
@@ -144,6 +157,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       double actuationValue = fullOutputs[0];
       double[] signals = Arrays.stream(fullOutputs, 1, fullOutputs.length).toArray();
       outputsGrid.set(key, new double[] {actuationValue, actuationValue, actuationValue, actuationValue});
+      signals = mirrored ? new double[] {signals[0], signals[3], signals[2], signals[1]} : signals;
+
       signalsGrid.set(key, signals);
     }
     return outputsGrid;

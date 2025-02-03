@@ -17,25 +17,22 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package io.github.ericmedvet.mrsim2d.core.tasks;
+package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
-import io.github.ericmedvet.jsdynsym.control.BiSimulation;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.engine.Engine;
-import java.util.ServiceLoader;
-import java.util.function.Consumer;
+import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
+import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import java.util.List;
 
-public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>>
-    extends BiSimulation<A1, A2, S, O> {
+public class TrainingSumoObservation extends AgentsObservation {
+  private final Poly rigidBodyPoly;
 
-  O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
-
-  default O run(A1 a1, A2 a2, Engine engine) {
-    return run(a1, a2, engine, snapshot -> {});
+  public TrainingSumoObservation(List<Agent> agents, RigidBody rigidBody) {
+    super(agents);
+    this.rigidBodyPoly = rigidBody.poly();
   }
 
-  @Override
-  default O simulate(A1 a1, A2 a2) {
-    return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
+  public Poly getRigidBodyPoly() {
+    return rigidBodyPoly;
   }
 }
