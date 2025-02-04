@@ -20,7 +20,6 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
@@ -29,16 +28,21 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
+
+import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 public class SumoTester {
 
-  private static final String DRAWER_STRING = """
-      sim.drawer(framer = sim.staticFramer(minX = 9.0; maxX = 26.0; minY = 13.0; maxY = 17.0); actions = true)
+  private static final String FIXED_DRAWER = """
+      sim.drawer(framer = sim.staticFramer(minX = 14.0; maxX = 31.0; minY = 13.0; maxY = 17.0); actions = true)
       """;
+
+  private static final String DRAWER = "sim.drawer(actions = true)";
 
   private static final String CENTRALIZED_BIPED = """
       s.a.centralizedNumGridVSR(
@@ -55,26 +59,29 @@ public class SumoTester {
   private static final String DISTRIBUTED_BIPED = """
       s.a.distributedNumGridVSR(
         body = s.a.vsr.gridBody(
-          shape = s.a.vsr.s.free(s="rss-sss-s.r");
+          shape = s.a.vsr.s.free(s="rsss-ssss-s..r");
           sensorizingFunction = s.a.vsr.sf.directional(
-            headSensors = [s.s.d(a = -15; r = 5)];
-            sSensors = [s.s.sin()];
-            sensors = [s.s.ar()]
+            headSensors = [s.s.d(a = -15; r = 5); s.s.sin()];
+            sSensors = [s.s.d(a = -90; r = 1)];
+            sensors = []
           )
         );
         nOfSignals = 1;
+        directional = true;
         function = ds.num.mlp()
       )
       """;
 
   public static void main(String[] args) {
+    RandomGenerator rg = new Random(7);
+    double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER_STRING)).apply("test");
+    @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
     Sumo sumo = new Sumo(30);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
         (EmbodiedAgent) nb.build(DISTRIBUTED_BIPED),
-        i -> DoubleRange.SYMMETRIC_UNIT.points(5).toArray()[i % 5]
+        i -> rndValues[i % rndValues.length]
     );
     sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
   }

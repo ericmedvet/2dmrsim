@@ -29,14 +29,6 @@ public class XMirrorer<A extends Action<O>, O> implements UnaryOperator<A> {
 
   @Override
   public A apply(A action) {
-    if (action instanceof TranslateBody translateAction) {
-      Body body = translateAction.body();
-      Point translation = translateAction.translation();
-      Point modifiedTranslation = new Point(-translation.x(), translation.y());
-      TranslateBody modifiedAction = new TranslateBody(body, modifiedTranslation);
-      //noinspection unchecked
-      return (A) modifiedAction;
-    }
     if (action instanceof SenseDistanceToBody senseAction) {
       double direction = senseAction.direction();
       double distanceRange = senseAction.distanceRange();

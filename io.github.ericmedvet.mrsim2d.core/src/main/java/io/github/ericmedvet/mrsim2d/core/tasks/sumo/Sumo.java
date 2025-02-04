@@ -29,14 +29,16 @@ import io.github.ericmedvet.mrsim2d.core.geometry.*;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
 
+  private static final boolean STOP_IF_FALLEN = false;
   private static final double INITIAL_Y_GAP = 0.1;
-  private static final double HOLE_W = 10;
+  private static final double HOLE_W = 15;
   private static final double HOLE_H = 15;
   private static final double FLAT_W = 15;
   private final double duration;
@@ -104,7 +106,9 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         )
     );
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
-    while ((engine.t() < duration) && (agent1.boundingBox().max().y() > groundH) && (agent2.boundingBox()
+    while ((engine.t() < duration) && (!STOP_IF_FALLEN || agent1.boundingBox()
+        .max()
+        .y() > groundH) && (!STOP_IF_FALLEN || agent2.boundingBox()
         .max()
         .y() > groundH)) {
       Snapshot snapshot = engine.tick();
