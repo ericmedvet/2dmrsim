@@ -33,8 +33,8 @@ public record CreateAndTranslateRotationalJoint(
     double mass,
     RotationalJoint.Motor motor,
     DoubleRange activeAngleRange,
-    Point translation)
-    implements SelfDescribedAction<RotationalJoint> {
+    Point translation
+) implements SelfDescribedAction<RotationalJoint> {
   @Override
   public RotationalJoint perform(ActionPerformer performer, Agent agent) throws ActionException {
     RotationalJoint rotationalJoint = performer

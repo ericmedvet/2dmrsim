@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public record Path(Point[] points) {
 
   public Path(Point point) {
-    this(new Point[] {point});
+    this(new Point[]{point});
   }
 
   public Path add(Point point) {

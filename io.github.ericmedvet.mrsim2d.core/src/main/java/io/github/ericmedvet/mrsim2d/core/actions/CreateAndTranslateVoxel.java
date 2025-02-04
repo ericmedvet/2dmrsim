@@ -27,8 +27,9 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import io.github.ericmedvet.mrsim2d.core.engine.ActionException;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 
-public record CreateAndTranslateVoxel(double sideLength, double mass, Voxel.Material material, Point translation)
-    implements SelfDescribedAction<Voxel> {
+public record CreateAndTranslateVoxel(
+    double sideLength, double mass, Voxel.Material material, Point translation
+) implements SelfDescribedAction<Voxel> {
   public CreateAndTranslateVoxel(double sideLength, double mass, Point translation) {
     this(sideLength, mass, new Voxel.Material(), translation);
   }

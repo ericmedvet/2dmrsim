@@ -28,19 +28,22 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import java.util.Collection;
 import java.util.Comparator;
 
-public record AttachAnchor(Anchor anchor, Anchorable anchorable, Anchor.Link.Type type)
-    implements SelfDescribedAction<Anchor.Link> {
+public record AttachAnchor(
+    Anchor anchor, Anchorable anchorable, Anchor.Link.Type type
+) implements SelfDescribedAction<Anchor.Link> {
 
   @Override
   public Anchor.Link perform(ActionPerformer performer, Agent agent) {
     // find already attached anchors
-    Collection<Anchor> attachedAnchors = anchor.links().stream()
+    Collection<Anchor> attachedAnchors = anchor.links()
+        .stream()
         .map(Anchor.Link::destination)
         .filter(a -> a.anchorable() == anchorable)
         .distinct()
         .toList();
     // find closest anchor on destination
-    Anchor destination = anchorable.anchors().stream()
+    Anchor destination = anchorable.anchors()
+        .stream()
         .filter(a -> !attachedAnchors.contains(a))
         .min(Comparator.comparingDouble(a -> a.point().distance(anchor.point())))
         .orElse(null);

@@ -40,8 +40,8 @@ import java.util.function.BiFunction;
 public class ReactiveVoxels {
 
   public enum Action {
-    EXPAND(-1d),
-    CONTRACT(1d);
+    EXPAND(-1d), CONTRACT(1d);
+
     private final double value;
 
     Action(double value) {
@@ -53,35 +53,37 @@ public class ReactiveVoxels {
     }
   }
 
-  private static final NumericalDynamicalSystem<StatelessSystem.State> EMPTY_NDS =
-      nss(0, (t, inputs) -> new double[4]);
+  private static final NumericalDynamicalSystem<StatelessSystem.State> EMPTY_NDS = nss(0, (t, inputs) -> new double[4]);
 
-  private ReactiveVoxels() {}
+  private ReactiveVoxels() {
+  }
 
   @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel asin(@Param(value = "f", dD = 1.0) double f) {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(),
-        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t))));
+        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t)))
+    );
   }
 
   @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel aa(
-      @Param(value = "angle", dD = 0d) double a, @Param(value = "action", dS = "expand") Action action) {
+      @Param(value = "angle", dD = 0d) double a,
+      @Param(value = "action", dS = "expand") Action action
+  ) {
     double aDeg = Math.toRadians(a);
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(SenseAngle::new),
         nss(1, (t, inputs) -> {
           Voxel.Side side = fromAngle(inputs[0] + aDeg);
-          return new double[] {
-            side.equals(Voxel.Side.N) ? action.getValue() : 0d,
-            side.equals(Voxel.Side.E) ? action.getValue() : 0d,
-            side.equals(Voxel.Side.S) ? action.getValue() : 0d,
-            side.equals(Voxel.Side.W) ? action.getValue() : 0d
+          return new double[]{side.equals(Voxel.Side.N) ? action.getValue() : 0d, side.equals(Voxel.Side.E) ? action
+              .getValue() : 0d, side.equals(Voxel.Side.S) ? action.getValue() : 0d, side.equals(Voxel.Side.W) ? action
+                  .getValue() : 0d
           };
-        }));
+        })
+    );
   }
 
   private static Voxel.Side fromAngle(double a) {
@@ -104,13 +106,18 @@ public class ReactiveVoxels {
   public static ReactiveGridVSR.ReactiveVoxel asld(
       @Param(value = "duration", dD = 0.2) double duration,
       @Param(value = "threshold", dD = 0.05) double threshold,
-      @Param(value = "action", dS = "expand") Action action) {
+      @Param(value = "action", dS = "expand") Action action
+  ) {
     Sensor<? super Voxel> sn = v -> new SenseSideCompression(Voxel.Side.N, v);
     Sensor<? super Voxel> se = v -> new SenseSideCompression(Voxel.Side.E, v);
     Sensor<? super Voxel> ss = v -> new SenseSideCompression(Voxel.Side.S, v);
     Sensor<? super Voxel> sw = v -> new SenseSideCompression(Voxel.Side.W, v);
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    List<Sensor<? super Body>> sensors = List.of((Sensor) sn, (Sensor) se, (Sensor) ss, (Sensor) sw);
+    @SuppressWarnings({"unchecked", "rawtypes"}) List<Sensor<? super Body>> sensors = List.of(
+        (Sensor) sn,
+        (Sensor) se,
+        (Sensor) ss,
+        (Sensor) sw
+    );
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         sensors,
@@ -154,14 +161,13 @@ public class ReactiveVoxels {
               lastEWT = t;
             }
             // apply
-            return new double[] {
-              t - lastNST < duration ? action.getValue() : 0d,
-              t - lastEWT < duration ? action.getValue() : 0d,
-              t - lastNST < duration ? action.getValue() : 0d,
-              t - lastEWT < duration ? action.getValue() : 0d,
+            return new double[]{t - lastNST < duration ? action.getValue() : 0d, t - lastEWT < duration ? action
+                .getValue() : 0d, t - lastNST < duration ? action.getValue() : 0d, t - lastEWT < duration ? action
+                    .getValue() : 0d,
             };
           }
-        });
+        }
+    );
   }
 
   @SuppressWarnings("unused")
@@ -169,7 +175,8 @@ public class ReactiveVoxels {
       @Param(value = "duration", dD = 0.2) double duration,
       @Param(value = "range", dD = 1) double range,
       @Param(value = "side", dS = "s") Voxel.Side side,
-      @Param(value = "action", dS = "expand") Action action) {
+      @Param(value = "action", dS = "expand") Action action
+  ) {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(b -> new SenseDistanceToBody(side.getNormalAngle(), range, b)),
@@ -204,7 +211,8 @@ public class ReactiveVoxels {
             }
             return (t - lastContactT < duration) ? four(action.getValue()) : four(0d);
           }
-        });
+        }
+    );
   }
 
   private static NumericalStatelessSystem nss(int nOfInputs, BiFunction<Double, double[], double[]> f) {
@@ -227,24 +235,33 @@ public class ReactiveVoxels {
   }
 
   private static double[] four(double value) {
-    return new double[] {value, value, value, value};
+    return new double[]{value, value, value, value};
   }
 
   @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel none() {
     return new ReactiveGridVSR.ReactiveVoxel(
-        new GridBody.Element(GridBody.VoxelType.NONE, Voxel.DEFAULT_MATERIAL), List.of(), EMPTY_NDS);
+        new GridBody.Element(GridBody.VoxelType.NONE, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        EMPTY_NDS
+    );
   }
 
   @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel ph() {
     return new ReactiveGridVSR.ReactiveVoxel(
-        new GridBody.Element(GridBody.VoxelType.RIGID, Voxel.DEFAULT_MATERIAL), List.of(), EMPTY_NDS);
+        new GridBody.Element(GridBody.VoxelType.RIGID, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        EMPTY_NDS
+    );
   }
 
   @SuppressWarnings("unused")
   public static ReactiveGridVSR.ReactiveVoxel ps() {
     return new ReactiveGridVSR.ReactiveVoxel(
-        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL), List.of(), EMPTY_NDS);
+        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        EMPTY_NDS
+    );
   }
 }

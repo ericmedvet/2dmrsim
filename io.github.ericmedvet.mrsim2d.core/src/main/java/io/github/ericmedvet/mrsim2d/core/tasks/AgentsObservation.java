@@ -50,8 +50,7 @@ public class AgentsObservation {
 
   public BoundingBox getAllBoundingBox() {
     if (allBoundingBox == null & !getBoundingBoxes().isEmpty()) {
-      allBoundingBox =
-          boundingBoxes.stream().reduce(BoundingBox::enclosing).orElse(null);
+      allBoundingBox = boundingBoxes.stream().reduce(BoundingBox::enclosing).orElse(null);
     }
     return allBoundingBox;
   }
@@ -60,10 +59,12 @@ public class AgentsObservation {
     if (boundingBoxes == null) {
       //noinspection OptionalGetWithoutIsPresent
       boundingBoxes = agents.stream()
-          .map(a -> a.polies.stream()
-              .map(Poly::boundingBox)
-              .reduce(BoundingBox::enclosing)
-              .get())
+          .map(
+              a -> a.polies.stream()
+                  .map(Poly::boundingBox)
+                  .reduce(BoundingBox::enclosing)
+                  .get()
+          )
           .toList();
     }
     return boundingBoxes;
@@ -87,32 +88,28 @@ public class AgentsObservation {
 
   public Point getMaxXAgentCenter() {
     if (maxXAgentCenter == null && !getCenters().isEmpty()) {
-      maxXAgentCenter =
-          getCenters().stream().max(Comparator.comparing(Point::x)).orElse(null);
+      maxXAgentCenter = getCenters().stream().max(Comparator.comparing(Point::x)).orElse(null);
     }
     return maxXAgentCenter;
   }
 
   public Point getMinXAgentCenter() {
     if (minXAgentCenter == null && !getCenters().isEmpty()) {
-      minXAgentCenter =
-          getCenters().stream().min(Comparator.comparing(Point::x)).orElse(null);
+      minXAgentCenter = getCenters().stream().min(Comparator.comparing(Point::x)).orElse(null);
     }
     return minXAgentCenter;
   }
 
   public Point getMaxYAgentCenter() {
     if (maxYAgentCenter == null && !getCenters().isEmpty()) {
-      maxYAgentCenter =
-          getCenters().stream().max(Comparator.comparing(Point::y)).orElse(null);
+      maxYAgentCenter = getCenters().stream().max(Comparator.comparing(Point::y)).orElse(null);
     }
     return maxYAgentCenter;
   }
 
   public Point getMinYAgentCenter() {
     if (minYAgentCenter == null && !getCenters().isEmpty()) {
-      minYAgentCenter =
-          getCenters().stream().min(Comparator.comparing(Point::y)).orElse(null);
+      minYAgentCenter = getCenters().stream().min(Comparator.comparing(Point::y)).orElse(null);
     }
     return minYAgentCenter;
   }

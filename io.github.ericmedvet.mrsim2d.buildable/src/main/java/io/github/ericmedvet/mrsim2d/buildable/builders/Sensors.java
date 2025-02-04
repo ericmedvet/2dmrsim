@@ -31,7 +31,8 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 @Discoverable(prefixTemplate = "sim|s.sensors|s")
 public class Sensors {
 
-  private Sensors() {}
+  private Sensors() {
+  }
 
   @SuppressWarnings("unused")
   public static Sensor<Body> a() {
@@ -76,5 +77,10 @@ public class Sensors {
   @SuppressWarnings("unused")
   public static Sensor<Body> sin(@Param(value = "f", dD = 1) Double f, @Param(value = "p", dD = 0) Double p) {
     return b -> new SenseSinusoidal(f, p, b);
+  }
+
+  @SuppressWarnings("unused")
+  public static Sensor<Body> v(@Param(value = "a", dD = 0) Double a) {
+    return b -> new SenseVelocity(Math.toRadians(a), b);
   }
 }

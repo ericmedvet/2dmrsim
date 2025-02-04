@@ -112,43 +112,56 @@ public abstract class AbstractEngine implements Engine, Profiled {
   }
 
   protected AttractAndLinkAnchor.Outcome attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
-    double d = PolyUtils.minAnchorDistance(action.source(), action.destination())
-        * configuration.attractLinkRangeRatio;
+    double d = PolyUtils.minAnchorDistance(action.source(), action.destination()) * configuration.attractLinkRangeRatio;
     if (action.source().point().distance(action.destination().point()) < d) {
       return new AttractAndLinkAnchor.Outcome(
           Optional.empty(),
           perform(new CreateLink(action.source(), action.destination(), action.type()), agent)
-              .outcome());
+              .outcome()
+      );
     } else {
       return new AttractAndLinkAnchor.Outcome(
           perform(new AttractAnchor(action.source(), action.destination(), action.magnitude()), agent)
               .outcome(),
-          Optional.empty());
+          Optional.empty()
+      );
     }
   }
 
   protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkClosestAnchorable(
-      AttractAndLinkClosestAnchorable action, Agent agent) throws IllegalActionException {
+      AttractAndLinkClosestAnchorable action,
+      Agent agent
+  ) throws IllegalActionException {
     // find owner
-    Anchorable src = action.anchors().stream()
+    Anchorable src = action.anchors()
+        .stream()
         .findAny()
         .map(Anchor::anchorable)
         .orElseThrow(() -> new IllegalActionException(action, "Empty source anchorable"));
     // find closest
     Optional<Pair<Anchorable, Double>> closest = bodies.stream()
         .filter(b -> b != src && b instanceof Anchorable)
-        .map(b -> new Pair<>(
-            (Anchorable) b,
-            action.anchors().stream()
-                .mapToDouble(a -> PolyUtils.distance(a.point(), b.poly()))
-                .sum()))
+        .map(
+            b -> new Pair<>(
+                (Anchorable) b,
+                action.anchors()
+                    .stream()
+                    .mapToDouble(a -> PolyUtils.distance(a.point(), b.poly()))
+                    .sum()
+            )
+        )
         .min(Comparator.comparingDouble(Pair::second));
     // attract and link
     if (closest.isPresent() && closest.get().second() < configuration.bodyFindRange) {
       return perform(
-              new AttractAndLinkAnchorable(
-                  action.anchors(), closest.get().first(), action.magnitude(), action.type()),
-              agent)
+          new AttractAndLinkAnchorable(
+              action.anchors(),
+              closest.get().first(),
+              action.magnitude(),
+              action.type()
+          ),
+          agent
+      )
           .outcome()
           .orElse(Map.of());
     }
@@ -162,7 +175,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
   protected NFCMessage emitNFCMessage(EmitNFCMessage action, Agent agent) throws ActionException {
     if (action.channel() < 0 || action.channel() >= configuration.nfcChannels) {
       throw new ActionException(
-          "Invalid channel: %d not in [0,%d]".formatted(action.channel(), configuration.nfcChannels - 1));
+          "Invalid channel: %d not in [0,%d]".formatted(action.channel(), configuration.nfcChannels - 1)
+      );
     }
     Point source = action.body().poly().center().sum(action.displacement());
     NFCMessage message = new NFCMessage(source, action.direction(), action.channel(), action.value());
@@ -193,34 +207,54 @@ public abstract class AbstractEngine implements Engine, Profiled {
         try {
           o = (O) selfDescribedAction.perform(this, agent);
         } catch (ActionException e) {
-          L.finer(String.format(
-              "Ignoring illegal action %s due to %s",
-              action.getClass().getSimpleName(), e));
+          L.finer(
+              String.format(
+                  "Ignoring illegal action %s due to %s",
+                  action.getClass().getSimpleName(),
+                  e
+              )
+          );
           counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
         } catch (RuntimeException e) {
-          L.warning(String.format(
-              "Ignoring action %s throwing exception: %s",
-              action.getClass().getSimpleName(), e));
+          L.warning(
+              String.format(
+                  "Ignoring action %s throwing exception: %s",
+                  action.getClass().getSimpleName(),
+                  e
+              )
+          );
           counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
         }
       } else {
         // keep note as unsupported action
-        L.finer(String.format(
-            "Ignoring unsupported action: %s", action.getClass().getSimpleName()));
+        L.finer(
+            String.format(
+                "Ignoring unsupported action: %s",
+                action.getClass().getSimpleName()
+            )
+        );
         counters.get(EngineSnapshot.CounterType.UNSUPPORTED_ACTION).incrementAndGet();
       }
     } else {
       try {
         o = actionSolver.solve(action, agent);
       } catch (ActionException e) {
-        L.finer(String.format(
-            "Ignoring illegal action %s due to %s",
-            action.getClass().getSimpleName(), e));
+        L.finer(
+            String.format(
+                "Ignoring illegal action %s due to %s",
+                action.getClass().getSimpleName(),
+                e
+            )
+        );
         counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
       } catch (RuntimeException e) {
-        L.warning(String.format(
-            "Ignoring action %s throwing exception: %s",
-            action.getClass().getSimpleName(), e));
+        L.warning(
+            String.format(
+                "Ignoring action %s throwing exception: %s",
+                action.getClass().getSimpleName(),
+                e
+            )
+        );
         counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
       }
     }
@@ -232,7 +266,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
   }
 
   protected final <A extends Action<O>, O> void registerActionSolver(
-      Class<A> actionClass, ActionSolver<A, O> actionSolver) {
+      Class<A> actionClass,
+      ActionSolver<A, O> actionSolver
+  ) {
     actionSolvers.put(actionClass, actionSolver);
   }
 
@@ -256,14 +292,16 @@ public abstract class AbstractEngine implements Engine, Profiled {
   }
 
   protected Double senseNFC(SenseNFC action, Agent agent) {
-    double sum =
-        lastNFCMessages
-            .get(action.body().poly().center().sum(action.displacement()), configuration.nfcDistanceRange)
-            .stream()
-            .filter(m -> m.channel() == action.channel()
-                && Math.abs(m.direction() - action.direction()) >= configuration.nfcAngleRange)
-            .mapToDouble(NFCMessage::value)
-            .sum();
+    double sum = lastNFCMessages
+        .get(action.body().poly().center().sum(action.displacement()), configuration.nfcDistanceRange)
+        .stream()
+        .filter(
+            m -> m.channel() == action.channel() && Math.abs(
+                m.direction() - action.direction()
+            ) >= configuration.nfcAngleRange
+        )
+        .mapToDouble(NFCMessage::value)
+        .sum();
     return action.range().clip(sum);
   }
 
@@ -283,12 +321,10 @@ public abstract class AbstractEngine implements Engine, Profiled {
     counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
     for (int i = 0; i < agentPairs.size(); i++) {
       List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
-      for (Action<?> action :
-          agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
+      for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
         outcomes.add(perform(action, agentPairs.get(i).first()));
       }
-      Pair<Agent, List<ActionOutcome<?, ?>>> pair =
-          new Pair<>(agentPairs.get(i).first(), outcomes);
+      Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(agentPairs.get(i).first(), outcomes);
       agentPairs.set(i, pair);
     }
     lastNFCMessages = newNFCMessages;
@@ -308,12 +344,15 @@ public abstract class AbstractEngine implements Engine, Profiled {
         agentPairs.stream().map(Pair::first).toList(),
         List.copyOf(lastTickPerformedActions),
         lastNFCMessages.all(),
-        times.entrySet().stream()
+        times.entrySet()
+            .stream()
             .map(e -> Map.entry(e.getKey(), e.getValue().get()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-        counters.entrySet().stream()
+        counters.entrySet()
+            .stream()
             .map(e -> Map.entry(e.getKey(), e.getValue().get()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+    );
     lastTickPerformedActions.clear();
     return snapshot;
   }
@@ -321,12 +360,23 @@ public abstract class AbstractEngine implements Engine, Profiled {
   @Override
   public Map<String, Number> values() {
     return Stream.of(
-            times.entrySet().stream()
-                .map(e -> Map.entry(
-                    "time_" + e.getKey(), e.getValue().get())),
-            counters.entrySet().stream()
-                .map(e -> Map.entry(
-                    "counter_" + e.getKey(), e.getValue().get())))
+        times.entrySet()
+            .stream()
+            .map(
+                e -> Map.entry(
+                    "time_" + e.getKey(),
+                    e.getValue().get()
+                )
+            ),
+        counters.entrySet()
+            .stream()
+            .map(
+                e -> Map.entry(
+                    "counter_" + e.getKey(),
+                    e.getValue().get()
+                )
+            )
+    )
         .flatMap(m -> m)
         .map(e -> Map.entry(e.getKey().toLowerCase(), e.getValue()))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -344,5 +394,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
       double bodyFindRange,
       double nfcDistanceRange,
       double nfcAngleRange,
-      int nfcChannels) {}
+      int nfcChannels
+  ) {}
 }

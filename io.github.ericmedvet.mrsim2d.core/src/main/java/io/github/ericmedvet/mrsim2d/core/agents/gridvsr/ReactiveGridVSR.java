@@ -39,22 +39,28 @@ public class ReactiveGridVSR extends NumGridVSR {
     super(
         new GridBody(reactiveVoxelGrid.map(re -> new GridBody.SensorizedElement(re.element(), re.sensors()))),
         voxelSideLength,
-        voxelMass);
+        voxelMass
+    );
     this.reactiveVoxelGrid = reactiveVoxelGrid;
   }
 
   public record ReactiveVoxel(
       GridBody.Element element,
       List<Sensor<? super Body>> sensors,
-      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
+  ) {
     public ReactiveVoxel {
       if (numericalDynamicalSystem.nOfInputs() != sensors.size()) {
-        throw new IllegalArgumentException("Wrong number of inputs: %d found, %d expected by the controller"
-            .formatted(sensors.size(), numericalDynamicalSystem.nOfInputs()));
+        throw new IllegalArgumentException(
+            "Wrong number of inputs: %d found, %d expected by the controller"
+                .formatted(sensors.size(), numericalDynamicalSystem.nOfInputs())
+        );
       }
       if (numericalDynamicalSystem.nOfOutputs() != 4) {
-        throw new IllegalArgumentException("Wrong number of outputs: %d produced by the controller, 4 expected"
-            .formatted(numericalDynamicalSystem.nOfInputs()));
+        throw new IllegalArgumentException(
+            "Wrong number of outputs: %d produced by the controller, 4 expected"
+                .formatted(numericalDynamicalSystem.nOfInputs())
+        );
       }
     }
   }
@@ -63,8 +69,10 @@ public class ReactiveGridVSR extends NumGridVSR {
 
   @Override
   protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
-    return inputsGrid.map((k, inputs) -> inputs == null
-        ? new double[4]
-        : reactiveVoxelGrid.get(k).numericalDynamicalSystem().step(t, inputs));
+    return inputsGrid.map(
+        (k, inputs) -> inputs == null ? new double[4] : reactiveVoxelGrid.get(k)
+            .numericalDynamicalSystem()
+            .step(t, inputs)
+    );
   }
 }

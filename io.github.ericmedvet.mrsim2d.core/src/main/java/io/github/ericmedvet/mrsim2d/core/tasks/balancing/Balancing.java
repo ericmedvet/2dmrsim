@@ -55,7 +55,8 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
       double swingDensity,
       double supportHeight,
       double initialXGap,
-      double initialYGap) {
+      double initialYGap
+  ) {
     this.duration = duration;
     this.swingLength = swingLength;
     this.swingDensity = swingDensity;
@@ -65,74 +66,112 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
   }
 
   public Balancing(
-      double duration, double swingLength, double swingDensity, double supportHeight, double initialXGap) {
+      double duration,
+      double swingLength,
+      double swingDensity,
+      double supportHeight,
+      double initialXGap
+  ) {
     this(duration, swingLength, swingDensity, supportHeight, initialXGap, INITIAL_Y_GAP);
   }
 
   @Override
   public BalancingAgentsOutcome run(
-      Supplier<EmbodiedAgent> embodiedAgentSupplier, Engine engine, Consumer<Snapshot> snapshotConsumer) {
+      Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      Engine engine,
+      Consumer<Snapshot> snapshotConsumer
+  ) {
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
-    Terrain terrain =
-        Terrain.fromPath(new Path(new Point(TERRAIN_W, 0)), TERRAIN_H, TERRAIN_BORDER_W, TERRAIN_BORDER_H);
+    Terrain terrain = Terrain.fromPath(
+        new Path(new Point(TERRAIN_W, 0)),
+        TERRAIN_H,
+        TERRAIN_BORDER_W,
+        TERRAIN_BORDER_H
+    );
     UnmovableBody ground = engine.perform(new CreateUnmovableBody(terrain.poly()))
         .outcome()
         .orElseThrow();
     // create swing
-    double worldCenterX = terrain.withinBordersXRange().min()
-        + terrain.withinBordersXRange().extent() / 2d;
+    double worldCenterX = terrain.withinBordersXRange().min() + terrain.withinBordersXRange().extent() / 2d;
     Point worldCenter = new Point(worldCenterX, terrain.maxHeightAt(new DoubleRange(worldCenterX, worldCenterX)));
     RigidBody support = engine.perform(new CreateUnmovableBody(Poly.rectangle(SUPPORT_WIDTH, supportHeight), 1d))
         .outcome()
         .orElseThrow();
     engine.perform(new TranslateBodyAt(support, BoundingBox.Anchor.CL, worldCenter));
-    RotationalJoint joint = engine.perform(new CreateRotationalJoint(
+    RotationalJoint joint = engine.perform(
+        new CreateRotationalJoint(
             2d * SUPPORT_WIDTH,
             SUPPORT_WIDTH,
             1d,
             new RotationalJoint.Motor(0d, 0d, 0d, 0d, 0d, 2d * Math.PI),
-            DoubleRange.UNBOUNDED))
+            DoubleRange.UNBOUNDED
+        )
+    )
         .outcome()
         .orElseThrow();
     engine.perform(new RotateBody(joint, Math.PI / 2d));
-    engine.perform(new TranslateBodyAt(
-        joint, BoundingBox.Anchor.CL, support.poly().boundingBox().anchor(BoundingBox.Anchor.CU)));
-    RigidBody swing = engine.perform(new CreateRigidBody(
-            Poly.rectangle(swingLength, SWING_HEIGHT), swingDensity * swingLength * SWING_HEIGHT, 1))
+    engine.perform(
+        new TranslateBodyAt(
+            joint,
+            BoundingBox.Anchor.CL,
+            support.poly().boundingBox().anchor(BoundingBox.Anchor.CU)
+        )
+    );
+    RigidBody swing = engine.perform(
+        new CreateRigidBody(
+            Poly.rectangle(swingLength, SWING_HEIGHT),
+            swingDensity * swingLength * SWING_HEIGHT,
+            1
+        )
+    )
         .outcome()
         .orElseThrow();
-    engine.perform(new TranslateBodyAt(
-        swing, BoundingBox.Anchor.CL, joint.poly().boundingBox().anchor(BoundingBox.Anchor.CU)));
+    engine.perform(
+        new TranslateBodyAt(
+            swing,
+            BoundingBox.Anchor.CL,
+            joint.poly().boundingBox().anchor(BoundingBox.Anchor.CU)
+        )
+    );
     engine.perform(new AttachClosestAnchors(2, joint, support, Anchor.Link.Type.RIGID));
     engine.perform(new AttachClosestAnchors(2, swing, joint, Anchor.Link.Type.RIGID));
     // add agent
     engine.perform(new AddAgent(embodiedAgent));
-    engine.perform(new TranslateAgentAt(
-        embodiedAgent,
-        BoundingBox.Anchor.CL,
-        swing.poly().boundingBox().anchor(BoundingBox.Anchor.CU).sum(new Point(initialXGap, initialYGap))));
+    engine.perform(
+        new TranslateAgentAt(
+            embodiedAgent,
+            BoundingBox.Anchor.CL,
+            swing.poly().boundingBox().anchor(BoundingBox.Anchor.CU).sum(new Point(initialXGap, initialYGap))
+        )
+    );
     // run for defined time
     Map<Double, BalancingObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
-      Collection<Body> swingInContactBodies =
-          engine.perform(new FindInContactBodies(swing)).outcome().orElseThrow();
+      Collection<Body> swingInContactBodies = engine.perform(new FindInContactBodies(swing)).outcome().orElseThrow();
       observations.put(
           engine.t(),
           new BalancingObservation(
-              List.of(new AgentsObservation.Agent(
-                  embodiedAgent.bodyParts().stream()
-                      .map(Body::poly)
-                      .toList(),
-                  PolyUtils.maxYAtX(
-                      terrain.poly(),
-                      embodiedAgent.boundingBox().center().x()))),
+              List.of(
+                  new AgentsObservation.Agent(
+                      embodiedAgent.bodyParts()
+                          .stream()
+                          .map(Body::poly)
+                          .toList(),
+                      PolyUtils.maxYAtX(
+                          terrain.poly(),
+                          embodiedAgent.boundingBox().center().x()
+                      )
+                  )
+              ),
               swing.angle(),
               swingInContactBodies.contains(ground),
-              swing.poly().boundingBox()));
+              swing.poly().boundingBox()
+          )
+      );
     }
     // return
     return new BalancingAgentsOutcome(new TreeMap<>(observations));

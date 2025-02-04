@@ -26,8 +26,7 @@ import io.github.ericmedvet.mrsim2d.viewer.drawers.AbstractLastingComponentDrawe
 import java.awt.*;
 import java.util.function.BiPredicate;
 
-public abstract class AbstractLastingActionOutcomeDrawer<A extends Action<O>, O>
-    extends AbstractLastingComponentDrawer {
+public abstract class AbstractLastingActionOutcomeDrawer<A extends Action<O>, O> extends AbstractLastingComponentDrawer {
 
   protected static final double DURATION = 0.5;
   protected final double duration;

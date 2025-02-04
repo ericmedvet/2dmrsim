@@ -34,11 +34,16 @@ public record Poly(Point... vertexes) implements Shape {
   }
 
   public static Poly regular(double radius, int n) {
-    return new Poly(IntStream.range(0, n)
-        .mapToObj(i -> new Point(
-            radius * Math.cos(Math.PI * 2d * (double) i / (double) n),
-            radius * Math.sin(Math.PI * 2d * (double) i / (double) n)))
-        .toArray(Point[]::new));
+    return new Poly(
+        IntStream.range(0, n)
+            .mapToObj(
+                i -> new Point(
+                    radius * Math.cos(Math.PI * 2d * (double) i / (double) n),
+                    radius * Math.sin(Math.PI * 2d * (double) i / (double) n)
+                )
+            )
+            .toArray(Point[]::new)
+    );
   }
 
   public static Poly square(double l) {

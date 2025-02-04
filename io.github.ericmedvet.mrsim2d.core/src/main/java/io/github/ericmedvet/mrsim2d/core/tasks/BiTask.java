@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * mrsim2d-viewer
+ * mrsim2d-core
  * %%
  * Copyright (C) 2020 - 2024 Eric Medvet
  * %%
@@ -17,23 +17,29 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package io.github.ericmedvet.mrsim2d.core.tasks;
 
-package io.github.ericmedvet.mrsim2d.viewer.framers;
-
+import io.github.ericmedvet.jnb.datastructure.Pair;
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
+import io.github.ericmedvet.mrsim2d.core.engine.Engine;
+import java.util.ServiceLoader;
+import java.util.function.Consumer;
 
-public class AllBodiesFramer extends AbstractFramer<Snapshot> {
-  public AllBodiesFramer(double sizeRelativeMargin) {
-    super(sizeRelativeMargin);
+public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>> extends Simulation<Pair<A1, A2>, S, O> {
+
+  O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
+
+  default O run(A1 a1, A2 a2, Engine engine) {
+    return run(a1, a2, engine, snapshot -> {});
   }
 
   @Override
-  protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
-    return snapshot.bodies()
-        .stream()
-        .map(b -> b.poly().boundingBox())
-        .reduce(BoundingBox::enclosing)
-        .orElse(DEFAULT_BOUNDING_BOX);
+  default O simulate(Pair<A1, A2> pair) {
+    return run(
+        pair.first(),
+        pair.second(),
+        ServiceLoader.load(Engine.class).findFirst().orElseThrow()
+    );
   }
 }

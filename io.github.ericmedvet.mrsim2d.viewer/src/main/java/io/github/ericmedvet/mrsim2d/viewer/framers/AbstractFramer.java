@@ -44,7 +44,8 @@ public abstract class AbstractFramer<K> implements Framer<K> {
     double h = currentBB.height();
     BoundingBox enlarged = new BoundingBox(
         new Point(cx - w / 2d * sizeRelativeMargin, cy - h / 2d * sizeRelativeMargin),
-        new Point(cx + w / 2d * sizeRelativeMargin, cy + h / 2d * sizeRelativeMargin));
+        new Point(cx + w / 2d * sizeRelativeMargin, cy + h / 2d * sizeRelativeMargin)
+    );
     // adjust
     BoundingBox adjusted = enlarged;
     double fRatio = enlarged.width() / enlarged.height();
@@ -52,16 +53,20 @@ public abstract class AbstractFramer<K> implements Framer<K> {
       // enlarge h
       adjusted = new BoundingBox(
           new Point(enlarged.min().x(), cy - h / 2d * sizeRelativeMargin * fRatio / ratio),
-          new Point(enlarged.max().x(), cy + h / 2d * sizeRelativeMargin * fRatio / ratio));
+          new Point(enlarged.max().x(), cy + h / 2d * sizeRelativeMargin * fRatio / ratio)
+      );
     } else if (fRatio < ratio) {
       // enlarge w
       adjusted = new BoundingBox(
           new Point(
               cx - w / 2d * sizeRelativeMargin * ratio / fRatio,
-              enlarged.min().y()),
+              enlarged.min().y()
+          ),
           new Point(
               cx + w / 2d * sizeRelativeMargin * ratio / fRatio,
-              enlarged.max().y()));
+              enlarged.max().y()
+          )
+      );
     }
     return adjusted;
   }

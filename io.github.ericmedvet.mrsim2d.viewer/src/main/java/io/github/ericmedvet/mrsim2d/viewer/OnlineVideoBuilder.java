@@ -58,7 +58,8 @@ public class OnlineVideoBuilder implements Accumulator<File, Snapshot> {
       double frameRate,
       VideoUtils.EncoderFacility encoder,
       File file,
-      Drawer drawer) {
+      Drawer drawer
+  ) {
     this.w = w;
     this.h = h;
     this.startTime = startTime;
@@ -109,10 +110,13 @@ public class OnlineVideoBuilder implements Accumulator<File, Snapshot> {
     try {
       Instant encodingStartInstant = Instant.now();
       VideoUtils.encodeAndSave(images, frameRate, file, encoder);
-      L.fine(String.format(
-          "Video saved: %.1fMB written in %.2fs",
-          Files.size(file.toPath()) / 1024f / 1024f,
-          Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f));
+      L.fine(
+          String.format(
+              "Video saved: %.1fMB written in %.2fs",
+              Files.size(file.toPath()) / 1024f / 1024f,
+              Duration.between(encodingStartInstant, Instant.now()).toMillis() / 1000f
+          )
+      );
     } catch (IOException e) {
       L.severe(String.format("Cannot save file due to %s", e));
       return null;

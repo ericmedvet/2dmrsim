@@ -27,8 +27,7 @@ public interface Anchor {
 
   record Link(Anchor source, Anchor destination, Type type) {
     public enum Type {
-      RIGID,
-      SOFT
+      RIGID, SOFT
     }
 
     public Link reversed() {

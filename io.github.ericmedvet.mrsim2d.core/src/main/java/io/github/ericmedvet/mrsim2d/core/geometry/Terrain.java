@@ -29,10 +29,12 @@ import java.util.List;
 public record Terrain(Poly poly, DoubleRange withinBordersXRange) {
 
   public double maxHeightAt(DoubleRange xRange) {
-    List<Double> xs = new ArrayList<>(Arrays.stream(poly().vertexes())
-        .filter(v -> v.x() >= xRange.min() && v.x() <= xRange.max())
-        .map(Point::x)
-        .toList());
+    List<Double> xs = new ArrayList<>(
+        Arrays.stream(poly().vertexes())
+            .filter(v -> v.x() >= xRange.min() && v.x() <= xRange.max())
+            .map(Point::x)
+            .toList()
+    );
     xs.add(xRange.min());
     xs.add(xRange.max());
     return xs.stream()
@@ -40,8 +42,11 @@ public record Terrain(Poly poly, DoubleRange withinBordersXRange) {
         .mapToDouble(x -> PolyUtils.maxYAtX(poly, x))
         .filter(d -> !Double.isNaN(d))
         .max()
-        .orElseThrow(() -> new IllegalArgumentException(
-            "Cannot find a terrain max y in range %.1f, %.1f.".formatted(xRange.min(), xRange.max())));
+        .orElseThrow(
+            () -> new IllegalArgumentException(
+                "Cannot find a terrain max y in range %.1f, %.1f.".formatted(xRange.min(), xRange.max())
+            )
+        );
   }
 
   public static Terrain fromPath(Path partialPath, double terrainH, double borderW, double borderH) {

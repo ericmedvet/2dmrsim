@@ -32,13 +32,14 @@ import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "sim|s.agent|a.vsr")
 public class VSRMisc {
-  private VSRMisc() {}
+  private VSRMisc() {
+  }
 
   @SuppressWarnings("unused")
   public static GridBody gridBody(
       @Param("shape") Grid<VoxelType> shape,
-      @Param("sensorizingFunction")
-          Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction) {
+      @Param("sensorizingFunction") Function<Grid<Boolean>, Grid<List<Sensor<? super Body>>>> sensorizingFunction
+  ) {
     return new GridBody(shape, sensorizingFunction);
   }
 

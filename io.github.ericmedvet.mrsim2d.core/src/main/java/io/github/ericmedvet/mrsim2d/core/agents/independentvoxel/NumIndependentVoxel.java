@@ -55,7 +55,8 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       AreaActuation areaActuation,
       boolean attachActuation,
       int nOfNFCChannels,
-      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
+  ) {
     super(material, voxelSideLength, voxelMass);
     this.sensors = sensors;
     inputs = new double[nOfInputs(sensors, nOfNFCChannels)];
@@ -64,10 +65,13 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     this.nOfNFCChannels = nOfNFCChannels;
     if (nOfNFCChannels < 0) {
       throw new IllegalArgumentException(
-          "The number of channels must be 0 or more: %d found".formatted(nOfNFCChannels));
+          "The number of channels must be 0 or more: %d found".formatted(nOfNFCChannels)
+      );
     }
     numericalDynamicalSystem.checkDimension(
-        nOfInputs(sensors, nOfNFCChannels), nOfOutputs(areaActuation, attachActuation, nOfNFCChannels));
+        nOfInputs(sensors, nOfNFCChannels),
+        nOfOutputs(areaActuation, attachActuation, nOfNFCChannels)
+    );
     this.numericalDynamicalSystem = numericalDynamicalSystem;
   }
 
@@ -76,7 +80,8 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
       AreaActuation areaActuation,
       boolean attachActuation,
       int nOfNFCChannels,
-      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
+  ) {
     this(
         new Voxel.Material(),
         VOXEL_SIDE_LENGTH,
@@ -85,12 +90,12 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
         areaActuation,
         attachActuation,
         nOfNFCChannels,
-        numericalDynamicalSystem);
+        numericalDynamicalSystem
+    );
   }
 
   public enum AreaActuation {
-    OVERALL,
-    SIDES
+    OVERALL, SIDES
   }
 
   public static int nOfInputs(List<Sensor<? super Voxel>> sensors, int nOfNFCChannels) {
@@ -107,10 +112,10 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
     double[] readInputs = previousActionOutcomes.stream()
         .filter(ao -> ao.action() instanceof Sense)
         .mapToDouble(ao -> {
-          @SuppressWarnings("unchecked")
-          ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
+          @SuppressWarnings("unchecked") ActionOutcome<Sense<? super Voxel>, Double> so = (ActionOutcome<Sense<? super Voxel>, Double>) ao;
           return INPUT_RANGE.denormalize(
-              so.action().range().normalize(so.outcome().orElse(0d)));
+              so.action().range().normalize(so.outcome().orElse(0d))
+          );
         })
         .toArray();
     System.arraycopy(readInputs, 0, inputs, 0, readInputs.length);
@@ -119,8 +124,7 @@ public class NumIndependentVoxel extends AbstractIndependentVoxel implements Num
         .map(OUTPUT_RANGE::clip)
         .toArray();
     // generate next sense actions
-    List<Action<?>> actions =
-        new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
+    List<Action<?>> actions = new ArrayList<>(sensors.stream().map(f -> f.apply(voxel)).toList());
     // generate actuation actions
     int aI = 0;
     if (areaActuation.equals(AreaActuation.SIDES)) {

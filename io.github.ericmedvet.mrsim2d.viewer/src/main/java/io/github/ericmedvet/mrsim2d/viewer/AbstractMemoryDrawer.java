@@ -47,8 +47,7 @@ public abstract class AbstractMemoryDrawer<T> implements Drawer {
   }
 
   public enum WindowType {
-    SNAPSHOT_TIME,
-    WALL_TIME
+    SNAPSHOT_TIME, WALL_TIME
   }
 
   protected abstract boolean innerDraw(SortedMap<Double, T> memory, Graphics2D g);
@@ -57,12 +56,15 @@ public abstract class AbstractMemoryDrawer<T> implements Drawer {
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     double wallT = Duration.between(startingInstant, Instant.now()).toMillis() / 1000d;
     // update map
-    snapshots.forEach(s -> memory.put(
-        switch (windowType) {
-          case WALL_TIME -> wallT;
-          case SNAPSHOT_TIME -> s.t();
-        },
-        extractor.apply(s)));
+    snapshots.forEach(
+        s -> memory.put(
+            switch (windowType) {
+              case WALL_TIME -> wallT;
+              case SNAPSHOT_TIME -> s.t();
+            },
+            extractor.apply(s)
+        )
+    );
     double lastT = memory.lastKey();
     memory.keySet().stream().filter(t -> t < lastT - windowT).toList().forEach(memory.keySet()::remove);
     // call inner drawer

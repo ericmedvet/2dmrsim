@@ -24,7 +24,8 @@ import java.util.List;
 
 public class Utils {
 
-  private Utils() {}
+  private Utils() {
+  }
 
   public static double[] concat(double[] a1, double[] a2) {
     double[] a = new double[a1.length + a2.length];

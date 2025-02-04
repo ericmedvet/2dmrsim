@@ -25,7 +25,8 @@ import io.github.ericmedvet.mrsim2d.core.geometry.*;
 
 public class PolyUtils {
 
-  private PolyUtils() {}
+  private PolyUtils() {
+  }
 
   private static double angle(Point a, Point b, Point c) {
     double angle = c.diff(b).direction() - a.diff(b).direction();
@@ -72,7 +73,8 @@ public class PolyUtils {
   }
 
   public static double maxYAtX(Poly poly, double x) {
-    return poly.sides().stream()
+    return poly.sides()
+        .stream()
         .mapToDouble(s -> yAtX(s, x))
         .filter(y -> !Double.isNaN(y))
         .max()

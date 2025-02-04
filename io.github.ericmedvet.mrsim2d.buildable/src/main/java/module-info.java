@@ -30,8 +30,7 @@ module io.github.ericmedvet.mrsim2d.buildable {
   requires io.github.ericmedvet.jsdynsym.core;
   requires io.github.ericmedvet.jnb.datastructure;
 
-  opens io.github.ericmedvet.mrsim2d.buildable.builders to
-      io.github.ericmedvet.jnb.core;
+  opens io.github.ericmedvet.mrsim2d.buildable.builders to io.github.ericmedvet.jnb.core;
 
   exports io.github.ericmedvet.mrsim2d.buildable.builders;
 }

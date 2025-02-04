@@ -27,8 +27,7 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 
-public class AttractAnchor
-    extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor, Double> {
+public class AttractAnchor extends AbstractActionComponentDrawer<io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor, Double> {
 
   private static final Color COLOR = DrawingUtils.alphaed(Color.GREEN, 0.25f);
 
@@ -49,7 +48,10 @@ public class AttractAnchor
 
   @Override
   protected boolean innerDraw(
-      double t, ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor, Double> o, Graphics2D g) {
+      double t,
+      ActionOutcome<io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor, Double> o,
+      Graphics2D g
+  ) {
     if (o.outcome().isEmpty()) {
       return true;
     }
@@ -74,8 +76,14 @@ public class AttractAnchor
     triangle.closePath();
     g.setColor(color);
     g.fill(triangle);
-    g.draw(new Line2D.Double(
-        dX, dY, dX - Math.cos(a) * l * ATTRACTED_LENGTH_RATIO, dY - Math.sin(a) * l * ATTRACTED_LENGTH_RATIO));
+    g.draw(
+        new Line2D.Double(
+            dX,
+            dY,
+            dX - Math.cos(a) * l * ATTRACTED_LENGTH_RATIO,
+            dY - Math.sin(a) * l * ATTRACTED_LENGTH_RATIO
+        )
+    );
     return true;
   }
 }

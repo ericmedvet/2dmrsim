@@ -37,7 +37,8 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
       GridBody body,
       double voxelSideLength,
       double voxelMass,
-      NumericalDynamicalSystem<?> numericalDynamicalSystem) {
+      NumericalDynamicalSystem<?> numericalDynamicalSystem
+  ) {
     super(body, voxelSideLength, voxelMass);
     numericalDynamicalSystem.checkDimension(nOfInputs(body), nOfOutputs(body));
     this.numericalDynamicalSystem = numericalDynamicalSystem;
@@ -52,7 +53,9 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   }
 
   public static int nOfOutputs(GridBody body) {
-    return (int) body.grid().values().stream()
+    return (int) body.grid()
+        .values()
+        .stream()
         .filter(e -> !e.element().type().equals(GridBody.VoxelType.NONE))
         .count();
   }
@@ -71,11 +74,16 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
   protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     // build inputs
     inputs = Utils.concat(
-        inputsGrid.values().stream().filter(Objects::nonNull).toList());
+        inputsGrid.values().stream().filter(Objects::nonNull).toList()
+    );
     if (inputs.length != numericalDynamicalSystem.nOfInputs()) {
-      throw new IllegalArgumentException(String.format(
-          "Wrong number of inputs: %d expected, %d found",
-          numericalDynamicalSystem.nOfInputs(), inputs.length));
+      throw new IllegalArgumentException(
+          String.format(
+              "Wrong number of inputs: %d expected, %d found",
+              numericalDynamicalSystem.nOfInputs(),
+              inputs.length
+          )
+      );
     }
     // compute outputs
     outputs = numericalDynamicalSystem.step(t, inputs);
@@ -84,7 +92,7 @@ public class CentralizedNumGridVSR extends NumGridVSR implements NumBrained {
     int c = 0;
     for (Grid.Entry<double[]> e : inputsGrid) {
       if (e.value() != null) {
-        outputsGrid.set(e.key(), new double[] {outputs[c], outputs[c], outputs[c], outputs[c]});
+        outputsGrid.set(e.key(), new double[]{outputs[c], outputs[c], outputs[c], outputs[c]});
         c = c + 1;
       }
     }
