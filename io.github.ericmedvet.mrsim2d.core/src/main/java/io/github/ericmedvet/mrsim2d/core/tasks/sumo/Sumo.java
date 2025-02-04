@@ -23,13 +23,11 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.*;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.*;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -38,19 +36,22 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
 
   private static final boolean STOP_IF_FALLEN = false;
   private static final double INITIAL_Y_GAP = 0.1;
+  private static final double INITIAL_X_GAP = 1;
   private static final double HOLE_W = 15;
   private static final double HOLE_H = 15;
   private static final double FLAT_W = 15;
   private final double duration;
+  private final double initialXGap;
   private final double initialYGap;
 
-  public Sumo(double duration, double initialYGap) {
+  public Sumo(double duration, double initialXGap, double initialYGap) {
     this.duration = duration;
+    this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
   public Sumo(double duration) {
-    this(duration, INITIAL_Y_GAP);
+    this(duration, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
@@ -73,12 +74,12 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         new DoubleRange(HOLE_W, HOLE_W + FLAT_W)
     );
     double groundH = HOLE_H;
-
+    /*
     RigidBody box4 = engine.perform(new CreateRigidBody(Poly.regular(1, 4), 1)).outcome().orElseThrow();
     RigidBody box6 = engine.perform(new CreateRigidBody(Poly.regular(1, 6), 1)).outcome().orElseThrow();
     engine.perform(new TranslateBody(box4, new Point(terrain.withinBordersXRange().center(), groundH + 3)));
     engine.perform(new TranslateBody(box6, new Point(terrain.withinBordersXRange().center(), groundH + 6)));
-
+    */
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // put agent 1 on left
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
@@ -87,7 +88,7 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         new TranslateAgentAt(
             agent1,
             BoundingBox.Anchor.LL,
-            new Point(terrain.withinBordersXRange().min(), groundH + initialYGap)
+            new Point(terrain.withinBordersXRange().min() + initialXGap, groundH + initialYGap)
         )
     );
     // put agent 2 on right
@@ -102,15 +103,15 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         new TranslateAgentAt(
             agent2,
             BoundingBox.Anchor.UL,
-            new Point(terrain.withinBordersXRange().max(), groundH + initialYGap)
+            new Point(terrain.withinBordersXRange().max() - initialXGap, groundH + initialYGap)
         )
     );
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
     while ((engine.t() < duration) && (!STOP_IF_FALLEN || agent1.boundingBox()
         .max()
         .y() > groundH) && (!STOP_IF_FALLEN || agent2.boundingBox()
-        .max()
-        .y() > groundH)) {
+            .max()
+            .y() > groundH)) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 

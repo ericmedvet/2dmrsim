@@ -26,10 +26,7 @@ import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
-
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
@@ -83,7 +80,8 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
         k -> new double[nOfOutputs(body, k, nOfSignals, directional)]
     );
     zeroSignals = new double[nOfSignals];
-    nonEmptyKeys = numericalDynamicalSystemGrid.entries().stream()
+    nonEmptyKeys = numericalDynamicalSystemGrid.entries()
+        .stream()
         .filter(e -> e.value() != null)
         .map(Grid.Entry::key)
         .toList();
@@ -136,12 +134,12 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     for (Grid.Key key : nonEmptyKeys) {
       double[] sensoryInputs = inputsGrid.get(key);
       double[] fullInputs = Stream.of(
-              sensoryInputs,
-              getLastSignals(key.x(), key.y() + 1, Voxel.Side.S),
-              getLastSignals(key.x() + 1, key.y(), Voxel.Side.W),
-              getLastSignals(key.x(), key.y() - 1, Voxel.Side.N),
-              getLastSignals(key.x() - 1, key.y(), Voxel.Side.E)
-          )
+          sensoryInputs,
+          getLastSignals(key.x(), key.y() + 1, Voxel.Side.S),
+          getLastSignals(key.x() + 1, key.y(), Voxel.Side.W),
+          getLastSignals(key.x(), key.y() - 1, Voxel.Side.N),
+          getLastSignals(key.x() - 1, key.y(), Voxel.Side.E)
+      )
           .flatMapToDouble(Arrays::stream)
           .toArray();
       fullInputsGrid.set(key, fullInputs);

@@ -28,4 +28,5 @@ public interface Sense<B extends Body> extends Action<Double> {
   B body();
 
   DoubleRange range();
+
 }

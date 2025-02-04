@@ -23,7 +23,6 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.XMirrorable;
-import io.github.ericmedvet.mrsim2d.core.XMirrorer;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
 import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
@@ -77,11 +76,9 @@ public class TrainingFight implements Task<Supplier<EmbodiedAgent>, TrainingFigh
 
     EmbodiedAgent agent1 = embodiedAgentSupplier.get();
     EmbodiedAgent agent2 = embodiedAgentSupplier.get();
-    // TODO: move actions-filter to NumGridVSR
-    if (agent2 instanceof XMirrorable XMirrorable) {
-      XMirrorable.mirror();
+    if (agent2 instanceof XMirrorable xMirrorable) {
+      xMirrorable.mirror();
     }
-    engine.registerActionsFilter(agent2, new XMirrorer<>());
 
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     engine.perform(new AddAgent(agent1));

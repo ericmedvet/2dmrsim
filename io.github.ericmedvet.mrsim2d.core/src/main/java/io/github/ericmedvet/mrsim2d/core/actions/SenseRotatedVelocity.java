@@ -26,8 +26,11 @@ import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseRotatedVelocity(double direction, Body body) implements Sense<Body>, SelfDescribedAction<Double> {
+public record SenseRotatedVelocity(
+    double direction, Body body
+) implements XMirrorableSense<Body>, SelfDescribedAction<Double> {
 
   private static final DoubleRange RANGE = new DoubleRange(-10, 10);
 
@@ -41,5 +44,15 @@ public record SenseRotatedVelocity(double direction, Body body) implements Sense
   @Override
   public DoubleRange range() {
     return RANGE;
+  }
+
+  @Override
+  public Sense<Body> mirrored() {
+    return new SenseRotatedVelocity(SenseAngle.mirrorAngle(direction), body);
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return DoubleUnaryOperator.identity();
   }
 }

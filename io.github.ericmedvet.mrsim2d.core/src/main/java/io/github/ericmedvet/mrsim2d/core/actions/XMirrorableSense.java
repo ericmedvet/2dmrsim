@@ -17,8 +17,13 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package io.github.ericmedvet.mrsim2d.core;
+package io.github.ericmedvet.mrsim2d.core.actions;
 
-public interface XMirrorable extends EmbodiedAgent {
-  void mirror();
+import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import java.util.function.DoubleUnaryOperator;
+
+public interface XMirrorableSense<B extends Body> extends Sense<B> {
+  Sense<B> mirrored();
+
+  DoubleUnaryOperator outcomeMirrorer();
 }
