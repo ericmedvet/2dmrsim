@@ -30,12 +30,25 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.*;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
+import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawers;
+import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
+import io.github.ericmedvet.mrsim2d.viewer.Framer;
+import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.NFCDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.*;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.AnchorableBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RigidBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RotationalJointDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.SoftBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.UnmovableBodyDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.framers.AllAgentsFramer;
 import io.github.ericmedvet.mrsim2d.viewer.framers.StaticFramer;
 import java.util.ArrayList;
@@ -194,6 +207,7 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
+      @Param(value = "name", iS = "{task.name}") String name,
       @Param("task") Task<A, S, O> task,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
   ) {

@@ -42,28 +42,21 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
-  public static Sumo sumo(@Param(value = "duration", dD = 60) double duration) {
-    return new Sumo(duration);
-  }
-
-  @SuppressWarnings("unused")
-  public static TrainingSumo trainingSumo(
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+  public static Balancing balancing(
+      @Param(value = "name", dS = "balancing") String name,
+      @Param(value = "duration", dD = 10) double duration,
+      @Param(value = "swingLength", dD = 10.0) double swingLength,
+      @Param(value = "swingDensity", dD = 0.1) double swingDensity,
+      @Param(value = "supportHeight", dD = 1.0) double supportHeight,
+      @Param(value = "initialXGap", dD = 0.0) double initialXGap,
+      @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new TrainingSumo(duration, terrain);
-  }
-
-  @SuppressWarnings("unused")
-  public static TrainingFight trainingFight(
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
-  ) {
-    return new TrainingFight(duration, terrain);
+    return new Balancing(duration, swingLength, swingDensity, supportHeight, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")
   public static FallPiling fallPiling(
+      @Param(value = "name", dS = "fallPiling") String name,
       @Param(value = "duration", dD = 45d) double duration,
       @Param(value = "fallInterval", dD = 5d) double fallInterval,
       @Param("nOfAgents") int nOfAgents,
@@ -88,6 +81,7 @@ public class Tasks {
 
   @SuppressWarnings("unused")
   public static Jumping jumping(
+      @Param(value = "name", dS = "jumping") String name,
       @Param(value = "duration", dD = 10) double duration,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
@@ -95,19 +89,8 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
-  public static Balancing balancing(
-      @Param(value = "duration", dD = 10) double duration,
-      @Param(value = "swingLength", dD = 10.0) double swingLength,
-      @Param(value = "swingDensity", dD = 0.1) double swingDensity,
-      @Param(value = "supportHeight", dD = 1.0) double supportHeight,
-      @Param(value = "initialXGap", dD = 0.0) double initialXGap,
-      @Param(value = "initialYGap", dD = 0.1) double initialYGap
-  ) {
-    return new Balancing(duration, swingLength, swingDensity, supportHeight, initialXGap, initialYGap);
-  }
-
-  @SuppressWarnings("unused")
   public static Locomotion locomotion(
+      @Param(value = "name", iS = "locomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
@@ -118,6 +101,7 @@ public class Tasks {
 
   @SuppressWarnings("unused")
   public static PrebuiltIndependentLocomotion prebuiltIndependentLocomotion(
+      @Param(value = "name", iS = "piLocomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
@@ -129,6 +113,7 @@ public class Tasks {
 
   @SuppressWarnings("unused")
   public static StandPiling standPiling(
+      @Param(value = "name", dS = "standPiling") String name,
       @Param(value = "duration", dD = 45) double duration,
       @Param(value = "nOfAgents") int nOfAgents,
       @Param(value = "xGapRatio", dD = 1) double xGapRatio,
@@ -137,5 +122,31 @@ public class Tasks {
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
     return new StandPiling(duration, nOfAgents, xGapRatio, terrain, firstXGap, initialYGap);
+  }
+
+  @SuppressWarnings("unused")
+  public static Sumo sumo(
+      @Param(value = "name", dS = "sumo") String name,
+      @Param(value = "duration", dD = 60) double duration
+  ) {
+    return new Sumo(duration);
+  }
+
+  @SuppressWarnings("unused")
+  public static TrainingFight trainingFight(
+      @Param(value = "name", dS = "trainingFight") String name,
+      @Param(value = "duration", dD = 60) double duration,
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+  ) {
+    return new TrainingFight(duration, terrain);
+  }
+
+  @SuppressWarnings("unused")
+  public static TrainingSumo trainingSumo(
+      @Param(value = "name", dS = "trainingSumo") String name,
+      @Param(value = "duration", dD = 60) double duration,
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+  ) {
+    return new TrainingSumo(duration, terrain);
   }
 }
