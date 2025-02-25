@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
@@ -70,16 +71,18 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
-  public static Framer<Snapshot> allAgentsFramer(
+  @Cacheable
+  public static Supplier<Framer<Snapshot>> allAgentsFramer(
       @Param(value = "enlargement", dD = 1.5) double enlargement,
       @Param(value = "followTime", dD = 2) double followTime
   ) {
-    return new AllAgentsFramer(enlargement).largest(followTime);
+    return () -> new AllAgentsFramer(enlargement).largest(followTime);
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Function<String, Drawer> drawer(
-      @Param(value = "framer", dNPM = "s.allAgentsFramer()") Framer<Snapshot> framer,
+      @Param(value = "framer", dNPM = "sim.allAgentsFramer()") Supplier<Framer<Snapshot>> framer,
       @Param(value = "profilingTime", dD = 1) double profilingTime,
       @Param(value = "miniWorldEnlargement", dD = 10) double miniWorldEnlargement,
       @Param(value = "miniWorld") boolean miniWorld,
@@ -118,7 +121,7 @@ public class Miscs {
       if (parts) {
         thingsDrawers.add(new ComponentsDrawer(List.of(new MultipartBodyDrawer()), Snapshot::bodies));
       }
-      Drawer worldDrawer = Drawer.transform(framer, Drawer.of(Collections.unmodifiableList(thingsDrawers)));
+      Drawer worldDrawer = Drawer.transform(framer.get(), Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
         drawers.add(
@@ -179,21 +182,24 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Supplier<Engine> engine() {
     return () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
   }
 
   @SuppressWarnings("unused")
-  public static Framer<Snapshot> staticFramer(
+  @Cacheable
+  public static Supplier<Framer<Snapshot>> staticFramer(
       @Param("minX") double minX,
       @Param("maxX") double maxX,
       @Param("minY") double minY,
       @Param("maxY") double maxY
   ) {
-    return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
+    return () -> new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
       @Param("task") Task<A, S, O> task,
       @Param("repetitions") int repetitions,
@@ -206,6 +212,7 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
       @Param(value = "name", iS = "{task.name}") String name,
       @Param("task") Task<A, S, O> task,
@@ -215,6 +222,7 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A> TaskVideoBuilder<A> taskVideoBuilder(
       @Param("task") Task<A, ?, ?> task,
       @Param(value = "title", dS = "") String title,
