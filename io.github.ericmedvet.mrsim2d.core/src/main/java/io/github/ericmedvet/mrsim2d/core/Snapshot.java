@@ -22,11 +22,12 @@ package io.github.ericmedvet.mrsim2d.core;
 
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import java.util.Collection;
+import java.util.Map;
 
 public interface Snapshot {
   Collection<ActionOutcome<?, ?>> actionOutcomes();
 
-  Collection<Agent> agents();
+  Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions();
 
   Collection<Body> bodies();
 

@@ -20,10 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.core.engine;
 
-import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
-import io.github.ericmedvet.mrsim2d.core.Agent;
-import io.github.ericmedvet.mrsim2d.core.NFCMessage;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import java.util.Collection;
 import java.util.Map;
@@ -31,7 +28,7 @@ import java.util.Map;
 public record EngineSnapshot(
     double t,
     Collection<Body> bodies,
-    Collection<Agent> agents,
+    Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions,
     Collection<ActionOutcome<?, ?>> actionOutcomes,
     Collection<NFCMessage> nfcMessages,
     Map<TimeType, Double> times,

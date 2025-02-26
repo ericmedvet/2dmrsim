@@ -158,7 +158,8 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
                           PolyUtils.maxYAtX(
                               terrain.poly(),
                               a.boundingBox().center().x()
-                          )
+                          ),
+                          snapshot.agentEnergyConsumptions().get(a)
                       )
                   )
                   .toList()

@@ -21,13 +21,7 @@
 package io.github.ericmedvet.mrsim2d.core.engine;
 
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.mrsim2d.core.Action;
-import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
-import io.github.ericmedvet.mrsim2d.core.Agent;
-import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
-import io.github.ericmedvet.mrsim2d.core.NFCMessage;
-import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
-import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.*;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkAnchor;
@@ -48,15 +42,7 @@ import io.github.ericmedvet.mrsim2d.core.util.Profiled;
 import io.github.ericmedvet.mrsim2d.core.util.SpatialMap;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
@@ -69,7 +55,8 @@ public abstract class AbstractEngine implements Engine, Profiled {
   private static final Logger L = Logger.getLogger(AbstractEngine.class.getName());
   protected final AtomicDouble t;
   protected final List<Body> bodies;
-  protected final List<Pair<Agent, List<ActionOutcome<?, ?>>>> agentPairs;
+  protected final Map<Agent, List<ActionOutcome<?, ?>>> agentActionOutcomes;
+  private final List<Agent> agents;
   private final Configuration configuration;
   private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
   private final Instant startingInstant;
@@ -83,14 +70,15 @@ public abstract class AbstractEngine implements Engine, Profiled {
   public AbstractEngine(Configuration configuration) {
     this.configuration = configuration;
     bodies = new ArrayList<>();
-    agentPairs = new ArrayList<>();
+    agents = new ArrayList<>();
+    agentActionOutcomes = new IdentityHashMap<>();
     actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
     lastTickPerformedActions = new ArrayList<>();
     lastNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     times = new EnumMap<>(EngineSnapshot.TimeType.class);
     counters = new EnumMap<>(EngineSnapshot.CounterType.class);
-    agentActionsFilters = new LinkedHashMap<>();
+    agentActionsFilters = new IdentityHashMap<>();
     Arrays.stream(EngineSnapshot.TimeType.values()).forEach(t -> times.put(t, new AtomicDouble(0d)));
     Arrays.stream(EngineSnapshot.CounterType.values()).forEach(t -> counters.put(t, new AtomicInteger(0)));
     startingInstant = Instant.now();
@@ -101,13 +89,29 @@ public abstract class AbstractEngine implements Engine, Profiled {
     this(DEFAULT_CONFIGURATION);
   }
 
+  @FunctionalInterface
+  protected interface ActionSolver<A extends Action<O>, O> {
+    O solve(A action, Agent agent) throws ActionException;
+  }
+
+  public record Configuration(
+      double attractionRange,
+      double attractLinkRangeRatio,
+      double bodyFindRange,
+      double nfcDistanceRange,
+      double nfcAngleRange,
+      int nfcChannels
+  ) {}
+
+  protected abstract Collection<Body> getBodies();
+
+  protected abstract double innerTick();
+
   protected Agent addAgent(AddAgent action, Agent agent) throws ActionException {
     if (action.agent() instanceof EmbodiedAgent embodiedAgent) {
       embodiedAgent.assemble(this);
-      agentPairs.add(new Pair<>(action.agent(), List.of()));
-    } else {
-      agentPairs.add(new Pair<>(action.agent(), List.of()));
     }
+    agents.add(action.agent());
     return action.agent();
   }
 
@@ -183,10 +187,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
     newNFCMessages.add(source, message);
     return message;
   }
-
-  protected abstract Collection<Body> getBodies();
-
-  protected abstract double innerTick();
 
   @SuppressWarnings("unchecked")
   @Override
@@ -319,13 +319,31 @@ public abstract class AbstractEngine implements Engine, Profiled {
     Instant tickStartingInstant = Instant.now();
     newNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
-    for (int i = 0; i < agentPairs.size(); i++) {
-      List<ActionOutcome<?, ?>> outcomes = new ArrayList<>();
-      for (Action<?> action : agentPairs.get(i).first().act(t.get(), agentPairs.get(i).second())) {
-        outcomes.add(perform(action, agentPairs.get(i).first()));
-      }
-      Pair<Agent, List<ActionOutcome<?, ?>>> pair = new Pair<>(agentPairs.get(i).first(), outcomes);
-      agentPairs.set(i, pair);
+    Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions = new IdentityHashMap<>();
+    for (Agent agent : agents) {
+      List<ActionOutcome<?, ?>> previousOutcomes = agentActionOutcomes.getOrDefault(agent, List.of());
+      List<? extends Action<?>> actions = agent.act(t.get(), previousOutcomes);
+      //noinspection unchecked,rawtypes
+      List<ActionOutcome<?, ?>> outcomes = (List) actions.stream().map(action -> perform(action, agent)).toList();
+      Map<EnergyConsumingAction.Type, Double> agentEnergies = new EnumMap<>(EnergyConsumingAction.Type.class);
+      outcomes.forEach(outcome -> {
+        //noinspection rawtypes
+        if (outcome.action() instanceof EnergyConsumingAction ecAction) {
+          //noinspection unchecked
+          Map<EnergyConsumingAction.Type, Double> energies = ecAction.energy(
+              outcome.outcome()
+                  .orElseThrow(() -> new RuntimeException("Energy consuming action wrongly returns an empty outcome"))
+          );
+          energies.forEach(
+              (type, value) -> agentEnergies.compute(
+                  type,
+                  (t, oldV) -> oldV == null ? value : (oldV + value)
+              )
+          );
+        }
+      });
+      agentActionOutcomes.put(agent, outcomes);
+      agentEnergyConsumptions.put(agent, agentEnergies);
     }
     lastNFCMessages = newNFCMessages;
     Instant innerTickStartingInstant = Instant.now();
@@ -341,7 +359,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     EngineSnapshot snapshot = new EngineSnapshot(
         t.get(),
         List.copyOf(getBodies()),
-        agentPairs.stream().map(Pair::first).toList(),
+        Collections.unmodifiableMap(agentEnergyConsumptions),
         List.copyOf(lastTickPerformedActions),
         lastNFCMessages.all(),
         times.entrySet()
@@ -381,18 +399,4 @@ public abstract class AbstractEngine implements Engine, Profiled {
         .map(e -> Map.entry(e.getKey().toLowerCase(), e.getValue()))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
-
-  @FunctionalInterface
-  protected interface ActionSolver<A extends Action<O>, O> {
-    O solve(A action, Agent agent) throws ActionException;
-  }
-
-  public record Configuration(
-      double attractionRange,
-      double attractLinkRangeRatio,
-      double bodyFindRange,
-      double nfcDistanceRange,
-      double nfcAngleRange,
-      int nfcChannels
-  ) {}
 }
