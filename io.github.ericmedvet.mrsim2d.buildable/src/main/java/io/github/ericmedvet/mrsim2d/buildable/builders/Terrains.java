@@ -43,12 +43,15 @@ public class Terrains {
   public static final double HOLE_W = 5d;
   public static final double END_W = 30d;
   public static final double HOLE_DIS_W = 9d;
+  public static final double FLAT_W = 5d;
+  public static final double FLAT_H = 5d;
 
   private Terrains() {
   }
 
   @SuppressWarnings("unused")
   public static Terrain downhill(
+      @Param(value = "name", iS = "downhill[{a}]") String name,
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
@@ -60,6 +63,7 @@ public class Terrains {
 
   @SuppressWarnings("unused")
   public static Terrain flat(
+      @Param(value = "name", dS = "flat") String name,
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
@@ -70,6 +74,7 @@ public class Terrains {
 
   @SuppressWarnings("unused")
   public static Terrain hilly(
+      @Param(value = "name", iS = "hilly[{chunkW}-{chunkH}]") String name,
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
@@ -92,6 +97,7 @@ public class Terrains {
 
   @SuppressWarnings("unused")
   public static Terrain holed(
+      @Param(value = "name", dS = "holed") String name,
       @Param(value = "startW", dD = START_W) double startW,
       @Param(value = "holeH", dD = HOLE_H) double holeH,
       @Param(
@@ -113,6 +119,7 @@ public class Terrains {
 
   @SuppressWarnings("unused")
   public static Terrain steppy(
+      @Param(value = "name", iS = "steppy[{chunkW}-{chunkH}]") String name,
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,
@@ -134,7 +141,23 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  public static Terrain sumoArena(
+      @Param(value = "name", dS = "sumoArena") String name,
+      @Param(value = "h", dD = 20) Double h,
+      @Param(value = "borderW", dD = 1) Double borderW,
+      @Param(value = "borderH", dD = 25) Double borderH,
+      @Param(value = "holeW", dD = 20) Double holeW,
+      @Param(value = "flatW", dD = 20) Double flatW,
+      @Param(value = "flatH", dD = 15) Double flatH
+  ) {
+    Path p = new Path(new Point(holeW, 0));
+    p = p.moveBy(0, flatH).moveBy(flatW, 0).moveBy(0, -flatH).moveBy(holeW, 0);
+    return Terrain.fromPath(p, h, borderW, borderH);
+  }
+
+  @SuppressWarnings("unused")
   public static Terrain uphill(
+      @Param(value = "name", iS = "uphill[{a}]") String name,
       @Param(value = "w", dD = W) Double w,
       @Param(value = "h", dD = H) Double h,
       @Param(value = "borderW", dD = BORDER_W) Double borderW,

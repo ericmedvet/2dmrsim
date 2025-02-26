@@ -25,20 +25,24 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained {
 
+  private final static Voxel.Side UNDIRECTIONAL_SIDE = Voxel.Side.E;
+
   private final Grid<NumericalDynamicalSystem<?>> numericalDynamicalSystemGrid;
   private final int nOfSignals;
   private final boolean directional;
-  private final Grid<double[]> signalsGrid;
 
   private final Grid<double[]> fullInputsGrid;
   private final Grid<double[]> fullOutputsGrid;
+  private final Grid<double[]> outputsGrid;
+  private final Grid<Map<Voxel.Side, double[]>> signalsGrid;
+  private final List<Grid.Key> nonEmptyKeys;
+  private final double[] zeroSignals;
 
   public DistributedNumGridVSR(
       GridBody body,
@@ -47,7 +51,6 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       boolean directional
   ) {
     super(body);
-    int communicationSize = directional ? nOfSignals * 4 : nOfSignals;
     body.grid().entries().forEach(e -> {
       if (e.value().element().type().equals(GridBody.VoxelType.NONE)) {
         if (numericalDynamicalSystemGrid.get(e.key()) != null) {
@@ -65,7 +68,7 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
     this.nOfSignals = nOfSignals;
     this.directional = directional;
     this.numericalDynamicalSystemGrid = numericalDynamicalSystemGrid;
-    signalsGrid = bodyGrid.map(v -> v != null ? new double[communicationSize] : null);
+    signalsGrid = numericalDynamicalSystemGrid.map(v -> v != null ? new EnumMap<>(Voxel.Side.class) : null);
     fullInputsGrid = Grid.create(
         body.grid().w(),
         body.grid().h(),
@@ -76,6 +79,14 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
         body.grid().h(),
         k -> new double[nOfOutputs(body, k, nOfSignals, directional)]
     );
+    zeroSignals = new double[nOfSignals];
+    nonEmptyKeys = numericalDynamicalSystemGrid.entries()
+        .stream()
+        .filter(e -> e.value() != null)
+        .map(Grid.Entry::key)
+        .toList();
+    outputsGrid = Grid.create(numericalDynamicalSystemGrid.w(), numericalDynamicalSystemGrid.h());
+    nonEmptyKeys.forEach(k -> outputsGrid.set(k, new double[SIDE_INDEXES.size()]));
   }
 
   public static int nOfInputs(GridBody body, Grid.Key key, int nOfSignals, boolean directional) {
@@ -120,25 +131,21 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
   @Override
   protected Grid<double[]> computeActuationValues(double t, Grid<double[]> inputsGrid) {
     // create actual input grid (concat sensed values and communication signals)
-    for (Grid.Key key : inputsGrid.keys()) {
-      if (inputsGrid.get(key) == null) {
-        continue;
-      }
+    for (Grid.Key key : nonEmptyKeys) {
       double[] sensoryInputs = inputsGrid.get(key);
-      double[] signals0 = getLastSignals(key.x(), key.y() + 1, 0);
-      double[] signals1 = getLastSignals(key.x() + 1, key.y(), 1);
-      double[] signals2 = getLastSignals(key.x(), key.y() - 1, 2);
-      double[] signals3 = getLastSignals(key.x() - 1, key.y(), 3);
-      double[] fullInputs = Stream.of(sensoryInputs, signals0, signals1, signals2, signals3)
+      double[] fullInputs = Stream.of(
+          sensoryInputs,
+          getLastSignals(key.x(), key.y() + 1, Voxel.Side.S),
+          getLastSignals(key.x() + 1, key.y(), Voxel.Side.W),
+          getLastSignals(key.x(), key.y() - 1, Voxel.Side.N),
+          getLastSignals(key.x() - 1, key.y(), Voxel.Side.E)
+      )
           .flatMapToDouble(Arrays::stream)
           .toArray();
       fullInputsGrid.set(key, fullInputs);
     }
     // process values
-    for (Grid.Key key : numericalDynamicalSystemGrid.keys()) {
-      if (numericalDynamicalSystemGrid.get(key) == null) {
-        continue;
-      }
+    for (Grid.Key key : nonEmptyKeys) {
       double[] inputs = fullInputsGrid.get(key);
       if (inputs.length != numericalDynamicalSystemGrid.get(key).nOfInputs()) {
         throw new IllegalArgumentException(
@@ -154,26 +161,30 @@ public class DistributedNumGridVSR extends NumGridVSR implements NumMultiBrained
       fullOutputsGrid.set(key, numericalDynamicalSystemGrid.get(key).step(t, inputs));
     }
     // split actuation and communication for next step
-    Grid<double[]> outputsGrid = Grid.create(inputsGrid.w(), inputsGrid.h(), new double[4]);
-    for (Grid.Key key : fullOutputsGrid.keys()) {
-      if (fullOutputsGrid.get(key) == null) {
-        continue;
-      }
+    for (Grid.Key key : nonEmptyKeys) {
       double[] fullOutputs = fullOutputsGrid.get(key);
       double actuationValue = fullOutputs[0];
-      double[] signals = Arrays.stream(fullOutputs, 1, fullOutputs.length).toArray();
-      outputsGrid.set(key, new double[]{actuationValue, actuationValue, actuationValue, actuationValue});
-      signalsGrid.set(key, signals);
+      SIDE_INDEXES.values().forEach(i -> outputsGrid.get(key)[i] = actuationValue);
+      if (directional) {
+        for (Map.Entry<Voxel.Side, Integer> sideEntry : SIDE_INDEXES.entrySet()) {
+          double[] sideSignals = signalsGrid.get(key).computeIfAbsent(sideEntry.getKey(), s -> zeroSignals);
+          System.arraycopy(fullOutputs, 1 + sideEntry.getValue() * nOfSignals, sideSignals, 0, nOfSignals);
+        }
+      } else {
+        double[] sideSignals = signalsGrid.get(key).computeIfAbsent(UNDIRECTIONAL_SIDE, s -> zeroSignals);
+        System.arraycopy(fullOutputs, 1, sideSignals, 0, nOfSignals);
+      }
     }
     return outputsGrid;
   }
 
-  private double[] getLastSignals(int x, int y, int c) {
+  private double[] getLastSignals(int x, int y, Voxel.Side side) {
     if (x < 0 || y < 0 || x >= signalsGrid.w() || y >= signalsGrid.h() || signalsGrid.get(x, y) == null) {
-      return new double[nOfSignals];
+      return zeroSignals;
     }
-    double[] allSignals = signalsGrid.get(x, y);
-    return directional ? Arrays.stream(allSignals, c * nOfSignals, (c + 1) * nOfSignals)
-        .toArray() : allSignals;
+    if (directional) {
+      return signalsGrid.get(x, y).computeIfAbsent(side, s -> zeroSignals);
+    }
+    return signalsGrid.get(x, y).computeIfAbsent(UNDIRECTIONAL_SIDE, s -> zeroSignals);
   }
 }

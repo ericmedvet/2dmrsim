@@ -22,8 +22,11 @@ package io.github.ericmedvet.mrsim2d.core.actions;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseNFC(Body body, Point displacement, double direction, short channel) implements Sense<Body> {
+public record SenseNFC(
+    Body body, Point displacement, double direction, short channel
+) implements XMirrorableSense<Body> {
   @Override
   public Body body() {
     return body;
@@ -32,5 +35,20 @@ public record SenseNFC(Body body, Point displacement, double direction, short ch
   @Override
   public DoubleRange range() {
     return DoubleRange.SYMMETRIC_UNIT;
+  }
+
+  @Override
+  public Sense<Body> mirrored() {
+    return new SenseNFC(
+        body,
+        new Point(-displacement.x(), displacement.y()),
+        SenseAngle.mirrorAngle(direction),
+        channel
+    );
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return DoubleUnaryOperator.identity();
   }
 }

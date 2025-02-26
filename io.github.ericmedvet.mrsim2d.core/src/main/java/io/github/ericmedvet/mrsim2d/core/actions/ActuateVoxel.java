@@ -24,6 +24,7 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel, Voxel> {
   public ActuateVoxel(Voxel voxel, double value) {
@@ -51,5 +52,13 @@ public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) imple
   @Override
   public DoubleRange range() {
     return DoubleRange.SYMMETRIC_UNIT;
+  }
+
+  @Override
+  public String toString() {
+    return "ActuateVoxel[" + "body=" + body + ", values={" + values.entrySet()
+        .stream()
+        .map(e -> "%s=%.3f".formatted(e.getKey(), e.getValue()))
+        .collect(Collectors.joining(";")) + "}]";
   }
 }

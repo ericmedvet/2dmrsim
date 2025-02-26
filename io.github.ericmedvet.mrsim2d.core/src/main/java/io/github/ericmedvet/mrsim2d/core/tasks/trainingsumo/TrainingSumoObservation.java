@@ -17,16 +17,22 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
 
-package io.github.ericmedvet.mrsim2d.core.actions;
+import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
+import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import java.util.List;
 
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
-import io.github.ericmedvet.mrsim2d.core.Action;
-import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+public class TrainingSumoObservation extends AgentsObservation {
+  private final Poly rigidBodyPoly;
 
-public interface Sense<B extends Body> extends Action<Double> {
-  B body();
+  public TrainingSumoObservation(List<Agent> agents, RigidBody rigidBody) {
+    super(agents);
+    this.rigidBodyPoly = rigidBody.poly();
+  }
 
-  DoubleRange range();
-
+  public Poly getRigidBodyPoly() {
+    return rigidBodyPoly;
+  }
 }

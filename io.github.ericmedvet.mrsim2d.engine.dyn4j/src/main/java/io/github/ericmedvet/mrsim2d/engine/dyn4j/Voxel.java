@@ -60,6 +60,9 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
   private final EnumSet<SpringScaffolding> springScaffoldings;
   private final Vector2 initialSidesAverageDirection;
 
+  private Collection<Body> bodies;
+  private Collection<Joint<Body>> joints;
+
   public Voxel(
       double sideLength,
       double mass,
@@ -98,7 +101,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     VERTEX, CENTRAL
   }
 
-  protected enum SpringScaffolding {
+  public enum SpringScaffolding {
     SIDE_EXTERNAL, SIDE_INTERNAL, SIDE_CROSS, CENTRAL_CROSS
   }
 
@@ -145,7 +148,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     // apply on central
     double v = sideValues.values()
         .stream()
-        .mapToDouble(d -> DoubleRange.SYMMETRIC_UNIT.clip(d))
+        .mapToDouble(DoubleRange.SYMMETRIC_UNIT::clip)
         .average()
         .orElse(0d);
     for (DistanceJoint<Body> joint : centralJoints) {
@@ -419,7 +422,8 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     // set collision filter
-    getBodies().forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.VERTEX))));
+    vertexes.values()
+        .forEach(b -> b.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.VERTEX))));
     // add central mass
     //noinspection ConstantConditions
     if (CENTRAL_MASS_RATIO > 0) {
@@ -433,7 +437,6 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       centralMass.setMass(MassType.NORMAL);
       centralMass.setLinearDamping(linearDamping);
       centralMass.setAngularDamping(angularDamping);
-      centralMass.translate(sideLength / 2d, sideLength / 2d);
       centralMass.getFixtures().forEach(f -> f.setFilter(new VoxelFilter(this, BodyType.CENTRAL)));
       otherBodies.add(centralMass);
       for (Body vertex : vertexes.values()) {
@@ -455,33 +458,29 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       }
     }
     // setup spring joints
-    getJoints().forEach(j -> {
-      if (j instanceof DistanceJoint<Body> joint) {
-        joint.setRestDistance(((SpringRange) joint.getUserData()).rest);
-        joint.setCollisionAllowed(true);
-        joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
-        joint.setDampingRatio(SPRING_D);
-      }
-    });
+    Stream.of(
+        sideJoints.get(Side.N),
+        sideJoints.get(Side.E),
+        sideJoints.get(Side.S),
+        sideJoints.get(Side.W),
+        centralJoints
+    )
+        .flatMap(Collection::stream)
+        .forEach(j -> {
+          if (j instanceof DistanceJoint<Body> joint) {
+            joint.setRestDistance(((SpringRange) joint.getUserData()).rest);
+            joint.setCollisionAllowed(true);
+            joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
+            joint.setDampingRatio(SPRING_D);
+          }
+        });
     // set user data
     vertexes.values().forEach(b -> b.setUserData(this));
     otherBodies.forEach(b -> b.setUserData(this));
-  }
-
-  private Point enlongForm(Point src, Point dst, double d) {
-    return dst.sum(new Point(dst.diff(src).direction()).scale(d));
-  }
-
-  @Override
-  public Collection<Body> getBodies() {
-    return Stream.of(vertexes.values(), otherBodies)
+    // prepare lists
+    bodies = Stream.of(vertexes.values(), otherBodies)
         .flatMap(Collection::stream)
         .toList();
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  @Override
-  public Collection<Joint<Body>> getJoints() {
     List<DistanceJoint<Body>> allJoints = Stream.of(
         sideJoints.get(Side.N),
         sideJoints.get(Side.E),
@@ -491,7 +490,22 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
     )
         .flatMap(Collection::stream)
         .toList();
-    return (List) allJoints;
+    //noinspection unchecked,rawtypes
+    joints = (List) allJoints;
+  }
+
+  private Point enlongForm(Point src, Point dst, double d) {
+    return dst.sum(new Point(dst.diff(src).direction()).scale(d));
+  }
+
+  @Override
+  public Collection<Body> getBodies() {
+    return bodies;
+  }
+
+  @Override
+  public Collection<Joint<Body>> getJoints() {
+    return joints;
   }
 
   private Vector2 getSidesAverageDirection() {

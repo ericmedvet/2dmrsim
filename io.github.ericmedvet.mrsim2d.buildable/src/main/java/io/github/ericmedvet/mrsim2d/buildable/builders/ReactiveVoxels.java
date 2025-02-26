@@ -76,13 +76,18 @@ public class ReactiveVoxels {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(SenseAngle::new),
-        nss(1, (t, inputs) -> {
-          Voxel.Side side = fromAngle(inputs[0] + aDeg);
-          return new double[]{side.equals(Voxel.Side.N) ? action.getValue() : 0d, side.equals(Voxel.Side.E) ? action
-              .getValue() : 0d, side.equals(Voxel.Side.S) ? action.getValue() : 0d, side.equals(Voxel.Side.W) ? action
-                  .getValue() : 0d
-          };
-        })
+        nss(
+            1,
+            (t, inputs) -> {
+              Voxel.Side side = fromAngle(inputs[0] + aDeg);
+              return new double[]{side.equals(Voxel.Side.N) ? action.getValue() : 0d, side.equals(Voxel.Side.E) ? action
+                  .getValue() : 0d, side.equals(Voxel.Side.S) ? action.getValue() : 0d, side.equals(
+                      Voxel.Side.W
+                  ) ? action
+                      .getValue() : 0d
+              };
+            }
+        )
     );
   }
 

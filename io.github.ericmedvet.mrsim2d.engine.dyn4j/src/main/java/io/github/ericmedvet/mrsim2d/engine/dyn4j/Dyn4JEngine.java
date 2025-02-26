@@ -28,7 +28,6 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.AbstractEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.IllegalActionException;
-import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -431,9 +430,10 @@ public class Dyn4JEngine extends AbstractEngine {
   }
 
   private Body translateBody(TranslateBody action, Agent agent) throws IllegalActionException {
-    Point t = new Point(action.translation().x(), action.translation().y());
+    double tx = action.translation().x();
+    double ty = action.translation().y();
     if (action.body() instanceof MultipartBody multipartBody) {
-      multipartBody.getBodies().forEach(b -> b.translate(t.x(), t.y()));
+      multipartBody.getBodies().forEach(b -> b.translate(tx, ty));
       return action.body();
     }
     throw new IllegalActionException(

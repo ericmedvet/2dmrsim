@@ -23,6 +23,7 @@ package io.github.ericmedvet.mrsim2d.core.agents.gridvsr;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
+import io.github.ericmedvet.mrsim2d.core.XMirrorable;
 import io.github.ericmedvet.mrsim2d.core.actions.AttachClosestAnchors;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateRigidBody;
 import io.github.ericmedvet.mrsim2d.core.actions.CreateVoxel;
@@ -36,7 +37,7 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractGridVSR implements EmbodiedAgent {
+public abstract class AbstractGridVSR implements EmbodiedAgent, XMirrorable {
 
   protected static final double VOXEL_SIDE_LENGTH = 1d;
   protected static final double VOXEL_MASS = 1d;
@@ -45,12 +46,19 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
   private final Grid<GridBody.Element> elementGrid;
   private final double voxelSideLength;
   private final double voxelMass;
+  protected boolean xMirrored;
 
   public AbstractGridVSR(Grid<GridBody.Element> elementGrid, double voxelSideLength, double voxelMass) {
     this.elementGrid = elementGrid;
     this.voxelSideLength = voxelSideLength;
     this.voxelMass = voxelMass;
     bodyGrid = Grid.create(elementGrid.w(), elementGrid.h());
+    xMirrored = false;
+  }
+
+  @Override
+  public void mirror() {
+    xMirrored = true;
   }
 
   @Override
@@ -90,9 +98,9 @@ public abstract class AbstractGridVSR implements EmbodiedAgent {
           actionPerformer.perform(
               new TranslateBodyAt(
                   anchorable,
-                  BoundingBox.Anchor.LU,
+                  BoundingBox.Anchor.CC,
                   new Point(
-                      e.key().x() * voxelSideLength,
+                      (xMirrored ? -1 : 1) * e.key().x() * voxelSideLength,
                       e.key().y() * voxelSideLength
                   )
               ),

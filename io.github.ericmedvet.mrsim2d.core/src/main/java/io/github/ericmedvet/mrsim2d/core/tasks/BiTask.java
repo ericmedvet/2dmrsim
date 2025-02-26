@@ -19,14 +19,13 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
-import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.jsdynsym.control.Simulation;
+import io.github.ericmedvet.jsdynsym.control.BiSimulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
-public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>> extends Simulation<Pair<A1, A2>, S, O> {
+public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>> extends BiSimulation<A1, A2, S, O> {
 
   O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
@@ -35,11 +34,7 @@ public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOut
   }
 
   @Override
-  default O simulate(Pair<A1, A2> pair) {
-    return run(
-        pair.first(),
-        pair.second(),
-        ServiceLoader.load(Engine.class).findFirst().orElseThrow()
-    );
+  default O simulate(A1 a1, A2 a2) {
+    return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
   }
 }

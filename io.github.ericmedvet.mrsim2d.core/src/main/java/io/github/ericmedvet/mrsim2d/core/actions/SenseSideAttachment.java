@@ -29,8 +29,11 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseSideAttachment(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
+public record SenseSideAttachment(
+    Voxel.Side side, Voxel body
+) implements XMirrorableSense<Voxel>, SelfDescribedAction<Double> {
 
   @Override
   public Double perform(ActionPerformer performer, Agent agent) {
@@ -58,5 +61,22 @@ public record SenseSideAttachment(Voxel.Side side, Voxel body) implements Sense<
   @Override
   public DoubleRange range() {
     return DoubleRange.UNIT;
+  }
+
+  @Override
+  public Sense<Voxel> mirrored() {
+    return new SenseSideAttachment(
+        switch (side) {
+          case E -> Voxel.Side.W;
+          case W -> Voxel.Side.E;
+          default -> side;
+        },
+        body
+    );
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return DoubleUnaryOperator.identity();
   }
 }

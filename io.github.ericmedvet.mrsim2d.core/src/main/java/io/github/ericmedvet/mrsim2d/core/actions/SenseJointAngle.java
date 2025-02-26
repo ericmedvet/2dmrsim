@@ -25,8 +25,11 @@ import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseJointAngle(RotationalJoint body) implements Sense<RotationalJoint>, SelfDescribedAction<Double> {
+public record SenseJointAngle(
+    RotationalJoint body
+) implements XMirrorableSense<RotationalJoint>, SelfDescribedAction<Double> {
 
   @Override
   public Double perform(ActionPerformer performer, Agent agent) {
@@ -36,5 +39,15 @@ public record SenseJointAngle(RotationalJoint body) implements Sense<RotationalJ
   @Override
   public DoubleRange range() {
     return body.jointPassiveAngleRange();
+  }
+
+  @Override
+  public Sense<RotationalJoint> mirrored() {
+    return this;
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return SenseAngle::mirrorAngle;
   }
 }

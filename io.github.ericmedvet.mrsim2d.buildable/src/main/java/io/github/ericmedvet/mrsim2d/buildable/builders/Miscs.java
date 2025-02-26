@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
@@ -29,12 +30,26 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
-import io.github.ericmedvet.mrsim2d.viewer.*;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.*;
+import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawer;
+import io.github.ericmedvet.mrsim2d.viewer.Drawers;
+import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
+import io.github.ericmedvet.mrsim2d.viewer.Framer;
+import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.NFCDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.StackedMultipliedDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseDistanceToBody;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.actions.SenseRotatedVelocity;
-import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.*;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.AnchorableBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RigidBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.RotationalJointDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.SoftBodyDrawer;
+import io.github.ericmedvet.mrsim2d.viewer.drawers.bodies.UnmovableBodyDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.framers.AllAgentsFramer;
 import io.github.ericmedvet.mrsim2d.viewer.framers.StaticFramer;
 import java.util.ArrayList;
@@ -56,16 +71,18 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
-  public static Framer<Snapshot> allAgentsFramer(
+  @Cacheable
+  public static Supplier<Framer<Snapshot>> allAgentsFramer(
       @Param(value = "enlargement", dD = 1.5) double enlargement,
       @Param(value = "followTime", dD = 2) double followTime
   ) {
-    return new AllAgentsFramer(enlargement).largest(followTime);
+    return () -> new AllAgentsFramer(enlargement).largest(followTime);
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Function<String, Drawer> drawer(
-      @Param(value = "framer", dNPM = "s.allAgentsFramer()") Framer<Snapshot> framer,
+      @Param(value = "framer", dNPM = "sim.allAgentsFramer()") Supplier<Framer<Snapshot>> framer,
       @Param(value = "profilingTime", dD = 1) double profilingTime,
       @Param(value = "miniWorldEnlargement", dD = 10) double miniWorldEnlargement,
       @Param(value = "miniWorld") boolean miniWorld,
@@ -75,7 +92,8 @@ public class Miscs {
       @Param(value = "engineProfiling") boolean engineProfiling,
       @Param(value = "actions") boolean actions,
       @Param(value = "info", dB = true) boolean info,
-      @Param(value = "nfc") boolean nfc
+      @Param(value = "nfc") boolean nfc,
+      @Param(value = "parts") boolean parts
   ) {
     return s -> {
       List<ComponentDrawer> componentDrawers = components.stream()
@@ -100,7 +118,10 @@ public class Miscs {
       if (nfc) {
         thingsDrawers.add(nfcDrawer);
       }
-      Drawer worldDrawer = Drawer.transform(framer, Drawer.of(Collections.unmodifiableList(thingsDrawers)));
+      if (parts) {
+        thingsDrawers.add(new ComponentsDrawer(List.of(new MultipartBodyDrawer()), Snapshot::bodies));
+      }
+      Drawer worldDrawer = Drawer.transform(framer.get(), Drawer.of(Collections.unmodifiableList(thingsDrawers)));
       List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
       if (!miniAgentInfo.equals(MiniAgentInfo.NONE)) {
         drawers.add(
@@ -161,21 +182,24 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Supplier<Engine> engine() {
     return () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
   }
 
   @SuppressWarnings("unused")
-  public static Framer<Snapshot> staticFramer(
+  @Cacheable
+  public static Supplier<Framer<Snapshot>> staticFramer(
       @Param("minX") double minX,
       @Param("maxX") double maxX,
       @Param("minY") double minY,
       @Param("maxY") double maxY
   ) {
-    return new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
+    return () -> new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
       @Param("task") Task<A, S, O> task,
       @Param("repetitions") int repetitions,
@@ -188,7 +212,9 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
+      @Param(value = "name", iS = "{task.name}") String name,
       @Param("task") Task<A, S, O> task,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
   ) {
@@ -196,6 +222,7 @@ public class Miscs {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <A> TaskVideoBuilder<A> taskVideoBuilder(
       @Param("task") Task<A, ?, ?> task,
       @Param(value = "title", dS = "") String title,

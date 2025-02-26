@@ -25,6 +25,7 @@ module io.github.ericmedvet.mrsim2d.core {
   requires io.github.ericmedvet.jsdynsym.core;
   requires io.github.ericmedvet.jsdynsym.control;
   requires io.github.ericmedvet.jnb.datastructure;
+  requires jcodec;
 
   exports io.github.ericmedvet.mrsim2d.core;
   exports io.github.ericmedvet.mrsim2d.core.actions;
@@ -39,5 +40,8 @@ module io.github.ericmedvet.mrsim2d.core {
   exports io.github.ericmedvet.mrsim2d.core.tasks.balancing;
   exports io.github.ericmedvet.mrsim2d.core.tasks.jumping;
   exports io.github.ericmedvet.mrsim2d.core.tasks.piling;
+  exports io.github.ericmedvet.mrsim2d.core.tasks.sumo;
   exports io.github.ericmedvet.mrsim2d.core.util;
+  exports io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo;
+  exports io.github.ericmedvet.mrsim2d.core.tasks.trainingfight;
 }

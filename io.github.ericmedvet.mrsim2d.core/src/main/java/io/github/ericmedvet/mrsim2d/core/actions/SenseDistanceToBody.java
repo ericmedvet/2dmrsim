@@ -22,11 +22,22 @@ package io.github.ericmedvet.mrsim2d.core.actions;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseDistanceToBody(double direction, double distanceRange, Body body) implements Sense<Body> {
+public record SenseDistanceToBody(double direction, double distanceRange, Body body) implements XMirrorableSense<Body> {
 
   @Override
   public DoubleRange range() {
     return new DoubleRange(0, distanceRange);
+  }
+
+  @Override
+  public Sense<Body> mirrored() {
+    return new SenseDistanceToBody(SenseAngle.mirrorAngle(direction), distanceRange, body);
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return DoubleUnaryOperator.identity();
   }
 }

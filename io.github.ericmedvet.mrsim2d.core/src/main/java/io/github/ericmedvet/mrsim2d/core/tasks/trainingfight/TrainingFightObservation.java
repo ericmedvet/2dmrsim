@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * mrsim2d-core
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,14 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package io.github.ericmedvet.mrsim2d.core.tasks.trainingfight;
 
-package io.github.ericmedvet.mrsim2d.core.actions;
+import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
+import java.util.List;
 
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
-import io.github.ericmedvet.mrsim2d.core.Action;
-import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+public class TrainingFightObservation extends AgentsObservation {
 
-public interface Sense<B extends Body> extends Action<Double> {
-  B body();
-
-  DoubleRange range();
-
+  public TrainingFightObservation(List<Agent> agents) {
+    super(agents);
+  }
 }

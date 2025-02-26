@@ -25,8 +25,11 @@ import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
+import java.util.function.DoubleUnaryOperator;
 
-public record SenseSideCompression(Voxel.Side side, Voxel body) implements Sense<Voxel>, SelfDescribedAction<Double> {
+public record SenseSideCompression(
+    Voxel.Side side, Voxel body
+) implements XMirrorableSense<Voxel>, SelfDescribedAction<Double> {
   private static final DoubleRange RANGE = new DoubleRange(0.5, 1.5);
 
   @Override
@@ -38,5 +41,22 @@ public record SenseSideCompression(Voxel.Side side, Voxel body) implements Sense
   @Override
   public DoubleRange range() {
     return RANGE;
+  }
+
+  @Override
+  public Sense<Voxel> mirrored() {
+    return new SenseSideCompression(
+        switch (side) {
+          case E -> Voxel.Side.W;
+          case W -> Voxel.Side.E;
+          default -> side;
+        },
+        body
+    );
+  }
+
+  @Override
+  public DoubleUnaryOperator outcomeMirrorer() {
+    return DoubleUnaryOperator.identity();
   }
 }

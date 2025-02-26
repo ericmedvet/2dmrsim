@@ -27,6 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.actions.ActuateVoxel;
 import io.github.ericmedvet.mrsim2d.core.actions.Sense;
+import io.github.ericmedvet.mrsim2d.core.actions.XMirrorableSense;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.bodies.Voxel;
 import java.util.*;
@@ -35,7 +36,15 @@ public abstract class NumGridVSR extends AbstractGridVSR {
 
   protected static final DoubleRange INPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
   protected static final DoubleRange OUTPUT_RANGE = DoubleRange.SYMMETRIC_UNIT;
-  private static final Voxel.Side[] SIDES = new Voxel.Side[]{Voxel.Side.N, Voxel.Side.E, Voxel.Side.S, Voxel.Side.W};
+  protected final static Map<Voxel.Side, Integer> SIDE_INDEXES = new EnumMap<>(
+      Map.ofEntries(
+          Map.entry(Voxel.Side.N, 0),
+          Map.entry(Voxel.Side.E, 1),
+          Map.entry(Voxel.Side.S, 2),
+          Map.entry(Voxel.Side.W, 3)
+      )
+  );
+
   private final Grid<List<Sensor<? super Body>>> sensorsGrid;
   private final Grid<double[]> inputsGrid;
   private final Grid<double[]> outputGrid;
@@ -47,7 +56,7 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     this.body = body;
     inputsGrid = body.grid()
         .map(e -> e.element().type().equals(GridBody.VoxelType.NONE) ? null : new double[e.sensors().size()]);
-    outputGrid = bodyGrid.map(v -> v != null ? new double[SIDES.length] : null);
+    outputGrid = bodyGrid.map(v -> v != null ? new double[SIDE_INDEXES.size()] : null);
   }
 
   public NumGridVSR(GridBody body) {
@@ -83,8 +92,12 @@ public abstract class NumGridVSR extends AbstractGridVSR {
             ActionOutcome<?, ?> outcome = previousActionOutcomes.get(c);
             if (outcome.action() instanceof Sense<?>) {
               @SuppressWarnings("unchecked") ActionOutcome<? extends Sense<Voxel>, Double> o = (ActionOutcome<? extends Sense<Voxel>, Double>) outcome;
+              double v = o.outcome().orElse(0d);
+              if (outcome.action() instanceof XMirrorableSense<?> xMirrorableSense) {
+                v = xMirrorableSense.outcomeMirrorer().applyAsDouble(v);
+              }
               inputs[i] = INPUT_RANGE.denormalize(
-                  o.action().range().normalize(o.outcome().orElse(0d))
+                  o.action().range().normalize(v)
               );
               c = c + 1;
             }
@@ -95,6 +108,8 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     // compute actuation
     computeActuationValues(t, inputsGrid)
         .entries()
+        .stream()
+        .filter(e -> Objects.nonNull(e.value()))
         .forEach(
             e -> outputGrid.set(
                 e.key(),
@@ -106,11 +121,15 @@ public abstract class NumGridVSR extends AbstractGridVSR {
     actions.addAll(
         bodyGrid.entries()
             .stream()
-            .filter(e -> e.value() != null)
+            .filter(e -> Objects.nonNull(e.value()))
             .map(
                 e -> sensorsGrid.get(e.key())
                     .stream()
-                    .map(f -> f.apply(e.value()))
+                    .map(f -> {
+                      Sense<? super Body> sense = f.apply(e.value());
+                      return (sense instanceof XMirrorableSense<? super Body> && xMirrored) ? ((XMirrorableSense<? super Body>) sense)
+                          .mirrored() : sense;
+                    })
                     .toList()
             )
             .flatMap(Collection::stream)
