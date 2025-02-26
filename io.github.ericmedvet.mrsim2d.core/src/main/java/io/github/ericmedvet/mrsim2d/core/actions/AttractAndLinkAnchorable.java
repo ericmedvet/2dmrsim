@@ -23,6 +23,7 @@ package io.github.ericmedvet.mrsim2d.core.actions;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
@@ -35,7 +36,7 @@ import java.util.Map;
 
 public record AttractAndLinkAnchorable(
     Collection<Anchor> anchors, Anchorable anchorable, double magnitude, Anchor.Link.Type type
-) implements SelfDescribedAction<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {
+) implements SelfDescribedAction<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>>, EnergyConsumingAction<Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome>> {
 
   @Override
   public Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> perform(ActionPerformer performer, Agent agent) {
@@ -70,5 +71,10 @@ public record AttractAndLinkAnchorable(
           .ifPresent(outcome -> map.put(pair, outcome));
     }
     return map;
+  }
+
+  @Override
+  public Map<Type, Double> energy(Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> outcome) {
+    return Map.of(Type.INDIRECT, Math.abs(AttractAnchor.ATTRACTION_ENERGY * magnitude * outcome.size()));
   }
 }

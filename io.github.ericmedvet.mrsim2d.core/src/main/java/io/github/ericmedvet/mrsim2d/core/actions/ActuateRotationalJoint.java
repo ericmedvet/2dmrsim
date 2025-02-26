@@ -25,9 +25,10 @@ import io.github.ericmedvet.mrsim2d.core.bodies.RotationalJoint;
 
 public record ActuateRotationalJoint(
     RotationalJoint body, double value
-) implements Actuate<RotationalJoint, RotationalJoint> {
+) implements Actuate<RotationalJoint> {
   @Override
   public DoubleRange range() {
     return DoubleRange.SYMMETRIC_UNIT;
   }
+
 }
