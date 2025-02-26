@@ -21,6 +21,7 @@
 package io.github.ericmedvet.mrsim2d.engine.dyn4j;
 
 import io.github.ericmedvet.jnb.datastructure.Pair;
+import io.github.ericmedvet.jsdynsym.control.geometry.Line;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
@@ -63,11 +64,37 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
     bodies.forEach(b -> b.setUserData(this));
     if (Double.isFinite(anchorsDensity)) {
       List<Anchor> localAnchors = new ArrayList<>();
-      for (Segment segment : poly.sides()) {
-        double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
-        for (double i = 0; i < nOfAnchors; i = i + 1) {
-          Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
-          Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+      if (anchorsDensity == 0) {
+        List<Line> shiftedSideLines = poly.sides().stream().map(s -> {
+          Point newDirection = new Point(s.direction() - Math.PI / 2).scale(anchorSideDistance);
+          Point p1Shifted = s.p1().sum(newDirection);
+          Point p2Shifted = s.p2().sum(newDirection);
+          return Line.from(
+              new io.github.ericmedvet.jsdynsym.control.geometry.Point(p1Shifted.x(), p1Shifted.y()),
+              new io.github.ericmedvet.jsdynsym.control.geometry.Point(p2Shifted.x(), p2Shifted.y())
+          );
+        }).toList();
+        for (int i = 0; i < shiftedSideLines.size() - 1; ++i) {
+          io.github.ericmedvet.jsdynsym.control.geometry.Point jsdynsymInt = shiftedSideLines.get(i)
+              .interception(shiftedSideLines.get(i + 1))
+              .orElse(null);
+          if (Objects.nonNull(jsdynsymInt)) {
+            Point aP = new Point(jsdynsymInt.x(), jsdynsymInt.y());
+            Body closest = bodies.stream()
+                .min(
+                    Comparator.comparingDouble(
+                        b -> Utils.point(b.getLocalCenter()).distance(aP)
+                    )
+                )
+                .orElseThrow();
+            localAnchors.add(new BodyAnchor(closest, aP, this));
+          }
+        }
+        io.github.ericmedvet.jsdynsym.control.geometry.Point jsdynsymInt = shiftedSideLines.getLast()
+            .interception(shiftedSideLines.getFirst())
+            .orElse(null);
+        if (Objects.nonNull(jsdynsymInt)) {
+          Point aP = new Point(jsdynsymInt.x(), jsdynsymInt.y());
           Body closest = bodies.stream()
               .min(
                   Comparator.comparingDouble(
@@ -76,6 +103,22 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
               )
               .orElseThrow();
           localAnchors.add(new BodyAnchor(closest, aP, this));
+        }
+      } else {
+        for (Segment segment : poly.sides()) {
+          double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
+          for (double i = 0; i < nOfAnchors; i = i + 1) {
+            Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
+            Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+            Body closest = bodies.stream()
+                .min(
+                    Comparator.comparingDouble(
+                        b -> Utils.point(b.getLocalCenter()).distance(aP)
+                    )
+                )
+                .orElseThrow();
+            localAnchors.add(new BodyAnchor(closest, aP, this));
+          }
         }
       }
       anchors = Collections.unmodifiableList(localAnchors);

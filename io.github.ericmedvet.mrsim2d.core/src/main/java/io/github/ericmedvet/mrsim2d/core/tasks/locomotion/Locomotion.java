@@ -47,18 +47,34 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
+  private final boolean attachableAngles;
   private final double initialXGap;
   private final double initialYGap;
 
-  public Locomotion(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+  public Locomotion(
+      double duration,
+      Terrain terrain,
+      boolean attachableAngles,
+      double initialXGap,
+      double initialYGap
+  ) {
     this.duration = duration;
     this.terrain = terrain;
+    this.attachableAngles = attachableAngles;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
+  public Locomotion(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+    this(duration, terrain, false, initialXGap, initialYGap);
+  }
+
+  public Locomotion(double duration, Terrain terrain, boolean attachableAngles) {
+    this(duration, terrain, attachableAngles, INITIAL_X_GAP, INITIAL_Y_GAP);
+  }
+
   public Locomotion(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
+    this(duration, terrain, false, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
@@ -70,7 +86,9 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(
+        attachableAngles ? new CreateUnmovableBody(terrain.poly(), 0d) : new CreateUnmovableBody(terrain.poly())
+    );
     engine.perform(new AddAgent(embodiedAgent));
     // place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();
