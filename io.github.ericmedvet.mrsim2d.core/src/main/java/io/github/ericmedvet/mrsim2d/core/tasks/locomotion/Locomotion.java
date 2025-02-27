@@ -20,15 +20,18 @@
 
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
-import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
-import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
+import io.github.ericmedvet.mrsim2d.core.actions.*;
+import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
+import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
+import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
@@ -109,9 +112,17 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
             new Point(0, maxY + initialYGap - agentBB.min().y())
         )
     );
+    RigidBody rigidBody = engine.perform(new CreateRigidBody(Poly.rectangle(1, 1), 1, 3)).outcome().orElseThrow();
+    engine.perform(new TranslateBody(
+            rigidBody, new Point(terrain.withinBordersXRange().min() + 20, 5)
+    ));
+    List<Anchor> rigidAnchors = rigidBody.anchors();
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
+      for (Anchor a : rigidAnchors) {
+        engine.perform(new AttractAndLinkClosestAnchorable(List.of(a), 1, Anchor.Link.Type.SOFT));
+      }
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
