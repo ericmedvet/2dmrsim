@@ -112,17 +112,22 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
             new Point(0, maxY + initialYGap - agentBB.min().y())
         )
     );
+
+    // testing part 1
     RigidBody rigidBody = engine.perform(new CreateRigidBody(Poly.rectangle(1, 1), 1, 3)).outcome().orElseThrow();
     engine.perform(new TranslateBody(
             rigidBody, new Point(terrain.withinBordersXRange().min() + 20, 5)
     ));
     List<Anchor> rigidAnchors = rigidBody.anchors();
+    // end of testint part 1
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
+      // testing part 2
       for (Anchor a : rigidAnchors) {
         engine.perform(new AttractAndLinkClosestAnchorable(List.of(a), 1, Anchor.Link.Type.SOFT));
       }
+      // end of testint part 2
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
