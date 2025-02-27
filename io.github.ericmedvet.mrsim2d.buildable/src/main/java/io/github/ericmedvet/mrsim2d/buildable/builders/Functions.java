@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
@@ -34,6 +35,7 @@ public class Functions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> Function<X, Grid<GridBody.VoxelType>> vsrBody(
       @Param(value = "of", dNPM = "f.identity()") Function<X, AbstractGridVSR> beforeF,
       @Param(value = "nullify", dB = true) boolean nullifyNone,

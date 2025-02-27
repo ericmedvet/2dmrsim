@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
@@ -36,6 +37,7 @@ public class VSRSensorizingFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> directional(
       @Param(value = "nSensors") List<Sensor<? super Voxel>> nSensors,
       @Param(value = "eSensors") List<Sensor<? super Voxel>> eSensors,
@@ -89,11 +91,13 @@ public class VSRSensorizingFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> empty() {
     return shape -> shape.map(b -> List.of());
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Function<Grid<Boolean>, Grid<List<Sensor<? super Voxel>>>> uniform(
       @Param(value = "sensors") List<Sensor<? super Voxel>> sensors
   ) {

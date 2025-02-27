@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.mrsim2d.core.geometry.Path;
@@ -50,6 +51,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain downhill(
       @Param(value = "name", iS = "downhill[{a}]") String name,
       @Param(value = "w", dD = W) Double w,
@@ -62,6 +64,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain flat(
       @Param(value = "name", dS = "flat") String name,
       @Param(value = "w", dD = W) Double w,
@@ -73,6 +76,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain hilly(
       @Param(value = "name", iS = "hilly[{chunkW}-{chunkH}]") String name,
       @Param(value = "w", dD = W) Double w,
@@ -96,6 +100,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain holed(
       @Param(value = "name", dS = "holed") String name,
       @Param(value = "startW", dD = START_W) double startW,
@@ -118,6 +123,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain steppy(
       @Param(value = "name", iS = "steppy[{chunkW}-{chunkH}]") String name,
       @Param(value = "w", dD = W) Double w,
@@ -141,6 +147,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain sumoArena(
       @Param(value = "name", dS = "sumoArena") String name,
       @Param(value = "h", dD = 20) Double h,
@@ -156,6 +163,7 @@ public class Terrains {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Terrain uphill(
       @Param(value = "name", iS = "uphill[{a}]") String name,
       @Param(value = "w", dD = W) Double w,

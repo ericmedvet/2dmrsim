@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
@@ -100,6 +101,7 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static PrebuiltIndependentLocomotion prebuiltIndependentLocomotion(
       @Param(value = "name", iS = "piLocomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
@@ -112,6 +114,7 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static StandPiling standPiling(
       @Param(value = "name", dS = "standPiling") String name,
       @Param(value = "duration", dD = 45) double duration,
@@ -125,6 +128,7 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Sumo sumo(
       @Param(value = "name", dS = "sumo") String name,
       @Param(value = "duration", dD = 60) double duration
@@ -133,6 +137,7 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static TrainingFight trainingFight(
       @Param(value = "name", dS = "trainingFight") String name,
       @Param(value = "duration", dD = 60) double duration,
@@ -142,6 +147,7 @@ public class Tasks {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static TrainingSumo trainingSumo(
       @Param(value = "name", dS = "trainingSumo") String name,
       @Param(value = "duration", dD = 60) double duration,
