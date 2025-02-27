@@ -21,7 +21,14 @@
 package io.github.ericmedvet.mrsim2d.core.engine;
 
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.mrsim2d.core.*;
+import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.ActionOutcome;
+import io.github.ericmedvet.mrsim2d.core.Agent;
+import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
+import io.github.ericmedvet.mrsim2d.core.NFCMessage;
+import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
+import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
 import io.github.ericmedvet.mrsim2d.core.actions.AttractAnchor;
 import io.github.ericmedvet.mrsim2d.core.actions.AttractAndLinkAnchor;
@@ -42,7 +49,17 @@ import io.github.ericmedvet.mrsim2d.core.util.Profiled;
 import io.github.ericmedvet.mrsim2d.core.util.SpatialMap;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
@@ -51,7 +68,14 @@ import java.util.stream.Stream;
 
 public abstract class AbstractEngine implements Engine, Profiled {
 
-  private static final Configuration DEFAULT_CONFIGURATION = new Configuration(2, 1.5, 5, 0.5, Math.PI / 2d, 8);
+  private static final Configuration DEFAULT_CONFIGURATION = new Configuration(
+      2,
+      1.5,
+      5,
+      0.5,
+      Math.PI / 2d,
+      8
+  );
   private static final Logger L = Logger.getLogger(AbstractEngine.class.getName());
   protected final AtomicDouble t;
   protected final List<Body> bodies;
@@ -79,8 +103,10 @@ public abstract class AbstractEngine implements Engine, Profiled {
     times = new EnumMap<>(EngineSnapshot.TimeType.class);
     counters = new EnumMap<>(EngineSnapshot.CounterType.class);
     agentActionsFilters = new IdentityHashMap<>();
-    Arrays.stream(EngineSnapshot.TimeType.values()).forEach(t -> times.put(t, new AtomicDouble(0d)));
-    Arrays.stream(EngineSnapshot.CounterType.values()).forEach(t -> counters.put(t, new AtomicInteger(0)));
+    Arrays.stream(EngineSnapshot.TimeType.values())
+        .forEach(t -> times.put(t, new AtomicDouble(0d)));
+    Arrays.stream(EngineSnapshot.CounterType.values())
+        .forEach(t -> counters.put(t, new AtomicInteger(0)));
     startingInstant = Instant.now();
     registerActionSolvers();
   }
@@ -89,19 +115,48 @@ public abstract class AbstractEngine implements Engine, Profiled {
     this(DEFAULT_CONFIGURATION);
   }
 
-  @FunctionalInterface
-  protected interface ActionSolver<A extends Action<O>, O> {
-    O solve(A action, Agent agent) throws ActionException;
+  protected AttractAndLinkAnchor.Outcome attractAndLinkAnchor(
+      AttractAndLinkAnchor action,
+      Agent agent
+  ) {
+    double d = PolyUtils.minAnchorDistance(action.source(), action.destination()) * configuration.attractLinkRangeRatio;
+    if (action.source().point().distance(action.destination().point()) < d) {
+      return new AttractAndLinkAnchor.Outcome(
+          Optional.empty(),
+          perform(new CreateLink(action.source(), action.destination(), action.type()), agent)
+              .outcome()
+      );
+    } else {
+      return new AttractAndLinkAnchor.Outcome(
+          perform(
+              new AttractAnchor(action.source(), action.destination(), action.magnitude()),
+              agent
+          )
+              .outcome(),
+          Optional.empty()
+      );
+    }
   }
 
-  public record Configuration(
-      double attractionRange,
-      double attractLinkRangeRatio,
-      double bodyFindRange,
-      double nfcDistanceRange,
-      double nfcAngleRange,
-      int nfcChannels
-  ) {}
+  protected NFCMessage emitNFCMessage(EmitNFCMessage action, Agent agent) throws ActionException {
+    if (action.channel() < 0 || action.channel() >= configuration.nfcChannels) {
+      throw new ActionException(
+          "Invalid channel: %d not in [0,%d]".formatted(
+              action.channel(),
+              configuration.nfcChannels - 1
+          )
+      );
+    }
+    Point source = action.body().poly().center().sum(action.displacement());
+    NFCMessage message = new NFCMessage(
+        source,
+        action.direction(),
+        action.channel(),
+        action.value()
+    );
+    newNFCMessages.add(source, message);
+    return message;
+  }
 
   protected abstract Collection<Body> getBodies();
 
@@ -113,79 +168,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
     }
     agents.add(action.agent());
     return action.agent();
-  }
-
-  protected AttractAndLinkAnchor.Outcome attractAndLinkAnchor(AttractAndLinkAnchor action, Agent agent) {
-    double d = PolyUtils.minAnchorDistance(action.source(), action.destination()) * configuration.attractLinkRangeRatio;
-    if (action.source().point().distance(action.destination().point()) < d) {
-      return new AttractAndLinkAnchor.Outcome(
-          Optional.empty(),
-          perform(new CreateLink(action.source(), action.destination(), action.type()), agent)
-              .outcome()
-      );
-    } else {
-      return new AttractAndLinkAnchor.Outcome(
-          perform(new AttractAnchor(action.source(), action.destination(), action.magnitude()), agent)
-              .outcome(),
-          Optional.empty()
-      );
-    }
-  }
-
-  protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkClosestAnchorable(
-      AttractAndLinkClosestAnchorable action,
-      Agent agent
-  ) throws IllegalActionException {
-    // find owner
-    Anchorable src = action.anchors()
-        .stream()
-        .findAny()
-        .map(Anchor::anchorable)
-        .orElseThrow(() -> new IllegalActionException(action, "Empty source anchorable"));
-    // find closest
-    Optional<Pair<Anchorable, Double>> closest = bodies.stream()
-        .filter(b -> b != src && b instanceof Anchorable)
-        .map(
-            b -> new Pair<>(
-                (Anchorable) b,
-                action.anchors()
-                    .stream()
-                    .mapToDouble(a -> PolyUtils.distance(a.point(), b.poly()))
-                    .sum()
-            )
-        )
-        .min(Comparator.comparingDouble(Pair::second));
-    // attract and link
-    if (closest.isPresent() && closest.get().second() < configuration.bodyFindRange) {
-      return perform(
-          new AttractAndLinkAnchorable(
-              action.anchors(),
-              closest.get().first(),
-              action.magnitude(),
-              action.type()
-          ),
-          agent
-      )
-          .outcome()
-          .orElse(Map.of());
-    }
-    return Map.of();
-  }
-
-  protected Configuration configuration() {
-    return configuration;
-  }
-
-  protected NFCMessage emitNFCMessage(EmitNFCMessage action, Agent agent) throws ActionException {
-    if (action.channel() < 0 || action.channel() >= configuration.nfcChannels) {
-      throw new ActionException(
-          "Invalid channel: %d not in [0,%d]".formatted(action.channel(), configuration.nfcChannels - 1)
-      );
-    }
-    Point source = action.body().poly().center().sum(action.displacement());
-    NFCMessage message = new NFCMessage(source, action.direction(), action.channel(), action.value());
-    newNFCMessages.add(source, message);
-    return message;
   }
 
   @SuppressWarnings("unchecked")
@@ -258,11 +240,79 @@ public abstract class AbstractEngine implements Engine, Profiled {
         counters.get(EngineSnapshot.CounterType.ILLEGAL_ACTION).incrementAndGet();
       }
     }
-    ActionOutcome<A, O> outcome = new ActionOutcome<>(agent, action, o == null ? Optional.empty() : Optional.of(o));
+    ActionOutcome<A, O> outcome = new ActionOutcome<>(
+        agent,
+        action,
+        o == null ? Optional.empty() : Optional.of(o)
+    );
     lastTickPerformedActions.add(outcome);
     times.get(EngineSnapshot.TimeType.PERFORM)
         .add(Duration.between(performStartingInstant, Instant.now()).toNanos() / 1000000000d);
     return outcome;
+  }
+
+  protected Map<Pair<Anchor, Anchor>, AttractAndLinkAnchor.Outcome> attractAndLinkClosestAnchorable(
+      AttractAndLinkClosestAnchorable action,
+      Agent agent
+  ) throws IllegalActionException {
+    // find owner
+    Anchorable src = action.anchors()
+        .stream()
+        .findAny()
+        .map(Anchor::anchorable)
+        .orElseThrow(() -> new IllegalActionException(action, "Empty source anchorable"));
+    // find closest
+    Optional<Pair<Anchorable, Double>> closest = bodies.stream()
+        .filter(b -> b != src && b instanceof Anchorable)
+        .map(
+            b -> new Pair<>(
+                (Anchorable) b,
+                action.anchors()
+                    .stream()
+                    .mapToDouble(a -> PolyUtils.distance(a.point(), b.poly()))
+                    .sum()
+            )
+        )
+        .min(Comparator.comparingDouble(Pair::second));
+    // attract and link
+    if (closest.isPresent() && closest.get().second() < configuration.bodyFindRange) {
+      return perform(
+          new AttractAndLinkAnchorable(
+              action.anchors(),
+              closest.get().first(),
+              action.magnitude(),
+              action.type()
+          ),
+          agent
+      )
+          .outcome()
+          .orElse(Map.of());
+    }
+    return Map.of();
+  }
+
+  protected Configuration configuration() {
+    return configuration;
+  }
+
+  protected void registerActionSolvers() {
+    registerActionSolver(AddAgent.class, this::addAgent);
+    registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
+    registerActionSolver(
+        AttractAndLinkClosestAnchorable.class,
+        this::attractAndLinkClosestAnchorable
+    );
+    registerActionSolver(SenseSinusoidal.class, this::senseSinusoidal);
+    registerActionSolver(EmitNFCMessage.class, this::emitNFCMessage);
+    registerActionSolver(SenseNFC.class, this::senseNFC);
+  }
+
+  @Override
+  public <A extends Action<O>, O> void registerActionsFilter(
+      Agent agent,
+      UnaryOperator<A> operator
+  ) {
+    agentActionsFilters.put(agent, operator);
   }
 
   protected final <A extends Action<O>, O> void registerActionSolver(
@@ -272,28 +322,12 @@ public abstract class AbstractEngine implements Engine, Profiled {
     actionSolvers.put(actionClass, actionSolver);
   }
 
-  protected void registerActionSolvers() {
-    registerActionSolver(AddAgent.class, this::addAgent);
-    registerActionSolver(AttractAndLinkAnchor.class, this::attractAndLinkAnchor);
-    registerActionSolver(AttractAndLinkClosestAnchorable.class, this::attractAndLinkClosestAnchorable);
-    registerActionSolver(SenseSinusoidal.class, this::senseSinusoidal);
-    registerActionSolver(EmitNFCMessage.class, this::emitNFCMessage);
-    registerActionSolver(SenseNFC.class, this::senseNFC);
-  }
-
-  @Override
-  public <A extends Action<O>, O> void registerActionsFilter(Agent agent, UnaryOperator<A> operator) {
-    agentActionsFilters.put(agent, operator);
-  }
-
-  @Override
-  public void removeActionsFilter(Agent agent) {
-    agentActionsFilters.remove(agent);
-  }
-
   protected Double senseNFC(SenseNFC action, Agent agent) {
     double sum = lastNFCMessages
-        .get(action.body().poly().center().sum(action.displacement()), configuration.nfcDistanceRange)
+        .get(
+            action.body().poly().center().sum(action.displacement()),
+            configuration.nfcDistanceRange
+        )
         .stream()
         .filter(
             m -> m.channel() == action.channel() && Math.abs(
@@ -305,15 +339,6 @@ public abstract class AbstractEngine implements Engine, Profiled {
     return action.range().clip(sum);
   }
 
-  protected double senseSinusoidal(SenseSinusoidal action, Agent agent) {
-    return Math.sin(2d * Math.PI * action.f() * t() + action.phi());
-  }
-
-  @Override
-  public double t() {
-    return t.get();
-  }
-
   @Override
   public Snapshot tick() {
     Instant tickStartingInstant = Instant.now();
@@ -321,18 +346,29 @@ public abstract class AbstractEngine implements Engine, Profiled {
     counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
     Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions = new IdentityHashMap<>();
     for (Agent agent : agents) {
-      List<ActionOutcome<?, ?>> previousOutcomes = agentActionOutcomes.getOrDefault(agent, List.of());
+      List<ActionOutcome<?, ?>> previousOutcomes = agentActionOutcomes.getOrDefault(
+          agent,
+          List.of()
+      );
       List<? extends Action<?>> actions = agent.act(t.get(), previousOutcomes);
       //noinspection unchecked,rawtypes
-      List<ActionOutcome<?, ?>> outcomes = (List) actions.stream().map(action -> perform(action, agent)).toList();
-      Map<EnergyConsumingAction.Type, Double> agentEnergies = new EnumMap<>(EnergyConsumingAction.Type.class);
+      List<ActionOutcome<?, ?>> outcomes = (List) actions.stream()
+          .map(action -> perform(action, agent))
+          .toList();
+      Map<EnergyConsumingAction.Type, Double> agentEnergies = new EnumMap<>(
+          EnergyConsumingAction.Type.class
+      );
       outcomes.forEach(outcome -> {
         //noinspection rawtypes
         if (outcome.action() instanceof EnergyConsumingAction ecAction) {
           //noinspection unchecked
           Map<EnergyConsumingAction.Type, Double> energies = ecAction.energy(
               outcome.outcome()
-                  .orElseThrow(() -> new RuntimeException("Energy consuming action wrongly returns an empty outcome"))
+                  .orElseThrow(
+                      () -> new RuntimeException(
+                          "Energy consuming action wrongly returns an empty outcome"
+                      )
+                  )
           );
           energies.forEach(
               (type, value) -> agentEnergies.compute(
@@ -347,7 +383,9 @@ public abstract class AbstractEngine implements Engine, Profiled {
     }
     lastNFCMessages = newNFCMessages;
     Instant innerTickStartingInstant = Instant.now();
+    double oldT = t.get();
     double newT = innerTick();
+    double deltaT = newT - oldT;
     t.set(newT);
     times.get(EngineSnapshot.TimeType.INNER_TICK)
         .add(Duration.between(innerTickStartingInstant, Instant.now()).toNanos() / 1000000000d);
@@ -358,9 +396,24 @@ public abstract class AbstractEngine implements Engine, Profiled {
     times.get(EngineSnapshot.TimeType.ENVIRONMENT).set(t.get());
     EngineSnapshot snapshot = new EngineSnapshot(
         t.get(),
-        List.copyOf(getBodies()),
-        Collections.unmodifiableMap(agentEnergyConsumptions),
-        List.copyOf(lastTickPerformedActions),
+        getBodies(),
+        agentEnergyConsumptions.entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Entry::getKey,
+                    e -> e.getValue()
+                        .entrySet()
+                        .stream()
+                        .collect(
+                            Collectors.toMap(
+                                Entry::getKey,
+                                ie -> ie.getValue() * deltaT
+                            )
+                        )
+                )
+            ),
+        lastTickPerformedActions,
         lastNFCMessages.all(),
         times.entrySet()
             .stream()
@@ -373,6 +426,37 @@ public abstract class AbstractEngine implements Engine, Profiled {
     );
     lastTickPerformedActions.clear();
     return snapshot;
+  }
+
+  @Override
+  public void removeActionsFilter(Agent agent) {
+    agentActionsFilters.remove(agent);
+  }
+
+  @FunctionalInterface
+  protected interface ActionSolver<A extends Action<O>, O> {
+
+    O solve(A action, Agent agent) throws ActionException;
+  }
+
+  protected double senseSinusoidal(SenseSinusoidal action, Agent agent) {
+    return Math.sin(2d * Math.PI * action.f() * t() + action.phi());
+  }
+
+  @Override
+  public double t() {
+    return t.get();
+  }
+
+  public record Configuration(
+      double attractionRange,
+      double attractLinkRangeRatio,
+      double bodyFindRange,
+      double nfcDistanceRange,
+      double nfcAngleRange,
+      int nfcChannels
+  ) {
+
   }
 
   @Override

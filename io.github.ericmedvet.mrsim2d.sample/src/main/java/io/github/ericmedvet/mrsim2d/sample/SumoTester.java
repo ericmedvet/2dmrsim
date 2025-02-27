@@ -100,7 +100,7 @@ public class SumoTester {
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
-    Sumo sumo = new Sumo(10);
+    Sumo sumo = new Sumo(5);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
         (EmbodiedAgent) nb.build(agentString),
