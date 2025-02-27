@@ -116,7 +116,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     // testing part 1
     RigidBody rigidBody = engine.perform(new CreateRigidBody(Poly.rectangle(1, 1), 1, 3)).outcome().orElseThrow();
     engine.perform(new TranslateBody(
-            rigidBody, new Point(terrain.withinBordersXRange().min() + 20, 5)
+            rigidBody, new Point(terrain.withinBordersXRange().min() + .25, 5)
     ));
     List<Anchor> rigidAnchors = rigidBody.anchors();
     // end of testint part 1

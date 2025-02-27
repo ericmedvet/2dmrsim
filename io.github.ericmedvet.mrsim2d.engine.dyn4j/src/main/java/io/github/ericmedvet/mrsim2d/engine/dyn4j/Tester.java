@@ -48,7 +48,7 @@ public class Tester {
     Path p = new Path(new Point(20, 0));
     p = p.moveBy(0, -10).moveBy(1.05, 0).moveBy(0, 10).moveBy(9, 0);
     p = p.moveBy(30, 0);
-    Locomotion locomotion = new Locomotion(30, Terrain.fromPath(p, 25, 10, 100), true, 11.75, .25);
+    Locomotion locomotion = new Locomotion(30, Terrain.fromPath(p, 25, 10, 100), true, 5.75, .25);
     Supplier<EmbodiedAgent> supplier = () -> new NumIndependentVoxel(
             List.of(),
             NumIndependentVoxel.AreaActuation.SIDES,
@@ -71,7 +71,7 @@ public class Tester {
     thingsDrawers.add(baseDrawer);
     thingsDrawers.add(actionsDrawer);
     thingsDrawers.add(new ComponentsDrawer(List.of(new MultipartBodyDrawer()), Snapshot::bodies));
-    Drawer worldDrawer = Drawer.transform(new StaticFramer(new BoundingBox(new Point(-20, -1), new Point(40, 3))),
+    Drawer worldDrawer = Drawer.transform(new StaticFramer(new BoundingBox(new Point(-20, -1), new Point(20, 3))),
             Drawer.of(Collections.unmodifiableList(thingsDrawers)));
     List<Drawer> drawers = new ArrayList<>(List.of(Drawer.clear(), worldDrawer));
     Drawer drawer = Drawer.of(Collections.unmodifiableList(drawers));

@@ -109,7 +109,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
           double nOfAnchors = Math.max(Math.floor(segment.length() * anchorsDensity), 2);
           for (double i = 0; i < nOfAnchors; i = i + 1) {
             Point sidePoint = segment.pointAtRate((i + 1d) / (nOfAnchors + 1d));
-            Point aP = sidePoint.sum(new Point(segment.direction() + Math.PI / 2d).scale(anchorSideDistance));
+            Point aP = sidePoint.sum(new Point(segment.direction() - Math.PI / 2d).scale(anchorSideDistance));
             Body closest = bodies.stream()
                 .min(
                     Comparator.comparingDouble(
