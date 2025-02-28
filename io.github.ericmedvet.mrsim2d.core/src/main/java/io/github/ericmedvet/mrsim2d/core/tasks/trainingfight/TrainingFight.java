@@ -43,19 +43,16 @@ import java.util.function.Supplier;
 
 public class TrainingFight implements Task<Supplier<EmbodiedAgent>, TrainingFightObservation, TrainingFightAgentOutcome> {
 
-  private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
+  private final double terrainAttachableDistance;
   private final double initialYGap;
 
-  public TrainingFight(double duration, Terrain terrain, double initialYGap) {
+  public TrainingFight(double duration, Terrain terrain, double terrainAttachableDistance, double initialYGap) {
     this.duration = duration;
     this.terrain = terrain;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialYGap = initialYGap;
-  }
-
-  public TrainingFight(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_Y_GAP);
   }
 
   @Override
@@ -80,7 +77,7 @@ public class TrainingFight implements Task<Supplier<EmbodiedAgent>, TrainingFigh
       xMirrorable.mirror();
     }
 
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance));
     engine.perform(new AddAgent(agent1));
     engine.perform(new AddAgent(agent2));
 

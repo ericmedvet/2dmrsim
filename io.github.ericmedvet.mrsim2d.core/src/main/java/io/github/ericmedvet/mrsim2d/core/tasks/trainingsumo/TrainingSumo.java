@@ -42,22 +42,16 @@ import java.util.function.Supplier;
 
 public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoObservation, TrainingSumoAgentOutcome> {
 
-  private static final double INITIAL_X_GAP = 7;
-  private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
-  private final double initialXGap;
+  private final double terrainAttachableDistance;
   private final double initialYGap;
 
-  public TrainingSumo(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+  public TrainingSumo(double duration, Terrain terrain, double terrainAttachableDistance, double initialYGap) {
     this.duration = duration;
     this.terrain = terrain;
-    this.initialXGap = initialXGap;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialYGap = initialYGap;
-  }
-
-  public TrainingSumo(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
@@ -77,7 +71,7 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
     double boxInitialX = centerX + (flatW / 3);
 
     EmbodiedAgent agent = embodiedAgentSupplier.get();
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance));
     engine.perform(new AddAgent(agent));
 
     engine.perform(new TranslateAgent(agent, new Point(agentInitialX, 0)));

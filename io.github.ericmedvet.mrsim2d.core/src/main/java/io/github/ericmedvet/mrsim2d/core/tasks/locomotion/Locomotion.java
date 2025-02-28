@@ -20,18 +20,13 @@
 
 package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
-import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.actions.*;
-import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
-import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.bodies.RigidBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
@@ -50,34 +45,26 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
-  private final boolean attachableAngles;
+  private final double terrainAttachableDistance;
   private final double initialXGap;
   private final double initialYGap;
 
   public Locomotion(
       double duration,
       Terrain terrain,
-      boolean attachableAngles,
+      double terrainAttachableDistance,
       double initialXGap,
       double initialYGap
   ) {
     this.duration = duration;
     this.terrain = terrain;
-    this.attachableAngles = attachableAngles;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
-  public Locomotion(double duration, Terrain terrain, double initialXGap, double initialYGap) {
-    this(duration, terrain, false, initialXGap, initialYGap);
-  }
-
-  public Locomotion(double duration, Terrain terrain, boolean attachableAngles) {
-    this(duration, terrain, attachableAngles, INITIAL_X_GAP, INITIAL_Y_GAP);
-  }
-
   public Locomotion(double duration, Terrain terrain) {
-    this(duration, terrain, false, INITIAL_X_GAP, INITIAL_Y_GAP);
+    this(duration, terrain, Double.POSITIVE_INFINITY, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
@@ -90,7 +77,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
     engine.perform(
-        attachableAngles ? new CreateUnmovableBody(terrain.poly(), 0d) : new CreateUnmovableBody(terrain.poly())
+        new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance)
     );
     engine.perform(new AddAgent(embodiedAgent));
     // place agent
@@ -112,22 +99,9 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
             new Point(0, maxY + initialYGap - agentBB.min().y())
         )
     );
-
-    // testing part 1
-    RigidBody rigidBody = engine.perform(new CreateRigidBody(Poly.rectangle(1, 1), 1, 3)).outcome().orElseThrow();
-    engine.perform(new TranslateBody(
-            rigidBody, new Point(terrain.withinBordersXRange().min() + .25, 5)
-    ));
-    List<Anchor> rigidAnchors = rigidBody.anchors();
-    // end of testint part 1
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
-      // testing part 2
-      for (Anchor a : rigidAnchors) {
-        engine.perform(new AttractAndLinkClosestAnchorable(List.of(a), 1, Anchor.Link.Type.SOFT));
-      }
-      // end of testint part 2
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
       observations.put(
