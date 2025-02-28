@@ -111,7 +111,8 @@ public class TrainingSumo implements Task<Supplier<EmbodiedAgent>, TrainingSumoO
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           agent.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(agent)
                   )
               ),
               rigidBody

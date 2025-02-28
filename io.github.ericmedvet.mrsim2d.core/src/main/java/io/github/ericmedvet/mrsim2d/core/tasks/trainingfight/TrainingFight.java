@@ -107,14 +107,16 @@ public class TrainingFight implements Task<Supplier<EmbodiedAgent>, TrainingFigh
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           agent1.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(agent1)
                   ),
                   new AgentsObservation.Agent(
                       agent2.bodyParts().stream().map(Body::poly).toList(),
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           agent2.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(agent2)
                   )
               )
           )

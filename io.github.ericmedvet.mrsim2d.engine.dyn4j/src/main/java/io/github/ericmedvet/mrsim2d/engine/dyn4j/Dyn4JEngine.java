@@ -29,6 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.AbstractEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.IllegalActionException;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -109,17 +110,17 @@ public class Dyn4JEngine extends AbstractEngine {
     return settings;
   }
 
-  private RotationalJoint actuateRotationalJoint(
+  private double actuateRotationalJoint(
       ActuateRotationalJoint action,
       Agent agent
   ) throws IllegalActionException {
     if (action.body() instanceof RotationalJoint rotationalJoint) {
-      rotationalJoint.setJointTargetAngle(
-          rotationalJoint
-              .jointActiveAngleRange()
-              .denormalize(action.range().normalize(action.value()))
-      );
-      return rotationalJoint;
+      double angle = rotationalJoint.jointTargetAngle();
+      double targetAngle = rotationalJoint
+          .jointActiveAngleRange()
+          .denormalize(action.range().normalize(action.value()));
+      rotationalJoint.setJointTargetAngle(targetAngle);
+      return Math.abs(DoubleRange.SYMMETRIC_UNIT.normalize((angle - targetAngle) / Math.PI));
     }
     throw new IllegalActionException(
         action,
@@ -130,10 +131,21 @@ public class Dyn4JEngine extends AbstractEngine {
     );
   }
 
-  private Voxel actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
+  private double actuateVoxel(ActuateVoxel action, Agent agent) throws IllegalActionException {
     if (action.body() instanceof Voxel voxel) {
+      double sideRestL = Math.sqrt(voxel.restArea());
+      double energy = Arrays.stream(io.github.ericmedvet.mrsim2d.core.bodies.Voxel.Side.values()).mapToDouble(side -> {
+        double diff = sideRestL - voxel.side(side).length();
+        if (diff > 0 && action.values().get(side) > 0) { // shorter and further contract
+          return diff * action.values().get(side);
+        }
+        if (diff < 0 && action.values().get(side) < 0) { // longer and further extend
+          return diff * action.values().get(side);
+        }
+        return 0d;
+      }).sum();
       voxel.actuate(action.values());
-      return voxel;
+      return energy;
     }
     throw new IllegalActionException(
         action,

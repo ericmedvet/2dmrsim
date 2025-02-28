@@ -26,7 +26,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel, Voxel> {
+public record ActuateVoxel(Voxel body, EnumMap<Voxel.Side, Double> values) implements Actuate<Voxel> {
   public ActuateVoxel(Voxel voxel, double value) {
     this(voxel, value, value, value, value);
   }

@@ -23,18 +23,15 @@ package io.github.ericmedvet.mrsim2d.core.actions;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.mrsim2d.core.ActionPerformer;
 import io.github.ericmedvet.mrsim2d.core.Agent;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.*;
 
 public record AttractAnchorable(
     Collection<Anchor> anchors, Anchorable anchorable, double magnitude
-) implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>> {
+) implements SelfDescribedAction<Collection<Pair<Anchor, Anchor>>>, EnergyConsumingAction<Collection<Pair<Anchor, Anchor>>> {
   @Override
   public Collection<Pair<Anchor, Anchor>> perform(ActionPerformer performer, Agent agent) {
     // discard already attached
@@ -62,5 +59,10 @@ public record AttractAnchorable(
     // attract
     pairs.forEach(p -> performer.perform(new AttractAnchor(p.first(), p.second(), magnitude)));
     return pairs;
+  }
+
+  @Override
+  public Map<Type, Double> energy(Collection<Pair<Anchor, Anchor>> outcome) {
+    return Map.of(Type.INDIRECT, Math.abs(AttractAnchor.ATTRACTION_ENERGY * magnitude * outcome.size()));
   }
 }

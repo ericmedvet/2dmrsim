@@ -32,7 +32,8 @@ public class AllAgentsFramer extends AbstractFramer<Snapshot> {
 
   @Override
   protected BoundingBox getCurrentBoundingBox(Snapshot snapshot) {
-    return snapshot.agents()
+    return snapshot.agentEnergyConsumptions()
+        .keySet()
         .stream()
         .filter(a -> a instanceof EmbodiedAgent)
         .map(

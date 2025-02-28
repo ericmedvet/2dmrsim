@@ -21,6 +21,19 @@
 package io.github.ericmedvet.mrsim2d.core.actions;
 
 import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
+import java.util.Map;
 
-public record AttractAnchor(Anchor source, Anchor destination, double magnitude) implements Action<Double> {}
+public record AttractAnchor(
+    Anchor source, Anchor destination, double magnitude
+) implements Action<Double>, EnergyConsumingAction<Double> {
+
+  public final static double ATTRACTION_ENERGY = 1d;
+
+  @Override
+  public Map<Type, Double> energy(Double outcome) {
+    return Map.of(Type.INDIRECT, Math.abs(ATTRACTION_ENERGY * magnitude));
+  }
+
+}

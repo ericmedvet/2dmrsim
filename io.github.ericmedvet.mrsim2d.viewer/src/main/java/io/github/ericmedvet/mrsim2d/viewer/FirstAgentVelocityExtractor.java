@@ -38,11 +38,12 @@ public class FirstAgentVelocityExtractor implements Function<Snapshot, Optional<
 
   @Override
   public Optional<Point> apply(Snapshot snapshot) {
-    if (snapshot.agents().stream().noneMatch(a -> a instanceof EmbodiedAgent)) {
+    if (snapshot.agentEnergyConsumptions().keySet().stream().noneMatch(a -> a instanceof EmbodiedAgent)) {
       return Optional.empty();
     }
     // add new sample
-    Point c = snapshot.agents()
+    Point c = snapshot.agentEnergyConsumptions()
+        .keySet()
         .stream()
         .filter(a -> a instanceof EmbodiedAgent)
         .map(a -> (EmbodiedAgent) a)

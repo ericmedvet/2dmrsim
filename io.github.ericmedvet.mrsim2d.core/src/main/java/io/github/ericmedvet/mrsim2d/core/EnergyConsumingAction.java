@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * mrsim2d-core
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,12 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package io.github.ericmedvet.mrsim2d.core.actions;
+package io.github.ericmedvet.mrsim2d.core;
 
-import io.github.ericmedvet.mrsim2d.core.Action;
-import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
-import io.github.ericmedvet.mrsim2d.core.NFCMessage;
-import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import java.util.Map;
 
-public record EmitNFCMessage(
-    Body body, Point displacement, double direction, short channel, double value
-) implements Action<NFCMessage>, EnergyConsumingAction<NFCMessage> {
+public interface EnergyConsumingAction<O> extends Action<O> {
+  enum Type { DIRECT, INDIRECT, COMMUNICATION }
 
-  public final static double NFC_ENERGY = 1d;
-  @Override
-  public Map<Type, Double> energy(NFCMessage outcome) {
-    return Map.of(Type.COMMUNICATION, NFC_ENERGY);
-  }
+  Map<Type, Double> energy(O outcome);
 }

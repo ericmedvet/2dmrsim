@@ -138,7 +138,7 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
       double v = DoubleRange.SYMMETRIC_UNIT.clip(sideEntry.getValue());
       for (DistanceJoint<Body> joint : sideJoints.get(sideEntry.getKey())) {
         Voxel.SpringRange range = (SpringRange) joint.getUserData();
-        if (v >= 0) { // shrink
+        if (v > 0) { // shrink
           joint.setRestDistance(range.rest - (range.rest - range.min) * v);
         } else if (v < 0) { // expand
           joint.setRestDistance(range.rest + (range.max - range.rest) * -v);

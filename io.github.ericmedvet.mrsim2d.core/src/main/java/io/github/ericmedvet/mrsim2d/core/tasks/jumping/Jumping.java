@@ -112,7 +112,8 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, AgentsObservation,
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           embodiedAgent.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(embodiedAgent)
                   )
               )
           )

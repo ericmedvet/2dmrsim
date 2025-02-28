@@ -124,14 +124,16 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           agent1.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(agent1)
                   ),
                   new AgentsObservation.Agent(
                       agent2.bodyParts().stream().map(Body::poly).toList(),
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           agent2.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(agent2)
                   )
               )
           )

@@ -90,7 +90,7 @@ public class SumoTester {
 
   public static void main(String[] args) {
     String agentString = CENTRALIZED_SIMPLE_BIPED;
-    double[] dsts = IntStream.range(0, 20).parallel().mapToDouble(n -> areaAvgDistance(n, agentString)).toArray();
+    double[] dsts = IntStream.range(0, 1).parallel().mapToDouble(n -> areaAvgDistance(n, agentString)).toArray();
     Arrays.stream(dsts).sorted().forEach(d -> System.out.printf("%.6f%n", d));
     Integer worstDstIndex = IntStream.range(0, dsts.length)
         .boxed()
@@ -100,13 +100,14 @@ public class SumoTester {
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
-    Sumo sumo = new Sumo(30);
+    Sumo sumo = new Sumo(5);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
-    sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
+    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
+    System.out.println(outcome.firstAgentAveragePower());
   }
 
   private static double areaAvgDistance(int n, String agentString) {

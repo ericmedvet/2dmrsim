@@ -113,7 +113,8 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           embodiedAgent.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(embodiedAgent)
                   )
               )
           )

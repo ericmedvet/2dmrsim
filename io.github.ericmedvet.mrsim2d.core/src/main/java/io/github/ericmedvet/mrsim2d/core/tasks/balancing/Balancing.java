@@ -164,7 +164,8 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
                       PolyUtils.maxYAtX(
                           terrain.poly(),
                           embodiedAgent.boundingBox().center().x()
-                      )
+                      ),
+                      snapshot.agentEnergyConsumptions().get(embodiedAgent)
                   )
               ),
               swing.angle(),

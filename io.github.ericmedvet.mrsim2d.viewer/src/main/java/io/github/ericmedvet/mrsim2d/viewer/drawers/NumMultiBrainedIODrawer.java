@@ -40,10 +40,10 @@ public class NumMultiBrainedIODrawer implements Drawer {
   public boolean draw(List<Snapshot> snapshots, Graphics2D g) {
     // get first agent of last snapshot
     Snapshot lastSnapshot = snapshots.getLast();
-    if (lastSnapshot.agents().isEmpty()) {
+    if (lastSnapshot.agentEnergyConsumptions().isEmpty()) {
       return false;
     }
-    Agent agent = lastSnapshot.agents().iterator().next();
+    Agent agent = lastSnapshot.agentEnergyConsumptions().keySet().iterator().next();
     if (agent instanceof NumMultiBrained brained) {
       BoundingBox gBB = DrawingUtils.getBoundingBox(g);
       int nOfBrains = brained.brainIOs().size();

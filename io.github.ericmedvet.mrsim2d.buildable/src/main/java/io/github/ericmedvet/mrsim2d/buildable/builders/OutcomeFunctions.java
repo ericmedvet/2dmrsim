@@ -92,39 +92,12 @@ public class OutcomeFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static <X> Function<X, Double> aaFinalMrH(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeHeight;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.h").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  public static <X> Function<X, Double> aaFinalMrW(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeWidth;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.w").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
   public static <X> Function<X, Double> aaFinalH(
       @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
       @Param(value = "format", dS = "%.1f") String format
   ) {
     Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalHeight;
     return FormattedNamedFunction.from(f, format, "all.agents.final.h").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  public static <X> Function<X, Double> aaFinalW(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalWidth;
-    return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -161,6 +134,33 @@ public class OutcomeFunctions {
   ) {
     Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMinWidth;
     return FormattedNamedFunction.from(f, format, "all.agents.final.min.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMrH(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeHeight;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.h").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalMrW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalMidrangeWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.mr.w").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> aaFinalW(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+    Function<AgentsOutcome<?>, Double> f = AgentsOutcome::allAgentsFinalWidth;
+    return FormattedNamedFunction.from(f, format, "all.agents.final.w").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -230,6 +230,16 @@ public class OutcomeFunctions {
         .firstAgentAverageBBMinY();
     return FormattedNamedFunction.from(f, format, "first.agent.avg.bb.min.y")
         .compose(beforeF);
+  }
+
+  public static <X> Function<X, Double> faAvgPower(
+      @Param(value = "transientTime", dD = 5.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, AgentsOutcome<?>> beforeF,
+      @Param(value = "format", dS = "%.2f") String format
+  ) {
+    Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
+        .firstAgentAveragePower();
+    return FormattedNamedFunction.from(f, format, "first.agent.power").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -310,46 +320,6 @@ public class OutcomeFunctions {
     Function<AgentsOutcome<?>, Double> f = o -> o.subOutcome(new DoubleRange(transientTime, o.duration()))
         .firstAgentXVelocity();
     return FormattedNamedFunction.from(f, format, "first.agent.velocity.x").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  public static <X> Function<X, Double> scoreSumoAgentvsBox(
-      @Param(value = "transientTime", dD = 0.0) double transientTime,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
-      @Param(value = "format", dS = "%.1f") String format
-  ) {
-
-    Function<TrainingSumoAgentOutcome, Double> f = o -> {
-      TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
-
-      List<Point> agentPositions = subOutcome.getAgentPositions();
-      List<Point> boxPositions = subOutcome.getBoxPositions();
-
-      // Componente fitness basata sulla x:
-      double boxDistance = boxPositions.get(1).x() - boxPositions.get(0).x();
-      double agentDistance = agentPositions.get(1).x() - agentPositions.get(0).x();
-
-      // Componente fitness basata sulla y:
-      double agentFallen = 0;
-      double boxFallen = 0;
-
-      // Controllo se l'agente è caduto
-      if (agentPositions.get(1).y() < subOutcome.getMaxYTerrain()) {
-        agentFallen = agentPositions.get(1).x() < agentPositions.get(0).x() ? -1.0 : 1.0;
-      }
-
-      // Ottieni la y massima della scatola
-      double boxMaxY = subOutcome.getMaxYBox();
-
-      // Controllo se la scatola è caduta
-      if (boxMaxY < subOutcome.getMaxYTerrain()) {
-        boxFallen = boxPositions.get(0).x() < boxPositions.get(1).x() ? -1.0 : 1.0;
-      }
-
-      return (agentDistance + boxDistance) * (1 + (agentFallen - boxFallen));
-    };
-
-    return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -504,6 +474,46 @@ public class OutcomeFunctions {
       }
 
       return -(agent1Distance + agent2Distance) * (1 + (agent1Fallen - agent2Fallen));
+    };
+
+    return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> Function<X, Double> scoreSumoAgentvsBox(
+      @Param(value = "transientTime", dD = 0.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+
+    Function<TrainingSumoAgentOutcome, Double> f = o -> {
+      TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
+
+      List<Point> agentPositions = subOutcome.getAgentPositions();
+      List<Point> boxPositions = subOutcome.getBoxPositions();
+
+      // Componente fitness basata sulla x:
+      double boxDistance = boxPositions.get(1).x() - boxPositions.get(0).x();
+      double agentDistance = agentPositions.get(1).x() - agentPositions.get(0).x();
+
+      // Componente fitness basata sulla y:
+      double agentFallen = 0;
+      double boxFallen = 0;
+
+      // Controllo se l'agente è caduto
+      if (agentPositions.get(1).y() < subOutcome.getMaxYTerrain()) {
+        agentFallen = agentPositions.get(1).x() < agentPositions.get(0).x() ? -1.0 : 1.0;
+      }
+
+      // Ottieni la y massima della scatola
+      double boxMaxY = subOutcome.getMaxYBox();
+
+      // Controllo se la scatola è caduta
+      if (boxMaxY < subOutcome.getMaxYTerrain()) {
+        boxFallen = boxPositions.get(0).x() < boxPositions.get(1).x() ? -1.0 : 1.0;
+      }
+
+      return (agentDistance + boxDistance) * (1 + (agentFallen - boxFallen));
     };
 
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);

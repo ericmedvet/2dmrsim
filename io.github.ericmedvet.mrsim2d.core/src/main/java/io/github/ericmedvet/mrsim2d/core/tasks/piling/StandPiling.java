@@ -124,7 +124,8 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
                           PolyUtils.maxYAtX(
                               terrain.poly(),
                               a.boundingBox().center().x()
-                          )
+                          ),
+                          snapshot.agentEnergyConsumptions().get(a)
                       )
                   )
                   .toList()

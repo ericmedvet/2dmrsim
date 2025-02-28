@@ -160,7 +160,8 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
                           PolyUtils.maxYAtX(
                               terrain.poly(),
                               a.boundingBox().center().x()
-                          )
+                          ),
+                          snapshot.agentEnergyConsumptions().get(a)
                       )
                   )
                   .toList()

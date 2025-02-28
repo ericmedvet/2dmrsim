@@ -21,10 +21,17 @@ package io.github.ericmedvet.mrsim2d.core.actions;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
+import java.util.Map;
 
-public interface Actuate<B extends Body, O> extends Action<O> {
+public interface Actuate<B extends Body> extends Action<Double>, EnergyConsumingAction<Double> {
   B body();
 
   DoubleRange range();
+
+  @Override
+  default Map<Type, Double> energy(Double outcome) {
+    return Map.of(Type.DIRECT, outcome);
+  }
 }

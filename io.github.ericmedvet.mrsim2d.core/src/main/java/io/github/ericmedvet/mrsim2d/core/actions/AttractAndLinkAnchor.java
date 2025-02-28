@@ -21,12 +21,19 @@
 package io.github.ericmedvet.mrsim2d.core.actions;
 
 import io.github.ericmedvet.mrsim2d.core.Action;
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
+import java.util.Map;
 import java.util.Optional;
 
 public record AttractAndLinkAnchor(
     Anchor source, Anchor destination, double magnitude, Anchor.Link.Type type
-) implements Action<AttractAndLinkAnchor.Outcome> {
+) implements Action<AttractAndLinkAnchor.Outcome>, EnergyConsumingAction<AttractAndLinkAnchor.Outcome> {
 
   public record Outcome(Optional<Double> magnitude, Optional<Anchor.Link> link) {}
+
+  @Override
+  public Map<Type, Double> energy(Outcome outcome) {
+    return Map.of(Type.INDIRECT, Math.abs(AttractAnchor.ATTRACTION_ENERGY * magnitude));
+  }
 }

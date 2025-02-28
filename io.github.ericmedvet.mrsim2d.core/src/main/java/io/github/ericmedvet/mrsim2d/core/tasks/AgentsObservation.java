@@ -19,20 +19,25 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
+import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class AgentsObservation {
 
-  public record Agent(List<Poly> polies, double terrainHeight) {}
+  public record Agent(
+      List<Poly> polies, double terrainHeight, Map<EnergyConsumingAction.Type, Double> energyConsumptions
+  ) {}
 
   private final List<Agent> agents;
   private BoundingBox allBoundingBox;
   private List<BoundingBox> boundingBoxes;
   private List<Point> centers;
+  private List<Double> energyConsumptions;
   private Point firstAgentCenter;
   private BoundingBox firstAgentBoundingBox;
   private Point maxXAgentCenter;
@@ -77,6 +82,15 @@ public class AgentsObservation {
           .toList();
     }
     return centers;
+  }
+
+  public List<Double> getEnergyConsumptions() {
+    if (energyConsumptions == null) {
+      energyConsumptions = agents.stream()
+          .map(a -> a.energyConsumptions.values().stream().reduce(Double::sum).orElse(0d))
+          .toList();
+    }
+    return energyConsumptions;
   }
 
   public BoundingBox getFirstAgentBoundingBox() {
