@@ -22,9 +22,7 @@ package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
-import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
-import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
+import io.github.ericmedvet.mrsim2d.core.actions.*;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
@@ -47,18 +45,26 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   private static final double INITIAL_Y_GAP = 0.25;
   private final double duration;
   private final Terrain terrain;
+  private final double terrainAttachableDistance;
   private final double initialXGap;
   private final double initialYGap;
 
-  public Locomotion(double duration, Terrain terrain, double initialXGap, double initialYGap) {
+  public Locomotion(
+      double duration,
+      Terrain terrain,
+      double terrainAttachableDistance,
+      double initialXGap,
+      double initialYGap
+  ) {
     this.duration = duration;
     this.terrain = terrain;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
   public Locomotion(double duration, Terrain terrain) {
-    this(duration, terrain, INITIAL_X_GAP, INITIAL_Y_GAP);
+    this(duration, terrain, Double.POSITIVE_INFINITY, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
@@ -70,7 +76,9 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     // create agent
     EmbodiedAgent embodiedAgent = embodiedAgentSupplier.get();
     // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(
+        new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance)
+    );
     engine.perform(new AddAgent(embodiedAgent));
     // place agent
     BoundingBox agentBB = embodiedAgent.boundingBox();

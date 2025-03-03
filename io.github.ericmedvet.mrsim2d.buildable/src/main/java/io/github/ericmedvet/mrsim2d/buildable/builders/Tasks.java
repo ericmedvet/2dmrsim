@@ -63,6 +63,7 @@ public class Tasks {
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "yGapRatio", dD = 1d) double yGapRatio,
       @Param(value = "xGap", dD = 10d) double xGap
   ) {
@@ -74,6 +75,7 @@ public class Tasks {
         xSigmaRatio,
         randomGenerator,
         terrain,
+        terrainAttachableDistance,
         yGapRatio,
         xGap
     );
@@ -93,10 +95,11 @@ public class Tasks {
       @Param(value = "name", iS = "locomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new Locomotion(duration, terrain, initialXGap, initialYGap);
+    return new Locomotion(duration, terrain, terrainAttachableDistance, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")
@@ -104,11 +107,19 @@ public class Tasks {
       @Param(value = "name", iS = "piLocomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap,
       @Param(value = "shape") Grid<VoxelType> shape
   ) {
-    return new PrebuiltIndependentLocomotion(duration, terrain, initialXGap, initialYGap, shape);
+    return new PrebuiltIndependentLocomotion(
+        duration,
+        terrain,
+        terrainAttachableDistance,
+        initialXGap,
+        initialYGap,
+        shape
+    );
   }
 
   @SuppressWarnings("unused")
@@ -118,10 +129,11 @@ public class Tasks {
       @Param(value = "nOfAgents") int nOfAgents,
       @Param(value = "xGapRatio", dD = 1) double xGapRatio,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "firstXGap", dD = 10) double firstXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new StandPiling(duration, nOfAgents, xGapRatio, terrain, firstXGap, initialYGap);
+    return new StandPiling(duration, nOfAgents, xGapRatio, terrain, terrainAttachableDistance, firstXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")
@@ -136,17 +148,21 @@ public class Tasks {
   public static TrainingFight trainingFight(
       @Param(value = "name", dS = "trainingFight") String name,
       @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
+      @Param(value = "initialYGap", dD = 0.25) double initialYGap
   ) {
-    return new TrainingFight(duration, terrain);
+    return new TrainingFight(duration, terrain, terrainAttachableDistance, initialYGap);
   }
 
   @SuppressWarnings("unused")
   public static TrainingSumo trainingSumo(
       @Param(value = "name", dS = "trainingSumo") String name,
       @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
+      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
+      @Param(value = "initialYGap", dD = 0.25) double initialYGap
   ) {
-    return new TrainingSumo(duration, terrain);
+    return new TrainingSumo(duration, terrain, terrainAttachableDistance, initialYGap);
   }
 }

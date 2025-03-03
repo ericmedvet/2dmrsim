@@ -27,6 +27,8 @@ module io.github.ericmedvet.mrsim2d.engine.dyn4j {
   requires io.github.ericmedvet.mrsim2d.viewer;
   requires io.github.ericmedvet.jnb.datastructure;
   requires java.desktop;
+  requires io.github.ericmedvet.jsdynsym.control;
+  requires io.github.ericmedvet.jsdynsym.core;
 
   provides Engine with Dyn4JEngine;
 

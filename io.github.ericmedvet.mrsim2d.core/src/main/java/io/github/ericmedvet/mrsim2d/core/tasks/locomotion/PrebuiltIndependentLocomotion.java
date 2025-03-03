@@ -50,6 +50,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
 
   private final double duration;
   private final Terrain terrain;
+  private final double terrainAttachableDistance;
   private final double initialXGap;
   private final double initialYGap;
   private final Grid<VoxelType> shape;
@@ -57,12 +58,14 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
   public PrebuiltIndependentLocomotion(
       double duration,
       Terrain terrain,
+      double terrainAttachableDistance,
       double initialXGap,
       double initialYGap,
       Grid<GridBody.VoxelType> shape
   ) {
     this.duration = duration;
     this.terrain = terrain;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
     this.shape = shape;
@@ -75,7 +78,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       Consumer<Snapshot> snapshotConsumer
   ) {
     // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance));
     // place agents
     Grid<AbstractIndependentVoxel> agents = shape.map(t -> switch (t) {
       case NONE, RIGID -> null;
