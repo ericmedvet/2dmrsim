@@ -358,31 +358,20 @@ public class OutcomeFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingFightAgentOutcome> beforeF,
       @Param(value = "format", dS = "%.1f") String format
   ) {
-
     Function<TrainingFightAgentOutcome, Double> f = o -> {
       TrainingFightAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
-
       Point agent1InitialPosition = subOutcome.getAgent1InitialPosition();
       Point agent2InitialPosition = subOutcome.getAgent2InitialPosition();
-
       Point agent1FinalPosition = subOutcome.getAgent1FinalPosition();
       Point agent2FinalPosition = subOutcome.getAgent2FinalPosition();
-
       Double agent1InitialMaxY = subOutcome.getAgent1InitialMaxY();
       Double agent2InitialMaxY = subOutcome.getAgent2InitialMaxY();
-
       Double agent1FinalMaxY = subOutcome.getAgent1FinalMaxY();
       Double agent2FinalMaxY = subOutcome.getAgent2FinalMaxY();
-
-      // componente fitness basata sulla x:
       double agent1Distance = agent1FinalPosition.x() - agent1InitialPosition.x();
-
       double agent2Distance = agent2FinalPosition.x() - agent2InitialPosition.x();
-
-      // componente fitness basata sulla y:
       double agent1Fallen = 0;
       double agent2Fallen = 0;
-
       if (agent1FinalMaxY < o.getMaxYTerrain()) {
         if (agent1FinalPosition.x() < agent1InitialPosition.x()) {
           agent1Fallen = -1.0;
@@ -390,7 +379,6 @@ public class OutcomeFunctions {
           agent1Fallen = 1.0;
         }
       }
-
       if (agent2FinalMaxY < o.getMaxYTerrain()) {
         if (agent2InitialPosition.x() < agent2FinalPosition.x()) {
           agent2Fallen = -1.0;
@@ -398,10 +386,8 @@ public class OutcomeFunctions {
           agent2Fallen = 1.0;
         }
       }
-
       return (agent1Distance + agent2Distance) * (1 + (agent1Fallen - agent2Fallen));
     };
-
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
@@ -412,30 +398,20 @@ public class OutcomeFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
       @Param(value = "format", dS = "%.1f") String format
   ) {
-
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
-
       Point agent1InitialPosition = subOutcome.getAgent1InitialPosition();
       Point agent2InitialPosition = subOutcome.getAgent2InitialPosition();
-
       Point agent1FinalPosition = subOutcome.getAgent1FinalPosition();
       Point agent2FinalPosition = subOutcome.getAgent2FinalPosition();
-
       Double agent1InitialMaxY = subOutcome.getAgent1InitialMaxY();
       Double agent2InitialMaxY = subOutcome.getAgent2InitialMaxY();
-
       Double agent1FinalMaxY = subOutcome.getAgent1FinalMaxY();
       Double agent2FinalMaxY = subOutcome.getAgent2FinalMaxY();
-
-      // componente fitness basata sulla x:
       double agent1Distance = agent1FinalPosition.x() - agent1InitialPosition.x();
       double agent2Distance = agent2FinalPosition.x() - agent2InitialPosition.x();
-
-      // componente fitness basata sulla y:
       double agent1Fallen = 0;
       double agent2Fallen = 0;
-
       if (agent1FinalMaxY < o.getMaxYTerrain()) {
         if (agent1FinalPosition.x() < agent1InitialPosition.x()) {
           agent1Fallen = -1.0;
@@ -443,7 +419,6 @@ public class OutcomeFunctions {
           agent1Fallen = 1.0;
         }
       }
-
       if (agent2FinalMaxY < o.getMaxYTerrain()) {
         if (agent2InitialPosition.x() < agent2FinalPosition.x()) {
           agent2Fallen = -1.0;
@@ -451,10 +426,8 @@ public class OutcomeFunctions {
           agent2Fallen = 1.0;
         }
       }
-
       return (agent1Distance + agent2Distance) * (1 + (agent1Fallen - agent2Fallen));
     };
-
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
@@ -465,30 +438,20 @@ public class OutcomeFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
       @Param(value = "format", dS = "%.1f") String format
   ) {
-
     Function<SumoAgentsOutcome, Double> f = o -> {
       SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
-
       Point agent1InitialPosition = subOutcome.getAgent1InitialPosition();
       Point agent2InitialPosition = subOutcome.getAgent2InitialPosition();
-
       Point agent1FinalPosition = subOutcome.getAgent1FinalPosition();
       Point agent2FinalPosition = subOutcome.getAgent2FinalPosition();
-
       Double agent1InitialMaxY = subOutcome.getAgent1InitialMaxY();
       Double agent2InitialMaxY = subOutcome.getAgent2InitialMaxY();
-
       Double agent1FinalMaxY = subOutcome.getAgent1FinalMaxY();
       Double agent2FinalMaxY = subOutcome.getAgent2FinalMaxY();
-
-      // componente fitness basata sulla x:
       double agent1Distance = agent1FinalPosition.x() - agent1InitialPosition.x();
       double agent2Distance = agent2FinalPosition.x() - agent2InitialPosition.x();
-
-      // componente fitness basata sulla y:
       double agent1Fallen = 0;
       double agent2Fallen = 0;
-
       if (agent1FinalMaxY < o.getMaxYTerrain()) {
         if (agent1FinalPosition.x() < agent1InitialPosition.x()) {
           agent1Fallen = -1.0;
@@ -496,7 +459,6 @@ public class OutcomeFunctions {
           agent1Fallen = 1.0;
         }
       }
-
       if (agent2FinalMaxY < o.getMaxYTerrain()) {
         if (agent2InitialPosition.x() < agent2FinalPosition.x()) {
           agent2Fallen = -1.0;
@@ -504,10 +466,8 @@ public class OutcomeFunctions {
           agent2Fallen = 1.0;
         }
       }
-
       return -(agent1Distance + agent2Distance) * (1 + (agent1Fallen - agent2Fallen));
     };
-
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 
@@ -518,37 +478,23 @@ public class OutcomeFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, TrainingSumoAgentOutcome> beforeF,
       @Param(value = "format", dS = "%.1f") String format
   ) {
-
     Function<TrainingSumoAgentOutcome, Double> f = o -> {
       TrainingSumoAgentOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
-
       List<Point> agentPositions = subOutcome.getAgentPositions();
       List<Point> boxPositions = subOutcome.getBoxPositions();
-
-      // Componente fitness basata sulla x:
       double boxDistance = boxPositions.get(1).x() - boxPositions.get(0).x();
       double agentDistance = agentPositions.get(1).x() - agentPositions.get(0).x();
-
-      // Componente fitness basata sulla y:
       double agentFallen = 0;
       double boxFallen = 0;
-
-      // Controllo se l'agente è caduto
       if (agentPositions.get(1).y() < subOutcome.getMaxYTerrain()) {
         agentFallen = agentPositions.get(1).x() < agentPositions.get(0).x() ? -1.0 : 1.0;
       }
-
-      // Ottieni la y massima della scatola
       double boxMaxY = subOutcome.getMaxYBox();
-
-      // Controllo se la scatola è caduta
       if (boxMaxY < subOutcome.getMaxYTerrain()) {
         boxFallen = boxPositions.get(0).x() < boxPositions.get(1).x() ? -1.0 : 1.0;
       }
-
       return (agentDistance + boxDistance) * (1 + (agentFallen - boxFallen));
     };
-
     return FormattedNamedFunction.from(f, format, "score.sumo.agent").compose(beforeF);
   }
 }
