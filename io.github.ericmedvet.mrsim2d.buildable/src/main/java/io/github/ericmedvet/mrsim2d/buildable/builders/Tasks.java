@@ -110,6 +110,8 @@ public class Tasks {
       @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap,
+      @Param(value = "xGapRatio", dD = 1) double xGapRatio,
+      @Param(value = "yGapRatio", dD = 1) double yGapRatio,
       @Param(value = "shape") Grid<VoxelType> shape
   ) {
     return new PrebuiltIndependentLocomotion(
@@ -118,6 +120,8 @@ public class Tasks {
         terrainAttachableDistance,
         initialXGap,
         initialYGap,
+        xGapRatio,
+        yGapRatio,
         shape
     );
   }
