@@ -31,17 +31,14 @@ import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody.VoxelType;
 import io.github.ericmedvet.mrsim2d.core.agents.independentvoxel.AbstractIndependentVoxel;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
-import io.github.ericmedvet.mrsim2d.core.bodies.UnmovableBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.geometry.Poly;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -93,15 +90,17 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
           .orElseThrow();
     });
     final double maxBBX = agents.values()
-            .stream()
-            .filter(Objects::nonNull)
-            .mapToDouble(v -> v.boundingBox().width())
-            .max().orElseThrow();
+        .stream()
+        .filter(Objects::nonNull)
+        .mapToDouble(v -> v.boundingBox().width())
+        .max()
+        .orElseThrow();
     final double maxBBY = agents.values()
-            .stream()
-            .filter(Objects::nonNull)
-            .mapToDouble(v -> v.boundingBox().height())
-            .max().orElseThrow();
+        .stream()
+        .filter(Objects::nonNull)
+        .mapToDouble(v -> v.boundingBox().height())
+        .max()
+        .orElseThrow();
     double currX = 0;
     double currY = 0;
     double[] maxYPerLine = new double[agents.h()];
