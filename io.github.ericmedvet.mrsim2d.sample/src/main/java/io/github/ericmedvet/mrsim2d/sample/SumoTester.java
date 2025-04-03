@@ -102,7 +102,7 @@ public class SumoTester {
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
     Sumo sumo = new Sumo(5);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
+    Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
@@ -116,7 +116,7 @@ public class SumoTester {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     Sumo sumo = new Sumo(30);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
-    Supplier<EmbodiedAgent> eas1 = () -> reparametrize(
+    Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
@@ -142,7 +142,7 @@ public class SumoTester {
         .orElse(0d);
   }
 
-  private static EmbodiedAgent reparametrize(EmbodiedAgent agent, Function<Integer, Double> f) {
+  private static EmbodiedAgent reParametrize(EmbodiedAgent agent, Function<Integer, Double> f) {
     if (agent instanceof NumMultiBrained numMultiBrained) {
       numMultiBrained.brains()
           .stream()
