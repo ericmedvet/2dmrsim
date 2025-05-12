@@ -32,8 +32,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLoc
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.StandPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingfight.TrainingFight;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "sim|s.task")
@@ -148,25 +146,4 @@ public class Tasks {
     return new Sumo(duration);
   }
 
-  @SuppressWarnings("unused")
-  public static TrainingFight trainingFight(
-      @Param(value = "name", dS = "trainingFight") String name,
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain,
-      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
-      @Param(value = "initialYGap", dD = 0.25) double initialYGap
-  ) {
-    return new TrainingFight(duration, terrain, terrainAttachableDistance, initialYGap);
-  }
-
-  @SuppressWarnings("unused")
-  public static TrainingSumo trainingSumo(
-      @Param(value = "name", dS = "trainingSumo") String name,
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain,
-      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
-      @Param(value = "initialYGap", dD = 0.25) double initialYGap
-  ) {
-    return new TrainingSumo(duration, terrain, terrainAttachableDistance, initialYGap);
-  }
 }
