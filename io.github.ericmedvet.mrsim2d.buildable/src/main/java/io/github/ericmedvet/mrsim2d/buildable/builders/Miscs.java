@@ -29,14 +29,10 @@ import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.ComponentDrawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.Drawers;
-import io.github.ericmedvet.mrsim2d.viewer.EmbodiedAgentsExtractor;
-import io.github.ericmedvet.mrsim2d.viewer.Framer;
-import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
+import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.EngineProfilingDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.InfoDrawer;
@@ -77,6 +73,20 @@ public class Miscs {
       @Param(value = "followTime", dD = 2) double followTime
   ) {
     return () -> new AllAgentsFramer(enlargement).largest(followTime);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <A1, A2> BiTaskVideoBuilder<A1, A2> biTaskVideoBuilder(
+      @Param("task") BiTask<A1, A2, ?, ?> task,
+      @Param(value = "title", dS = "") String title,
+      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawerBuilder,
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
+      @Param(value = "startTime", dD = 0) double startTime,
+      @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
+      @Param(value = "frameRate", dD = 30) double frameRate
+  ) {
+    return new BiTaskVideoBuilder<>(task, drawerBuilder, engineSupplier, title, startTime, endTime, frameRate);
   }
 
   @SuppressWarnings("unused")
