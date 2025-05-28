@@ -69,9 +69,10 @@ public class TerrainTester {
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     // do single task
     if (true) {
-      @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer()")).apply(
-          "test"
-      );
+      @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build("sim.drawer(actions = true)"))
+          .apply(
+              "test"
+          );
       taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")
           .run();
       System.exit(0);
