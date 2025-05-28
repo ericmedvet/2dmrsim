@@ -47,6 +47,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
   private final int nOfAgents;
   private final double xGapRatio;
   private final Terrain terrain;
+  private final double terrainAttachableDistance;
   private final double firstXGap;
   private final double initialYGap;
 
@@ -55,6 +56,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
       int nOfAgents,
       double xGapRatio,
       Terrain terrain,
+      double terrainAttachableDistance,
       double firstXGap,
       double initialYGap
   ) {
@@ -62,12 +64,13 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
     this.nOfAgents = nOfAgents;
     this.xGapRatio = xGapRatio;
     this.terrain = terrain;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.firstXGap = firstXGap;
     this.initialYGap = initialYGap;
   }
 
   public StandPiling(double duration, int nOfAgents, double xGapRatio, Terrain terrain) {
-    this(duration, nOfAgents, xGapRatio, terrain, FIRST_X_GAP, INITIAL_Y_GAP);
+    this(duration, nOfAgents, xGapRatio, terrain, Double.POSITIVE_INFINITY, FIRST_X_GAP, INITIAL_Y_GAP);
   }
 
   private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
@@ -96,7 +99,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
       Consumer<Snapshot> snapshotConsumer
   ) {
     // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance));
     // place agents
     List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);
     while (agents.size() < nOfAgents) {

@@ -27,12 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.EnergyConsumingAction;
 import io.github.ericmedvet.mrsim2d.core.SelfDescribedAction;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 
 public record AttractAndLinkAnchorable(
     Collection<Anchor> anchors, Anchorable anchorable, double magnitude, Anchor.Link.Type type
@@ -52,7 +47,7 @@ public record AttractAndLinkAnchorable(
         )
         .toList();
     // match anchor pairs
-    Collection<Anchor> dstAnchors = new LinkedHashSet<>(anchorable.anchors());
+    Collection<Anchor> dstAnchors = new LinkedList<>(anchorable.anchors());
     Collection<Pair<Anchor, Anchor>> pairs = new ArrayList<>();
     srcAnchors.forEach(
         src -> dstAnchors.stream()

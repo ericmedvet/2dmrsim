@@ -25,6 +25,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
+import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Sensor;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.CentralizedNumGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.DistributedNumGridVSR;
@@ -155,5 +156,28 @@ public class Agents {
   @SuppressWarnings("unused")
   public static ReactiveGridVSR reactiveGridVSR(@Param("body") Grid<ReactiveVoxel> body) {
     return new ReactiveGridVSR(body);
+  }
+
+  @SuppressWarnings("unused")
+  public static EmbodiedAgent dummyBox(
+      @Param(value = "w", dI = 2) int nOfBaseVoxels,
+      @Param(value = "h", dI = 2) int nOfHeightVoxels
+  ) {
+    GridBody body = new GridBody(
+        Grid.create(
+            nOfBaseVoxels,
+            nOfHeightVoxels,
+            (x, y) -> GridBody.VoxelType.RIGID
+        ),
+        g -> g.map(b -> List.of())
+    );
+    return new CentralizedNumGridVSR(
+        body,
+        MultivariateRealFunction.from(
+            in -> new double[CentralizedNumGridVSR.nOfOutputs(body)],
+            CentralizedNumGridVSR.nOfInputs(body),
+            CentralizedNumGridVSR.nOfOutputs(body)
+        )
+    );
   }
 }

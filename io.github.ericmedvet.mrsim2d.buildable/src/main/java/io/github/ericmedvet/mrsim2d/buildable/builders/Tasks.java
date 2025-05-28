@@ -20,7 +20,6 @@
 
 package io.github.ericmedvet.mrsim2d.buildable.builders;
 
-import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
@@ -33,8 +32,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.PrebuiltIndependentLoc
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.FallPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.piling.StandPiling;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.Sumo;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingfight.TrainingFight;
-import io.github.ericmedvet.mrsim2d.core.tasks.trainingsumo.TrainingSumo;
 import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "sim|s.task")
@@ -64,6 +61,7 @@ public class Tasks {
       @Param(value = "xSigmaRatio", dD = 0.1d) double xSigmaRatio,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "yGapRatio", dD = 1d) double yGapRatio,
       @Param(value = "xGap", dD = 10d) double xGap
   ) {
@@ -75,6 +73,7 @@ public class Tasks {
         xSigmaRatio,
         randomGenerator,
         terrain,
+        terrainAttachableDistance,
         yGapRatio,
         xGap
     );
@@ -94,41 +93,48 @@ public class Tasks {
       @Param(value = "name", iS = "locomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new Locomotion(duration, terrain, initialXGap, initialYGap);
+    return new Locomotion(duration, terrain, terrainAttachableDistance, initialXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")
-  @Cacheable
   public static PrebuiltIndependentLocomotion prebuiltIndependentLocomotion(
       @Param(value = "name", iS = "piLocomotion[{terrain.name}]") String name,
       @Param(value = "duration", dD = 30) double duration,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "initialXGap", dD = 1) double initialXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap,
       @Param(value = "shape") Grid<VoxelType> shape
   ) {
-    return new PrebuiltIndependentLocomotion(duration, terrain, initialXGap, initialYGap, shape);
+    return new PrebuiltIndependentLocomotion(
+        duration,
+        terrain,
+        terrainAttachableDistance,
+        initialXGap,
+        initialYGap,
+        shape
+    );
   }
 
   @SuppressWarnings("unused")
-  @Cacheable
   public static StandPiling standPiling(
       @Param(value = "name", dS = "standPiling") String name,
       @Param(value = "duration", dD = 45) double duration,
       @Param(value = "nOfAgents") int nOfAgents,
       @Param(value = "xGapRatio", dD = 1) double xGapRatio,
       @Param(value = "terrain", dNPM = "sim.terrain.flat()") Terrain terrain,
+      @Param(value = "terrainAttachableDistance", dD = Double.POSITIVE_INFINITY) double terrainAttachableDistance,
       @Param(value = "firstXGap", dD = 10) double firstXGap,
       @Param(value = "initialYGap", dD = 0.1) double initialYGap
   ) {
-    return new StandPiling(duration, nOfAgents, xGapRatio, terrain, firstXGap, initialYGap);
+    return new StandPiling(duration, nOfAgents, xGapRatio, terrain, terrainAttachableDistance, firstXGap, initialYGap);
   }
 
   @SuppressWarnings("unused")
-  @Cacheable
   public static Sumo sumo(
       @Param(value = "name", dS = "sumo") String name,
       @Param(value = "duration", dD = 60) double duration
@@ -136,23 +142,4 @@ public class Tasks {
     return new Sumo(duration);
   }
 
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static TrainingFight trainingFight(
-      @Param(value = "name", dS = "trainingFight") String name,
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
-  ) {
-    return new TrainingFight(duration, terrain);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static TrainingSumo trainingSumo(
-      @Param(value = "name", dS = "trainingSumo") String name,
-      @Param(value = "duration", dD = 60) double duration,
-      @Param(value = "terrain", dNPM = "sim.terrain.sumoArena()") Terrain terrain
-  ) {
-    return new TrainingSumo(duration, terrain);
-  }
 }

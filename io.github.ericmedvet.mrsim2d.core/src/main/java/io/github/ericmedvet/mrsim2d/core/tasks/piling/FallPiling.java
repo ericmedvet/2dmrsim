@@ -50,6 +50,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   private final double xSigmaRatio;
   private final RandomGenerator randomGenerator;
   private final Terrain terrain;
+  private final double terrainAttachableDistance;
   private final double yGapRatio;
   private final double xGap;
 
@@ -60,6 +61,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       double xSigmaRatio,
       RandomGenerator randomGenerator,
       Terrain terrain,
+      double terrainAttachableDistance,
       double yGapRatio,
       double xGap
   ) {
@@ -69,6 +71,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
     this.xSigmaRatio = xSigmaRatio;
     this.randomGenerator = randomGenerator;
     this.terrain = terrain;
+    this.terrainAttachableDistance = terrainAttachableDistance;
     this.xGap = xGap;
     this.yGapRatio = yGapRatio;
   }
@@ -82,7 +85,17 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       Terrain terrain,
       double yGapRatio
   ) {
-    this(duration, fallInterval, nOfAgents, xSigmaRatio, randomGenerator, terrain, yGapRatio, X_GAP);
+    this(
+        duration,
+        fallInterval,
+        nOfAgents,
+        xSigmaRatio,
+        randomGenerator,
+        terrain,
+        Double.POSITIVE_INFINITY,
+        yGapRatio,
+        X_GAP
+    );
   }
 
   private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
@@ -122,7 +135,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       Consumer<Snapshot> snapshotConsumer
   ) {
     // build world
-    engine.perform(new CreateUnmovableBody(terrain.poly()));
+    engine.perform(new CreateUnmovableBody(terrain.poly(), terrainAttachableDistance));
     // run for defined time
     Map<Double, AgentsObservation> observations = new HashMap<>();
     List<EmbodiedAgent> agents = new ArrayList<>(nOfAgents);

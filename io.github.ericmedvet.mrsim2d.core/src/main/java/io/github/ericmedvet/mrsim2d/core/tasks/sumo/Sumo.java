@@ -33,25 +33,46 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgentsObservation, SumoAgentsOutcome> {
+  private final Configuration configuration;
 
-  private static final boolean STOP_IF_FALLEN = false;
-  private static final double INITIAL_Y_GAP = 0.1;
-  private static final double INITIAL_X_GAP = 1;
-  private static final double HOLE_W = 15;
-  private static final double HOLE_H = 15;
-  private static final double FLAT_W = 15;
-  private final double duration;
-  private final double initialXGap;
-  private final double initialYGap;
+  public record Configuration(
+      boolean stopIfFallen,
+      double wHole,
+      double hHole,
+      double wFlat,
+      double duration,
+      double initialXGap,
+      double initialYGap
+  ) {
+    public static final Configuration DEFAULT = new Configuration(
+        false,
+        15,
+        15,
+        15,
+        60,
+        1,
+        0.1
+    );
+  }
 
   public Sumo(double duration, double initialXGap, double initialYGap) {
-    this.duration = duration;
-    this.initialXGap = initialXGap;
-    this.initialYGap = initialYGap;
+    this.configuration = new Configuration(
+        Configuration.DEFAULT.stopIfFallen(),
+        Configuration.DEFAULT.wHole(),
+        Configuration.DEFAULT.hHole(),
+        Configuration.DEFAULT.wFlat(),
+        duration,
+        initialXGap,
+        initialYGap
+    );
   }
 
   public Sumo(double duration) {
-    this(duration, INITIAL_X_GAP, INITIAL_Y_GAP);
+    this(duration, Configuration.DEFAULT.initialXGap, Configuration.DEFAULT.initialYGap);
+  }
+
+  public Sumo(Configuration configuration) {
+    this.configuration = configuration;
   }
 
   @Override
@@ -63,23 +84,17 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
   ) {
     Terrain terrain = new Terrain(
         new Path(Point.ORIGIN)
-            .moveBy(HOLE_W, 0)
-            .moveBy(0, HOLE_H)
-            .moveBy(FLAT_W, 0)
-            .moveBy(0, -HOLE_H)
-            .moveBy(HOLE_W, 0)
-            .moveBy(0, -HOLE_H)
-            .moveBy(-2 * HOLE_W - FLAT_W, 0)
+            .moveBy(configuration.wHole(), 0)
+            .moveBy(0, configuration.hHole())
+            .moveBy(configuration.wFlat(), 0)
+            .moveBy(0, -configuration.hHole())
+            .moveBy(configuration.wHole(), 0)
+            .moveBy(0, -configuration.hHole())
+            .moveBy(-2 * configuration.wHole() - configuration.wFlat(), 0)
             .toPoly(),
-        new DoubleRange(HOLE_W, HOLE_W + FLAT_W)
+        new DoubleRange(configuration.wHole(), configuration.wHole() + configuration.wFlat())
     );
-    double groundH = HOLE_H;
-    /*
-    RigidBody box4 = engine.perform(new CreateRigidBody(Poly.regular(1, 4), 1)).outcome().orElseThrow();
-    RigidBody box6 = engine.perform(new CreateRigidBody(Poly.regular(1, 6), 1)).outcome().orElseThrow();
-    engine.perform(new TranslateBody(box4, new Point(terrain.withinBordersXRange().center(), groundH + 3)));
-    engine.perform(new TranslateBody(box6, new Point(terrain.withinBordersXRange().center(), groundH + 6)));
-    */
+    double groundH = configuration.hHole();
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // put agent 1 on left
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
@@ -88,7 +103,10 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         new TranslateAgentAt(
             agent1,
             BoundingBox.Anchor.LL,
-            new Point(terrain.withinBordersXRange().min() + initialXGap, groundH + initialYGap)
+            new Point(
+                terrain.withinBordersXRange().min() + configuration.initialXGap(),
+                groundH + configuration.initialYGap()
+            )
         )
     );
     // put agent 2 on right
@@ -103,13 +121,16 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         new TranslateAgentAt(
             agent2,
             BoundingBox.Anchor.UL,
-            new Point(terrain.withinBordersXRange().max() - initialXGap, groundH + initialYGap)
+            new Point(
+                terrain.withinBordersXRange().max() - configuration.initialXGap(),
+                groundH + configuration.initialYGap()
+            )
         )
     );
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
-    while ((engine.t() < duration) && (!STOP_IF_FALLEN || agent1.boundingBox()
+    while ((engine.t() < configuration.duration()) && (!configuration.stopIfFallen() || agent1.boundingBox()
         .max()
-        .y() > groundH) && (!STOP_IF_FALLEN || agent2.boundingBox()
+        .y() > groundH) && (!configuration.stopIfFallen() || agent2.boundingBox()
             .max()
             .y() > groundH)) {
       Snapshot snapshot = engine.tick();
@@ -139,7 +160,6 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
           )
       );
     }
-
     return new SumoAgentsOutcome(new TreeMap<>(observations));
   }
 }

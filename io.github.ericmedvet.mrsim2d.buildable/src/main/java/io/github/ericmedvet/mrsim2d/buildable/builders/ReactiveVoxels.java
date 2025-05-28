@@ -39,6 +39,11 @@ import java.util.function.BiFunction;
 @Discoverable(prefixTemplate = "sim|s.agent|a.vsr.reactiveVoxel|rv")
 public class ReactiveVoxels {
 
+  private static final NumericalDynamicalSystem<StatelessSystem.State> EMPTY_NDS = nss(0, (t, inputs) -> new double[4]);
+
+  private ReactiveVoxels() {
+  }
+
   public enum Action {
     EXPAND(-1d), CONTRACT(1d);
 
@@ -51,20 +56,6 @@ public class ReactiveVoxels {
     public double getValue() {
       return value;
     }
-  }
-
-  private static final NumericalDynamicalSystem<StatelessSystem.State> EMPTY_NDS = nss(0, (t, inputs) -> new double[4]);
-
-  private ReactiveVoxels() {
-  }
-
-  @SuppressWarnings("unused")
-  public static ReactiveGridVSR.ReactiveVoxel asin(@Param(value = "f", dD = 1.0) double f) {
-    return new ReactiveGridVSR.ReactiveVoxel(
-        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
-        List.of(),
-        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t)))
-    );
   }
 
   @SuppressWarnings("unused")
@@ -91,20 +82,28 @@ public class ReactiveVoxels {
     );
   }
 
-  private static Voxel.Side fromAngle(double a) {
-    while (a > Math.PI) {
-      a = a - Math.PI;
-    }
-    if (-Math.PI / 4d < a && a <= Math.PI / 4d) {
-      return Voxel.Side.E;
-    }
-    if (Math.PI / 4d < a && a <= Math.PI * 3d / 4d) {
-      return Voxel.Side.N;
-    }
-    if (-Math.PI * 3d / 4d < a && a <= -Math.PI / 4d) {
-      return Voxel.Side.S;
-    }
-    return Voxel.Side.W;
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR.ReactiveVoxel ahsin(@Param(value = "f", dD = 1.0) double f) {
+    return new ReactiveGridVSR.ReactiveVoxel(
+        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        nss(
+            0,
+            (t, inputs) -> {
+              double v = Math.sin(2d * Math.PI * f * t);
+              return new double[]{-v, v, -v, v};
+            }
+        )
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR.ReactiveVoxel asin(@Param(value = "f", dD = 1.0) double f) {
+    return new ReactiveGridVSR.ReactiveVoxel(
+        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t)))
+    );
   }
 
   @SuppressWarnings("unused")
@@ -129,16 +128,6 @@ public class ReactiveVoxels {
         new NumericalDynamicalSystem<Pair<Double, Double>>() {
           private double lastNST = Double.NEGATIVE_INFINITY;
           private double lastEWT = Double.NEGATIVE_INFINITY;
-
-          @Override
-          public int nOfInputs() {
-            return 4;
-          }
-
-          @Override
-          public int nOfOutputs() {
-            return 4;
-          }
 
           @Override
           public Pair<Double, Double> getState() {
@@ -171,6 +160,16 @@ public class ReactiveVoxels {
                     .getValue() : 0d,
             };
           }
+
+          @Override
+          public int nOfInputs() {
+            return 4;
+          }
+
+          @Override
+          public int nOfOutputs() {
+            return 4;
+          }
         }
     );
   }
@@ -190,16 +189,6 @@ public class ReactiveVoxels {
           private double lastContactT = Double.NEGATIVE_INFINITY;
 
           @Override
-          public int nOfInputs() {
-            return 1;
-          }
-
-          @Override
-          public int nOfOutputs() {
-            return 4;
-          }
-
-          @Override
           public Double getState() {
             return lastContactT;
           }
@@ -216,7 +205,61 @@ public class ReactiveVoxels {
             }
             return (t - lastContactT < duration) ? four(action.getValue()) : four(0d);
           }
+
+          @Override
+          public int nOfInputs() {
+            return 1;
+          }
+
+          @Override
+          public int nOfOutputs() {
+            return 4;
+          }
         }
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR.ReactiveVoxel avsin(@Param(value = "f", dD = 1.0) double f) {
+    return new ReactiveGridVSR.ReactiveVoxel(
+        new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        nss(
+            0,
+            (t, inputs) -> {
+              double v = Math.sin(2d * Math.PI * f * t);
+              return new double[]{v, -v, v, -v};
+            }
+        )
+    );
+  }
+
+  private static double[] four(double value) {
+    return new double[]{value, value, value, value};
+  }
+
+  private static Voxel.Side fromAngle(double a) {
+    while (a > Math.PI) {
+      a = a - Math.PI;
+    }
+    if (-Math.PI / 4d < a && a <= Math.PI / 4d) {
+      return Voxel.Side.E;
+    }
+    if (Math.PI / 4d < a && a <= Math.PI * 3d / 4d) {
+      return Voxel.Side.N;
+    }
+    if (-Math.PI * 3d / 4d < a && a <= -Math.PI / 4d) {
+      return Voxel.Side.S;
+    }
+    return Voxel.Side.W;
+  }
+
+  @SuppressWarnings("unused")
+  public static ReactiveGridVSR.ReactiveVoxel none() {
+    return new ReactiveGridVSR.ReactiveVoxel(
+        new GridBody.Element(GridBody.VoxelType.NONE, Voxel.DEFAULT_MATERIAL),
+        List.of(),
+        EMPTY_NDS
     );
   }
 
@@ -237,19 +280,6 @@ public class ReactiveVoxels {
         return f.apply(t, inputs);
       }
     };
-  }
-
-  private static double[] four(double value) {
-    return new double[]{value, value, value, value};
-  }
-
-  @SuppressWarnings("unused")
-  public static ReactiveGridVSR.ReactiveVoxel none() {
-    return new ReactiveGridVSR.ReactiveVoxel(
-        new GridBody.Element(GridBody.VoxelType.NONE, Voxel.DEFAULT_MATERIAL),
-        List.of(),
-        EMPTY_NDS
-    );
   }
 
   @SuppressWarnings("unused")
