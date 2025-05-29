@@ -29,10 +29,7 @@ import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
-import io.github.ericmedvet.mrsim2d.viewer.FramesImageBuilder;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-
-import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.Random;
 import java.util.ServiceLoader;
@@ -79,9 +76,9 @@ public class AgentTester {
     }
     // do task
     task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
-//    FramesImageBuilder fib = new FramesImageBuilder(500,400, 20,3,0.6,1, FramesImageBuilder.Direction.HORIZONTAL, false, drawer);
-//    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, fib);
-//    ImageIO.write(fib.get(), "png", new File("../reactive-biped.png"));
+    //    FramesImageBuilder fib = new FramesImageBuilder(500,400, 20,3,0.6,1, FramesImageBuilder.Direction.HORIZONTAL, false, drawer);
+    //    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, fib);
+    //    ImageIO.write(fib.get(), "png", new File("../reactive-biped.png"));
   }
 
   private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {
