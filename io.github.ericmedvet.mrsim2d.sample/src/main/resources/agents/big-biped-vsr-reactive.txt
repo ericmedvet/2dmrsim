@@ -1,0 +1,28 @@
+s.a.reactiveGridVSR(
+  body = m.grid(w = 6; h = 4; items = [
+    s.a.vsr.rv.ps();
+    s.a.vsr.rv.ph();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.ps();
+    s.a.vsr.rv.ph();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.ahsin();
+    s.a.vsr.rv.ahsin();
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.none();
+    s.a.vsr.rv.ahsin();
+    s.a.vsr.rv.ahsin();
+    s.a.vsr.rv.ps();
+    s.a.vsr.rv.ph();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.ps();
+    s.a.vsr.rv.ph();
+    s.a.vsr.rv.avsin();
+    s.a.vsr.rv.avsin()
+  ])
+)
