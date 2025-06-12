@@ -29,7 +29,6 @@ import io.github.ericmedvet.mrsim2d.core.tasks.sumo.SumoAgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.SumoCup;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
@@ -41,7 +40,7 @@ import java.util.stream.IntStream;
 
 public class SumoCupTester {
 
-  private static final String DRAWER = "sim.drawer(framer = sim.staticFramer(minX = 0; maxX = 30; minY = 0; maxY = 25); actions = true)";
+  private static final String DRAWER = "sim.drawer(framer = sim.staticFramer(minX = 4; maxX = 36; minY = 2; maxY = 26))";
 
   //private static final String DRAWER = "sim.drawer(actions = true)";
 

@@ -401,4 +401,44 @@ public class OutcomeFunctions {
         "score2"
     );
   }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> Function<X, Double> sumoShiftedScoreDifference1(
+      @Param(value = "transientTime", dD = 0.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+    Function<SumoAgentsOutcome, Double> f = o -> {
+      SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
+      Point agent1InitialPosition = subOutcome.getAgent1InitialPosition();
+      Point agent2InitialPosition = subOutcome.getAgent2InitialPosition();
+      Point agent1FinalPosition = subOutcome.getAgent1FinalPosition();
+      Point agent2FinalPosition = subOutcome.getAgent2FinalPosition();
+      double deltaX1 = agent1FinalPosition.x() - agent1InitialPosition.x();
+      double deltaX2 = -(agent2FinalPosition.x() - agent2InitialPosition.x());
+      return deltaX1 - deltaX2;
+    };
+    return FormattedNamedFunction.from(f, format, "shiftedScoreDifference1").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> Function<X, Double> sumoShiftedScoreDifference2(
+      @Param(value = "transientTime", dD = 0.0) double transientTime,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, SumoAgentsOutcome> beforeF,
+      @Param(value = "format", dS = "%.1f") String format
+  ) {
+    Function<SumoAgentsOutcome, Double> f = o -> {
+      SumoAgentsOutcome subOutcome = o.subOutcome(new DoubleRange(transientTime, o.duration()));
+      Point agent1InitialPosition = subOutcome.getAgent1InitialPosition();
+      Point agent2InitialPosition = subOutcome.getAgent2InitialPosition();
+      Point agent1FinalPosition = subOutcome.getAgent1FinalPosition();
+      Point agent2FinalPosition = subOutcome.getAgent2FinalPosition();
+      double deltaX1 = agent1FinalPosition.x() - agent1InitialPosition.x();
+      double deltaX2 = -(agent2FinalPosition.x() - agent2InitialPosition.x());
+      return deltaX2 - deltaX1;
+    };
+    return FormattedNamedFunction.from(f, format, "shiftedScoreDifference2").compose(beforeF);
+  }
 }

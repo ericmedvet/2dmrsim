@@ -35,7 +35,6 @@ import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.HomogeneousBiTask;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,17 +51,15 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
       int tCup,
       double duration,
       double initialXGap,
-      double initialYGap,
-      double hFall
+      double initialYGap
   ) {
     public static final Configuration DEFAULT = new Configuration(
-        20,
+        30,
         15,
         5,
         60,
-        1,
-        0.1,
-        2
+        7,
+        1
     );
   }
 
@@ -73,8 +70,7 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
         Configuration.DEFAULT.tCup(),
         duration,
         initialXGap,
-        initialYGap,
-        Configuration.DEFAULT.hFall
+        initialYGap
     );
   }
 
@@ -105,7 +101,7 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
             .toPoly(),
         new DoubleRange(0, configuration.wCup())
     );
-    double groundH = configuration.tCup() + configuration.hFall();
+    double groundH = configuration.tCup();
     engine.perform(new CreateUnmovableBody(terrain.poly()));
     // put agent 1 on left
     EmbodiedAgent agent1 = embodiedAgentSupplier1.get();
@@ -133,7 +129,8 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
             agent2,
             BoundingBox.Anchor.UL,
             new Point(
-                terrain.withinBordersXRange().min() + configuration.tCup() + configuration.wCup() - configuration.initialXGap(),
+                terrain.withinBordersXRange().min() + configuration.tCup() + configuration.wCup() - configuration
+                    .initialXGap(),
                 groundH + configuration.initialYGap()
             )
         )
