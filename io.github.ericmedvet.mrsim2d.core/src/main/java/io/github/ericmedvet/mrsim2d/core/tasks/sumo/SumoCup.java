@@ -59,7 +59,7 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
         5,
         60,
         7,
-        1
+        0.15
     );
   }
 

@@ -25,6 +25,7 @@ import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
+import io.github.ericmedvet.mrsim2d.core.geometry.Point;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.SumoAgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.sumo.SumoCup;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
@@ -98,14 +99,22 @@ public class SumoCupTester {
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
-    SumoCup sumo = new SumoCup(5);
+    SumoCup sumo = new SumoCup(20);
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
     SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
-    System.out.println(outcome.firstAgentAveragePower());
+
+    Point agent1InitialPosition = outcome.getAgent1InitialPosition();
+    Point agent2InitialPosition = outcome.getAgent2InitialPosition();
+    Point agent1FinalPosition = outcome.getAgent1FinalPosition();
+    Point agent2FinalPosition = outcome.getAgent2FinalPosition();
+    double deltaX1 = agent1FinalPosition.x() - agent1InitialPosition.x();
+    double deltaX2 = -(agent2FinalPosition.x() - agent2InitialPosition.x());
+    System.out.println("dX1=" + deltaX1 + " - dX2=" + deltaX2);
+    System.out.println("s1=" + (deltaX1 - deltaX2) + " - s2=" + (deltaX2 - deltaX1));
   }
 
   private static double areaAvgDistance(int n, String agentString) {
