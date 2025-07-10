@@ -168,6 +168,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       }
     }
     // run for defined time
+    snapshotConsumer.accept(engine.snapshot());
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();

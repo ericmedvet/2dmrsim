@@ -22,7 +22,6 @@ package io.github.ericmedvet.mrsim2d.viewer;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
-import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
@@ -108,6 +107,6 @@ public class BiTaskVideoBuilder<A1, A2> implements VideoBuilder<Pair<A1, A2>> {
   public Video build(VideoInfo videoInfo, Pair<A1, A2> agents) {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
     biTask.run(agents.first(), agents.second(), engineSupplier.get(), collector);
-    return new Video(collector.images, frameRate, VideoUtils.defaultEncoder());
+    return new Video(collector.images, frameRate, videoInfo.encoder());
   }
 }

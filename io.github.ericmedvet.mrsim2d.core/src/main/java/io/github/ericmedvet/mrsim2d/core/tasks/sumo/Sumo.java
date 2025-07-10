@@ -127,6 +127,7 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
             )
         )
     );
+    snapshotConsumer.accept(engine.snapshot());
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
     while ((engine.t() < configuration.duration()) && (!configuration.stopIfFallen() || agent1.boundingBox()
         .max()
