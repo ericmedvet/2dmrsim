@@ -31,6 +31,9 @@ import java.util.List;
 public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> {
   private final int nOfFrames;
   private final double deltaT;
+  private final int frameW;
+  private final int frameH;
+  private final int gap;
   private final Direction direction;
   private final Drawer drawer;
   private final BufferedImage image;
@@ -42,6 +45,7 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
   public FramesImageBuilder(
       int frameW,
       int frameH,
+      int gap,
       int nOfFrames,
       double deltaT,
       double startTime,
@@ -49,6 +53,9 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       boolean justLastSnapshot,
       Drawer drawer
   ) {
+    this.frameW = frameW;
+    this.frameH = frameH;
+    this.gap = gap;
     this.nOfFrames = nOfFrames;
     this.deltaT = deltaT;
     this.direction = direction;
@@ -60,9 +67,9 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
     int overallW = frameW;
     int overallH = frameH;
     if (direction.equals(Direction.HORIZONTAL)) {
-      overallW = frameW * nOfFrames;
+      overallW = frameW * nOfFrames + gap * (nOfFrames - 1);
     } else {
-      overallH = frameH * nOfFrames;
+      overallH = frameH * nOfFrames + gap * (nOfFrames - 1);
     }
     image = new BufferedImage(overallW, overallH, BufferedImage.TYPE_3BYTE_BGR);
     snapshots = new ArrayList<>();
@@ -84,13 +91,13 @@ public class FramesImageBuilder implements Accumulator<BufferedImage, Snapshot> 
       BoundingBox imageFrame;
       if (direction.equals(Direction.HORIZONTAL)) {
         imageFrame = new BoundingBox(
-            new Point((double) frameCount / (double) nOfFrames, 0),
-            new Point((double) (frameCount + 1) / (double) nOfFrames, 1d)
+            new Point((double) (frameCount * (frameW + gap)) / (double) image.getWidth(), 0),
+            new Point((double) (frameCount * (frameW + gap) + frameW) / (double) image.getWidth(), 1d)
         );
       } else {
         imageFrame = new BoundingBox(
-            new Point(0d, (double) frameCount / (double) nOfFrames),
-            new Point(1d, (double) (frameCount + 1) / (double) nOfFrames)
+            new Point(0d, (double) (frameCount * (frameH + gap)) / (double) image.getHeight()),
+            new Point(1d, (double) (frameCount * (frameH + gap) + frameH) / (double) image.getHeight())
         );
       }
       frameCount = frameCount + 1;

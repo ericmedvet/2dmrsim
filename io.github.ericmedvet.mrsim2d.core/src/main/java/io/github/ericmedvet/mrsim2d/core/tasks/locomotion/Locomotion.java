@@ -22,7 +22,9 @@ package io.github.ericmedvet.mrsim2d.core.tasks.locomotion;
 
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
-import io.github.ericmedvet.mrsim2d.core.actions.*;
+import io.github.ericmedvet.mrsim2d.core.actions.AddAgent;
+import io.github.ericmedvet.mrsim2d.core.actions.CreateUnmovableBody;
+import io.github.ericmedvet.mrsim2d.core.actions.TranslateAgent;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;

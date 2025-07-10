@@ -30,10 +30,7 @@ import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.RealtimeViewer;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.function.Function;
@@ -46,15 +43,15 @@ public class AgentTester {
 
   private static final Logger L = Logger.getLogger(AgentTester.class.getName());
 
-  private static final String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 5))";
+  private static final String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 0))";
   private static final String TASK_JUMPING = "sim.task.jumping()";
   private static final String TASK_BALANCING = "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(
-        "sim.drawer(actions=true; nfc=true; enlargement = 5)"
+        "sim.drawer(actions=true; nfc=true; enlargement = 5; info = false; miniAgents = none)"
     ))
         .apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
@@ -79,6 +76,9 @@ public class AgentTester {
     }
     // do task
     task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
+    //    FramesImageBuilder fib = new FramesImageBuilder(500,400, 20,3,0.6,1, FramesImageBuilder.Direction.HORIZONTAL, false, drawer);
+    //    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, fib);
+    //    ImageIO.write(fib.get(), "png", new File("../reactive-biped.png"));
   }
 
   private static Supplier<EmbodiedAgent> getEmbodiedAgentSupplier(String agentDescription, NamedBuilder<Object> nb) {

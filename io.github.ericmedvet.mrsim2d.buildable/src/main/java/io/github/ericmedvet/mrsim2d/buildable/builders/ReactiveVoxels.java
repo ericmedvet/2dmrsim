@@ -83,14 +83,17 @@ public class ReactiveVoxels {
   }
 
   @SuppressWarnings("unused")
-  public static ReactiveGridVSR.ReactiveVoxel ahsin(@Param(value = "f", dD = 1.0) double f) {
+  public static ReactiveGridVSR.ReactiveVoxel ahsin(
+      @Param(value = "f", dD = 1.0) double f,
+      @Param(value = "phase", dD = 0) double phase
+  ) {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(),
         nss(
             0,
             (t, inputs) -> {
-              double v = Math.sin(2d * Math.PI * f * t);
+              double v = Math.sin(2d * Math.PI * f * t + phase);
               return new double[]{-v, v, -v, v};
             }
         )
@@ -98,11 +101,14 @@ public class ReactiveVoxels {
   }
 
   @SuppressWarnings("unused")
-  public static ReactiveGridVSR.ReactiveVoxel asin(@Param(value = "f", dD = 1.0) double f) {
+  public static ReactiveGridVSR.ReactiveVoxel asin(
+      @Param(value = "f", dD = 1.0) double f,
+      @Param(value = "phase", dD = 0) double phase
+  ) {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(),
-        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t)))
+        nss(0, (t, inputs) -> four(Math.sin(2d * Math.PI * f * t + phase)))
     );
   }
 
@@ -220,14 +226,17 @@ public class ReactiveVoxels {
   }
 
   @SuppressWarnings("unused")
-  public static ReactiveGridVSR.ReactiveVoxel avsin(@Param(value = "f", dD = 1.0) double f) {
+  public static ReactiveGridVSR.ReactiveVoxel avsin(
+      @Param(value = "f", dD = 1.0) double f,
+      @Param(value = "phase", dD = 0) double phase
+  ) {
     return new ReactiveGridVSR.ReactiveVoxel(
         new GridBody.Element(GridBody.VoxelType.SOFT, Voxel.DEFAULT_MATERIAL),
         List.of(),
         nss(
             0,
             (t, inputs) -> {
-              double v = Math.sin(2d * Math.PI * f * t);
+              double v = Math.sin(2d * Math.PI * f * t + phase);
               return new double[]{v, -v, v, -v};
             }
         )

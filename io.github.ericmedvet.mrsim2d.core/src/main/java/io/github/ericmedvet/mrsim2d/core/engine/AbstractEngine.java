@@ -80,6 +80,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
   protected final AtomicDouble t;
   protected final List<Body> bodies;
   protected final Map<Agent, List<ActionOutcome<?, ?>>> agentActionOutcomes;
+  private final Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions;
   private final List<Agent> agents;
   private final Configuration configuration;
   private final Map<Class<? extends Action<?>>, ActionSolver<?, ?>> actionSolvers;
@@ -96,6 +97,7 @@ public abstract class AbstractEngine implements Engine, Profiled {
     bodies = new ArrayList<>();
     agents = new ArrayList<>();
     agentActionOutcomes = new IdentityHashMap<>();
+    agentEnergyConsumptions = new IdentityHashMap<>();
     actionSolvers = new LinkedHashMap<>();
     t = new AtomicDouble(0d);
     lastTickPerformedActions = new ArrayList<>();
@@ -340,11 +342,45 @@ public abstract class AbstractEngine implements Engine, Profiled {
   }
 
   @Override
+  public Snapshot snapshot() {
+    return new EngineSnapshot(
+        t.get(),
+        getBodies(),
+        agentEnergyConsumptions.entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Entry::getKey,
+                    e -> e.getValue()
+                        .entrySet()
+                        .stream()
+                        .collect(
+                            Collectors.toMap(
+                                Entry::getKey,
+                                Entry::getValue
+                            )
+                        )
+                )
+            ),
+        lastTickPerformedActions,
+        lastNFCMessages.all(),
+        times.entrySet()
+            .stream()
+            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+        counters.entrySet()
+            .stream()
+            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+    );
+  }
+
+  @Override
   public Snapshot tick() {
     Instant tickStartingInstant = Instant.now();
+    lastTickPerformedActions.clear();
     newNFCMessages = new HashSpatialMap<>(configuration.nfcDistanceRange);
     counters.get(EngineSnapshot.CounterType.TICK).incrementAndGet();
-    Map<Agent, Map<EnergyConsumingAction.Type, Double>> agentEnergyConsumptions = new IdentityHashMap<>();
     for (Agent agent : agents) {
       List<ActionOutcome<?, ?>> previousOutcomes = agentActionOutcomes.getOrDefault(
           agent,
@@ -389,43 +425,19 @@ public abstract class AbstractEngine implements Engine, Profiled {
     t.set(newT);
     times.get(EngineSnapshot.TimeType.INNER_TICK)
         .add(Duration.between(innerTickStartingInstant, Instant.now()).toNanos() / 1000000000d);
+    // update energies
+    agentEnergyConsumptions
+        .forEach(
+            (agent, energies) -> energies
+                .forEach((t, e) -> energies.put(t, e * deltaT))
+        );
+    // save profile times
     times.get(EngineSnapshot.TimeType.TICK)
         .add(Duration.between(tickStartingInstant, Instant.now()).toNanos() / 1000000000d);
     times.get(EngineSnapshot.TimeType.WALL)
         .set(Duration.between(startingInstant, Instant.now()).toMillis() / 1000d);
     times.get(EngineSnapshot.TimeType.ENVIRONMENT).set(t.get());
-    EngineSnapshot snapshot = new EngineSnapshot(
-        t.get(),
-        getBodies(),
-        agentEnergyConsumptions.entrySet()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    Entry::getKey,
-                    e -> e.getValue()
-                        .entrySet()
-                        .stream()
-                        .collect(
-                            Collectors.toMap(
-                                Entry::getKey,
-                                ie -> ie.getValue() * deltaT
-                            )
-                        )
-                )
-            ),
-        lastTickPerformedActions,
-        lastNFCMessages.all(),
-        times.entrySet()
-            .stream()
-            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-        counters.entrySet()
-            .stream()
-            .map(e -> Map.entry(e.getKey(), e.getValue().get()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-    );
-    lastTickPerformedActions.clear();
-    return snapshot;
+    return snapshot();
   }
 
   @Override

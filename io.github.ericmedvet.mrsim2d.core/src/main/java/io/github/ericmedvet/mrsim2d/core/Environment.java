@@ -25,4 +25,6 @@ public interface Environment extends ActionPerformer {
   double t();
 
   Snapshot tick();
+
+  Snapshot snapshot();
 }
