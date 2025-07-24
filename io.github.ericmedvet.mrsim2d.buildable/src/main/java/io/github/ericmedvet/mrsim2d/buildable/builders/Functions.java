@@ -28,7 +28,6 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
-
 import java.util.List;
 import java.util.function.Function;
 
@@ -50,7 +49,7 @@ public class Functions {
         .map(t -> nullifyNone ? (t.equals(GridBody.VoxelType.NONE) ? null : t) : t);
     return FormattedNamedFunction.from(f, format, "body").compose(beforeF);
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static <X> FormattedNamedFunction<X, List<NumericalDynamicalSystem<?>>> numBrains(
