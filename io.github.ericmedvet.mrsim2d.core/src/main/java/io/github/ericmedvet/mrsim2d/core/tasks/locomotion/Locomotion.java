@@ -102,6 +102,7 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
         )
     );
     // run for defined time
+    snapshotConsumer.accept(engine.snapshot());
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();

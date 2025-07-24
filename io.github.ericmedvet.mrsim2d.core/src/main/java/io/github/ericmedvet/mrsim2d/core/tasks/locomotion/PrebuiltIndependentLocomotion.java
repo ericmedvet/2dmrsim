@@ -39,10 +39,7 @@ import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -53,6 +50,8 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
   private final double terrainAttachableDistance;
   private final double initialXGap;
   private final double initialYGap;
+  private final double xGapRatio;
+  private final double yGapRatio;
   private final Grid<VoxelType> shape;
 
   public PrebuiltIndependentLocomotion(
@@ -61,6 +60,8 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       double terrainAttachableDistance,
       double initialXGap,
       double initialYGap,
+      double xGapRatio,
+      double yGapRatio,
       Grid<GridBody.VoxelType> shape
   ) {
     this.duration = duration;
@@ -68,6 +69,8 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
     this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
+    this.xGapRatio = xGapRatio;
+    this.yGapRatio = yGapRatio;
     this.shape = shape;
   }
 
@@ -86,26 +89,46 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
           .outcome()
           .orElseThrow();
     });
-    BoundingBox oneBB = agents.values()
+    final double maxBBX = agents.values()
         .stream()
         .filter(Objects::nonNull)
-        .findFirst()
-        .orElseThrow()
-        .boundingBox();
-    agents.entries()
+        .mapToDouble(v -> v.boundingBox().width())
+        .max()
+        .orElseThrow();
+    final double maxBBY = agents.values()
         .stream()
-        .filter(e -> e.value() != null)
-        .forEach(
-            e -> engine.perform(
-                new TranslateAgent(
-                    e.value(),
-                    new Point(
-                        oneBB.width() * e.key().x(),
-                        oneBB.height() * e.key().y()
-                    )
-                )
-            )
-        );
+        .filter(Objects::nonNull)
+        .mapToDouble(v -> v.boundingBox().height())
+        .max()
+        .orElseThrow();
+    double currX = 0;
+    double currY = 0;
+    double[] maxYPerLine = new double[agents.h()];
+    for (int j = 0; j < agents.h(); ++j) {
+      maxYPerLine[j] = 0;
+      for (int i = 0; i < agents.w(); i++) {
+        if (Objects.nonNull(agents.get(i, j))) {
+          maxYPerLine[j] = Math.max(maxYPerLine[j], agents.get(i, j).boundingBox().height());
+        }
+      }
+      if (maxYPerLine[j] == 0) {
+        maxYPerLine[j] = maxBBY;
+      }
+    }
+    for (int j = 0; j < agents.h(); ++j) {
+      currY += maxYPerLine[j] * yGapRatio / 2;
+      for (int i = 0; i < agents.w(); ++i) {
+        if (Objects.nonNull(agents.get(i, j))) {
+          currX += agents.get(i, j).boundingBox().width() * xGapRatio / 2;
+          engine.perform(new TranslateAgent(agents.get(i, j), new Point(currX, currY)));
+          currX += agents.get(i, j).boundingBox().width() * xGapRatio / 2;
+        } else {
+          currX += maxBBX * xGapRatio / 2;
+        }
+      }
+      currY += maxYPerLine[j] * yGapRatio / 2;
+      currX = 0;
+    }
     BoundingBox allBB = agents.values()
         .stream()
         .filter(Objects::nonNull)
@@ -145,6 +168,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       }
     }
     // run for defined time
+    snapshotConsumer.accept(engine.snapshot());
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();

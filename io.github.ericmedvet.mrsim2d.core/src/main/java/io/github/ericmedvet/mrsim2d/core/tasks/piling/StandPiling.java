@@ -109,6 +109,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
       agents.add(agent);
     }
     // run for defined time
+    snapshotConsumer.accept(engine.snapshot());
     Map<Double, AgentsObservation> observations = new HashMap<>();
     while (engine.t() < duration) {
       // tick

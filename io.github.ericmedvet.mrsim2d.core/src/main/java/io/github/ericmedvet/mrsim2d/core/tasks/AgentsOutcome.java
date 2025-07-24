@@ -194,7 +194,7 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
   }
 
   private double get(Metric metric, Subject subject, AgentsObservation observation) {
-    return switch (metric) {
+    double value = switch (metric) {
       case X -> switch (subject) {
         case FIRST -> observation.getFirstAgentCenter().x();
         case ALL -> observation.getAllBoundingBox().center().x();
@@ -268,6 +268,7 @@ public class AgentsOutcome<O extends AgentsObservation> implements Simulation.Ou
         case ALL -> observation.getEnergyConsumptions().stream().reduce(Double::sum).orElse(0d);
       };
     };
+    return Double.isNaN(value) ? Double.NEGATIVE_INFINITY : value;
   }
 
   @Override
