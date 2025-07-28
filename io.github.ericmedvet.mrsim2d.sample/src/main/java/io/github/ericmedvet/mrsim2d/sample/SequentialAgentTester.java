@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * mrsim2d-sample
  * %%
- * Copyright (C) 2020 - 2024 Eric Medvet
+ * Copyright (C) 2020 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
-/** @author "Eric Medvet" on 2024/03/23 for 2dmrsim */
 public class SequentialAgentTester {
 
   private static final Logger L = Logger.getLogger(SequentialAgentTester.class.getName());
