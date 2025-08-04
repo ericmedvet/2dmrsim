@@ -24,8 +24,11 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.AbstractGridVSR;
 import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
+import java.util.List;
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "sim|s.function|f")
@@ -36,7 +39,7 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> Function<X, Grid<GridBody.VoxelType>> vsrBody(
+  public static <X> FormattedNamedFunction<X, Grid<GridBody.VoxelType>> vsrBody(
       @Param(value = "of", dNPM = "f.identity()") Function<X, AbstractGridVSR> beforeF,
       @Param(value = "nullify", dB = true) boolean nullifyNone,
       @Param(value = "format", dS = "%s") String format
@@ -45,5 +48,15 @@ public class Functions {
         .map(GridBody.Element::type)
         .map(t -> nullifyNone ? (t.equals(GridBody.VoxelType.NONE) ? null : t) : t);
     return FormattedNamedFunction.from(f, format, "body").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, List<NumericalDynamicalSystem<?>>> numBrains(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, NumMultiBrained> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<NumMultiBrained, List<NumericalDynamicalSystem<?>>> f = NumMultiBrained::brains;
+    return FormattedNamedFunction.from(f, format, "brains").compose(beforeF);
   }
 }
