@@ -98,7 +98,7 @@ public class TrainingTester {
 
   private static Runnable taskOn(NamedBuilder<?> nb, Supplier<Engine> engineSupplier, Consumer<Snapshot> consumer) {
     // prepare task
-    Sumo sumo = new Sumo(30);
+    Sumo sumo = new Sumo();
     // read agent resource
     String agentDescription;
     try {
@@ -132,7 +132,7 @@ public class TrainingTester {
       }
       return agent;
     };
-    return () -> sumo.run(agentSupplier, agentSupplier, engineSupplier.get(), consumer);
+    return () -> sumo.run(agentSupplier, agentSupplier, 30, engineSupplier.get(), consumer);
   }
 }
 //    String agentDescription;

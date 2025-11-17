@@ -99,13 +99,13 @@ public class SumoCupTester {
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
-    SumoCup sumo = new SumoCup(20);
+    SumoCup sumo = new SumoCup();
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
-    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
+    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, 20, engineSupplier.get(), new RealtimeViewer(30, drawer));
 
     Point agent1InitialPosition = outcome.getAgent1InitialPosition();
     Point agent2InitialPosition = outcome.getAgent2InitialPosition();
@@ -121,13 +121,13 @@ public class SumoCupTester {
     RandomGenerator rg = new Random(n);
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    SumoCup sumo = new SumoCup(30);
+    SumoCup sumo = new SumoCup();
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
-    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get());
+    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, 30, engineSupplier.get());
     return outcome.snapshots()
         .values()
         .stream()

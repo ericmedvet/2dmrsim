@@ -45,33 +45,31 @@ public class Locomotion implements Task<Supplier<EmbodiedAgent>, AgentsObservati
 
   private static final double INITIAL_X_GAP = 1;
   private static final double INITIAL_Y_GAP = 0.25;
-  private final double duration;
   private final Terrain terrain;
   private final double terrainAttachableDistance;
   private final double initialXGap;
   private final double initialYGap;
 
   public Locomotion(
-      double duration,
       Terrain terrain,
       double terrainAttachableDistance,
       double initialXGap,
       double initialYGap
   ) {
-    this.duration = duration;
     this.terrain = terrain;
     this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
     this.initialYGap = initialYGap;
   }
 
-  public Locomotion(double duration, Terrain terrain) {
-    this(duration, terrain, Double.POSITIVE_INFINITY, INITIAL_X_GAP, INITIAL_Y_GAP);
+  public Locomotion(Terrain terrain) {
+    this(terrain, Double.POSITIVE_INFINITY, INITIAL_X_GAP, INITIAL_Y_GAP);
   }
 
   @Override
   public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

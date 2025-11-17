@@ -19,22 +19,38 @@
  */
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.BiSimulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.engine.ConfigurableEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 public interface BiTask<A1, A2, S extends AgentsObservation, O extends AgentsOutcome<S>> extends BiSimulation<A1, A2, S, O> {
 
-  O run(A1 a1, A2 a2, Engine engine, Consumer<Snapshot> snapshotConsumer);
+  O run(A1 a1, A2 a2, double duration, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
-  default O run(A1 a1, A2 a2, Engine engine) {
-    return run(a1, a2, engine, snapshot -> {});
+  default O run(A1 a1, A2 a2, double duration, Engine engine) {
+    return run(a1, a2, duration, engine, snapshot -> {
+    });
   }
 
   @Override
-  default O simulate(A1 a1, A2 a2) {
-    return run(a1, a2, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
+  default O simulate(A1 a1, A2 a2, double dT, DoubleRange tRange) {
+    if (tRange.min() != 0) {
+      throw new UnsupportedOperationException(
+          "Unsupported non-zero starting time: tRange=%s".formatted(tRange)
+      );
+    }
+    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    if (engine instanceof ConfigurableEngine configurableEngine) {
+      configurableEngine.setTimeStep(dT);
+    } else {
+      throw new UnsupportedOperationException(
+          "Engine %s does not support setting the time step".formatted(engine.getClass().getSimpleName())
+      );
+    }
+    return run(a1, a2, tRange.max(), engine);
   }
 }

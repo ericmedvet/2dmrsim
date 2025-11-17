@@ -25,6 +25,7 @@ import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
+import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Random;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
@@ -43,7 +45,7 @@ public class SequentialAgentTester {
   private static final String TASK = "sim.task.locomotion(duration = 10; terrain = s.t.downhill(a = 5))";
   private static final List<String> AGENTS = List.of(
       "ball-vsr-reactive.txt",
-      "biped-vsr-centralized-drn.txt",
+      //"biped-vsr-centralized-drn.txt",
       "biped-vsr-centralized-mlp.txt",
       "biped-vsr-reactive.txt",
       "hybrid-biped-vsr-centralized-mlp.txt",
@@ -78,7 +80,12 @@ public class SequentialAgentTester {
           System.exit(-1);
         }
       }
-      System.out.println(task.simulate(getEmbodiedAgentSupplier(agentDescription, nb)));
+      // System.out.println(task.simulate(getEmbodiedAgentSupplier(agentDescription, nb)));
+      task.run(
+          getEmbodiedAgentSupplier(agentDescription, nb),
+          10,
+          ServiceLoader.load(Engine.class).findFirst().orElseThrow()
+      );
     }
   }
 

@@ -40,7 +40,6 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
       double wHole,
       double hHole,
       double wFlat,
-      double duration,
       double initialXGap,
       double initialYGap
   ) {
@@ -49,26 +48,24 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
         15,
         15,
         15,
-        60,
         1,
         0.1
     );
   }
 
-  public Sumo(double duration, double initialXGap, double initialYGap) {
+  public Sumo(double initialXGap, double initialYGap) {
     this.configuration = new Configuration(
         Configuration.DEFAULT.stopIfFallen(),
         Configuration.DEFAULT.wHole(),
         Configuration.DEFAULT.hHole(),
         Configuration.DEFAULT.wFlat(),
-        duration,
         initialXGap,
         initialYGap
     );
   }
 
-  public Sumo(double duration) {
-    this(duration, Configuration.DEFAULT.initialXGap, Configuration.DEFAULT.initialYGap);
+  public Sumo() {
+    this(Configuration.DEFAULT.initialXGap, Configuration.DEFAULT.initialYGap);
   }
 
   public Sumo(Configuration configuration) {
@@ -79,6 +76,7 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
   public SumoAgentsOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier1,
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {
@@ -129,7 +127,7 @@ public class Sumo implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoAgen
     );
     snapshotConsumer.accept(engine.snapshot());
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
-    while ((engine.t() < configuration.duration()) && (!configuration.stopIfFallen() || agent1.boundingBox()
+    while ((engine.t() < duration) && (!configuration.stopIfFallen() || agent1.boundingBox()
         .max()
         .y() > groundH) && (!configuration.stopIfFallen() || agent2.boundingBox()
             .max()

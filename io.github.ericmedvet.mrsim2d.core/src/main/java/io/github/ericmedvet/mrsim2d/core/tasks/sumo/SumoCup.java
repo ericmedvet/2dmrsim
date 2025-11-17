@@ -49,7 +49,6 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
       double wCup,
       double hCup,
       int tCup,
-      double duration,
       double initialXGap,
       double initialYGap
   ) {
@@ -57,25 +56,23 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
         30,
         15,
         5,
-        60,
         7,
         0.15
     );
   }
 
-  public SumoCup(double duration, double initialXGap, double initialYGap) {
+  public SumoCup(double initialXGap, double initialYGap) {
     this.configuration = new Configuration(
         Configuration.DEFAULT.wCup(),
         Configuration.DEFAULT.hCup(),
         Configuration.DEFAULT.tCup(),
-        duration,
         initialXGap,
         initialYGap
     );
   }
 
-  public SumoCup(double duration) {
-    this(duration, Configuration.DEFAULT.initialXGap, Configuration.DEFAULT.initialYGap);
+  public SumoCup() {
+    this(Configuration.DEFAULT.initialXGap, Configuration.DEFAULT.initialYGap);
   }
 
   public SumoCup(Configuration configuration) {
@@ -86,6 +83,7 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
   public SumoAgentsOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier1,
       Supplier<EmbodiedAgent> embodiedAgentSupplier2,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {
@@ -136,7 +134,7 @@ public class SumoCup implements HomogeneousBiTask<Supplier<EmbodiedAgent>, SumoA
         )
     );
     Map<Double, SumoAgentsObservation> observations = new HashMap<>();
-    while (engine.t() < configuration.duration()) {
+    while (engine.t() < duration) {
       Snapshot snapshot = engine.tick();
       snapshotConsumer.accept(snapshot);
 

@@ -42,7 +42,6 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
   private static final double INITIAL_Y_GAP = 0.25;
   private static final double SUPPORT_WIDTH = 1;
   private static final double SWING_HEIGHT = 0.5;
-  private final double duration;
   private final double initialYGap;
   private final double swingLength;
   private final double swingDensity;
@@ -50,14 +49,12 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
   private final double initialXGap;
 
   public Balancing(
-      double duration,
       double swingLength,
       double swingDensity,
       double supportHeight,
       double initialXGap,
       double initialYGap
   ) {
-    this.duration = duration;
     this.swingLength = swingLength;
     this.swingDensity = swingDensity;
     this.supportHeight = supportHeight;
@@ -66,18 +63,18 @@ public class Balancing implements Task<Supplier<EmbodiedAgent>, BalancingObserva
   }
 
   public Balancing(
-      double duration,
       double swingLength,
       double swingDensity,
       double supportHeight,
       double initialXGap
   ) {
-    this(duration, swingLength, swingDensity, supportHeight, initialXGap, INITIAL_Y_GAP);
+    this(swingLength, swingDensity, supportHeight, initialXGap, INITIAL_Y_GAP);
   }
 
   @Override
   public BalancingAgentsOutcome run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

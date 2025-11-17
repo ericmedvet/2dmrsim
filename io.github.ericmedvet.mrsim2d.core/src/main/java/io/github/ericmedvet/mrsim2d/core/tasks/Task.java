@@ -20,22 +20,37 @@
 
 package io.github.ericmedvet.mrsim2d.core.tasks;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.engine.ConfigurableEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 public interface Task<A, S extends AgentsObservation, O extends AgentsOutcome<S>> extends Simulation<A, S, O> {
 
-  O run(A a, Engine engine, Consumer<Snapshot> snapshotConsumer);
+  O run(A a, double duration, Engine engine, Consumer<Snapshot> snapshotConsumer);
 
-  default O run(A a, Engine engine) {
-    return run(a, engine, snapshot -> {});
+  default O run(A a, double duration, Engine engine) {
+    return run(a, duration, engine, snapshot -> {});
   }
 
   @Override
-  default O simulate(A a) {
-    return run(a, ServiceLoader.load(Engine.class).findFirst().orElseThrow());
+  default O simulate(A a, double dT, DoubleRange tRange) {
+    if (tRange.min() != 0) {
+      throw new IllegalArgumentException(
+          "Unsupported non-zero starting time: tRange=%s".formatted(tRange)
+      );
+    }
+    Engine engine = ServiceLoader.load(Engine.class).findFirst().orElseThrow();
+    if (engine instanceof ConfigurableEngine configurableEngine) {
+      configurableEngine.setTimeStep(dT);
+    } else {
+      throw new UnsupportedOperationException(
+          "Engine %s does not support setting the time step".formatted(engine.getClass().getSimpleName())
+      );
+    }
+    return run(a, tRange.max(), engine);
   }
 }

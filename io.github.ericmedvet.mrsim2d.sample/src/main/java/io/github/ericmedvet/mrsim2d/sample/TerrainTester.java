@@ -26,6 +26,7 @@ import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
+import io.github.ericmedvet.mrsim2d.core.engine.ConfigurableEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.Terrain;
 import io.github.ericmedvet.mrsim2d.core.tasks.locomotion.Locomotion;
@@ -73,7 +74,7 @@ public class TerrainTester {
           .apply(
               "test"
           );
-      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), "s.t.flat()")
+      taskOn(nb, engineSupplier, new RealtimeViewer(30, drawer), 30, "s.t.flat()")
           .run();
       System.exit(0);
     }
@@ -96,7 +97,7 @@ public class TerrainTester {
     L.info("Warming up");
     System.out.printf(
         "t=%5.3f with n=%d on %s%n",
-        profile(taskOn(nb, engineSupplier, nullConsumer, terrains.getFirst()), warmUpNOfTimes),
+        profile(taskOn(nb, engineSupplier, nullConsumer, 30, terrains.getFirst()), warmUpNOfTimes),
         warmUpNOfTimes,
         terrains.getFirst()
     );
@@ -106,7 +107,7 @@ public class TerrainTester {
     for (String terrain : terrains) {
       System.out.printf(
           "t=%5.3f with n=%d on %s%n",
-          profile(taskOn(nb, engineSupplier, nullConsumer, terrain), testNOfTimes),
+          profile(taskOn(nb, engineSupplier, nullConsumer, 30, terrain), testNOfTimes),
           testNOfTimes,
           terrain
       );
@@ -142,10 +143,11 @@ public class TerrainTester {
       NamedBuilder<?> nb,
       Supplier<Engine> engineSupplier,
       Consumer<Snapshot> consumer,
+      double duration,
       String terrain
   ) {
     // prepare task
-    Locomotion locomotion = new Locomotion(60, (Terrain) nb.build(terrain));
+    Locomotion locomotion = new Locomotion((Terrain) nb.build(terrain));
     // read agent resource
     String agentDescription;
     try {
@@ -183,6 +185,12 @@ public class TerrainTester {
       }
       return agent;
     };
-    return () -> locomotion.run(agentSupplier, engineSupplier.get(), consumer);
+    return () -> {
+      Engine engine = engineSupplier.get();
+      if (engine instanceof ConfigurableEngine configurableEngine) {
+        engine = configurableEngine.setTimeStep(0.01);
+      }
+      locomotion.run(agentSupplier, duration, engine, consumer);
+    };
   }
 }

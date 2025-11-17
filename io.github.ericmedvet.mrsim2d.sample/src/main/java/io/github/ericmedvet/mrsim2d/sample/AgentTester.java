@@ -75,7 +75,7 @@ public class AgentTester {
       }
     }
     // do task
-    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, viewer);
+    task.run(getEmbodiedAgentSupplier(agentDescription, nb), 30, engine, viewer);
     //    FramesImageBuilder fib = new FramesImageBuilder(500,400, 20,3,0.6,1, FramesImageBuilder.Direction.HORIZONTAL, false, drawer);
     //    task.run(getEmbodiedAgentSupplier(agentDescription, nb), engine, fib);
     //    ImageIO.write(fib.get(), "png", new File("../reactive-biped.png"));

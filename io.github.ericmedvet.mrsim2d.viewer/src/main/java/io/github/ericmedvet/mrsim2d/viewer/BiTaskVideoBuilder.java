@@ -106,7 +106,7 @@ public class BiTaskVideoBuilder<A1, A2> implements VideoBuilder<Pair<A1, A2>> {
   @Override
   public Video build(VideoInfo videoInfo, Pair<A1, A2> agents) {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
-    biTask.run(agents.first(), agents.second(), engineSupplier.get(), collector);
+    biTask.run(agents.first(), agents.second(), endTime, engineSupplier.get(), collector);
     return new Video(collector.images, frameRate, videoInfo.encoder());
   }
 }

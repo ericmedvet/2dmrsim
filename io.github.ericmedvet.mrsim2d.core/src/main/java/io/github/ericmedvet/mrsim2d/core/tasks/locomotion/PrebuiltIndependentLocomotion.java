@@ -45,7 +45,6 @@ import java.util.function.Supplier;
 
 public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractIndependentVoxel>, AgentsObservation, AgentsOutcome<AgentsObservation>> {
 
-  private final double duration;
   private final Terrain terrain;
   private final double terrainAttachableDistance;
   private final double initialXGap;
@@ -55,7 +54,6 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
   private final Grid<VoxelType> shape;
 
   public PrebuiltIndependentLocomotion(
-      double duration,
       Terrain terrain,
       double terrainAttachableDistance,
       double initialXGap,
@@ -64,7 +62,6 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
       double yGapRatio,
       Grid<GridBody.VoxelType> shape
   ) {
-    this.duration = duration;
     this.terrain = terrain;
     this.terrainAttachableDistance = terrainAttachableDistance;
     this.initialXGap = initialXGap;
@@ -77,6 +74,7 @@ public class PrebuiltIndependentLocomotion implements Task<Supplier<AbstractInde
   @Override
   public AgentsOutcome<AgentsObservation> run(
       Supplier<AbstractIndependentVoxel> abstractIndependentVoxelSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

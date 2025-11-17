@@ -43,7 +43,6 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
 
   private static final double FIRST_X_GAP = 10;
   private static final double INITIAL_Y_GAP = 0.1;
-  private final double duration;
   private final int nOfAgents;
   private final double xGapRatio;
   private final Terrain terrain;
@@ -52,7 +51,6 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
   private final double initialYGap;
 
   public StandPiling(
-      double duration,
       int nOfAgents,
       double xGapRatio,
       Terrain terrain,
@@ -60,7 +58,6 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
       double firstXGap,
       double initialYGap
   ) {
-    this.duration = duration;
     this.nOfAgents = nOfAgents;
     this.xGapRatio = xGapRatio;
     this.terrain = terrain;
@@ -69,8 +66,8 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
     this.initialYGap = initialYGap;
   }
 
-  public StandPiling(double duration, int nOfAgents, double xGapRatio, Terrain terrain) {
-    this(duration, nOfAgents, xGapRatio, terrain, Double.POSITIVE_INFINITY, FIRST_X_GAP, INITIAL_Y_GAP);
+  public StandPiling(int nOfAgents, double xGapRatio, Terrain terrain) {
+    this(nOfAgents, xGapRatio, terrain, Double.POSITIVE_INFINITY, FIRST_X_GAP, INITIAL_Y_GAP);
   }
 
   private void placeAgent(Engine engine, EmbodiedAgent agent, List<EmbodiedAgent> agents) {
@@ -95,6 +92,7 @@ public class StandPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservat
   @Override
   public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

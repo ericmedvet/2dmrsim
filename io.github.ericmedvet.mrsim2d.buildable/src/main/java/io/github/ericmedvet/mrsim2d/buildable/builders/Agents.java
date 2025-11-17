@@ -64,7 +64,7 @@ public class Agents {
   public static DistributedNumGridVSR distributedNumGridVSR(
       @Param("body") GridBody body,
       @Param("function") NumericalDynamicalSystems.Builder<?, ?> numericalDynamicalSystemBuilder,
-      @Param("nOfSignals") int nOfSignals,
+      @Param(value = "nOfSignals", dI = 1) int nOfSignals,
       @Param("directional") boolean directional
   ) {
     return new DistributedNumGridVSR(

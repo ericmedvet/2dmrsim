@@ -27,6 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.bodies.Anchor;
 import io.github.ericmedvet.mrsim2d.core.bodies.Anchorable;
 import io.github.ericmedvet.mrsim2d.core.bodies.Body;
 import io.github.ericmedvet.mrsim2d.core.engine.AbstractEngine;
+import io.github.ericmedvet.mrsim2d.core.engine.ConfigurableEngine;
 import io.github.ericmedvet.mrsim2d.core.engine.IllegalActionException;
 import io.github.ericmedvet.mrsim2d.core.util.PolyUtils;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ import org.dyn4j.world.DetectFilter;
 import org.dyn4j.world.World;
 import org.dyn4j.world.result.RaycastResult;
 
-public class Dyn4JEngine extends AbstractEngine {
+public class Dyn4JEngine extends AbstractEngine implements ConfigurableEngine {
 
   private static final Configuration DEFAULT_CONFIGURATION = new Configuration(
       getDefaultSettings(),
@@ -108,6 +109,14 @@ public class Dyn4JEngine extends AbstractEngine {
     settings.setVelocityConstraintSolverIterations(20);
     settings.setPositionConstraintSolverIterations(20);
     return settings;
+  }
+
+  @Override
+  public ConfigurableEngine setTimeStep(double dT) {
+    Settings settings = configuration.innerSettings;
+    settings.setStepFrequency(dT);
+    world.setSettings(settings);
+    return this;
   }
 
   private double actuateRotationalJoint(

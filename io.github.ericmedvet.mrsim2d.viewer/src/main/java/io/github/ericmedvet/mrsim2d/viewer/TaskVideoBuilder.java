@@ -105,7 +105,7 @@ public class TaskVideoBuilder<A> implements VideoBuilder<A> {
   @Override
   public Video build(VideoInfo videoInfo, A a) {
     ImageCollector collector = new ImageCollector(videoInfo.w(), videoInfo.h());
-    task.run(a, engineSupplier.get(), collector);
+    task.run(a, endTime, engineSupplier.get(), collector);
     return new Video(collector.images, frameRate, videoInfo.encoder());
   }
 }

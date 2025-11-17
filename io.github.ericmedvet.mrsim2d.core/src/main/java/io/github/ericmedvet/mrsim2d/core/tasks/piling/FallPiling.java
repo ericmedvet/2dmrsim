@@ -44,7 +44,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
 
   private static final double X_GAP = 10;
 
-  private final double duration;
   private final double fallInterval;
   private final int nOfAgents;
   private final double xSigmaRatio;
@@ -55,7 +54,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   private final double xGap;
 
   public FallPiling(
-      double duration,
       double fallInterval,
       int nOfAgents,
       double xSigmaRatio,
@@ -65,7 +63,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       double yGapRatio,
       double xGap
   ) {
-    this.duration = duration;
     this.fallInterval = fallInterval;
     this.nOfAgents = nOfAgents;
     this.xSigmaRatio = xSigmaRatio;
@@ -77,7 +74,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   }
 
   public FallPiling(
-      double duration,
       double fallInterval,
       int nOfAgents,
       double xSigmaRatio,
@@ -86,7 +82,6 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
       double yGapRatio
   ) {
     this(
-        duration,
         fallInterval,
         nOfAgents,
         xSigmaRatio,
@@ -131,6 +126,7 @@ public class FallPiling implements Task<Supplier<EmbodiedAgent>, AgentsObservati
   @Override
   public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

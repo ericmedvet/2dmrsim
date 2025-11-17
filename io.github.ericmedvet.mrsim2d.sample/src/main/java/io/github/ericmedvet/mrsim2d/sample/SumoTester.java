@@ -100,13 +100,13 @@ public class SumoTester {
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(DRAWER)).apply("test");
-    Sumo sumo = new Sumo(5);
+    Sumo sumo = new Sumo();
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
-    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get(), new RealtimeViewer(30, drawer));
+    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, 5, engineSupplier.get(), new RealtimeViewer(30, drawer));
     System.out.println(outcome.firstAgentAveragePower());
   }
 
@@ -114,13 +114,13 @@ public class SumoTester {
     RandomGenerator rg = new Random(n);
     double[] rndValues = IntStream.range(0, 100).mapToDouble(i -> 5 * rg.nextGaussian()).toArray();
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    Sumo sumo = new Sumo(30);
+    Sumo sumo = new Sumo();
     Supplier<Engine> engineSupplier = () -> ServiceLoader.load(Engine.class).findFirst().orElseThrow();
     Supplier<EmbodiedAgent> eas1 = () -> reParametrize(
         (EmbodiedAgent) nb.build(agentString),
         i -> rndValues[i % rndValues.length]
     );
-    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, engineSupplier.get());
+    SumoAgentsOutcome outcome = sumo.run(eas1, eas1, 30, engineSupplier.get());
     return outcome.snapshots()
         .values()
         .stream()

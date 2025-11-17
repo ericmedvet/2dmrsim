@@ -49,21 +49,20 @@ public class Jumping implements Task<Supplier<EmbodiedAgent>, AgentsObservation,
   public static final double TERRAIN_W = 100d;
   public static final double TERRAIN_H = 25d;
   private static final double INITIAL_Y_GAP = 0.25;
-  private final double duration;
   private final double initialYGap;
 
-  public Jumping(double duration, double initialYGap) {
-    this.duration = duration;
+  public Jumping(double initialYGap) {
     this.initialYGap = initialYGap;
   }
 
-  public Jumping(double duration) {
-    this(duration, INITIAL_Y_GAP);
+  public Jumping() {
+    this(INITIAL_Y_GAP);
   }
 
   @Override
   public AgentsOutcome<AgentsObservation> run(
       Supplier<EmbodiedAgent> embodiedAgentSupplier,
+      double duration,
       Engine engine,
       Consumer<Snapshot> snapshotConsumer
   ) {

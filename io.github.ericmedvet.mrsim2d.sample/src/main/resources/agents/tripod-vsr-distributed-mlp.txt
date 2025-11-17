@@ -18,6 +18,5 @@ s.a.distributedNumGridVSR(
       types = [avg]
     )
   );
-  signals = 1;
   directional = true
 )

@@ -213,11 +213,12 @@ public class Miscs {
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
       @Param("task") Task<A, S, O> task,
       @Param("repetitions") int repetitions,
+      @Param("duration") double duration,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
   ) {
     return a -> IntStream.range(0, repetitions)
         .boxed()
-        .map(i -> task.run(a, engineSupplier.get()))
+        .map(i -> task.run(a, duration, engineSupplier.get()))
         .toList();
   }
 
@@ -226,9 +227,10 @@ public class Miscs {
   public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
       @Param(value = "name", iS = "{task.name}") String name,
       @Param("task") Task<A, S, O> task,
+      @Param("duration") double duration,
       @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
   ) {
-    return a -> task.run(a, engineSupplier.get());
+    return a -> task.run(a, duration, engineSupplier.get());
   }
 
   @SuppressWarnings("unused")
