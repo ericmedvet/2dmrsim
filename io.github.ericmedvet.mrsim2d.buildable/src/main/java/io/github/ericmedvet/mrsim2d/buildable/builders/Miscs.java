@@ -27,10 +27,7 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
-import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
 import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
-import io.github.ericmedvet.mrsim2d.core.tasks.Task;
 import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
@@ -54,7 +51,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "sim|s")
 public class Miscs {
@@ -208,42 +204,4 @@ public class Miscs {
     return () -> new StaticFramer(new BoundingBox(new Point(minX, minY), new Point(maxX, maxY)));
   }
 
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, List<O>> taskMultiRunner(
-      @Param("task") Task<A, S, O> task,
-      @Param("repetitions") int repetitions,
-      @Param("duration") double duration,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
-  ) {
-    return a -> IntStream.range(0, repetitions)
-        .boxed()
-        .map(i -> task.run(a, duration, engineSupplier.get()))
-        .toList();
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <A, S extends AgentsObservation, O extends AgentsOutcome<S>> Function<A, O> taskRunner(
-      @Param(value = "name", iS = "{task.name}") String name,
-      @Param("task") Task<A, S, O> task,
-      @Param("duration") double duration,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier
-  ) {
-    return a -> task.run(a, duration, engineSupplier.get());
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <A> TaskVideoBuilder<A> taskVideoBuilder(
-      @Param("task") Task<A, ?, ?> task,
-      @Param(value = "title", dS = "") String title,
-      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawerBuilder,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
-      @Param(value = "startTime", dD = 0) double startTime,
-      @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
-      @Param(value = "frameRate", dD = 30) double frameRate
-  ) {
-    return new TaskVideoBuilder<>(task, drawerBuilder, engineSupplier, title, startTime, endTime, frameRate);
-  }
 }
