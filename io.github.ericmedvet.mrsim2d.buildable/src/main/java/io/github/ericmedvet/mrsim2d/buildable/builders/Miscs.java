@@ -27,7 +27,6 @@ import io.github.ericmedvet.mrsim2d.core.Snapshot;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.geometry.BoundingBox;
 import io.github.ericmedvet.mrsim2d.core.geometry.Point;
-import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.engine.dyn4j.drawers.MultipartBodyDrawer;
 import io.github.ericmedvet.mrsim2d.viewer.*;
 import io.github.ericmedvet.mrsim2d.viewer.drawers.ComponentsDrawer;
@@ -69,20 +68,6 @@ public class Miscs {
       @Param(value = "followTime", dD = 2) double followTime
   ) {
     return () -> new AllAgentsFramer(enlargement).largest(followTime);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <A1, A2> BiTaskVideoBuilder<A1, A2> biTaskVideoBuilder(
-      @Param("task") BiTask<A1, A2, ?, ?> task,
-      @Param(value = "title", dS = "") String title,
-      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawerBuilder,
-      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
-      @Param(value = "startTime", dD = 0) double startTime,
-      @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
-      @Param(value = "frameRate", dD = 30) double frameRate
-  ) {
-    return new BiTaskVideoBuilder<>(task, drawerBuilder, engineSupplier, title, startTime, endTime, frameRate);
   }
 
   @SuppressWarnings("unused")

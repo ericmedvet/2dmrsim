@@ -25,6 +25,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
@@ -33,7 +34,9 @@ import io.github.ericmedvet.mrsim2d.core.agents.gridvsr.GridBody;
 import io.github.ericmedvet.mrsim2d.core.engine.Engine;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsObservation;
 import io.github.ericmedvet.mrsim2d.core.tasks.AgentsOutcome;
+import io.github.ericmedvet.mrsim2d.core.tasks.BiTask;
 import io.github.ericmedvet.mrsim2d.core.tasks.Task;
+import io.github.ericmedvet.mrsim2d.viewer.BiTaskVideoBuilder;
 import io.github.ericmedvet.mrsim2d.viewer.Drawer;
 import io.github.ericmedvet.mrsim2d.viewer.TaskVideoBuilder;
 import java.util.List;
@@ -45,6 +48,31 @@ import java.util.stream.IntStream;
 public class Functions {
 
   private Functions() {
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X, A1, A2> NamedFunction<X, Video> biTaskVideo(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Pair<A1, A2>> beforeF,
+      @Param(value = "name", iS = "video[{title}]") String name,
+      @Param("task") BiTask<A1, A2, ?, ?> task,
+      @Param(value = "title", iS = "{task.name}") String title,
+      @Param(value = "drawer", dNPM = "sim.drawer()") Function<String, Drawer> drawerBuilder,
+      @Param(value = "engine", dNPM = "sim.engine()") Supplier<Engine> engineSupplier,
+      @Param(value = "startTime", dD = 0) double startTime,
+      @Param(value = "endTime", dD = Double.POSITIVE_INFINITY) double endTime,
+      @Param(value = "frameRate", dD = 30) double frameRate
+  ) {
+    Function<Pair<A1, A2>, Video> f = new BiTaskVideoBuilder<>(
+        task,
+        drawerBuilder,
+        engineSupplier,
+        title,
+        startTime,
+        endTime,
+        frameRate
+    );
+    return NamedFunction.from(f, name).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
