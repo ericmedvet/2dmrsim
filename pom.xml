@@ -50,9 +50,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jdk.version>21</jdk.version>
-    <revision>1.3.0</revision>
-    <jsdynsym.version>1.2.0</jsdynsym.version>
-    <jnb.version>1.5.0</jnb.version>
+    <revision>1.3.1-SNAPSHOT</revision>
+    <jsdynsym.version>1.2.1-SNAPSHOT</jsdynsym.version>
+    <jnb.version>1.5.1-SNAPSHOT</jnb.version>
   </properties>
 
   <dependencies/>
