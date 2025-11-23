@@ -21,8 +21,8 @@
 package io.github.ericmedvet.mrsim2d.sample;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
+import io.github.ericmedvet.jnb.datastructure.Composed;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
-import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.mrsim2d.core.EmbodiedAgent;
 import io.github.ericmedvet.mrsim2d.core.NumMultiBrained;
 import io.github.ericmedvet.mrsim2d.core.Snapshot;
@@ -135,51 +135,3 @@ public class TrainingTester {
     return () -> sumo.run(agentSupplier, agentSupplier, 30, engineSupplier.get(), consumer);
   }
 }
-//    String agentDescription;
-//    try {
-//      agentDescription = readResource("/agents/worm2-SP.txt");
-//    } catch (IOException e) {
-//      L.severe("Cannot read agent description: %s%n".formatted(e));
-//      throw new RuntimeException(e);
-//    }
-//    // load weights
-//    String serializedWeights;
-//    try {
-//      serializedWeights = readResource("/agents/trained-biped-fast-mlp-weights.txt");
-//    } catch (IOException e) {
-//      L.severe("Cannot read serialized params: %s%n".formatted(e));
-//      throw new RuntimeException(e);
-//    }
-//    List<Double> params;
-//    try {
-//      //noinspection unchecked
-//      params = (List<Double>) fromBase64(serializedWeights);
-//    } catch (IOException e) {
-//      L.severe("Cannot deserialize params: %s%n".formatted(e));
-//      throw new RuntimeException(e);
-//    }
-//
-//    List<Integer> brainSizes = ((NumMultiBrained) nb.build(agentDescription))
-//        .brains().stream()
-//            .map(b -> ((NumericalParametrized<?>) b).getParams().length)
-//            .toList();
-//    System.out.println(brainSizes);
-//
-//    // prepare supplier
-//    Supplier<EmbodiedAgent> agentSupplier = () -> {
-//      RandomGenerator rg = new Random(1);
-//
-//      EmbodiedAgent agent = (EmbodiedAgent) nb.build(agentDescription);
-//      // shuffle parameters
-//      if (agent instanceof NumMultiBrained numMultiBrained) {
-//        numMultiBrained.brains().stream()
-//            .map(b -> Composed.shallowest(b, NumericalParametrized.class))
-//            .forEach(o -> o.ifPresent(np -> {
-//              np.randomize(rg, DoubleRange.SYMMETRIC_UNIT);
-//            }));
-//      }
-//      return agent;
-//    };
-//    return () -> sumo.run(agentSupplier, agentSupplier, engineSupplier.get(), consumer);
-//  }
-// }
