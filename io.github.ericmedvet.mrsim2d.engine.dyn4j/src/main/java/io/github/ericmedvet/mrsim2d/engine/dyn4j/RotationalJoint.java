@@ -110,7 +110,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
     // joint.setReferenceAngle(0);
     if (SET_LIMITS) {
       joint.setLimits(JOINT_PASSIVE_ANGLE_RANGE.min(), JOINT_PASSIVE_ANGLE_RANGE.max());
-      joint.setLimitEnabled(true);
+      joint.setLimitsEnabled(true);
     }
     joint.setMotorEnabled(true);
     joint.setMaximumMotorTorque(motor.maxTorque());
@@ -265,7 +265,7 @@ public class RotationalJoint implements io.github.ericmedvet.mrsim2d.core.bodies
 
   @Override
   public double jointAngle() {
-    return joint.getJointAngle();
+    return joint.getAngularTranslation();
   }
 
   @Override

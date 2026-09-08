@@ -29,6 +29,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Polygon;
@@ -36,6 +37,7 @@ import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
 public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
+
   private static final Color COLOR = Color.BLACK;
 
   private final Color drawColor;
@@ -84,14 +86,16 @@ public class VoxelDrawer extends AbstractComponentDrawer<Voxel> {
       }
       g.setColor(drawColor);
       for (Joint<Body> joint : voxel.getJoints()) {
-        g.draw(
-            new Line2D.Double(
-                joint.getAnchor1().x,
-                joint.getAnchor1().y,
-                joint.getAnchor2().x,
-                joint.getAnchor2().y
-            )
-        );
+        if (joint instanceof DistanceJoint<Body> distanceJoint) {
+          g.draw(
+              new Line2D.Double(
+                  distanceJoint.getAnchor1().x,
+                  distanceJoint.getAnchor1().y,
+                  distanceJoint.getAnchor2().x,
+                  distanceJoint.getAnchor2().y
+              )
+          );
+        }
       }
       return true;
     }

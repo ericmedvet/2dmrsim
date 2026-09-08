@@ -56,7 +56,7 @@ public class SumoTester {
             sensors = [s.s.a()]
           )
         );
-        function = ds.num.mlp()
+        nds = ds.num.mlp()
       )
       """;
 
@@ -68,7 +68,7 @@ public class SumoTester {
             headSensors = [s.s.sin()]
           )
         );
-        function = ds.num.mlp()
+        nds = ds.num.mlp()
       )
       """;
 
@@ -84,7 +84,7 @@ public class SumoTester {
         );
         nOfSignals = 1;
         directional = true;
-        function = ds.num.mlp()
+        nds = ds.num.mlp()
       )
       """;
 

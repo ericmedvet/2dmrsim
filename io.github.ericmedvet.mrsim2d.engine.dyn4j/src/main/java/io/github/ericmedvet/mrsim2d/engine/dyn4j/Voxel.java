@@ -470,8 +470,8 @@ public class Voxel implements io.github.ericmedvet.mrsim2d.core.bodies.Voxel, Mu
           if (j instanceof DistanceJoint<Body> joint) {
             joint.setRestDistance(((SpringRange) joint.getUserData()).rest);
             joint.setCollisionAllowed(true);
-            joint.setFrequency(SPRING_F_RANGE.denormalize(softness));
-            joint.setDampingRatio(SPRING_D);
+            joint.setSpringFrequency(SPRING_F_RANGE.denormalize(softness));
+            joint.setSpringDampingRatio(SPRING_D);
           }
         });
     // set user data

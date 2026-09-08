@@ -222,8 +222,8 @@ public class Dyn4JEngine extends AbstractEngine implements ConfigurableEngine {
           );
           springJoint.setRestDistance(d);
           springJoint.setCollisionAllowed(true);
-          springJoint.setFrequency(configuration.softLinkSpringF);
-          springJoint.setDampingRatio(configuration.softLinkSpringD);
+          springJoint.setSpringFrequency(configuration.softLinkSpringF);
+          springJoint.setSpringDampingRatio(configuration.softLinkSpringD);
           joint = springJoint;
         } else {
           throw new IllegalActionException(action, String.format("Unsupported link type: %s", action.type()));

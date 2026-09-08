@@ -41,4 +41,9 @@ public class BodyOwnerFilter implements Filter {
     }
     return true;
   }
+
+  @Override
+  public Filter copy() {
+    return new BodyOwnerFilter(owner);
+  }
 }
