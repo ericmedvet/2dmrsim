@@ -45,13 +45,13 @@ public class AgentTester {
 
   private static final String TASK_LOCOMOTION = "sim.task.locomotion(duration = 120; terrain = s.t.downhill(a = 0))";
   private static final String TASK_JUMPING = "sim.task.jumping()";
-  private static final String TASK_BALANCING = "sim.task.balancing(supportHeight = 0.5; swingLength = 10; duration = 20)";
+  private static final String TASK_BALANCING = "sim.task.balancing(supportHeight = 0.5; swingLength = 10)";
 
   public static void main(String[] args) throws IOException {
     NamedBuilder<Object> nb = NamedBuilder.fromDiscovery();
     // prepare drawer, viewer, engine
     @SuppressWarnings("unchecked") Drawer drawer = ((Function<String, Drawer>) nb.build(
-        "sim.drawer(actions=true; nfc=true; enlargement = 5; info = false; miniAgents = none)"
+        "sim.drawer(actions=true; nfc=true; info = false; miniAgents = none)"
     ))
         .apply("test");
     RealtimeViewer viewer = new RealtimeViewer(30, drawer);
