@@ -76,7 +76,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
         }).toList();
         for (int i = 0; i < shiftedSideLines.size() - 1; ++i) {
           io.github.ericmedvet.jviz.core.geometry.Point jsdynsymInt = shiftedSideLines.get(i)
-              .intersection(shiftedSideLines.get(i + 1))
+              .intersectionWith(shiftedSideLines.get(i + 1))
               .orElse(null);
           if (Objects.nonNull(jsdynsymInt)) {
             Point aP = new Point(jsdynsymInt.x(), jsdynsymInt.y());
@@ -91,7 +91,7 @@ public class UnmovableBody implements io.github.ericmedvet.mrsim2d.core.bodies.U
           }
         }
         io.github.ericmedvet.jviz.core.geometry.Point jsdynsymInt = shiftedSideLines.getLast()
-            .intersection(shiftedSideLines.getFirst())
+            .intersectionWith(shiftedSideLines.getFirst())
             .orElse(null);
         if (Objects.nonNull(jsdynsymInt)) {
           Point aP = new Point(jsdynsymInt.x(), jsdynsymInt.y());
